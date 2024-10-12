@@ -1,0 +1,30 @@
+version: '3'
+services:
+  client:
+    container_name: meditrax-client
+    restart: unless-stopped
+    expose:
+      - 80
+    labels:
+      caddy: meditrax.wmtech.cc
+      caddy.@ws.0_header: Connection *Upgrade*
+      caddy.@ws.1_header: Upgrade websocket
+      caddy.0_reverse_proxy: "@ws {{upstreams}}"
+      caddy.1_reverse_proxy: "{{ upstreams 80 }}"
+    image: registry-intl.ap-southeast-1.aliyuncs.com/swmeng/meditrax-client:${BUILD_NUMBER}
+  api:
+    restart: always
+    hostname: meditrax-api
+    container_name: meditrax-api
+    image: registry-intl.ap-southeast-1.aliyuncs.com/swmeng/meditrax-server:${BUILD_NUMBER}
+    environment:
+      - BUILD_NUMBER=${BUILD_NUMBER}
+    volumes:
+      - "./.env:/.env"
+      - "./auth.creds:/auth.creds"
+      - "./backend.creds:/backend.creds"
+      - ./assets:/assets
+networks:
+  default:
+    name: nginx-proxy
+    external: true
