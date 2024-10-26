@@ -24,20 +24,6 @@ mixin _$AppStateData {
   String get theme => throw _privateConstructorUsedError;
   @HiveField(3)
   bool? get autoLoginResult => throw _privateConstructorUsedError;
-  @HiveField(4)
-  bool get isConnectedInternet => throw _privateConstructorUsedError;
-  @HiveField(5)
-  String? get selectedBusiness => throw _privateConstructorUsedError;
-  @HiveField(6)
-  String? get selectedShop => throw _privateConstructorUsedError;
-  @HiveField(7)
-  String? get selectedOrder => throw _privateConstructorUsedError;
-  @HiveField(8)
-  bool get isEditingOrder => throw _privateConstructorUsedError;
-  @HiveField(9)
-  String? get selectedMenuItemOverride => throw _privateConstructorUsedError;
-  @HiveField(10)
-  bool get isEditingMenuItemOverride => throw _privateConstructorUsedError;
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -56,14 +42,7 @@ abstract class $AppStateDataCopyWith<$Res> {
       {@HiveField(0) int navigatorIndex,
       @HiveField(1) Token? token,
       @HiveField(2) String theme,
-      @HiveField(3) bool? autoLoginResult,
-      @HiveField(4) bool isConnectedInternet,
-      @HiveField(5) String? selectedBusiness,
-      @HiveField(6) String? selectedShop,
-      @HiveField(7) String? selectedOrder,
-      @HiveField(8) bool isEditingOrder,
-      @HiveField(9) String? selectedMenuItemOverride,
-      @HiveField(10) bool isEditingMenuItemOverride});
+      @HiveField(3) bool? autoLoginResult});
 }
 
 /// @nodoc
@@ -85,13 +64,6 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
     Object? token = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
-    Object? isConnectedInternet = null,
-    Object? selectedBusiness = freezed,
-    Object? selectedShop = freezed,
-    Object? selectedOrder = freezed,
-    Object? isEditingOrder = null,
-    Object? selectedMenuItemOverride = freezed,
-    Object? isEditingMenuItemOverride = null,
   }) {
     return _then(_value.copyWith(
       navigatorIndex: null == navigatorIndex
@@ -110,34 +82,6 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
           ? _value.autoLoginResult
           : autoLoginResult // ignore: cast_nullable_to_non_nullable
               as bool?,
-      isConnectedInternet: null == isConnectedInternet
-          ? _value.isConnectedInternet
-          : isConnectedInternet // ignore: cast_nullable_to_non_nullable
-              as bool,
-      selectedBusiness: freezed == selectedBusiness
-          ? _value.selectedBusiness
-          : selectedBusiness // ignore: cast_nullable_to_non_nullable
-              as String?,
-      selectedShop: freezed == selectedShop
-          ? _value.selectedShop
-          : selectedShop // ignore: cast_nullable_to_non_nullable
-              as String?,
-      selectedOrder: freezed == selectedOrder
-          ? _value.selectedOrder
-          : selectedOrder // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isEditingOrder: null == isEditingOrder
-          ? _value.isEditingOrder
-          : isEditingOrder // ignore: cast_nullable_to_non_nullable
-              as bool,
-      selectedMenuItemOverride: freezed == selectedMenuItemOverride
-          ? _value.selectedMenuItemOverride
-          : selectedMenuItemOverride // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isEditingMenuItemOverride: null == isEditingMenuItemOverride
-          ? _value.isEditingMenuItemOverride
-          : isEditingMenuItemOverride // ignore: cast_nullable_to_non_nullable
-              as bool,
     ) as $Val);
   }
 }
@@ -154,14 +98,7 @@ abstract class _$$AppStateDataImplCopyWith<$Res>
       {@HiveField(0) int navigatorIndex,
       @HiveField(1) Token? token,
       @HiveField(2) String theme,
-      @HiveField(3) bool? autoLoginResult,
-      @HiveField(4) bool isConnectedInternet,
-      @HiveField(5) String? selectedBusiness,
-      @HiveField(6) String? selectedShop,
-      @HiveField(7) String? selectedOrder,
-      @HiveField(8) bool isEditingOrder,
-      @HiveField(9) String? selectedMenuItemOverride,
-      @HiveField(10) bool isEditingMenuItemOverride});
+      @HiveField(3) bool? autoLoginResult});
 }
 
 /// @nodoc
@@ -181,13 +118,6 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
     Object? token = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
-    Object? isConnectedInternet = null,
-    Object? selectedBusiness = freezed,
-    Object? selectedShop = freezed,
-    Object? selectedOrder = freezed,
-    Object? isEditingOrder = null,
-    Object? selectedMenuItemOverride = freezed,
-    Object? isEditingMenuItemOverride = null,
   }) {
     return _then(_$AppStateDataImpl(
       navigatorIndex: null == navigatorIndex
@@ -206,34 +136,6 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
           ? _value.autoLoginResult
           : autoLoginResult // ignore: cast_nullable_to_non_nullable
               as bool?,
-      isConnectedInternet: null == isConnectedInternet
-          ? _value.isConnectedInternet
-          : isConnectedInternet // ignore: cast_nullable_to_non_nullable
-              as bool,
-      selectedBusiness: freezed == selectedBusiness
-          ? _value.selectedBusiness
-          : selectedBusiness // ignore: cast_nullable_to_non_nullable
-              as String?,
-      selectedShop: freezed == selectedShop
-          ? _value.selectedShop
-          : selectedShop // ignore: cast_nullable_to_non_nullable
-              as String?,
-      selectedOrder: freezed == selectedOrder
-          ? _value.selectedOrder
-          : selectedOrder // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isEditingOrder: null == isEditingOrder
-          ? _value.isEditingOrder
-          : isEditingOrder // ignore: cast_nullable_to_non_nullable
-              as bool,
-      selectedMenuItemOverride: freezed == selectedMenuItemOverride
-          ? _value.selectedMenuItemOverride
-          : selectedMenuItemOverride // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isEditingMenuItemOverride: null == isEditingMenuItemOverride
-          ? _value.isEditingMenuItemOverride
-          : isEditingMenuItemOverride // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
@@ -246,14 +148,7 @@ class _$AppStateDataImpl extends _AppStateData {
       {@HiveField(0) this.navigatorIndex = 0,
       @HiveField(1) this.token,
       @HiveField(2) this.theme = "system",
-      @HiveField(3) this.autoLoginResult,
-      @HiveField(4) this.isConnectedInternet = false,
-      @HiveField(5) this.selectedBusiness,
-      @HiveField(6) this.selectedShop,
-      @HiveField(7) this.selectedOrder,
-      @HiveField(8) this.isEditingOrder = false,
-      @HiveField(9) this.selectedMenuItemOverride,
-      @HiveField(10) this.isEditingMenuItemOverride = false})
+      @HiveField(3) this.autoLoginResult})
       : super._();
 
   @override
@@ -270,34 +165,10 @@ class _$AppStateDataImpl extends _AppStateData {
   @override
   @HiveField(3)
   final bool? autoLoginResult;
-  @override
-  @JsonKey()
-  @HiveField(4)
-  final bool isConnectedInternet;
-  @override
-  @HiveField(5)
-  final String? selectedBusiness;
-  @override
-  @HiveField(6)
-  final String? selectedShop;
-  @override
-  @HiveField(7)
-  final String? selectedOrder;
-  @override
-  @JsonKey()
-  @HiveField(8)
-  final bool isEditingOrder;
-  @override
-  @HiveField(9)
-  final String? selectedMenuItemOverride;
-  @override
-  @JsonKey()
-  @HiveField(10)
-  final bool isEditingMenuItemOverride;
 
   @override
   String toString() {
-    return 'AppStateData(navigatorIndex: $navigatorIndex, token: $token, theme: $theme, autoLoginResult: $autoLoginResult, isConnectedInternet: $isConnectedInternet, selectedBusiness: $selectedBusiness, selectedShop: $selectedShop, selectedOrder: $selectedOrder, isEditingOrder: $isEditingOrder, selectedMenuItemOverride: $selectedMenuItemOverride, isEditingMenuItemOverride: $isEditingMenuItemOverride)';
+    return 'AppStateData(navigatorIndex: $navigatorIndex, token: $token, theme: $theme, autoLoginResult: $autoLoginResult)';
   }
 
   @override
@@ -310,39 +181,12 @@ class _$AppStateDataImpl extends _AppStateData {
             (identical(other.token, token) || other.token == token) &&
             (identical(other.theme, theme) || other.theme == theme) &&
             (identical(other.autoLoginResult, autoLoginResult) ||
-                other.autoLoginResult == autoLoginResult) &&
-            (identical(other.isConnectedInternet, isConnectedInternet) ||
-                other.isConnectedInternet == isConnectedInternet) &&
-            (identical(other.selectedBusiness, selectedBusiness) ||
-                other.selectedBusiness == selectedBusiness) &&
-            (identical(other.selectedShop, selectedShop) ||
-                other.selectedShop == selectedShop) &&
-            (identical(other.selectedOrder, selectedOrder) ||
-                other.selectedOrder == selectedOrder) &&
-            (identical(other.isEditingOrder, isEditingOrder) ||
-                other.isEditingOrder == isEditingOrder) &&
-            (identical(
-                    other.selectedMenuItemOverride, selectedMenuItemOverride) ||
-                other.selectedMenuItemOverride == selectedMenuItemOverride) &&
-            (identical(other.isEditingMenuItemOverride,
-                    isEditingMenuItemOverride) ||
-                other.isEditingMenuItemOverride == isEditingMenuItemOverride));
+                other.autoLoginResult == autoLoginResult));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      navigatorIndex,
-      token,
-      theme,
-      autoLoginResult,
-      isConnectedInternet,
-      selectedBusiness,
-      selectedShop,
-      selectedOrder,
-      isEditingOrder,
-      selectedMenuItemOverride,
-      isEditingMenuItemOverride);
+  int get hashCode =>
+      Object.hash(runtimeType, navigatorIndex, token, theme, autoLoginResult);
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -355,18 +199,10 @@ class _$AppStateDataImpl extends _AppStateData {
 
 abstract class _AppStateData extends AppStateData {
   factory _AppStateData(
-          {@HiveField(0) final int navigatorIndex,
-          @HiveField(1) final Token? token,
-          @HiveField(2) final String theme,
-          @HiveField(3) final bool? autoLoginResult,
-          @HiveField(4) final bool isConnectedInternet,
-          @HiveField(5) final String? selectedBusiness,
-          @HiveField(6) final String? selectedShop,
-          @HiveField(7) final String? selectedOrder,
-          @HiveField(8) final bool isEditingOrder,
-          @HiveField(9) final String? selectedMenuItemOverride,
-          @HiveField(10) final bool isEditingMenuItemOverride}) =
-      _$AppStateDataImpl;
+      {@HiveField(0) final int navigatorIndex,
+      @HiveField(1) final Token? token,
+      @HiveField(2) final String theme,
+      @HiveField(3) final bool? autoLoginResult}) = _$AppStateDataImpl;
   _AppStateData._() : super._();
 
   @override
@@ -381,27 +217,6 @@ abstract class _AppStateData extends AppStateData {
   @override
   @HiveField(3)
   bool? get autoLoginResult;
-  @override
-  @HiveField(4)
-  bool get isConnectedInternet;
-  @override
-  @HiveField(5)
-  String? get selectedBusiness;
-  @override
-  @HiveField(6)
-  String? get selectedShop;
-  @override
-  @HiveField(7)
-  String? get selectedOrder;
-  @override
-  @HiveField(8)
-  bool get isEditingOrder;
-  @override
-  @HiveField(9)
-  String? get selectedMenuItemOverride;
-  @override
-  @HiveField(10)
-  bool get isEditingMenuItemOverride;
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.

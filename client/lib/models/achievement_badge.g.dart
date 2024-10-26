@@ -1,41 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'app_state.dart';
+part of 'achievement_badge.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
+class AchievementBadgeImplAdapter extends TypeAdapter<_$AchievementBadgeImpl> {
   @override
-  final int typeId = 0;
+  final int typeId = 11;
 
   @override
-  _$AppStateDataImpl read(BinaryReader reader) {
+  _$AchievementBadgeImpl read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return _$AppStateDataImpl(
-      navigatorIndex: fields[0] as int,
-      token: fields[1] as Token?,
-      theme: fields[2] as String,
-      autoLoginResult: fields[3] as bool?,
+    return _$AchievementBadgeImpl(
+      id: fields[0] as String,
+      name: fields[1] as String,
+      description: fields[2] as String,
+      iconUrl: fields[3] as String,
+      createdAt: fields[4] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, _$AppStateDataImpl obj) {
+  void write(BinaryWriter writer, _$AchievementBadgeImpl obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
-      ..write(obj.navigatorIndex)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.token)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.theme)
+      ..write(obj.description)
       ..writeByte(3)
-      ..write(obj.autoLoginResult);
+      ..write(obj.iconUrl)
+      ..writeByte(4)
+      ..write(obj.createdAt);
   }
 
   @override
@@ -44,7 +47,7 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AppStateDataImplAdapter &&
+      other is AchievementBadgeImplAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

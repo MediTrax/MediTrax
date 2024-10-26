@@ -1,41 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'app_state.dart';
+part of 'user_achievement.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
+class UserAchievementImplAdapter extends TypeAdapter<_$UserAchievementImpl> {
   @override
-  final int typeId = 0;
+  final int typeId = 12;
 
   @override
-  _$AppStateDataImpl read(BinaryReader reader) {
+  _$UserAchievementImpl read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return _$AppStateDataImpl(
-      navigatorIndex: fields[0] as int,
-      token: fields[1] as Token?,
-      theme: fields[2] as String,
-      autoLoginResult: fields[3] as bool?,
+    return _$UserAchievementImpl(
+      id: fields[0] as String,
+      userId: fields[1] as String,
+      badgeId: fields[2] as String,
+      earnedAt: fields[3] as DateTime,
+      createdAt: fields[4] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, _$AppStateDataImpl obj) {
+  void write(BinaryWriter writer, _$UserAchievementImpl obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
-      ..write(obj.navigatorIndex)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.token)
+      ..write(obj.userId)
       ..writeByte(2)
-      ..write(obj.theme)
+      ..write(obj.badgeId)
       ..writeByte(3)
-      ..write(obj.autoLoginResult);
+      ..write(obj.earnedAt)
+      ..writeByte(4)
+      ..write(obj.createdAt);
   }
 
   @override
@@ -44,7 +47,7 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AppStateDataImplAdapter &&
+      other is UserAchievementImplAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
