@@ -243,6 +243,18 @@ type ResetPasswordResponse struct {
 	Message string `json:"message"`
 }
 
+type Token struct {
+	ID                 string `json:"id"`
+	User               string `json:"user"`
+	AccessToken        string `json:"accessToken"`
+	RefreshToken       string `json:"refreshToken"`
+	AccessTokenExpiry  string `json:"accessTokenExpiry"`
+	RefreshTokenExpiry string `json:"refreshTokenExpiry"`
+	Device             string `json:"device"`
+	CreatedAt          string `json:"createdAt"`
+	UpdatedAt          string `json:"updatedAt"`
+}
+
 type TreatmentScheduleDetail struct {
 	ScheduleID    string  `json:"scheduleId"`
 	TreatmentType string  `json:"treatmentType"`

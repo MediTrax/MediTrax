@@ -1,6 +1,9 @@
 # GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
+
+# run: go run github.com/99designs/gqlgen generate
+
 scalar DateTime
 
 type Question{
@@ -16,6 +19,17 @@ type RecordObject{
   data: String!
 }
 
+type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
 
 type User{
   id: String!

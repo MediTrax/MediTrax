@@ -2,11 +2,14 @@ package utils
 
 import (
 	"context"
+	crand "crypto/rand"
+	"encoding/base64"
 	"encoding/json"
+
 	"fmt"
-	"gogqlauth/graph/database"
-	"gogqlauth/graph/model"
 	"math/rand"
+	"meditrax/graph/database"
+	"meditrax/graph/model"
 	"os"
 
 	"time"
@@ -82,4 +85,15 @@ func HandleLogin(user *model.User, ctx context.Context) (*model.Token, error) {
 		return nil, err
 	}
 	return &createdToken, nil
+}
+
+func GenerateRandomString(n int) (string, error) {
+	b := make([]byte, n)
+	_, err := crand.Read(b)
+	// Note that err == nil only if we read len(b) bytes.
+	if err != nil {
+		return "", err
+	}
+
+	return base64.URLEncoding.EncodeToString(b), nil
 }
