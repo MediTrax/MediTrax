@@ -1,0 +1,36 @@
+scalar DateTime
+scalar Upload
+# scalar Float
+
+
+
+type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+
+
+type Query {
+
+}
+
+type Mutation {
+  # User Methodsds
+  loginWithEmailPassword(email:String!, password:String!, token:String!):Token!
+  changePassword(token: String!, newPassword: String!): Boolean!
+  requestChangePassword(token: String!, email: String!): Boolean!
+  refreshToken(
+    accessToken: String!
+    refreshToken: String!
+    device: String!
+  ): Token!
+
+}
