@@ -10,14 +10,214 @@ import (
 	"meditrax/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// LoginUser is the resolver for the loginUser field.
+func (r *mutationResolver) LoginUser(ctx context.Context, email string, password string) (*model.LoginUserResponse, error) {
+	panic(fmt.Errorf("not implemented: LoginUser - loginUser"))
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *mutationResolver) GetUser(ctx context.Context, userID string) (*model.UserDetailResponse, error) {
+	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+}
+
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *string, email *string, password *string) (*model.UpdateUserResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+}
+
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*model.DeleteUserResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+}
+
+// RequestPasswordReset is the resolver for the requestPasswordReset field.
+func (r *mutationResolver) RequestPasswordReset(ctx context.Context, email string) (*model.RequestPasswordResetResponse, error) {
+	panic(fmt.Errorf("not implemented: RequestPasswordReset - requestPasswordReset"))
+}
+
+// ResetPassword is the resolver for the resetPassword field.
+func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
+	panic(fmt.Errorf("not implemented: ResetPassword - resetPassword"))
+}
+
+// CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
+func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, userID string, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateHealthRiskAssessment - createHealthRiskAssessment"))
+}
+
+// GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
+func (r *mutationResolver) GetHealthRiskAssessment(ctx context.Context, userID string) (*model.HealthRiskAssessmentDetailResponse, error) {
+	panic(fmt.Errorf("not implemented: GetHealthRiskAssessment - getHealthRiskAssessment"))
+}
+
+// UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
+func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
+}
+
+// AddMedication is the resolver for the addMedication field.
+func (r *mutationResolver) AddMedication(ctx context.Context, userID string, name string, dosage string, unit string, frequency string, inventory int) (*model.AddMedicationResponse, error) {
+	panic(fmt.Errorf("not implemented: AddMedication - addMedication"))
+}
+
+// GetMedications is the resolver for the getMedications field.
+func (r *mutationResolver) GetMedications(ctx context.Context, userID string) ([]*model.MedicationDetail, error) {
+	panic(fmt.Errorf("not implemented: GetMedications - getMedications"))
+}
+
+// UpdateMedication is the resolver for the updateMedication field.
+func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *string, unit *string, frequency *string, inventory *int) (*model.UpdateMedicationResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateMedication - updateMedication"))
+}
+
+// DeleteMedication is the resolver for the deleteMedication field.
+func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteMedication - deleteMedication"))
+}
+
+// CreateMedicationReminder is the resolver for the createMedicationReminder field.
+func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID string, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateMedicationReminder - createMedicationReminder"))
+}
+
+// UpdateMedicationReminder is the resolver for the updateMedicationReminder field.
+func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime string, isTaken bool) (*model.UpdateMedicationReminderResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateMedicationReminder - updateMedicationReminder"))
+}
+
+// GetMedicationReminders is the resolver for the getMedicationReminders field.
+func (r *mutationResolver) GetMedicationReminders(ctx context.Context, userID string) ([]*model.MedicationReminderDetail, error) {
+	panic(fmt.Errorf("not implemented: GetMedicationReminders - getMedicationReminders"))
+}
+
+// CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
+func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, userID string, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateTreatmentSchedule - createTreatmentSchedule"))
+}
+
+// GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
+func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context, userID string) ([]*model.TreatmentScheduleDetail, error) {
+	panic(fmt.Errorf("not implemented: GetTreatmentSchedules - getTreatmentSchedules"))
+}
+
+// UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
+func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateTreatmentSchedule - updateTreatmentSchedule"))
+}
+
+// DeleteTreatmentSchedule is the resolver for the deleteTreatmentSchedule field.
+func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteTreatmentSchedule - deleteTreatmentSchedule"))
+}
+
+// AddHealthMetric is the resolver for the addHealthMetric field.
+func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, metricType string, value float64, unit string) (*model.AddHealthMetricResponse, error) {
+	panic(fmt.Errorf("not implemented: AddHealthMetric - addHealthMetric"))
+}
+
+// GetHealthMetrics is the resolver for the getHealthMetrics field.
+func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, startDate *string, endDate *string) ([]*model.HealthMetricDetail, error) {
+	panic(fmt.Errorf("not implemented: GetHealthMetrics - getHealthMetrics"))
+}
+
+// UpdateHealthMetric is the resolver for the updateHealthMetric field.
+func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateHealthMetric - updateHealthMetric"))
+}
+
+// DeleteHealthMetric is the resolver for the deleteHealthMetric field.
+func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteHealthMetric - deleteHealthMetric"))
+}
+
+// CreateDietPlan is the resolver for the createDietPlan field.
+func (r *mutationResolver) CreateDietPlan(ctx context.Context, userID string, mealType string, foodItems string, calories float64) (*model.CreateDietPlanResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateDietPlan - createDietPlan"))
+}
+
+// GetDietPlans is the resolver for the getDietPlans field.
+func (r *mutationResolver) GetDietPlans(ctx context.Context, userID string) ([]*model.DietPlanDetail, error) {
+	panic(fmt.Errorf("not implemented: GetDietPlans - getDietPlans"))
+}
+
+// UpdateDietPlan is the resolver for the updateDietPlan field.
+func (r *mutationResolver) UpdateDietPlan(ctx context.Context, planID string, mealType *string, foodItems *string, calories *float64) (*model.UpdateDietPlanResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateDietPlan - updateDietPlan"))
+}
+
+// DeleteDietPlan is the resolver for the deleteDietPlan field.
+func (r *mutationResolver) DeleteDietPlan(ctx context.Context, planID string) (*model.DeleteDietPlanResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteDietPlan - deleteDietPlan"))
+}
+
+// AddMedicalRecord is the resolver for the addMedicalRecord field.
+func (r *mutationResolver) AddMedicalRecord(ctx context.Context, userID string, recordType string, content string) (*model.AddMedicalRecordResponse, error) {
+	panic(fmt.Errorf("not implemented: AddMedicalRecord - addMedicalRecord"))
+}
+
+// GetMedicalRecords is the resolver for the getMedicalRecords field.
+func (r *mutationResolver) GetMedicalRecords(ctx context.Context, userID string) ([]*model.MedicalRecordDetail, error) {
+	panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
+}
+
+// UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
+func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
+}
+
+// DeleteMedicalRecord is the resolver for the deleteMedicalRecord field.
+func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID string) (*model.DeleteMedicalRecordResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteMedicalRecord - deleteMedicalRecord"))
+}
+
+// AddFamilyMember is the resolver for the addFamilyMember field.
+func (r *mutationResolver) AddFamilyMember(ctx context.Context, userID string, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error) {
+	panic(fmt.Errorf("not implemented: AddFamilyMember - addFamilyMember"))
+}
+
+// GetFamilyMembers is the resolver for the getFamilyMembers field.
+func (r *mutationResolver) GetFamilyMembers(ctx context.Context, userID string) ([]*model.FamilyMemberDetail, error) {
+	panic(fmt.Errorf("not implemented: GetFamilyMembers - getFamilyMembers"))
+}
+
+// UpdateFamilyMember is the resolver for the updateFamilyMember field.
+func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID string, relationship *string, accessLevel *string) (*model.UpdateFamilyMemberResponse, error) {
+	panic(fmt.Errorf("not implemented: UpdateFamilyMember - updateFamilyMember"))
+}
+
+// DeleteFamilyMember is the resolver for the deleteFamilyMember field.
+func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID string) (*model.DeleteFamilyMemberResponse, error) {
+	panic(fmt.Errorf("not implemented: DeleteFamilyMember - deleteFamilyMember"))
+}
+
+// CreateAchievementBadge is the resolver for the createAchievementBadge field.
+func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name string, description string, iconURL string) (*model.CreateAchievementBadgeResponse, error) {
+	panic(fmt.Errorf("not implemented: CreateAchievementBadge - createAchievementBadge"))
+}
+
+// GetAchievementBadges is the resolver for the getAchievementBadges field.
+func (r *mutationResolver) GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error) {
+	panic(fmt.Errorf("not implemented: GetAchievementBadges - getAchievementBadges"))
+}
+
+// AwardAchievement is the resolver for the awardAchievement field.
+func (r *mutationResolver) AwardAchievement(ctx context.Context, userID string, badgeID string) (*model.AwardAchievementResponse, error) {
+	panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
+}
+
+// GetUserAchievements is the resolver for the getUserAchievements field.
+func (r *mutationResolver) GetUserAchievements(ctx context.Context, userID string) ([]*model.UserAchievementDetail, error) {
+	panic(fmt.Errorf("not implemented: GetUserAchievements - getUserAchievements"))
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
 }
 
 // Mutation returns MutationResolver implementation.
