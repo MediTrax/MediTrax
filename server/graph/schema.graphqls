@@ -2,8 +2,19 @@
 #
 # https://gqlgen.com/getting-started/
 scalar DateTime
-scalar QuestionnaireObject
-scalar RecordObject
+
+type Question{
+  question: String!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type RecordObject{
+  data: String!
+}
 
 
 type User{

@@ -128,12 +128,12 @@ type HealthMetricDetail struct {
 }
 
 type HealthRiskAssessment struct {
-	ID                string   `json:"id"`
-	UserID            string   `json:"user_id"`
-	QuestionnaireData *string  `json:"questionnaire_data,omitempty"`
-	RiskLevel         int      `json:"risk_level"`
-	Recommendations   []string `json:"recommendations"`
-	CreatedAt         string   `json:"created_at"`
+	ID                string               `json:"id"`
+	UserID            string               `json:"user_id"`
+	QuestionnaireData *QuestionnaireObject `json:"questionnaire_data,omitempty"`
+	RiskLevel         int                  `json:"risk_level"`
+	Recommendations   []string             `json:"recommendations"`
+	CreatedAt         string               `json:"created_at"`
 }
 
 type HealthRiskAssessmentDetailResponse struct {
@@ -157,12 +157,12 @@ type LoginUserResponse struct {
 }
 
 type MedicalRecord struct {
-	ID         string `json:"id"`
-	UserID     string `json:"user_id"`
-	RecordType string `json:"record_type"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
+	ID         string        `json:"id"`
+	UserID     string        `json:"user_id"`
+	RecordType string        `json:"record_type"`
+	Content    *RecordObject `json:"content"`
+	CreatedAt  string        `json:"created_at"`
+	UpdatedAt  string        `json:"updated_at"`
 }
 
 type MedicalRecordDetail struct {
@@ -220,6 +220,19 @@ type PasswordChange struct {
 }
 
 type Query struct {
+}
+
+type Question struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
+}
+
+type QuestionnaireObject struct {
+	Data []*Question `json:"data"`
+}
+
+type RecordObject struct {
+	Data string `json:"data"`
 }
 
 type RequestPasswordResetResponse struct {
