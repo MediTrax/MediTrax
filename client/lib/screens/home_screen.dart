@@ -72,29 +72,17 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Quick Access Section
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildQuickAccessButton(
-                        label: '快速访问',
-                        onTap: () {},
-                      ),
-                      _buildQuickAccessButton(
-                        label: 'AI助手',
-                        onTap: () => context.go('/ai-helper'),
-                      ),
-                      _buildQuickAccessButton(
-                        label: '最近活动',
-                        onTap: () {},
-                      ),
-                    ],
+                // Quick Access Section Title
+                const Text(
+                  '快速访问',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // Main Features Grid
+                // Quick Access Grid
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -103,25 +91,25 @@ class HomeScreen extends StatelessWidget {
                   crossAxisSpacing: 16,
                   childAspectRatio: 1.5,
                   children: [
-                    _buildFeatureCard(
-                      title: '药品管理',
-                      icon: Icons.medication,
-                      onTap: () => context.go('/medicine-inventory'),
+                    _buildQuickAccessCard(
+                      title: '健康风险评估',
+                      icon: Icons.health_and_safety,
+                      onTap: () => context.push('/health-risk-assessment'),
                     ),
-                    _buildFeatureCard(
-                      title: '预约管理',
-                      icon: Icons.calendar_today,
-                      onTap: () => context.go('/treatment'),
+                    _buildQuickAccessCard(
+                      title: '饮食管理',
+                      icon: Icons.restaurant_menu,
+                      onTap: () => context.push('/diet-management'),
                     ),
-                    _buildFeatureCard(
-                      title: '健康记录',
-                      icon: Icons.folder_shared,
-                      onTap: () => context.go('/medical-records'),
+                    _buildQuickAccessCard(
+                      title: '处方管理',
+                      icon: Icons.description,
+                      onTap: () => context.push('/prescription-management'),
                     ),
-                    _buildFeatureCard(
-                      title: '健康统计',
-                      icon: Icons.bar_chart,
-                      onTap: () => context.go('/health-risk-assessment'),
+                    _buildQuickAccessCard(
+                      title: 'AI智能助手',
+                      icon: Icons.smart_toy,
+                      onTap: () => context.push('/ai-helper'),
                     ),
                   ],
                 ),
@@ -183,28 +171,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickAccessButton({
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey.shade100,
-          foregroundColor: Colors.black,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: Text(label),
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard({
+  Widget _buildQuickAccessCard({
     required String title,
     required IconData icon,
     required VoidCallback onTap,
@@ -231,6 +198,7 @@ class HomeScreen extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
