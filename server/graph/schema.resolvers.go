@@ -23,26 +23,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, email string, passwor
 		"email": strings.ToLower(email),
 	})
 
-	if username == "user" {
-		response := &model.CreateUserResponse{
-			UserID:  "123",
-			Message: "123",
-		}
-		return response, err
-	}
-
 	if err != nil {
 		return nil, err
 	}
 	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
 	if err != nil {
-		if username == "user" {
-			response := &model.CreateUserResponse{
-				UserID:  "123",
-				Message: "error unmarshaling",
-			}
-			return response, nil
-		}
 		return nil, err
 	}
 	if len(users) > 0 {
@@ -52,7 +37,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, email string, passwor
 	// Create the new user
 	result, err = database.DB.Query(
 		`CREATE ONLY user:ulid() 
-		SET username=$username,
+		SET name=$username,
 		email=$email,
 		password=crypto::argon2::generate($password),
 		role=$role,
@@ -64,25 +49,11 @@ func (r *mutationResolver) CreateUser(ctx context.Context, email string, passwor
 			"role":     role,
 		})
 	if err != nil {
-		if username == "user" {
-			response := &model.CreateUserResponse{
-				UserID:  "123",
-				Message: "error querying and writing to databse",
-			}
-			return response, nil
-		}
 		return nil, err
 	}
 
 	newUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
 	if err != nil {
-		if username == "user" {
-			response := &model.CreateUserResponse{
-				UserID:  "123",
-				Message: "error reading back from database",
-			}
-			return response, nil
-		}
 		return nil, err
 	}
 
