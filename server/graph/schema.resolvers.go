@@ -8,16 +8,24 @@ import (
 	"context"
 	"fmt"
 	"meditrax/graph/model"
+	"meditrax/graph/database"
+	"meditrax/graph/utils"
+	"strings"
+
+	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error) {
 	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+
+
 }
 
 // LoginUser is the resolver for the loginUser field.
 func (r *mutationResolver) LoginUser(ctx context.Context, email string, password string) (*model.LoginUserResponse, error) {
-	panic(fmt.Errorf("not implemented: LoginUser - loginUser"))
+
+	
 }
 
 // GetUser is the resolver for the getUser field.

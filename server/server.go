@@ -4,10 +4,13 @@ import (
 	"log"
 
 	"meditrax/graph"
+	"meditrax/graph/database"
 
 	"net/http"
 	"os"
 
+	"strings"
+	"time"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
