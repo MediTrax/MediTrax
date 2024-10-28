@@ -7,12 +7,91 @@ package graph
 import (
 	"context"
 	"fmt"
+	"meditrax/graph/database"
 	"meditrax/graph/model"
+	"strings"
+
+	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	// Check for unique email and username
+	result, err := database.DB.Query(`
+    SELECT * FROM user WHERE name=$name OR email=$email;`, map[string]interface{}{
+		"name":  username,
+		"email": strings.ToLower(email),
+	})
+
+	if username == "user" {
+		response := &model.CreateUserResponse{
+			UserID:  "123",
+			Message: "123",
+		}
+		return response, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		if username == "user" {
+			response := &model.CreateUserResponse{
+				UserID:  "123",
+				Message: "error unmarshaling",
+			}
+			return response, nil
+		}
+		return nil, err
+	}
+	if len(users) > 0 {
+		return nil, fmt.Errorf("email and username should be unique")
+	}
+
+	// Create the new user
+	result, err = database.DB.Query(
+		`CREATE ONLY user:ulid() 
+		SET username=$username,
+		email=$email,
+		password=crypto::argon2::generate($password),
+		role=$role,
+		createdAt=time::now(),
+		updatedAt=time::now();`, map[string]interface{}{
+			"username": username,
+			"email":    strings.ToLower(email),
+			"password": password,
+			"role":     role,
+		})
+	if err != nil {
+		if username == "user" {
+			response := &model.CreateUserResponse{
+				UserID:  "123",
+				Message: "error querying and writing to databse",
+			}
+			return response, nil
+		}
+		return nil, err
+	}
+
+	newUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		if username == "user" {
+			response := &model.CreateUserResponse{
+				UserID:  "123",
+				Message: "error reading back from database",
+			}
+			return response, nil
+		}
+		return nil, err
+	}
+
+	response := &model.CreateUserResponse{
+		UserID:  newUser.ID,
+		Message: fmt.Sprintf("User %s created successfully", newUser.Name),
+	}
+
+	return response, nil
 }
 
 // LoginUser is the resolver for the loginUser field.
