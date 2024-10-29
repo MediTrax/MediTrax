@@ -2,158 +2,398 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
+# run: go run github.com/99designs/gqlgen generate
+
+scalar DateTime
+
+type Question{
+  question: String!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type RecordObject{
+  data: String!
+}
+
+type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User{
+  id: String!
+  email: String!
+  password: String!
+  name: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  last_login: DateTime!
+  status: Int!
+  role: String!
+}
+
+type HealthRiskAssessment{
+  id: String!
+  user_id: String!
+  questionnaire_data: QuestionnaireObject
+  risk_level: Int!
+  recommendations: [String!]!
+  created_at: DateTime!
+}
+
+type Medication{
+  id: String!
+  name: String!
+  dosage: Float!
+  unit: String!
+  frequency: String!
+  inventory: Int!
+  user_id: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MedicationReminder{
+  id: String!
+  medication_id: String!
+  user_id: String!
+  reminder_time: DateTime!
+  is_taken: Boolean!
+  created_at: DateTime!
+}
+
+type MedicalRecord{
+  id: String!
+  user_id: String!
+  record_type: String!
+  content: RecordObject!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type FamilyMember{
+  id: String!
+  user_id: String!
+  related_user_id: String!
+  relationship: String!
+  access_level: Int!
+  created_at: DateTime!
+}
+
+type AchievementBadge{
+  id: String!
+  name: String!
+  description: String!
+  icon_url: String!
+  created_at: DateTime!
+}
+
+type UserAchievement{
+  id: String!
+  user_id: String!
+  badge_id: String!
+  earned_at: DateTime!
+  created_at: DateTime!
+}
+
+type Query {
   user: User!
 }
 
-type User {
-  id: ID!
+type PasswordChange {
+  id: String!
+  user: String!
+  token: String!
+  createdAt: DateTime!
+}
+
+type CreateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type LoginUserResponse {
+  userId: String!
+  token: String!
+  message: String!
+}
+
+type UserDetailResponse {
+  userId: String!
+  email: String!
   name: String!
-  phone: String
-  email: String
-
-  stage: Integer!
-  medicines: [Medicine!]!
-  health_records: [HealthRecord!]!
-
-  dialysis: Dialysis
-
-  # Future TODO:
-  # doc_recommendations: [Recommendation!]!
+  role: String!
+  createdAt: DateTime!
+  lastLogin: DateTime
 }
 
-type Medicine{
+type UpdateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type DeleteUserResponse {
+  message: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
+type HealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+type HealthRiskAssessmentDetailResponse {
+  assessmentId: String!
+  questionnaireData: String!
+  riskLevel: String!
+  recommendations: String!
+  createdAt: DateTime!
+}
+
+type UpdateHealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+type AddMedicationResponse {
+  medicationId: String!
+  message: String!
+}
+
+type MedicationDetail {
+  medicationId: String!
   name: String!
-  remaining: Integer!
-  days_remaining: Integer!
-  start_time: Date!
-  last_taken: DateTime
-  next_reminder: DateTime!
-  consump_rate: ConsumpRate!
+  dosage: String!
+  unit: String!
+  frequency: String!
+  inventory: Int!
 }
 
-type ConsumpRate{
-  # whether the medicine is taken multiple times a day, or once every few days
-  is_multi_daily: Boolean!
-  # if it is taken once every few days, how few
-  alt_days: Integer
-  # when the reminder should be for those taken once every few days
-  day_remind_time: Time
-  # if it is taken multiple times a day, how many times
-  multi_daily: Integer
-  # when reminder times are for those takne multiple times a day (should provide autofill for user)
-  remind_times: [Time!]!
+type UpdateMedicationResponse {
+  medicationId: String!
+  message: String!
 }
 
-type HealthRecord{
-  date_taken: Date!
-  
-  specs: record_specs!
+type DeleteMedicationResponse {
+  message: String!
 }
 
-union record_specs = BloodPressure | BloodTest | UrineTest
-
-type BloodPressure{
-  time_taken: Time!
-  high: Float
-  low: Float
+type CreateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
 }
 
-type BloodTest{
-  # 肌酐
-  creatinine: Concentration
-  # 尿素
-  urea_nitrogen: Concentration
-  # 尿酸
-  uric_acid: Concentration
-  # 碳酸氢根
-  bicarbonate: Float
-  # 内生肌酐清除率
-  creatinine_clearance_rate: Float
-  # 胱抑素C
-  cystatin_c: Float
-  # 视黄醇结合蛋白
-  retinol_binding_protein: FLoat
-  # 血红蛋白
-  hemoglobin: Concentration
-  # 电解质
-  eletrolytes: Eletrolytes  
+type UpdateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
 }
 
-type UrineTest{
-  # 肌酐
-  creatinine: Concentration
-  # 尿蛋白
-  albumin: Concentration
-  # 肌酐/尿白蛋白比
-  albumin_to_creatine: Float
-  # ph
-  ph: Float
-  # 红细胞
-  red_blood_cells: Concentration
-  # 白细胞
-  white_blood_cells: Concentration
+type MedicationReminderDetail {
+  reminderId: String!
+  medicationId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
 }
 
-type Eletrolytes{
-  pottassium: Concentration
-  sodium: Concentration
-  calcium: Concentration
-  phosphate: Concentration
+type CreateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
 }
 
-type Concentration{
+type TreatmentScheduleDetail {
+  scheduleId: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
+}
+
+type UpdateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
+}
+
+type DeleteTreatmentScheduleResponse {
+  message: String!
+}
+
+type AddHealthMetricResponse {
+  metricId: String!
+  message: String!
+}
+
+type HealthMetricDetail {
+  metricId: String!
+  metricType: String!
   value: Float!
   unit: String!
+  recordedAt: DateTime!
 }
 
-type Dialysis{
-  is_blood_dialysis: Boolean!
-
-  specs: dialysis_specs!
+type UpdateHealthMetricResponse {
+  metricId: String!
+  message: String!
 }
 
-union dialysis_specs = Hemodialysis | PeritonealDialysis
-
-# through blood, usually once per week, but may vary
-type Hemodialysis{
-  interval: Integer!
-  start_date: Date!
-  last_dialysis: DateTime
-  next_dialysis: DateTime
-  next_reservation_rem: DateTime!
-
-  reservation_days: Integer
-  reservation_time: Time
+type DeleteHealthMetricResponse {
+  message: String!
 }
 
-# through abdomen, once per day
-type PeritonealDialysis{
-  start_date: Date!
-  last_dialysis: DateTime
-  next_reminder: DateTime!
-  dialysis_time: Time!
-
-  # regarding their remaining stockpile of dialysis fluid
-  remaining_packs: Integer
-  pks_used_per_time: Integer
-  days_remaining: Integer
+type CreateDietPlanResponse {
+  planId: String!
+  message: String!
 }
 
-
-
-type Query {
-  todos: [Todo!]!
+type DietPlanDetail {
+  planId: String!
+  mealType: String!
+  foodItems: String!
+  calories: Float!
+  createdAt: DateTime!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+type UpdateDietPlanResponse {
+  planId: String!
+  message: String!
+}
+
+type DeleteDietPlanResponse {
+  message: String!
+}
+
+type AddMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type MedicalRecordDetail {
+  recordId: String!
+  recordType: String!
+  content: String!
+  createdAt: DateTime!
+}
+
+type UpdateMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type DeleteMedicalRecordResponse {
+  message: String!
+}
+
+type AddFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type FamilyMemberDetail {
+  memberId: String!
+  relatedUserId: String!
+  relationship: String!
+  accessLevel: String!
+}
+
+type UpdateFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type DeleteFamilyMemberResponse {
+  message: String!
+}
+
+type CreateAchievementBadgeResponse {
+  badgeId: String!
+  message: String!
+}
+
+type AchievementBadgeDetail {
+  badgeId: String!
+  name: String!
+  description: String!
+  iconUrl: String!
+}
+
+type AwardAchievementResponse {
+  userAchievementId: String!
+  message: String!
+}
+
+type UserAchievementDetail {
+  userAchievementId: String!
+  badgeId: String!
+  earnedAt: DateTime!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createUser(email: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(email: String!, password: String!): LoginUserResponse
+  getUser(userId: String!): UserDetailResponse
+  updateUser(userId: String!, name: String, email: String, password: String): UpdateUserResponse
+  deleteUser(userId: String!): DeleteUserResponse
+  requestPasswordReset(email: String!): RequestPasswordResetResponse
+  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  createHealthRiskAssessment(userId: String!, questionnaireData: String!): HealthRiskAssessmentResponse
+  getHealthRiskAssessment(userId: String!): HealthRiskAssessmentDetailResponse
+  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
+  
+  addMedication(userId: String!, name: String!, dosage: String!, unit: String!, frequency: String!, inventory: Int!): AddMedicationResponse
+  getMedications(userId: String!): [MedicationDetail]
+  updateMedication(medicationId: String!, name: String, dosage: String, unit: String, frequency: String, inventory: Int): UpdateMedicationResponse
+  deleteMedication(medicationId: String!): DeleteMedicationResponse
+  createMedicationReminder(userId: String!, medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
+  updateMedicationReminder(reminderId: String!, reminderTime: DateTime!, isTaken: Boolean!): UpdateMedicationReminderResponse
+  getMedicationReminders(userId: String!): [MedicationReminderDetail]
+  
+  createTreatmentSchedule(userId: String!, treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
+  getTreatmentSchedules(userId: String!): [TreatmentScheduleDetail]
+  updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
+  deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
+  
+  addHealthMetric(userId: String!, metricType: String!, value: Float!, unit: String!): AddHealthMetricResponse
+  getHealthMetrics(userId: String!, startDate: DateTime, endDate: DateTime): [HealthMetricDetail]
+  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
+  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
+  
+  createDietPlan(userId: String!, mealType: String!, foodItems: String!, calories: Float!): CreateDietPlanResponse
+  getDietPlans(userId: String!): [DietPlanDetail]
+  updateDietPlan(planId: String!, mealType: String, foodItems: String, calories: Float): UpdateDietPlanResponse
+  deleteDietPlan(planId: String!): DeleteDietPlanResponse
+  
+  addMedicalRecord(userId: String!, recordType: String!, content: String!): AddMedicalRecordResponse
+  getMedicalRecords(userId: String!): [MedicalRecordDetail]
+  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
+  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
+  
+  addFamilyMember(userId: String!, relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
+  getFamilyMembers(userId: String!): [FamilyMemberDetail]
+  updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+  deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+  
+  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
+  getAchievementBadges: [AchievementBadgeDetail]
+  awardAchievement(userId: String!, badgeId: String!): AwardAchievementResponse
+  getUserAchievements(userId: String!): [UserAchievementDetail]
 }

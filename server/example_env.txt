@@ -1,0 +1,13 @@
+# PORT=8080
+# SMTP_SERVER=<your-smtp-server>
+# SMTP_USER=<your-smtp-user>
+# SMTP_PASS=<your-smtp-pass>
+# SURREALDB_URL=<your-surrealdb-url>
+# SURREALDB_USER=<your-surrealdb-user>
+# SURREALDB_PASSWORD=<your-surrealdb-password>
+# SURREALDB_NS=<your-surrealdb-ns>
+# SURREALDB_DB=<your-surrealdb-db>
+# MINIO_URL=<your-minio-url>
+# MINIO_ACCESS_KEY_ID=<your-minio-access-key-id>
+# MINIO_ACCESS_KEY_SECRET=<your-minio-access-key-secret>
+# MINIO_BUCKET_NAME=<your-minio-bucket-name>
