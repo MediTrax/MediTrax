@@ -2,7 +2,7 @@
 #
 # https://gqlgen.com/getting-started/
 
-# run: go run github.com/99designs/gqlgen generate
+# go run: go run github.com/99designs/gqlgen generate
 
 scalar DateTime
 
@@ -359,9 +359,9 @@ type Mutation {
   getHealthRiskAssessment(userId: String!): HealthRiskAssessmentDetailResponse
   updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
   
-  addMedication(userId: String!, name: String!, dosage: String!, unit: String!, frequency: String!, inventory: Int!): AddMedicationResponse
+  addMedication(userId: String!, name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Int!): AddMedicationResponse
   getMedications(userId: String!): [MedicationDetail]
-  updateMedication(medicationId: String!, name: String, dosage: String, unit: String, frequency: String, inventory: Int): UpdateMedicationResponse
+  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Int): UpdateMedicationResponse
   deleteMedication(medicationId: String!): DeleteMedicationResponse
   createMedicationReminder(userId: String!, medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime!, isTaken: Boolean!): UpdateMedicationReminderResponse

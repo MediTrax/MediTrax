@@ -9,10 +9,37 @@ import (
 	"fmt"
 	"meditrax/graph/database"
 	"meditrax/graph/model"
+	"regexp"
+	"strconv"
 	"strings"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
+
+// FrequencyParser extracts the times and days from a frequency string.
+func FrequencyParser(frequency string) (int, int, error) {
+	// Compile the regex pattern to match the expected format
+	frequencyPattern := regexp.MustCompile(`^(\d+)/(\d+)$`)
+
+	// Check if the frequency matches the pattern
+	matches := frequencyPattern.FindStringSubmatch(frequency)
+	if matches == nil {
+		return 0, 0, fmt.Errorf("invalid frequency format: %s", frequency)
+	}
+
+	// Convert the matched groups to integers
+	times, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid times value: %s", matches[1])
+	}
+
+	days, err := strconv.Atoi(matches[2])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid days value: %s", matches[2])
+	}
+
+	return times, days, nil
+}
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error) {
@@ -111,23 +138,206 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 }
 
 // AddMedication is the resolver for the addMedication field.
-func (r *mutationResolver) AddMedication(ctx context.Context, userID string, name string, dosage string, unit string, frequency string, inventory int) (*model.AddMedicationResponse, error) {
-	panic(fmt.Errorf("not implemented: AddMedication - addMedication"))
+func (r *mutationResolver) AddMedication(ctx context.Context, userID string, name string, dosage float64, unit string, frequency string, inventory int) (*model.AddMedicationResponse, error) {
+	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
+		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	}
+
+	// query database for medications for the same user with the same name
+	result, err := database.DB.Query(
+		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
+		map[string]interface{}{
+			"name":    name,
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(medications) > 0 {
+		return nil, fmt.Errorf("identical medication name already exists for the user, please use update medication instead")
+	}
+
+	if _, _, err := FrequencyParser(frequency); err != nil {
+		return nil, fmt.Errorf("invalid frequency format %s for medication %s", frequency, name)
+	}
+
+	// create new Medication record
+	result, err = database.DB.Query(
+		`CREATE ONLY medication:ulid()
+		SET name=$name,
+		dosage=$dosage,
+		unit=$unit,
+		frequency=$frequency,
+		inventory=$inventory,
+		user_id=$user_id,
+		created_at=time::now(),
+		updated_at=time::now();
+		`,
+		map[string]interface{}{
+			"name":      name,
+			"dosage":    dosage,
+			"unit":      unit,
+			"frequency": frequency,
+			"inventory": inventory,
+			"user_id":   userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// unmarshall the returned results
+	newMedication, err := surrealdb.SmartUnmarshal[model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	response := &model.AddMedicationResponse{
+		MedicationID: newMedication.ID,
+		Message:      fmt.Sprintf("Medication %s added successfully", newMedication.Name),
+	}
+
+	return response, nil
 }
 
 // GetMedications is the resolver for the getMedications field.
 func (r *mutationResolver) GetMedications(ctx context.Context, userID string) ([]*model.MedicationDetail, error) {
-	panic(fmt.Errorf("not implemented: GetMedications - getMedications"))
+	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
+		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	}
+
+	result, err := database.DB.Query(
+		`SELECT * FROM medication WHERE user_id = $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
+	var medicationDetails []*model.MedicationDetail
+	for _, med := range medications {
+		medicationDetail := &model.MedicationDetail{
+			MedicationID: med.ID,
+			Name:         med.Name,
+			Dosage:       fmt.Sprintf("%g", med.Dosage), // Convert dosage to string
+			Unit:         med.Unit,
+			Frequency:    med.Frequency,
+			Inventory:    med.Inventory,
+		}
+		medicationDetails = append(medicationDetails, medicationDetail)
+	}
+
+	return medicationDetails, nil
 }
 
 // UpdateMedication is the resolver for the updateMedication field.
-func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *string, unit *string, frequency *string, inventory *int) (*model.UpdateMedicationResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateMedication - updateMedication"))
+func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *int) (*model.UpdateMedicationResponse, error) {
+	if len(medicationID) == 0 || !strings.HasPrefix(medicationID, "medication:") {
+		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	}
+
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{"id": medicationID}
+
+	// Prepare the fields to be updated
+	updateFields := []string{}
+	if name != nil {
+		updateValues["name"] = *name
+		updateFields = append(updateFields, "name = $name")
+	}
+	if dosage != nil {
+		updateValues["dosage"] = *dosage
+		updateFields = append(updateFields, "dosage = $dosage")
+	}
+	if unit != nil {
+		updateValues["unit"] = *unit
+		updateFields = append(updateFields, "unit = $unit")
+	}
+	if frequency != nil {
+		// Validate the frequency format
+		if _, _, err := FrequencyParser(*frequency); err != nil {
+			return nil, err // Return the error if format is invalid
+		}
+		updateValues["frequency"] = *frequency
+		updateFields = append(updateFields, "frequency = $frequency")
+	}
+	if inventory != nil {
+		updateValues["inventory"] = *inventory
+		updateFields = append(updateFields, "inventory = $inventory")
+	}
+
+	// Construct the final query with the medicationID in quotes
+	query := fmt.Sprintf("UPDATE ONLY $id SET %s;", strings.Join(updateFields, ", "))
+
+	result, err := database.DB.Query(query, updateValues)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no medication object found")
+	}
+
+	response := &model.UpdateMedicationResponse{
+		MedicationID: results[0].ID,
+		Message:      "Medication updated successfully",
+	}
+
+	// Return the response with the medication ID and a success message
+	return response, nil
 }
 
 // DeleteMedication is the resolver for the deleteMedication field.
 func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteMedication - deleteMedication"))
+	if len(medicationID) == 0 || !strings.HasPrefix(medicationID, "medication:") {
+		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	}
+
+	// Execute the query
+	result, err := database.DB.Query(
+		`DELETE $id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id": medicationID,
+		},
+	)
+	if err != nil {
+		return nil, err // Return the error if the query fails
+	}
+
+	results, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no medication object found")
+	}
+
+	response := &model.DeleteMedicationResponse{
+		Message: fmt.Sprintf("Medication %s with name %s deleted successfully", results[0].ID, results[0].Name),
+	}
+
+	// Return the response with the medication ID and a success message
+	return response, nil
 }
 
 // CreateMedicationReminder is the resolver for the createMedicationReminder field.
