@@ -1,0 +1,65 @@
+mutation add_med_test {
+  addMedication(
+    userId: "user:01JBBZS007PM21B971RZXN2JFJ"
+    name: "test_medication"
+    unit: "tablets"
+    dosage: 1
+    frequency: "1/2"
+    inventory: 24
+  ) {
+    medicationId
+    message
+  }
+}
+
+mutation get_med_test {
+  getMedications(userId: "user:01JBBZS007PM21B971RZXN2JFJ") {
+    medicationId
+    name
+    frequency
+    dosage
+  }
+}
+
+mutation update_med_test {
+  updateMedication(
+    medicationId: "medication:01JBCCQ8ZJY2F736GDDC3FH038"
+    name: "test_change"
+    unit: "tablet"
+    frequency: "3/1"
+    inventory: 12
+  ) {
+    medicationId
+    message
+  }
+}
+
+mutation delete_med_test {
+  deleteMedication(medicationId: "medication:01JBCCBM64C3MBGKVMTTVAW316") {
+    message
+  }
+}
+
+mutation create_med_reminder_test{
+  createMedicationReminder(userId:"user:01JBBZS007PM21B971RZXN2JFJ", medicationId:"medication:01JBCCQ8ZJY2F736GDDC3FH038", 
+reminderTime:"2024-01-03T15:04:05.000"){
+    reminderId,
+    message
+  }
+}
+
+mutation update_med_reminder_test{
+  updateMedicationReminder(reminderId:"medication_reminder:01JBEKXG65EZQG8A9RQK7V7Q4V", isTaken:true){
+    reminderId,
+    message
+  }
+}
+
+mutation get_med_reminder_test{
+  getMedicationReminders(userId:"user:01JBBZS007PM21B971RZXN2JFJ"){
+    reminderId,
+    medicationId,
+    reminderTime,
+    isTaken
+  }
+}

@@ -178,19 +178,19 @@ type Medication struct {
 	Dosage    float64 `json:"dosage"`
 	Unit      string  `json:"unit"`
 	Frequency string  `json:"frequency"`
-	Inventory int     `json:"inventory"`
+	Inventory float64 `json:"inventory"`
 	UserID    string  `json:"user_id"`
 	CreatedAt string  `json:"created_at"`
 	UpdatedAt string  `json:"updated_at"`
 }
 
 type MedicationDetail struct {
-	MedicationID string `json:"medicationId"`
-	Name         string `json:"name"`
-	Dosage       string `json:"dosage"`
-	Unit         string `json:"unit"`
-	Frequency    string `json:"frequency"`
-	Inventory    int    `json:"inventory"`
+	MedicationID string  `json:"medicationId"`
+	Name         string  `json:"name"`
+	Dosage       string  `json:"dosage"`
+	Unit         string  `json:"unit"`
+	Frequency    string  `json:"frequency"`
+	Inventory    float64 `json:"inventory"`
 }
 
 type MedicationReminder struct {
