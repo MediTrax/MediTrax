@@ -95,6 +95,16 @@ type DeleteUserResponse struct {
 	Message string `json:"message"`
 }
 
+type DietPlan struct {
+	ID        string   `json:"id"`
+	UserID    string   `json:"user_id"`
+	MealType  string   `json:"meal_type"`
+	FoodItems []string `json:"food_items"`
+	Calories  int      `json:"calories"`
+	CreatedAt string   `json:"created_at"`
+	UpdatedAt string   `json:"updated_at"`
+}
+
 type DietPlanDetail struct {
 	PlanID    string  `json:"planId"`
 	MealType  string  `json:"mealType"`
@@ -117,6 +127,16 @@ type FamilyMemberDetail struct {
 	RelatedUserID string `json:"relatedUserId"`
 	Relationship  string `json:"relationship"`
 	AccessLevel   string `json:"accessLevel"`
+}
+
+type HealthMetric struct {
+	ID         string  `json:"id"`
+	UserID     string  `json:"user_id"`
+	MetricType string  `json:"metric_type"`
+	Value      float64 `json:"value"`
+	Unit       string  `json:"unit"`
+	RecordedAt string  `json:"recorded_at"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 type HealthMetricDetail struct {

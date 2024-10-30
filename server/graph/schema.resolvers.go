@@ -575,22 +575,82 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 }
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
-func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, metricType string, value float64, unit string) (*model.AddHealthMetricResponse, error) {
-	panic(fmt.Errorf("not implemented: AddHealthMetric - addHealthMetric"))
+func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
+	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
+		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	}
+
+	result, err := database.DB.Query(
+		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
+		map[string]interface{}{
+			"user_id":    userID,
+			"recordedAt": recordedAt,
+			"metricType": metricType,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(metrics) > 0 {
+		return nil, fmt.Errorf("health metric with the same type and same recordAt time already exists")
+	}
+
+	// create new Medication record
+	result, err = database.DB.Query(
+		`CREATE ONLY health_metric:ulid()
+		SET
+		user_id=$user_id,
+		metric_type=$metric_type,
+		value=$value,
+		unit=$unit,
+		recorded_at=$recorded_at,
+		created_at=time::now();
+		`,
+		map[string]interface{}{
+			"user_id":     userID,
+			"metric_type": metricType,
+			"value":       value,
+			"unit":        unit,
+			"recorded_at": recordedAt,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// unmarshall the returned results
+	newMetric, err := surrealdb.SmartUnmarshal[model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	response := &model.AddHealthMetricResponse{
+		MetricID: newMetric.ID,
+		Message:  "new health metric added successfully",
+	}
+
+	return response, nil
 }
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, startDate *string, endDate *string) ([]*model.HealthMetricDetail, error) {
+	///
 	panic(fmt.Errorf("not implemented: GetHealthMetrics - getHealthMetrics"))
 }
 
 // UpdateHealthMetric is the resolver for the updateHealthMetric field.
 func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
+	///
 	panic(fmt.Errorf("not implemented: UpdateHealthMetric - updateHealthMetric"))
 }
 
 // DeleteHealthMetric is the resolver for the deleteHealthMetric field.
 func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error) {
+	///
 	panic(fmt.Errorf("not implemented: DeleteHealthMetric - deleteHealthMetric"))
 }
 
