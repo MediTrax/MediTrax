@@ -638,20 +638,119 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, m
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, startDate *string, endDate *string) ([]*model.HealthMetricDetail, error) {
-	///
-	panic(fmt.Errorf("not implemented: GetHealthMetrics - getHealthMetrics"))
+	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
+		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	}
+
+	// https://surrealdb.com/docs/surrealql/datamodel/ids#array-based-record-ids
+	result, err := database.DB.Query(
+		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
+	var metricDetails []*model.HealthMetricDetail
+	for _, metric := range metrics {
+		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
+			metricDetail := &model.HealthMetricDetail{
+				MetricID:   metric.ID,
+				MetricType: metric.MetricType,
+				Value:      metric.Value,
+				RecordedAt: metric.RecordedAt,
+				Unit:       metric.Unit,
+			}
+			metricDetails = append(metricDetails, metricDetail)
+		}
+	}
+
+	return metricDetails, nil
 }
 
 // UpdateHealthMetric is the resolver for the updateHealthMetric field.
 func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
-	///
-	panic(fmt.Errorf("not implemented: UpdateHealthMetric - updateHealthMetric"))
+	if len(metricID) == 0 || !strings.HasPrefix(metricID, "health_metric:") {
+		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	}
+
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{"id": metricID}
+
+	// Prepare the fields to be updated
+	updateFields := []string{}
+	if value != nil {
+		updateValues["value"] = *value
+		updateFields = append(updateFields, "value = $value")
+	}
+	if unit != nil {
+		updateValues["unit"] = *unit
+		updateFields = append(updateFields, "unit = $unit")
+	}
+
+	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
+
+	result, err := database.DB.Query(query, updateValues)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no heath metric object found")
+	}
+
+	response := &model.UpdateHealthMetricResponse{
+		MetricID: results[0].ID,
+		Message:  "Health metric updated successfully",
+	}
+
+	return response, nil
 }
 
 // DeleteHealthMetric is the resolver for the deleteHealthMetric field.
 func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error) {
-	///
-	panic(fmt.Errorf("not implemented: DeleteHealthMetric - deleteHealthMetric"))
+	if len(metricID) == 0 || !strings.HasPrefix(metricID, "health_metric:") {
+		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	}
+
+	// Execute the query
+	result, err := database.DB.Query(
+		`DELETE $id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id": metricID,
+		},
+	)
+	if err != nil {
+		return nil, err // Return the error if the query fails
+	}
+
+	results, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no health metric object found")
+	}
+
+	response := &model.DeleteHealthMetricResponse{
+		Message: fmt.Sprintf("Health metric %s of type %s deleted successfully", results[0].ID, results[0].MetricType),
+	}
+
+	// Return the response with the medication ID and a success message
+	return response, nil
 }
 
 // CreateDietPlan is the resolver for the createDietPlan field.
