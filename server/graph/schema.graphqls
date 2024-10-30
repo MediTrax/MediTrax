@@ -58,7 +58,7 @@ type Medication{
   dosage: Float!
   unit: String!
   frequency: String!
-  inventory: Int!
+  inventory: Float!
   user_id: String!
   created_at: DateTime!
   updated_at: DateTime!
@@ -186,7 +186,7 @@ type MedicationDetail {
   dosage: String!
   unit: String!
   frequency: String!
-  inventory: Int!
+  inventory: Float!
 }
 
 type UpdateMedicationResponse {
@@ -359,12 +359,12 @@ type Mutation {
   getHealthRiskAssessment(userId: String!): HealthRiskAssessmentDetailResponse
   updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
   
-  addMedication(userId: String!, name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Int!): AddMedicationResponse
+  addMedication(userId: String!, name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
   getMedications(userId: String!): [MedicationDetail]
-  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Int): UpdateMedicationResponse
+  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Float): UpdateMedicationResponse
   deleteMedication(medicationId: String!): DeleteMedicationResponse
   createMedicationReminder(userId: String!, medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
-  updateMedicationReminder(reminderId: String!, reminderTime: DateTime!, isTaken: Boolean!): UpdateMedicationReminderResponse
+  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
   getMedicationReminders(userId: String!): [MedicationReminderDetail]
   
   createTreatmentSchedule(userId: String!, treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse

@@ -258,7 +258,7 @@ type ComplexityRoot struct {
 		AddFamilyMember            func(childComplexity int, userID string, relatedUserID string, relationship string, accessLevel string) int
 		AddHealthMetric            func(childComplexity int, userID string, metricType string, value float64, unit string) int
 		AddMedicalRecord           func(childComplexity int, userID string, recordType string, content string) int
-		AddMedication              func(childComplexity int, userID string, name string, dosage float64, unit string, frequency string, inventory int) int
+		AddMedication              func(childComplexity int, userID string, name string, dosage float64, unit string, frequency string, inventory float64) int
 		AwardAchievement           func(childComplexity int, userID string, badgeID string) int
 		CreateAchievementBadge     func(childComplexity int, name string, description string, iconURL string) int
 		CreateDietPlan             func(childComplexity int, userID string, mealType string, foodItems string, calories float64) int
@@ -292,8 +292,8 @@ type ComplexityRoot struct {
 		UpdateHealthMetric         func(childComplexity int, metricID string, value *float64, unit *string) int
 		UpdateHealthRiskAssessment func(childComplexity int, assessmentID string, questionnaireData string) int
 		UpdateMedicalRecord        func(childComplexity int, recordID string, recordType *string, content *string) int
-		UpdateMedication           func(childComplexity int, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *int) int
-		UpdateMedicationReminder   func(childComplexity int, reminderID string, reminderTime string, isTaken bool) int
+		UpdateMedication           func(childComplexity int, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) int
+		UpdateMedicationReminder   func(childComplexity int, reminderID string, reminderTime *string, isTaken *bool) int
 		UpdateTreatmentSchedule    func(childComplexity int, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) int
 		UpdateUser                 func(childComplexity int, userID string, name *string, email *string, password *string) int
 	}
@@ -443,12 +443,12 @@ type MutationResolver interface {
 	CreateHealthRiskAssessment(ctx context.Context, userID string, questionnaireData string) (*model.HealthRiskAssessmentResponse, error)
 	GetHealthRiskAssessment(ctx context.Context, userID string) (*model.HealthRiskAssessmentDetailResponse, error)
 	UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error)
-	AddMedication(ctx context.Context, userID string, name string, dosage float64, unit string, frequency string, inventory int) (*model.AddMedicationResponse, error)
+	AddMedication(ctx context.Context, userID string, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error)
 	GetMedications(ctx context.Context, userID string) ([]*model.MedicationDetail, error)
-	UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *int) (*model.UpdateMedicationResponse, error)
+	UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) (*model.UpdateMedicationResponse, error)
 	DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error)
 	CreateMedicationReminder(ctx context.Context, userID string, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error)
-	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime string, isTaken bool) (*model.UpdateMedicationReminderResponse, error)
+	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
 	GetMedicationReminders(ctx context.Context, userID string) ([]*model.MedicationReminderDetail, error)
 	CreateTreatmentSchedule(ctx context.Context, userID string, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
 	GetTreatmentSchedules(ctx context.Context, userID string) ([]*model.TreatmentScheduleDetail, error)
@@ -1300,7 +1300,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddMedication(childComplexity, args["userId"].(string), args["name"].(string), args["dosage"].(float64), args["unit"].(string), args["frequency"].(string), args["inventory"].(int)), true
+		return e.complexity.Mutation.AddMedication(childComplexity, args["userId"].(string), args["name"].(string), args["dosage"].(float64), args["unit"].(string), args["frequency"].(string), args["inventory"].(float64)), true
 
 	case "Mutation.awardAchievement":
 		if e.complexity.Mutation.AwardAchievement == nil {
@@ -1703,7 +1703,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateMedication(childComplexity, args["medicationId"].(string), args["name"].(*string), args["dosage"].(*float64), args["unit"].(*string), args["frequency"].(*string), args["inventory"].(*int)), true
+		return e.complexity.Mutation.UpdateMedication(childComplexity, args["medicationId"].(string), args["name"].(*string), args["dosage"].(*float64), args["unit"].(*string), args["frequency"].(*string), args["inventory"].(*float64)), true
 
 	case "Mutation.updateMedicationReminder":
 		if e.complexity.Mutation.UpdateMedicationReminder == nil {
@@ -1715,7 +1715,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateMedicationReminder(childComplexity, args["reminderId"].(string), args["reminderTime"].(string), args["isTaken"].(bool)), true
+		return e.complexity.Mutation.UpdateMedicationReminder(childComplexity, args["reminderId"].(string), args["reminderTime"].(*string), args["isTaken"].(*bool)), true
 
 	case "Mutation.updateTreatmentSchedule":
 		if e.complexity.Mutation.UpdateTreatmentSchedule == nil {
@@ -2649,13 +2649,13 @@ func (ec *executionContext) field_Mutation_addMedication_argsFrequency(
 func (ec *executionContext) field_Mutation_addMedication_argsInventory(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (int, error) {
+) (float64, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("inventory"))
 	if tmp, ok := rawArgs["inventory"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
+		return ec.unmarshalNFloat2float64(ctx, tmp)
 	}
 
-	var zeroVal int
+	var zeroVal float64
 	return zeroVal, nil
 }
 
@@ -3971,26 +3971,26 @@ func (ec *executionContext) field_Mutation_updateMedicationReminder_argsReminder
 func (ec *executionContext) field_Mutation_updateMedicationReminder_argsReminderTime(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (*string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderTime"))
 	if tmp, ok := rawArgs["reminderTime"]; ok {
-		return ec.unmarshalNDateTime2string(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal *string
 	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updateMedicationReminder_argsIsTaken(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (bool, error) {
+) (*bool, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("isTaken"))
 	if tmp, ok := rawArgs["isTaken"]; ok {
-		return ec.unmarshalNBoolean2bool(ctx, tmp)
+		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
 	}
 
-	var zeroVal bool
+	var zeroVal *bool
 	return zeroVal, nil
 }
 
@@ -4097,13 +4097,13 @@ func (ec *executionContext) field_Mutation_updateMedication_argsFrequency(
 func (ec *executionContext) field_Mutation_updateMedication_argsInventory(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*int, error) {
+) (*float64, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("inventory"))
 	if tmp, ok := rawArgs["inventory"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+		return ec.unmarshalOFloat2ᚖfloat64(ctx, tmp)
 	}
 
-	var zeroVal *int
+	var zeroVal *float64
 	return zeroVal, nil
 }
 
@@ -8259,9 +8259,9 @@ func (ec *executionContext) _Medication_inventory(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Medication_inventory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8271,7 +8271,7 @@ func (ec *executionContext) fieldContext_Medication_inventory(_ context.Context,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8655,9 +8655,9 @@ func (ec *executionContext) _MedicationDetail_inventory(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicationDetail_inventory(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8667,7 +8667,7 @@ func (ec *executionContext) fieldContext_MedicationDetail_inventory(_ context.Co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9721,7 +9721,7 @@ func (ec *executionContext) _Mutation_addMedication(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddMedication(rctx, fc.Args["userId"].(string), fc.Args["name"].(string), fc.Args["dosage"].(float64), fc.Args["unit"].(string), fc.Args["frequency"].(string), fc.Args["inventory"].(int))
+		return ec.resolvers.Mutation().AddMedication(rctx, fc.Args["userId"].(string), fc.Args["name"].(string), fc.Args["dosage"].(float64), fc.Args["unit"].(string), fc.Args["frequency"].(string), fc.Args["inventory"].(float64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9845,7 +9845,7 @@ func (ec *executionContext) _Mutation_updateMedication(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateMedication(rctx, fc.Args["medicationId"].(string), fc.Args["name"].(*string), fc.Args["dosage"].(*float64), fc.Args["unit"].(*string), fc.Args["frequency"].(*string), fc.Args["inventory"].(*int))
+		return ec.resolvers.Mutation().UpdateMedication(rctx, fc.Args["medicationId"].(string), fc.Args["name"].(*string), fc.Args["dosage"].(*float64), fc.Args["unit"].(*string), fc.Args["frequency"].(*string), fc.Args["inventory"].(*float64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10017,7 +10017,7 @@ func (ec *executionContext) _Mutation_updateMedicationReminder(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateMedicationReminder(rctx, fc.Args["reminderId"].(string), fc.Args["reminderTime"].(string), fc.Args["isTaken"].(bool))
+		return ec.resolvers.Mutation().UpdateMedicationReminder(rctx, fc.Args["reminderId"].(string), fc.Args["reminderTime"].(*string), fc.Args["isTaken"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20524,22 +20524,6 @@ func (ec *executionContext) marshalOHealthRiskAssessmentResponse2ᚖmeditraxᚋg
 		return graphql.Null
 	}
 	return ec._HealthRiskAssessmentResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalInt(*v)
-	return res
 }
 
 func (ec *executionContext) marshalOLoginUserResponse2ᚖmeditraxᚋgraphᚋmodelᚐLoginUserResponse(ctx context.Context, sel ast.SelectionSet, v *model.LoginUserResponse) graphql.Marshaler {
