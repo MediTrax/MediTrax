@@ -63,3 +63,21 @@ mutation get_med_reminder_test{
     isTaken
   }
 }
+
+mutation add_metric_test{
+  addHealthMetric(userId:"user:01JBBZS007PM21B971RZXN2JFJ", unit:"mg/l", value:11.3, metricType:"test_metric", recordedAt:"2024-01-03T18:04:05.000"){
+    metricId,
+    message
+  }
+}
+
+
+mutation get_metric_test{
+  getHealthMetrics(userId:"user:01JBBZS007PM21B971RZXN2JFJ", startDate:"2024-01-01T15:04:05.000", endDate:"2024-02-01T15:04:05.000"){
+    metricId,
+    metricType,
+    value,
+    unit,
+    recordedAt
+  }
+}
