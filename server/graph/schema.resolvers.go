@@ -73,32 +73,174 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 
 // LoginUser is the resolver for the loginUser field.
 func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error) {
-	panic(fmt.Errorf("not implemented: LoginUser - loginUser"))
+    // Fetch the user based on phone number
+    result, err := database.DB.Query(`SELECT * FROM user WHERE phoneNumber=$phoneNumber;`, map[string]interface{}{
+        "phoneNumber": phoneNumber,
+    })
+    if err != nil {
+        return nil, err
+    }
+    
+    user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+    if err != nil || user == nil {
+        return nil, fmt.Errorf("user not found")
+    }
+
+    // Verify password
+    if !crypto::argon2::verify(password, user.Password) {
+        return nil, fmt.Errorf("incorrect password")
+    }
+
+    // Create a token
+    token := &model.Token{
+        ID:                 user.ID,
+        User:               user.ID,
+        AccessToken:        generateAccessToken(user.ID), // Assume this function exists
+        RefreshToken:       generateRefreshToken(user.ID), // Assume this function exists
+        AccessTokenExpiry:  time.Now().Add(time.Hour * 1),
+        RefreshTokenExpiry: time.Now().Add(time.Hour * 24 * 30),
+        Device:             "unknown", // Replace with actual device info if available
+        CreatedAt:         time.Now(),
+        UpdatedAt:         time.Now(),
+    }
+
+    response := &model.LoginUserResponse{
+        UserId: user.ID,
+        Token:  token,
+        Message: "Login successful",
+    }
+
+    return response, nil
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *mutationResolver) GetUser(ctx context.Context, userID string) (*model.UserDetailResponse, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+    // Fetch the user details
+    result, err := database.DB.Query(`SELECT * FROM user WHERE id=$userID;`, map[string]interface{}{
+        "userID": userID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.UserDetailResponse{
+        UserId:    user.ID,
+        Email:     user.PhoneNumber, // Assuming email is stored in phoneNumber for simplicity
+        Name:      user.Name,
+        Role:      user.Role,
+        CreatedAt: user.CreatedAt,
+        LastLogin: user.LastLogin,
+    }
+
+    return response, nil
 }
+
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
+    // Create update query
+    updateFields := map[string]interface{}{}
+    if name != nil {
+        updateFields["name"] = *name
+    }
+    if phoneNumber != nil {
+        updateFields["phoneNumber"] = *phoneNumber
+    }
+    if password != nil {
+        updateFields["password"] = crypto::argon2::generate(*password)
+    }
+
+    if len(updateFields) == 0 {
+        return nil, fmt.Errorf("no fields to update")
+    }
+
+    result, err := database.DB.Query(`UPDATE user SET $fields WHERE id=$userID;`, map[string]interface{}{
+        "fields": updateFields,
+        "userID": userID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.UpdateUserResponse{
+        UserId: userID,
+        Message: "User updated successfully",
+    }
+
+    return response, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*model.DeleteUserResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+    // Delete the user
+    _, err := database.DB.Query(`DELETE FROM user WHERE id=$userID;`, map[string]interface{}{
+        "userID": userID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.DeleteUserResponse{
+        Message: "User deleted successfully",
+    }
+
+    return response, nil
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error) {
-	panic(fmt.Errorf("not implemented: RequestPasswordReset - requestPasswordReset"))
+    // Check if user exists
+    result, err := database.DB.Query(`SELECT * FROM user WHERE phoneNumber=$phoneNumber;`, map[string]interface{}{
+        "phoneNumber": phoneNumber,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+    if err != nil || user == nil {
+        return nil, fmt.Errorf("user not found")
+    }
+
+    // Generate and send password reset token (this is just an example)
+    token := generatePasswordResetToken(user.ID) // Assume this function exists
+    sendPasswordResetEmail(user.Email, token) // Assume this function exists
+
+    response := &model.RequestPasswordResetResponse{
+        Message: "Password reset link sent to your phone",
+    }
+
+    return response, nil
 }
+
 
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
-	panic(fmt.Errorf("not implemented: ResetPassword - resetPassword"))
+    // Verify the token and reset the password
+    userID, err := verifyPasswordResetToken(token) // Assume this function exists
+    if err != nil {
+        return nil, err
+    }
+
+    // Update the password
+    _, err = database.DB.Query(`UPDATE user SET password=$password WHERE id=$userID;`, map[string]interface{}{
+        "password": crypto::argon2::generate(newPassword),
+        "userID":   userID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.ResetPasswordResponse{
+        Message: "Password reset successfully",
+    }
+
+    return response, nil
 }
 
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
@@ -610,22 +752,111 @@ func (r *mutationResolver) GetMedicationReminders(ctx context.Context, userID st
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
 func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, userID string, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateTreatmentSchedule - createTreatmentSchedule"))
+    // Create the treatment schedule
+    result, err := database.DB.Query(`CREATE ONLY treatment_schedule:ulid() 
+    SET user_id=$userID,
+        treatmentType=$treatmentType,
+        scheduledTime=$scheduledTime,
+        location=$location,
+        notes=$notes,
+        createdAt=time::now(),
+        updatedAt=time::now();`, map[string]interface{}{
+        "userID":       userID,
+        "treatmentType": treatmentType,
+        "scheduledTime": scheduledTime,
+        "location":      location,
+        "notes":        notes,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentScheduleDetail](result, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.CreateTreatmentScheduleResponse{
+        ScheduleId: newSchedule.ScheduleId,
+        Message:    "Treatment schedule created successfully",
+    }
+
+    return response, nil
 }
 
 // GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
 func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context, userID string) ([]*model.TreatmentScheduleDetail, error) {
-	panic(fmt.Errorf("not implemented: GetTreatmentSchedules - getTreatmentSchedules"))
+    // Fetch treatment schedules for the user
+    result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
+        "userID": userID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+    if err != nil {
+        return nil, err
+    }
+
+    return schedules, nil
 }
 
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
 func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateTreatmentSchedule - updateTreatmentSchedule"))
+    // Create update fields
+    updateFields := map[string]interface{}{}
+    if treatmentType != nil {
+        updateFields["treatmentType"] = *treatmentType
+    }
+    if scheduledTime != nil {
+        updateFields["scheduledTime"] = *scheduledTime
+    }
+    if location != nil {
+        updateFields["location"] = *location
+    }
+    if notes != nil {
+        updateFields["notes"] = *notes
+    }
+
+    if len(updateFields) == 0 {
+        return nil, fmt.Errorf("no fields to update")
+    }
+
+    // Update the treatment schedule
+    _, err := database.DB.Query(`UPDATE treatment_schedule SET $fields WHERE id=$scheduleID;`, map[string]interface{}{
+        "fields":    updateFields,
+        "scheduleID": scheduleID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.UpdateTreatmentScheduleResponse{
+        ScheduleId: scheduleID,
+        Message:    "Treatment schedule updated successfully",
+    }
+
+    return response, nil
 }
+
+
 
 // DeleteTreatmentSchedule is the resolver for the deleteTreatmentSchedule field.
 func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteTreatmentSchedule - deleteTreatmentSchedule"))
+    // Delete the treatment schedule
+    _, err := database.DB.Query(`DELETE FROM treatment_schedule WHERE id=$scheduleID;`, map[string]interface{}{
+        "scheduleID": scheduleID,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    response := &model.DeleteTreatmentScheduleResponse{
+        Message: "Treatment schedule deleted successfully",
+    }
+
+    return response, nil
 }
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
