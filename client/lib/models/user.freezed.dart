@@ -21,16 +21,18 @@ mixin _$User {
   @HiveField(1)
   String get email => throw _privateConstructorUsedError;
   @HiveField(2)
-  String get name => throw _privateConstructorUsedError;
+  String get password => throw _privateConstructorUsedError;
   @HiveField(3)
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
   @HiveField(4)
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime get createdAt => throw _privateConstructorUsedError;
   @HiveField(5)
-  DateTime get lastLogin => throw _privateConstructorUsedError;
+  DateTime get updatedAt => throw _privateConstructorUsedError;
   @HiveField(6)
-  int get status => throw _privateConstructorUsedError;
+  DateTime get lastLogin => throw _privateConstructorUsedError;
   @HiveField(7)
+  int get status => throw _privateConstructorUsedError;
+  @HiveField(8)
   String get role => throw _privateConstructorUsedError;
 
   /// Create a copy of User
@@ -47,12 +49,13 @@ abstract class $UserCopyWith<$Res> {
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String email,
-      @HiveField(2) String name,
-      @HiveField(3) DateTime createdAt,
-      @HiveField(4) DateTime updatedAt,
-      @HiveField(5) DateTime lastLogin,
-      @HiveField(6) int status,
-      @HiveField(7) String role});
+      @HiveField(2) String password,
+      @HiveField(3) String name,
+      @HiveField(4) DateTime createdAt,
+      @HiveField(5) DateTime updatedAt,
+      @HiveField(6) DateTime lastLogin,
+      @HiveField(7) int status,
+      @HiveField(8) String role});
 }
 
 /// @nodoc
@@ -72,6 +75,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? password = null,
     Object? name = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -87,6 +91,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      password: null == password
+          ? _value.password
+          : password // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _value.name
@@ -126,12 +134,13 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String email,
-      @HiveField(2) String name,
-      @HiveField(3) DateTime createdAt,
-      @HiveField(4) DateTime updatedAt,
-      @HiveField(5) DateTime lastLogin,
-      @HiveField(6) int status,
-      @HiveField(7) String role});
+      @HiveField(2) String password,
+      @HiveField(3) String name,
+      @HiveField(4) DateTime createdAt,
+      @HiveField(5) DateTime updatedAt,
+      @HiveField(6) DateTime lastLogin,
+      @HiveField(7) int status,
+      @HiveField(8) String role});
 }
 
 /// @nodoc
@@ -148,6 +157,7 @@ class __$$UserImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? password = null,
     Object? name = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -163,6 +173,10 @@ class __$$UserImplCopyWithImpl<$Res>
       email: null == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      password: null == password
+          ? _value.password
+          : password // ignore: cast_nullable_to_non_nullable
               as String,
       name: null == name
           ? _value.name
@@ -194,17 +208,18 @@ class __$$UserImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 1)
 class _$UserImpl extends _User {
   _$UserImpl(
       {@HiveField(0) required this.id,
       @HiveField(1) required this.email,
-      @HiveField(2) required this.name,
-      @HiveField(3) required this.createdAt,
-      @HiveField(4) required this.updatedAt,
-      @HiveField(5) required this.lastLogin,
-      @HiveField(6) required this.status,
-      @HiveField(7) required this.role})
+      @HiveField(2) required this.password,
+      @HiveField(3) required this.name,
+      @HiveField(4) required this.createdAt,
+      @HiveField(5) required this.updatedAt,
+      @HiveField(6) required this.lastLogin,
+      @HiveField(7) required this.status,
+      @HiveField(8) required this.role})
       : super._();
 
   @override
@@ -215,26 +230,29 @@ class _$UserImpl extends _User {
   final String email;
   @override
   @HiveField(2)
-  final String name;
+  final String password;
   @override
   @HiveField(3)
-  final DateTime createdAt;
+  final String name;
   @override
   @HiveField(4)
-  final DateTime updatedAt;
+  final DateTime createdAt;
   @override
   @HiveField(5)
-  final DateTime lastLogin;
+  final DateTime updatedAt;
   @override
   @HiveField(6)
-  final int status;
+  final DateTime lastLogin;
   @override
   @HiveField(7)
+  final int status;
+  @override
+  @HiveField(8)
   final String role;
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, name: $name, createdAt: $createdAt, updatedAt: $updatedAt, lastLogin: $lastLogin, status: $status, role: $role)';
+    return 'User(id: $id, email: $email, password: $password, name: $name, createdAt: $createdAt, updatedAt: $updatedAt, lastLogin: $lastLogin, status: $status, role: $role)';
   }
 
   @override
@@ -244,6 +262,8 @@ class _$UserImpl extends _User {
             other is _$UserImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.password, password) ||
+                other.password == password) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -256,8 +276,8 @@ class _$UserImpl extends _User {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, name, createdAt,
-      updatedAt, lastLogin, status, role);
+  int get hashCode => Object.hash(runtimeType, id, email, password, name,
+      createdAt, updatedAt, lastLogin, status, role);
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -272,12 +292,13 @@ abstract class _User extends User {
   factory _User(
       {@HiveField(0) required final String id,
       @HiveField(1) required final String email,
-      @HiveField(2) required final String name,
-      @HiveField(3) required final DateTime createdAt,
-      @HiveField(4) required final DateTime updatedAt,
-      @HiveField(5) required final DateTime lastLogin,
-      @HiveField(6) required final int status,
-      @HiveField(7) required final String role}) = _$UserImpl;
+      @HiveField(2) required final String password,
+      @HiveField(3) required final String name,
+      @HiveField(4) required final DateTime createdAt,
+      @HiveField(5) required final DateTime updatedAt,
+      @HiveField(6) required final DateTime lastLogin,
+      @HiveField(7) required final int status,
+      @HiveField(8) required final String role}) = _$UserImpl;
   _User._() : super._();
 
   @override
@@ -288,21 +309,24 @@ abstract class _User extends User {
   String get email;
   @override
   @HiveField(2)
-  String get name;
+  String get password;
   @override
   @HiveField(3)
-  DateTime get createdAt;
+  String get name;
   @override
   @HiveField(4)
-  DateTime get updatedAt;
+  DateTime get createdAt;
   @override
   @HiveField(5)
-  DateTime get lastLogin;
+  DateTime get updatedAt;
   @override
   @HiveField(6)
-  int get status;
+  DateTime get lastLogin;
   @override
   @HiveField(7)
+  int get status;
+  @override
+  @HiveField(8)
   String get role;
 
   /// Create a copy of User
