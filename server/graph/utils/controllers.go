@@ -55,7 +55,7 @@ func HandleLogin(user *model.User, ctx context.Context) (*model.Token, error) {
 	}
 	// private claims, as payload is JSON use the generic json patterns
 	privClaims := map[string]interface{}{
-		"email": user.Email,
+		"phoneNumber": user.PhoneNumber,
 	}
 	// Add the claims. Note Claims returns a Builder so can chain
 	builder = builder.Claims(pubClaims).Claims(privClaims)
