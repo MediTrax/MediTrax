@@ -2,11 +2,8 @@ package utils
 
 import (
 	"fmt"
-	"meditrax/graph/database"
 	"regexp"
 	"strconv"
-
-	"github.com/surrealdb/surrealdb.go"
 )
 
 func FrequencyParser(frequency string) (int, int, error) {
@@ -32,26 +29,13 @@ func FrequencyParser(frequency string) (int, int, error) {
 
 	return times, days, nil
 }
-func EntryExists(id string) (bool, error) {
-	result, err := database.DB.Query(`SELECT count() FROM $id;`, map[string]interface{}{
-		"id": id,
-	})
-	if err != nil {
-		return false, err
-	}
 
-	// Unmarshal the result to retrieve the count value
-	countResult, err := surrealdb.SmartUnmarshal[[]map[string]interface{}](result, nil)
-	if err != nil {
-		return false, err
-	}
+func MatchID(id string, table string) bool {
+	idPattern := regexp.MustCompile(`^` + table + `:[0-9A-Z]{1,30}$`)
 
-	// Extract the count from the response
-	if len(countResult) > 0 {
-		if count, ok := countResult[0]["count"].(float64); ok && count > 0 {
-			return true, nil
-		}
+	if idPattern.MatchString(id) {
+		return true
+	} else {
+		return false
 	}
-
-	return false, nil
 }

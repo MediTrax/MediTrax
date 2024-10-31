@@ -207,7 +207,7 @@ type Medication struct {
 type MedicationDetail struct {
 	MedicationID string  `json:"medicationId"`
 	Name         string  `json:"name"`
-	Dosage       string  `json:"dosage"`
+	Dosage       float64 `json:"dosage"`
 	Unit         string  `json:"unit"`
 	Frequency    string  `json:"frequency"`
 	Inventory    float64 `json:"inventory"`

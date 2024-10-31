@@ -203,7 +203,7 @@ type AddMedicationResponse {
 type MedicationDetail {
   medicationId: String!
   name: String!
-  dosage: String!
+  dosage: Float!
   unit: String!
   frequency: String!
   inventory: Float!
