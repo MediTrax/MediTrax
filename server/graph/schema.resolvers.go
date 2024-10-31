@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"meditrax/graph/database"
 	"meditrax/graph/model"
@@ -114,12 +113,31 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 
 // AddMedication is the resolver for the addMedication field.
 func (r *mutationResolver) AddMedication(ctx context.Context, userID string, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check legality of id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
+	}
+
+	// query the databse to see is the given user exists
+	result, err := database.DB.Query(
+		`SELECT * FROM $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) < 1 {
+		return nil, fmt.Errorf("invalid user id")
 	}
 
 	// query database for medications for the same user with the same name
-	result, err := database.DB.Query(
+	result, err = database.DB.Query(
 		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
 		map[string]interface{}{
 			"name":    name,
@@ -129,7 +147,6 @@ func (r *mutationResolver) AddMedication(ctx context.Context, userID string, nam
 	if err != nil {
 		return nil, err
 	}
-
 	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 	if err != nil {
 		return nil, err
@@ -138,6 +155,7 @@ func (r *mutationResolver) AddMedication(ctx context.Context, userID string, nam
 		return nil, fmt.Errorf("identical medication name already exists for the user, please use update medication instead")
 	}
 
+	// check the validity of the given frequency
 	if _, _, err := utils.FrequencyParser(frequency); err != nil {
 		return nil, fmt.Errorf("invalid frequency format %s for medication %s", frequency, name)
 	}
@@ -172,6 +190,7 @@ func (r *mutationResolver) AddMedication(ctx context.Context, userID string, nam
 	if err != nil {
 		return nil, err
 	}
+	// create response
 	response := &model.AddMedicationResponse{
 		MedicationID: newMedication.ID,
 		Message:      fmt.Sprintf("Medication %s added successfully", newMedication.Name),
@@ -182,11 +201,31 @@ func (r *mutationResolver) AddMedication(ctx context.Context, userID string, nam
 
 // GetMedications is the resolver for the getMedications field.
 func (r *mutationResolver) GetMedications(ctx context.Context, userID string) ([]*model.MedicationDetail, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check validity of given id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
 	}
 
+	// query the database to see if the user id really exists
 	result, err := database.DB.Query(
+		`SELECT * FROM $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) < 1 {
+		return nil, fmt.Errorf("invalid user id")
+	}
+
+	// query for all the medications associated with the user
+	result, err = database.DB.Query(
 		`SELECT * FROM medication WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -207,7 +246,7 @@ func (r *mutationResolver) GetMedications(ctx context.Context, userID string) ([
 		medicationDetail := &model.MedicationDetail{
 			MedicationID: med.ID,
 			Name:         med.Name,
-			Dosage:       fmt.Sprintf("%g", med.Dosage), // Convert dosage to string
+			Dosage:       med.Dosage,
 			Unit:         med.Unit,
 			Frequency:    med.Frequency,
 			Inventory:    med.Inventory,
@@ -220,8 +259,9 @@ func (r *mutationResolver) GetMedications(ctx context.Context, userID string) ([
 
 // UpdateMedication is the resolver for the updateMedication field.
 func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) (*model.UpdateMedicationResponse, error) {
-	if len(medicationID) == 0 || !strings.HasPrefix(medicationID, "medication:") {
-		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	// check if id is legal
+	if !utils.MatchID(medicationID, "medication") {
+		return nil, fmt.Errorf("illegal medication id")
 	}
 
 	// Initialize a map to hold the update values
@@ -257,21 +297,22 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	// Construct the final query with the medicationID in quotes
 	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
 
+	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// unmarshal the results and check for errors
 	results, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
-
 	if err != nil {
 		return nil, err
 	}
-
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no medication object found")
 	}
 
+	// create response
 	response := &model.UpdateMedicationResponse{
 		MedicationID: results[0].ID,
 		Message:      "Medication updated successfully",
@@ -283,8 +324,9 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 
 // DeleteMedication is the resolver for the deleteMedication field.
 func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error) {
-	if len(medicationID) == 0 || !strings.HasPrefix(medicationID, "medication:") {
-		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	// check legality of the provided id
+	if !utils.MatchID(medicationID, "medication") {
+		return nil, fmt.Errorf("illegal medication id")
 	}
 
 	// Execute the query
@@ -298,15 +340,16 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 		return nil, err // Return the error if the query fails
 	}
 
+	// unmarshal results and check for errors
 	results, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no medication object found")
 	}
 
+	// create response
 	response := &model.DeleteMedicationResponse{
 		Message: fmt.Sprintf("Medication %s with name %s deleted successfully", results[0].ID, results[0].Name),
 	}
@@ -317,13 +360,15 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 
 // CreateMedicationReminder is the resolver for the createMedicationReminder field.
 func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID string, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check legality of both user and medication id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
 	}
-	if len(medicationID) == 0 || !strings.HasPrefix(medicationID, "medication:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	if !utils.MatchID(medicationID, "medication") {
+		return nil, fmt.Errorf("illegal medication id")
 	}
 
+	// query for the medication and check if it exists
 	result, err := database.DB.Query(
 		`SELECT * FROM $medication_id WHERE user_id = $user_id;`,
 		map[string]interface{}{
@@ -334,13 +379,12 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID 
 	if err != nil {
 		return nil, err
 	}
-
 	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 	if err != nil {
 		return nil, err
 	}
 	if len(medications) < 1 {
-		return nil, fmt.Errorf("wrong user or medication id")
+		return nil, fmt.Errorf("invalid user or medication id")
 	}
 
 	// query database for medications with the same reminder time
@@ -356,13 +400,6 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID 
 	if err != nil {
 		return nil, err
 	}
-
-	a, err := json.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	println(string(a))
-
 	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
@@ -371,6 +408,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID 
 		return nil, fmt.Errorf("identical medication reminder for the user already exists")
 	}
 
+	// finally, send the create reminder query
 	result, err = database.DB.Query(
 		`CREATE ONLY medication_reminder:ulid()
 		SET medication_id=$medication_id,
@@ -389,11 +427,13 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID 
 		return nil, err
 	}
 
+	// unmarshal the results of the CREATE query
 	newReminder, err := surrealdb.SmartUnmarshal[model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	// create response
 	response := &model.CreateMedicationReminderResponse{
 		ReminderID: newReminder.ID,
 		Message:    "new reminder created successfully",
@@ -403,10 +443,12 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID 
 
 // UpdateMedicationReminder is the resolver for the updateMedicationReminder field.
 func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error) {
-	if len(reminderID) == 0 || !strings.HasPrefix(reminderID, "medication_reminder:") {
-		return nil, fmt.Errorf("medication reminder id should start with 'medication_reminder:' and be non-empty")
+	// check legality of the reminder id
+	if !utils.MatchID(reminderID, "medication_reminder") {
+		return nil, fmt.Errorf("illegal reminder id")
 	}
 
+	// query database to see if the reminder exists
 	result, err := database.DB.Query(
 		`SELECT * FROM medication_reminder WHERE id=$reminder_id;`,
 		map[string]interface{}{
@@ -416,7 +458,6 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	if err != nil {
 		return nil, err
 	}
-
 	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
@@ -425,6 +466,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, fmt.Errorf("wrong medication reminder id, no reminder found")
 	}
 
+	// get the reminder before updating
 	remBefore := reminders[0]
 
 	// logic for when the reminder changes from not taken to taken, subtract the medication's remaining by its dosage
@@ -441,6 +483,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 				return nil, err
 			}
 
+			// verify that there is a medication linked to this reminder
 			medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 			if err != nil {
 				return nil, err
@@ -449,12 +492,14 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 				return nil, fmt.Errorf("no medication linked to reminder found")
 			}
 
+			// calculate the new inventory
 			new_inventory := medications[0].Inventory - medications[0].Dosage
-
+			// if the inventory becomes negative, throw an error
 			if new_inventory < 0 {
 				return nil, fmt.Errorf("negative inventory")
 			}
 
+			// update the inventory
 			_, err = database.DB.Query(
 				`UPDATE ONLY $id SET inventory=$inventory`,
 				map[string]interface{}{
@@ -482,23 +527,19 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		updateFields = append(updateFields, "is_taken = $is_taken")
 	}
 
-	// Construct the final query with the medicationID in quotes
+	// Construct the final query
 	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
-
+	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// unmarshal results and construct response
 	results, err := surrealdb.SmartUnmarshal[[]*model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id, no medication object found")
-	}
-
 	response := &model.UpdateMedicationReminderResponse{
 		ReminderID: results[0].ID,
 		Message:    "Medication reminder updated successfully",
@@ -509,11 +550,31 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 // GetMedicationReminders is the resolver for the getMedicationReminders field.
 func (r *mutationResolver) GetMedicationReminders(ctx context.Context, userID string) ([]*model.MedicationReminderDetail, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check legality of user id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
 	}
 
+	// query the database to make sure the user exists
 	result, err := database.DB.Query(
+		`SELECT * FROM $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) < 1 {
+		return nil, fmt.Errorf("invalid user id")
+	}
+
+	// get all the medication reminders for the user
+	result, err = database.DB.Query(
 		`SELECT * FROM medication_reminder WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -522,13 +583,12 @@ func (r *mutationResolver) GetMedicationReminders(ctx context.Context, userID st
 	if err != nil {
 		return nil, err
 	}
-
 	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
+	// loop through the reminders, convert them into MedicationReminderDetails, then return the converted list and nil
 	var reminderDetails []*model.MedicationReminderDetail
 	for _, rem := range reminders {
 		reminderDetail := &model.MedicationReminderDetail{
@@ -565,11 +625,31 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
 func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check legality of the user id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
 	}
 
+	// query the database to make sure the user exists
 	result, err := database.DB.Query(
+		`SELECT * FROM $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) < 1 {
+		return nil, fmt.Errorf("invalid user id")
+	}
+
+	// check that there isn't already a metric entry for the user with the same type and record time
+	result, err = database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
 		map[string]interface{}{
 			"user_id":    userID,
@@ -580,7 +660,6 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, m
 	if err != nil {
 		return nil, err
 	}
-
 	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
 	if err != nil {
 		return nil, err
@@ -589,7 +668,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, m
 		return nil, fmt.Errorf("health metric with the same type and same recordAt time already exists")
 	}
 
-	// create new Medication record
+	// create new HealthMetric record
 	result, err = database.DB.Query(
 		`CREATE ONLY health_metric:ulid()
 		SET
@@ -627,12 +706,31 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, m
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, startDate *string, endDate *string) ([]*model.HealthMetricDetail, error) {
-	if len(userID) == 0 || !strings.HasPrefix(userID, "user:") {
-		return nil, fmt.Errorf("user id should start with 'user:' and be non-empty")
+	// check legality of user id
+	if !utils.MatchID(userID, "user") {
+		return nil, fmt.Errorf("illegal user id")
 	}
 
-	// https://surrealdb.com/docs/surrealql/datamodel/ids#array-based-record-ids
+	// query the database and verify that the user exists
 	result, err := database.DB.Query(
+		`SELECT * FROM $user_id;`,
+		map[string]interface{}{
+			"user_id": userID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) < 1 {
+		return nil, fmt.Errorf("invalid user id")
+	}
+
+	// get all the health metric entries that is associated with the user
+	result, err = database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -642,14 +740,16 @@ func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, 
 		return nil, err
 	}
 
+	// unmarshal results into Go objects
 	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
+	// loop through the metrics, convert them into HealthMetricDetail, then return the converted list and nil
 	var metricDetails []*model.HealthMetricDetail
 	for _, metric := range metrics {
+		// check that the metric is within the record time constraints
 		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
 			metricDetail := &model.HealthMetricDetail{
 				MetricID:   metric.ID,
@@ -667,8 +767,9 @@ func (r *mutationResolver) GetHealthMetrics(ctx context.Context, userID string, 
 
 // UpdateHealthMetric is the resolver for the updateHealthMetric field.
 func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
-	if len(metricID) == 0 || !strings.HasPrefix(metricID, "health_metric:") {
-		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	// check legality of the health metric id
+	if !utils.MatchID(metricID, "health_metric") {
+		return nil, fmt.Errorf("illegal health metric id")
 	}
 
 	// Initialize a map to hold the update values
@@ -685,13 +786,15 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 		updateFields = append(updateFields, "unit = $unit")
 	}
 
+	// write to the query
 	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
-
+	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// unmarshal results
 	results, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
 	if err != nil {
 		return nil, err
@@ -710,11 +813,12 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 
 // DeleteHealthMetric is the resolver for the deleteHealthMetric field.
 func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error) {
-	if len(metricID) == 0 || !strings.HasPrefix(metricID, "health_metric:") {
-		return nil, fmt.Errorf("medication id should start with 'medication:' and be non-empty")
+	// check the legality of the metric id
+	if !utils.MatchID(metricID, "health_metric") {
+		return nil, fmt.Errorf("illegal health metric id")
 	}
 
-	// Execute the query
+	// Execute the query, returning the entry before it is deleted
 	result, err := database.DB.Query(
 		`DELETE $id RETURN BEFORE;`,
 		map[string]interface{}{
@@ -722,23 +826,23 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 		},
 	)
 	if err != nil {
-		return nil, err // Return the error if the query fails
+		return nil, err
 	}
 
+	// unmarshal the results, and check if the entry existed before DELETE
 	results, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no health metric object found")
 	}
 
+	// create response
 	response := &model.DeleteHealthMetricResponse{
 		Message: fmt.Sprintf("Health metric %s of type %s deleted successfully", results[0].ID, results[0].MetricType),
 	}
 
-	// Return the response with the medication ID and a success message
 	return response, nil
 }
 
