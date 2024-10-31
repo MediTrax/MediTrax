@@ -4,30 +4,25 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
 
-class Variables$Mutation$LoginWithEmailPassword {
-  factory Variables$Mutation$LoginWithEmailPassword({
+class Variables$Mutation$LoginUser {
+  factory Variables$Mutation$LoginUser({
     required String email,
     required String password,
-    required String token,
   }) =>
-      Variables$Mutation$LoginWithEmailPassword._({
+      Variables$Mutation$LoginUser._({
         r'email': email,
         r'password': password,
-        r'token': token,
       });
 
-  Variables$Mutation$LoginWithEmailPassword._(this._$data);
+  Variables$Mutation$LoginUser._(this._$data);
 
-  factory Variables$Mutation$LoginWithEmailPassword.fromJson(
-      Map<String, dynamic> data) {
+  factory Variables$Mutation$LoginUser.fromJson(Map<String, dynamic> data) {
     final result$data = <String, dynamic>{};
     final l$email = data['email'];
     result$data['email'] = (l$email as String);
     final l$password = data['password'];
     result$data['password'] = (l$password as String);
-    final l$token = data['token'];
-    result$data['token'] = (l$token as String);
-    return Variables$Mutation$LoginWithEmailPassword._(result$data);
+    return Variables$Mutation$LoginUser._(result$data);
   }
 
   Map<String, dynamic> _$data;
@@ -36,22 +31,17 @@ class Variables$Mutation$LoginWithEmailPassword {
 
   String get password => (_$data['password'] as String);
 
-  String get token => (_$data['token'] as String);
-
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
     final l$email = email;
     result$data['email'] = l$email;
     final l$password = password;
     result$data['password'] = l$password;
-    final l$token = token;
-    result$data['token'] = l$token;
     return result$data;
   }
 
-  CopyWith$Variables$Mutation$LoginWithEmailPassword<
-          Variables$Mutation$LoginWithEmailPassword>
-      get copyWith => CopyWith$Variables$Mutation$LoginWithEmailPassword(
+  CopyWith$Variables$Mutation$LoginUser<Variables$Mutation$LoginUser>
+      get copyWith => CopyWith$Variables$Mutation$LoginUser(
             this,
             (i) => i,
           );
@@ -61,7 +51,7 @@ class Variables$Mutation$LoginWithEmailPassword {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$LoginWithEmailPassword) ||
+    if (!(other is Variables$Mutation$LoginUser) ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -75,11 +65,6 @@ class Variables$Mutation$LoginWithEmailPassword {
     if (l$password != lOther$password) {
       return false;
     }
-    final l$token = token;
-    final lOther$token = other.token;
-    if (l$token != lOther$token) {
-      return false;
-    }
     return true;
   }
 
@@ -87,98 +72,92 @@ class Variables$Mutation$LoginWithEmailPassword {
   int get hashCode {
     final l$email = email;
     final l$password = password;
-    final l$token = token;
     return Object.hashAll([
       l$email,
       l$password,
-      l$token,
     ]);
   }
 }
 
-abstract class CopyWith$Variables$Mutation$LoginWithEmailPassword<TRes> {
-  factory CopyWith$Variables$Mutation$LoginWithEmailPassword(
-    Variables$Mutation$LoginWithEmailPassword instance,
-    TRes Function(Variables$Mutation$LoginWithEmailPassword) then,
-  ) = _CopyWithImpl$Variables$Mutation$LoginWithEmailPassword;
+abstract class CopyWith$Variables$Mutation$LoginUser<TRes> {
+  factory CopyWith$Variables$Mutation$LoginUser(
+    Variables$Mutation$LoginUser instance,
+    TRes Function(Variables$Mutation$LoginUser) then,
+  ) = _CopyWithImpl$Variables$Mutation$LoginUser;
 
-  factory CopyWith$Variables$Mutation$LoginWithEmailPassword.stub(TRes res) =
-      _CopyWithStubImpl$Variables$Mutation$LoginWithEmailPassword;
+  factory CopyWith$Variables$Mutation$LoginUser.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$LoginUser;
 
   TRes call({
     String? email,
     String? password,
-    String? token,
   });
 }
 
-class _CopyWithImpl$Variables$Mutation$LoginWithEmailPassword<TRes>
-    implements CopyWith$Variables$Mutation$LoginWithEmailPassword<TRes> {
-  _CopyWithImpl$Variables$Mutation$LoginWithEmailPassword(
+class _CopyWithImpl$Variables$Mutation$LoginUser<TRes>
+    implements CopyWith$Variables$Mutation$LoginUser<TRes> {
+  _CopyWithImpl$Variables$Mutation$LoginUser(
     this._instance,
     this._then,
   );
 
-  final Variables$Mutation$LoginWithEmailPassword _instance;
+  final Variables$Mutation$LoginUser _instance;
 
-  final TRes Function(Variables$Mutation$LoginWithEmailPassword) _then;
+  final TRes Function(Variables$Mutation$LoginUser) _then;
 
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
     Object? email = _undefined,
     Object? password = _undefined,
-    Object? token = _undefined,
   }) =>
-      _then(Variables$Mutation$LoginWithEmailPassword._({
+      _then(Variables$Mutation$LoginUser._({
         ..._instance._$data,
         if (email != _undefined && email != null) 'email': (email as String),
         if (password != _undefined && password != null)
           'password': (password as String),
-        if (token != _undefined && token != null) 'token': (token as String),
       }));
 }
 
-class _CopyWithStubImpl$Variables$Mutation$LoginWithEmailPassword<TRes>
-    implements CopyWith$Variables$Mutation$LoginWithEmailPassword<TRes> {
-  _CopyWithStubImpl$Variables$Mutation$LoginWithEmailPassword(this._res);
+class _CopyWithStubImpl$Variables$Mutation$LoginUser<TRes>
+    implements CopyWith$Variables$Mutation$LoginUser<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$LoginUser(this._res);
 
   TRes _res;
 
   call({
     String? email,
     String? password,
-    String? token,
   }) =>
       _res;
 }
 
-class Mutation$LoginWithEmailPassword {
-  Mutation$LoginWithEmailPassword({
-    required this.loginWithEmailPassword,
+class Mutation$LoginUser {
+  Mutation$LoginUser({
+    this.loginUser,
     this.$__typename = 'Mutation',
   });
 
-  factory Mutation$LoginWithEmailPassword.fromJson(Map<String, dynamic> json) {
-    final l$loginWithEmailPassword = json['loginWithEmailPassword'];
+  factory Mutation$LoginUser.fromJson(Map<String, dynamic> json) {
+    final l$loginUser = json['loginUser'];
     final l$$__typename = json['__typename'];
-    return Mutation$LoginWithEmailPassword(
-      loginWithEmailPassword:
-          Mutation$LoginWithEmailPassword$loginWithEmailPassword.fromJson(
-              (l$loginWithEmailPassword as Map<String, dynamic>)),
+    return Mutation$LoginUser(
+      loginUser: l$loginUser == null
+          ? null
+          : Mutation$LoginUser$loginUser.fromJson(
+              (l$loginUser as Map<String, dynamic>)),
       $__typename: (l$$__typename as String),
     );
   }
 
-  final Mutation$LoginWithEmailPassword$loginWithEmailPassword
-      loginWithEmailPassword;
+  final Mutation$LoginUser$loginUser? loginUser;
 
   final String $__typename;
 
   Map<String, dynamic> toJson() {
     final _resultData = <String, dynamic>{};
-    final l$loginWithEmailPassword = loginWithEmailPassword;
-    _resultData['loginWithEmailPassword'] = l$loginWithEmailPassword.toJson();
+    final l$loginUser = loginUser;
+    _resultData['loginUser'] = l$loginUser?.toJson();
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
@@ -186,10 +165,10 @@ class Mutation$LoginWithEmailPassword {
 
   @override
   int get hashCode {
-    final l$loginWithEmailPassword = loginWithEmailPassword;
+    final l$loginUser = loginUser;
     final l$$__typename = $__typename;
     return Object.hashAll([
-      l$loginWithEmailPassword,
+      l$loginUser,
       l$$__typename,
     ]);
   }
@@ -199,13 +178,12 @@ class Mutation$LoginWithEmailPassword {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$LoginWithEmailPassword) ||
-        runtimeType != other.runtimeType) {
+    if (!(other is Mutation$LoginUser) || runtimeType != other.runtimeType) {
       return false;
     }
-    final l$loginWithEmailPassword = loginWithEmailPassword;
-    final lOther$loginWithEmailPassword = other.loginWithEmailPassword;
-    if (l$loginWithEmailPassword != lOther$loginWithEmailPassword) {
+    final l$loginUser = loginUser;
+    final lOther$loginUser = other.loginUser;
+    if (l$loginUser != lOther$loginUser) {
       return false;
     }
     final l$$__typename = $__typename;
@@ -217,92 +195,85 @@ class Mutation$LoginWithEmailPassword {
   }
 }
 
-extension UtilityExtension$Mutation$LoginWithEmailPassword
-    on Mutation$LoginWithEmailPassword {
-  CopyWith$Mutation$LoginWithEmailPassword<Mutation$LoginWithEmailPassword>
-      get copyWith => CopyWith$Mutation$LoginWithEmailPassword(
-            this,
-            (i) => i,
-          );
+extension UtilityExtension$Mutation$LoginUser on Mutation$LoginUser {
+  CopyWith$Mutation$LoginUser<Mutation$LoginUser> get copyWith =>
+      CopyWith$Mutation$LoginUser(
+        this,
+        (i) => i,
+      );
 }
 
-abstract class CopyWith$Mutation$LoginWithEmailPassword<TRes> {
-  factory CopyWith$Mutation$LoginWithEmailPassword(
-    Mutation$LoginWithEmailPassword instance,
-    TRes Function(Mutation$LoginWithEmailPassword) then,
-  ) = _CopyWithImpl$Mutation$LoginWithEmailPassword;
+abstract class CopyWith$Mutation$LoginUser<TRes> {
+  factory CopyWith$Mutation$LoginUser(
+    Mutation$LoginUser instance,
+    TRes Function(Mutation$LoginUser) then,
+  ) = _CopyWithImpl$Mutation$LoginUser;
 
-  factory CopyWith$Mutation$LoginWithEmailPassword.stub(TRes res) =
-      _CopyWithStubImpl$Mutation$LoginWithEmailPassword;
+  factory CopyWith$Mutation$LoginUser.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUser;
 
   TRes call({
-    Mutation$LoginWithEmailPassword$loginWithEmailPassword?
-        loginWithEmailPassword,
+    Mutation$LoginUser$loginUser? loginUser,
     String? $__typename,
   });
-  CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes>
-      get loginWithEmailPassword;
+  CopyWith$Mutation$LoginUser$loginUser<TRes> get loginUser;
 }
 
-class _CopyWithImpl$Mutation$LoginWithEmailPassword<TRes>
-    implements CopyWith$Mutation$LoginWithEmailPassword<TRes> {
-  _CopyWithImpl$Mutation$LoginWithEmailPassword(
+class _CopyWithImpl$Mutation$LoginUser<TRes>
+    implements CopyWith$Mutation$LoginUser<TRes> {
+  _CopyWithImpl$Mutation$LoginUser(
     this._instance,
     this._then,
   );
 
-  final Mutation$LoginWithEmailPassword _instance;
+  final Mutation$LoginUser _instance;
 
-  final TRes Function(Mutation$LoginWithEmailPassword) _then;
+  final TRes Function(Mutation$LoginUser) _then;
 
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
-    Object? loginWithEmailPassword = _undefined,
+    Object? loginUser = _undefined,
     Object? $__typename = _undefined,
   }) =>
-      _then(Mutation$LoginWithEmailPassword(
-        loginWithEmailPassword: loginWithEmailPassword == _undefined ||
-                loginWithEmailPassword == null
-            ? _instance.loginWithEmailPassword
-            : (loginWithEmailPassword
-                as Mutation$LoginWithEmailPassword$loginWithEmailPassword),
+      _then(Mutation$LoginUser(
+        loginUser: loginUser == _undefined
+            ? _instance.loginUser
+            : (loginUser as Mutation$LoginUser$loginUser?),
         $__typename: $__typename == _undefined || $__typename == null
             ? _instance.$__typename
             : ($__typename as String),
       ));
 
-  CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes>
-      get loginWithEmailPassword {
-    final local$loginWithEmailPassword = _instance.loginWithEmailPassword;
-    return CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword(
-        local$loginWithEmailPassword, (e) => call(loginWithEmailPassword: e));
+  CopyWith$Mutation$LoginUser$loginUser<TRes> get loginUser {
+    final local$loginUser = _instance.loginUser;
+    return local$loginUser == null
+        ? CopyWith$Mutation$LoginUser$loginUser.stub(_then(_instance))
+        : CopyWith$Mutation$LoginUser$loginUser(
+            local$loginUser, (e) => call(loginUser: e));
   }
 }
 
-class _CopyWithStubImpl$Mutation$LoginWithEmailPassword<TRes>
-    implements CopyWith$Mutation$LoginWithEmailPassword<TRes> {
-  _CopyWithStubImpl$Mutation$LoginWithEmailPassword(this._res);
+class _CopyWithStubImpl$Mutation$LoginUser<TRes>
+    implements CopyWith$Mutation$LoginUser<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUser(this._res);
 
   TRes _res;
 
   call({
-    Mutation$LoginWithEmailPassword$loginWithEmailPassword?
-        loginWithEmailPassword,
+    Mutation$LoginUser$loginUser? loginUser,
     String? $__typename,
   }) =>
       _res;
 
-  CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes>
-      get loginWithEmailPassword =>
-          CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword.stub(
-              _res);
+  CopyWith$Mutation$LoginUser$loginUser<TRes> get loginUser =>
+      CopyWith$Mutation$LoginUser$loginUser.stub(_res);
 }
 
-const documentNodeMutationLoginWithEmailPassword = DocumentNode(definitions: [
+const documentNodeMutationLoginUser = DocumentNode(definitions: [
   OperationDefinitionNode(
     type: OperationType.mutation,
-    name: NameNode(value: 'LoginWithEmailPassword'),
+    name: NameNode(value: 'LoginUser'),
     variableDefinitions: [
       VariableDefinitionNode(
         variable: VariableNode(name: NameNode(value: 'email')),
@@ -322,20 +293,11 @@ const documentNodeMutationLoginWithEmailPassword = DocumentNode(definitions: [
         defaultValue: DefaultValueNode(value: null),
         directives: [],
       ),
-      VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'token')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      ),
     ],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
       FieldNode(
-        name: NameNode(value: 'loginWithEmailPassword'),
+        name: NameNode(value: 'loginUser'),
         alias: null,
         arguments: [
           ArgumentNode(
@@ -346,47 +308,58 @@ const documentNodeMutationLoginWithEmailPassword = DocumentNode(definitions: [
             name: NameNode(value: 'password'),
             value: VariableNode(name: NameNode(value: 'password')),
           ),
-          ArgumentNode(
-            name: NameNode(value: 'token'),
-            value: VariableNode(name: NameNode(value: 'token')),
-          ),
         ],
         directives: [],
         selectionSet: SelectionSetNode(selections: [
           FieldNode(
-            name: NameNode(value: 'user'),
+            name: NameNode(value: 'userId'),
             alias: null,
             arguments: [],
             directives: [],
             selectionSet: null,
           ),
           FieldNode(
-            name: NameNode(value: 'accessToken'),
+            name: NameNode(value: 'token'),
             alias: null,
             arguments: [],
             directives: [],
-            selectionSet: null,
-          ),
-          FieldNode(
-            name: NameNode(value: 'refreshToken'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null,
-          ),
-          FieldNode(
-            name: NameNode(value: 'accessTokenExpiry'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null,
-          ),
-          FieldNode(
-            name: NameNode(value: 'refreshTokenExpiry'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null,
+            selectionSet: SelectionSetNode(selections: [
+              FieldNode(
+                name: NameNode(value: 'accessToken'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'refreshToken'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'accessTokenExpiry'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'refreshTokenExpiry'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: '__typename'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+            ]),
           ),
           FieldNode(
             name: NameNode(value: '__typename'),
@@ -407,28 +380,26 @@ const documentNodeMutationLoginWithEmailPassword = DocumentNode(definitions: [
     ]),
   ),
 ]);
-Mutation$LoginWithEmailPassword _parserFn$Mutation$LoginWithEmailPassword(
-        Map<String, dynamic> data) =>
-    Mutation$LoginWithEmailPassword.fromJson(data);
-typedef OnMutationCompleted$Mutation$LoginWithEmailPassword = FutureOr<void>
-    Function(
+Mutation$LoginUser _parserFn$Mutation$LoginUser(Map<String, dynamic> data) =>
+    Mutation$LoginUser.fromJson(data);
+typedef OnMutationCompleted$Mutation$LoginUser = FutureOr<void> Function(
   Map<String, dynamic>?,
-  Mutation$LoginWithEmailPassword?,
+  Mutation$LoginUser?,
 );
 
-class Options$Mutation$LoginWithEmailPassword
-    extends graphql.MutationOptions<Mutation$LoginWithEmailPassword> {
-  Options$Mutation$LoginWithEmailPassword({
+class Options$Mutation$LoginUser
+    extends graphql.MutationOptions<Mutation$LoginUser> {
+  Options$Mutation$LoginUser({
     String? operationName,
-    required Variables$Mutation$LoginWithEmailPassword variables,
+    required Variables$Mutation$LoginUser variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
     Object? optimisticResult,
-    Mutation$LoginWithEmailPassword? typedOptimisticResult,
+    Mutation$LoginUser? typedOptimisticResult,
     graphql.Context? context,
-    OnMutationCompleted$Mutation$LoginWithEmailPassword? onCompleted,
-    graphql.OnMutationUpdate<Mutation$LoginWithEmailPassword>? update,
+    OnMutationCompleted$Mutation$LoginUser? onCompleted,
+    graphql.OnMutationUpdate<Mutation$LoginUser>? update,
     graphql.OnError? onError,
   })  : onCompletedWithParsed = onCompleted,
         super(
@@ -443,18 +414,15 @@ class Options$Mutation$LoginWithEmailPassword
               ? null
               : (data) => onCompleted(
                     data,
-                    data == null
-                        ? null
-                        : _parserFn$Mutation$LoginWithEmailPassword(data),
+                    data == null ? null : _parserFn$Mutation$LoginUser(data),
                   ),
           update: update,
           onError: onError,
-          document: documentNodeMutationLoginWithEmailPassword,
-          parserFn: _parserFn$Mutation$LoginWithEmailPassword,
+          document: documentNodeMutationLoginUser,
+          parserFn: _parserFn$Mutation$LoginUser,
         );
 
-  final OnMutationCompleted$Mutation$LoginWithEmailPassword?
-      onCompletedWithParsed;
+  final OnMutationCompleted$Mutation$LoginUser? onCompletedWithParsed;
 
   @override
   List<Object?> get properties => [
@@ -465,16 +433,16 @@ class Options$Mutation$LoginWithEmailPassword
       ];
 }
 
-class WatchOptions$Mutation$LoginWithEmailPassword
-    extends graphql.WatchQueryOptions<Mutation$LoginWithEmailPassword> {
-  WatchOptions$Mutation$LoginWithEmailPassword({
+class WatchOptions$Mutation$LoginUser
+    extends graphql.WatchQueryOptions<Mutation$LoginUser> {
+  WatchOptions$Mutation$LoginUser({
     String? operationName,
-    required Variables$Mutation$LoginWithEmailPassword variables,
+    required Variables$Mutation$LoginUser variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
     Object? optimisticResult,
-    Mutation$LoginWithEmailPassword? typedOptimisticResult,
+    Mutation$LoginUser? typedOptimisticResult,
     graphql.Context? context,
     Duration? pollInterval,
     bool? eagerlyFetchResults,
@@ -488,43 +456,40 @@ class WatchOptions$Mutation$LoginWithEmailPassword
           cacheRereadPolicy: cacheRereadPolicy,
           optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
           context: context,
-          document: documentNodeMutationLoginWithEmailPassword,
+          document: documentNodeMutationLoginUser,
           pollInterval: pollInterval,
           eagerlyFetchResults: eagerlyFetchResults,
           carryForwardDataOnException: carryForwardDataOnException,
           fetchResults: fetchResults,
-          parserFn: _parserFn$Mutation$LoginWithEmailPassword,
+          parserFn: _parserFn$Mutation$LoginUser,
         );
 }
 
-extension ClientExtension$Mutation$LoginWithEmailPassword
-    on graphql.GraphQLClient {
-  Future<graphql.QueryResult<Mutation$LoginWithEmailPassword>>
-      mutate$LoginWithEmailPassword(
-              Options$Mutation$LoginWithEmailPassword options) async =>
-          await this.mutate(options);
-  graphql.ObservableQuery<Mutation$LoginWithEmailPassword>
-      watchMutation$LoginWithEmailPassword(
-              WatchOptions$Mutation$LoginWithEmailPassword options) =>
-          this.watchMutation(options);
+extension ClientExtension$Mutation$LoginUser on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$LoginUser>> mutate$LoginUser(
+          Options$Mutation$LoginUser options) async =>
+      await this.mutate(options);
+  graphql.ObservableQuery<Mutation$LoginUser> watchMutation$LoginUser(
+          WatchOptions$Mutation$LoginUser options) =>
+      this.watchMutation(options);
 }
 
-class Mutation$LoginWithEmailPassword$HookResult {
-  Mutation$LoginWithEmailPassword$HookResult(
+class Mutation$LoginUser$HookResult {
+  Mutation$LoginUser$HookResult(
     this.runMutation,
     this.result,
   );
 
-  final RunMutation$Mutation$LoginWithEmailPassword runMutation;
+  final RunMutation$Mutation$LoginUser runMutation;
 
-  final graphql.QueryResult<Mutation$LoginWithEmailPassword> result;
+  final graphql.QueryResult<Mutation$LoginUser> result;
 }
 
-Mutation$LoginWithEmailPassword$HookResult useMutation$LoginWithEmailPassword(
-    [WidgetOptions$Mutation$LoginWithEmailPassword? options]) {
+Mutation$LoginUser$HookResult useMutation$LoginUser(
+    [WidgetOptions$Mutation$LoginUser? options]) {
   final result = graphql_flutter
-      .useMutation(options ?? WidgetOptions$Mutation$LoginWithEmailPassword());
-  return Mutation$LoginWithEmailPassword$HookResult(
+      .useMutation(options ?? WidgetOptions$Mutation$LoginUser());
+  return Mutation$LoginUser$HookResult(
     (variables, {optimisticResult, typedOptimisticResult}) =>
         result.runMutation(
       variables.toJson(),
@@ -534,23 +499,22 @@ Mutation$LoginWithEmailPassword$HookResult useMutation$LoginWithEmailPassword(
   );
 }
 
-graphql.ObservableQuery<Mutation$LoginWithEmailPassword>
-    useWatchMutation$LoginWithEmailPassword(
-            WatchOptions$Mutation$LoginWithEmailPassword options) =>
-        graphql_flutter.useWatchMutation(options);
+graphql.ObservableQuery<Mutation$LoginUser> useWatchMutation$LoginUser(
+        WatchOptions$Mutation$LoginUser options) =>
+    graphql_flutter.useWatchMutation(options);
 
-class WidgetOptions$Mutation$LoginWithEmailPassword
-    extends graphql.MutationOptions<Mutation$LoginWithEmailPassword> {
-  WidgetOptions$Mutation$LoginWithEmailPassword({
+class WidgetOptions$Mutation$LoginUser
+    extends graphql.MutationOptions<Mutation$LoginUser> {
+  WidgetOptions$Mutation$LoginUser({
     String? operationName,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
     Object? optimisticResult,
-    Mutation$LoginWithEmailPassword? typedOptimisticResult,
+    Mutation$LoginUser? typedOptimisticResult,
     graphql.Context? context,
-    OnMutationCompleted$Mutation$LoginWithEmailPassword? onCompleted,
-    graphql.OnMutationUpdate<Mutation$LoginWithEmailPassword>? update,
+    OnMutationCompleted$Mutation$LoginUser? onCompleted,
+    graphql.OnMutationUpdate<Mutation$LoginUser>? update,
     graphql.OnError? onError,
   })  : onCompletedWithParsed = onCompleted,
         super(
@@ -564,18 +528,15 @@ class WidgetOptions$Mutation$LoginWithEmailPassword
               ? null
               : (data) => onCompleted(
                     data,
-                    data == null
-                        ? null
-                        : _parserFn$Mutation$LoginWithEmailPassword(data),
+                    data == null ? null : _parserFn$Mutation$LoginUser(data),
                   ),
           update: update,
           onError: onError,
-          document: documentNodeMutationLoginWithEmailPassword,
-          parserFn: _parserFn$Mutation$LoginWithEmailPassword,
+          document: documentNodeMutationLoginUser,
+          parserFn: _parserFn$Mutation$LoginUser,
         );
 
-  final OnMutationCompleted$Mutation$LoginWithEmailPassword?
-      onCompletedWithParsed;
+  final OnMutationCompleted$Mutation$LoginUser? onCompletedWithParsed;
 
   @override
   List<Object?> get properties => [
@@ -586,26 +547,26 @@ class WidgetOptions$Mutation$LoginWithEmailPassword
       ];
 }
 
-typedef RunMutation$Mutation$LoginWithEmailPassword
-    = graphql.MultiSourceResult<Mutation$LoginWithEmailPassword> Function(
-  Variables$Mutation$LoginWithEmailPassword, {
+typedef RunMutation$Mutation$LoginUser
+    = graphql.MultiSourceResult<Mutation$LoginUser> Function(
+  Variables$Mutation$LoginUser, {
   Object? optimisticResult,
-  Mutation$LoginWithEmailPassword? typedOptimisticResult,
+  Mutation$LoginUser? typedOptimisticResult,
 });
-typedef Builder$Mutation$LoginWithEmailPassword = widgets.Widget Function(
-  RunMutation$Mutation$LoginWithEmailPassword,
-  graphql.QueryResult<Mutation$LoginWithEmailPassword>?,
+typedef Builder$Mutation$LoginUser = widgets.Widget Function(
+  RunMutation$Mutation$LoginUser,
+  graphql.QueryResult<Mutation$LoginUser>?,
 );
 
-class Mutation$LoginWithEmailPassword$Widget
-    extends graphql_flutter.Mutation<Mutation$LoginWithEmailPassword> {
-  Mutation$LoginWithEmailPassword$Widget({
+class Mutation$LoginUser$Widget
+    extends graphql_flutter.Mutation<Mutation$LoginUser> {
+  Mutation$LoginUser$Widget({
     widgets.Key? key,
-    WidgetOptions$Mutation$LoginWithEmailPassword? options,
-    required Builder$Mutation$LoginWithEmailPassword builder,
+    WidgetOptions$Mutation$LoginUser? options,
+    required Builder$Mutation$LoginUser builder,
   }) : super(
           key: key,
-          options: options ?? WidgetOptions$Mutation$LoginWithEmailPassword(),
+          options: options ?? WidgetOptions$Mutation$LoginUser(),
           builder: (
             run,
             result,
@@ -626,9 +587,164 @@ class Mutation$LoginWithEmailPassword$Widget
         );
 }
 
-class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
-  Mutation$LoginWithEmailPassword$loginWithEmailPassword({
-    required this.user,
+class Mutation$LoginUser$loginUser {
+  Mutation$LoginUser$loginUser({
+    required this.userId,
+    required this.token,
+    this.$__typename = 'LoginUserResponse',
+  });
+
+  factory Mutation$LoginUser$loginUser.fromJson(Map<String, dynamic> json) {
+    final l$userId = json['userId'];
+    final l$token = json['token'];
+    final l$$__typename = json['__typename'];
+    return Mutation$LoginUser$loginUser(
+      userId: (l$userId as String),
+      token: Mutation$LoginUser$loginUser$token.fromJson(
+          (l$token as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String userId;
+
+  final Mutation$LoginUser$loginUser$token token;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$userId = userId;
+    _resultData['userId'] = l$userId;
+    final l$token = token;
+    _resultData['token'] = l$token.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$userId = userId;
+    final l$token = token;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$userId,
+      l$token,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Mutation$LoginUser$loginUser) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$userId = userId;
+    final lOther$userId = other.userId;
+    if (l$userId != lOther$userId) {
+      return false;
+    }
+    final l$token = token;
+    final lOther$token = other.token;
+    if (l$token != lOther$token) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$LoginUser$loginUser
+    on Mutation$LoginUser$loginUser {
+  CopyWith$Mutation$LoginUser$loginUser<Mutation$LoginUser$loginUser>
+      get copyWith => CopyWith$Mutation$LoginUser$loginUser(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$LoginUser$loginUser<TRes> {
+  factory CopyWith$Mutation$LoginUser$loginUser(
+    Mutation$LoginUser$loginUser instance,
+    TRes Function(Mutation$LoginUser$loginUser) then,
+  ) = _CopyWithImpl$Mutation$LoginUser$loginUser;
+
+  factory CopyWith$Mutation$LoginUser$loginUser.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUser$loginUser;
+
+  TRes call({
+    String? userId,
+    Mutation$LoginUser$loginUser$token? token,
+    String? $__typename,
+  });
+  CopyWith$Mutation$LoginUser$loginUser$token<TRes> get token;
+}
+
+class _CopyWithImpl$Mutation$LoginUser$loginUser<TRes>
+    implements CopyWith$Mutation$LoginUser$loginUser<TRes> {
+  _CopyWithImpl$Mutation$LoginUser$loginUser(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$LoginUser$loginUser _instance;
+
+  final TRes Function(Mutation$LoginUser$loginUser) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? userId = _undefined,
+    Object? token = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$LoginUser$loginUser(
+        userId: userId == _undefined || userId == null
+            ? _instance.userId
+            : (userId as String),
+        token: token == _undefined || token == null
+            ? _instance.token
+            : (token as Mutation$LoginUser$loginUser$token),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$LoginUser$loginUser$token<TRes> get token {
+    final local$token = _instance.token;
+    return CopyWith$Mutation$LoginUser$loginUser$token(
+        local$token, (e) => call(token: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$LoginUser$loginUser<TRes>
+    implements CopyWith$Mutation$LoginUser$loginUser<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUser$loginUser(this._res);
+
+  TRes _res;
+
+  call({
+    String? userId,
+    Mutation$LoginUser$loginUser$token? token,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$LoginUser$loginUser$token<TRes> get token =>
+      CopyWith$Mutation$LoginUser$loginUser$token.stub(_res);
+}
+
+class Mutation$LoginUser$loginUser$token {
+  Mutation$LoginUser$loginUser$token({
     required this.accessToken,
     required this.refreshToken,
     required this.accessTokenExpiry,
@@ -636,16 +752,14 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
     this.$__typename = 'Token',
   });
 
-  factory Mutation$LoginWithEmailPassword$loginWithEmailPassword.fromJson(
+  factory Mutation$LoginUser$loginUser$token.fromJson(
       Map<String, dynamic> json) {
-    final l$user = json['user'];
     final l$accessToken = json['accessToken'];
     final l$refreshToken = json['refreshToken'];
     final l$accessTokenExpiry = json['accessTokenExpiry'];
     final l$refreshTokenExpiry = json['refreshTokenExpiry'];
     final l$$__typename = json['__typename'];
-    return Mutation$LoginWithEmailPassword$loginWithEmailPassword(
-      user: (l$user as String),
+    return Mutation$LoginUser$loginUser$token(
       accessToken: (l$accessToken as String),
       refreshToken: (l$refreshToken as String),
       accessTokenExpiry: DateTime.parse((l$accessTokenExpiry as String)),
@@ -653,8 +767,6 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
       $__typename: (l$$__typename as String),
     );
   }
-
-  final String user;
 
   final String accessToken;
 
@@ -668,8 +780,6 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
 
   Map<String, dynamic> toJson() {
     final _resultData = <String, dynamic>{};
-    final l$user = user;
-    _resultData['user'] = l$user;
     final l$accessToken = accessToken;
     _resultData['accessToken'] = l$accessToken;
     final l$refreshToken = refreshToken;
@@ -685,14 +795,12 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
 
   @override
   int get hashCode {
-    final l$user = user;
     final l$accessToken = accessToken;
     final l$refreshToken = refreshToken;
     final l$accessTokenExpiry = accessTokenExpiry;
     final l$refreshTokenExpiry = refreshTokenExpiry;
     final l$$__typename = $__typename;
     return Object.hashAll([
-      l$user,
       l$accessToken,
       l$refreshToken,
       l$accessTokenExpiry,
@@ -706,13 +814,8 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$LoginWithEmailPassword$loginWithEmailPassword) ||
+    if (!(other is Mutation$LoginUser$loginUser$token) ||
         runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$user = user;
-    final lOther$user = other.user;
-    if (l$user != lOther$user) {
       return false;
     }
     final l$accessToken = accessToken;
@@ -744,30 +847,26 @@ class Mutation$LoginWithEmailPassword$loginWithEmailPassword {
   }
 }
 
-extension UtilityExtension$Mutation$LoginWithEmailPassword$loginWithEmailPassword
-    on Mutation$LoginWithEmailPassword$loginWithEmailPassword {
-  CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<
-          Mutation$LoginWithEmailPassword$loginWithEmailPassword>
-      get copyWith =>
-          CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword(
+extension UtilityExtension$Mutation$LoginUser$loginUser$token
+    on Mutation$LoginUser$loginUser$token {
+  CopyWith$Mutation$LoginUser$loginUser$token<
+          Mutation$LoginUser$loginUser$token>
+      get copyWith => CopyWith$Mutation$LoginUser$loginUser$token(
             this,
             (i) => i,
           );
 }
 
-abstract class CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<
-    TRes> {
-  factory CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword(
-    Mutation$LoginWithEmailPassword$loginWithEmailPassword instance,
-    TRes Function(Mutation$LoginWithEmailPassword$loginWithEmailPassword) then,
-  ) = _CopyWithImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword;
+abstract class CopyWith$Mutation$LoginUser$loginUser$token<TRes> {
+  factory CopyWith$Mutation$LoginUser$loginUser$token(
+    Mutation$LoginUser$loginUser$token instance,
+    TRes Function(Mutation$LoginUser$loginUser$token) then,
+  ) = _CopyWithImpl$Mutation$LoginUser$loginUser$token;
 
-  factory CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword.stub(
-          TRes res) =
-      _CopyWithStubImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword;
+  factory CopyWith$Mutation$LoginUser$loginUser$token.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUser$loginUser$token;
 
   TRes call({
-    String? user,
     String? accessToken,
     String? refreshToken,
     DateTime? accessTokenExpiry,
@@ -776,33 +875,27 @@ abstract class CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<
   });
 }
 
-class _CopyWithImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes>
-    implements
-        CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes> {
-  _CopyWithImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword(
+class _CopyWithImpl$Mutation$LoginUser$loginUser$token<TRes>
+    implements CopyWith$Mutation$LoginUser$loginUser$token<TRes> {
+  _CopyWithImpl$Mutation$LoginUser$loginUser$token(
     this._instance,
     this._then,
   );
 
-  final Mutation$LoginWithEmailPassword$loginWithEmailPassword _instance;
+  final Mutation$LoginUser$loginUser$token _instance;
 
-  final TRes Function(Mutation$LoginWithEmailPassword$loginWithEmailPassword)
-      _then;
+  final TRes Function(Mutation$LoginUser$loginUser$token) _then;
 
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
-    Object? user = _undefined,
     Object? accessToken = _undefined,
     Object? refreshToken = _undefined,
     Object? accessTokenExpiry = _undefined,
     Object? refreshTokenExpiry = _undefined,
     Object? $__typename = _undefined,
   }) =>
-      _then(Mutation$LoginWithEmailPassword$loginWithEmailPassword(
-        user: user == _undefined || user == null
-            ? _instance.user
-            : (user as String),
+      _then(Mutation$LoginUser$loginUser$token(
         accessToken: accessToken == _undefined || accessToken == null
             ? _instance.accessToken
             : (accessToken as String),
@@ -823,17 +916,13 @@ class _CopyWithImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes>
       ));
 }
 
-class _CopyWithStubImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword<
-        TRes>
-    implements
-        CopyWith$Mutation$LoginWithEmailPassword$loginWithEmailPassword<TRes> {
-  _CopyWithStubImpl$Mutation$LoginWithEmailPassword$loginWithEmailPassword(
-      this._res);
+class _CopyWithStubImpl$Mutation$LoginUser$loginUser$token<TRes>
+    implements CopyWith$Mutation$LoginUser$loginUser$token<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUser$loginUser$token(this._res);
 
   TRes _res;
 
   call({
-    String? user,
     String? accessToken,
     String? refreshToken,
     DateTime? accessTokenExpiry,
@@ -994,7 +1083,7 @@ class _CopyWithStubImpl$Variables$Mutation$RefreshToken<TRes>
 
 class Mutation$RefreshToken {
   Mutation$RefreshToken({
-    required this.refreshToken,
+    this.refreshToken,
     this.$__typename = 'Mutation',
   });
 
@@ -1002,20 +1091,22 @@ class Mutation$RefreshToken {
     final l$refreshToken = json['refreshToken'];
     final l$$__typename = json['__typename'];
     return Mutation$RefreshToken(
-      refreshToken: Mutation$RefreshToken$refreshToken.fromJson(
-          (l$refreshToken as Map<String, dynamic>)),
+      refreshToken: l$refreshToken == null
+          ? null
+          : Mutation$RefreshToken$refreshToken.fromJson(
+              (l$refreshToken as Map<String, dynamic>)),
       $__typename: (l$$__typename as String),
     );
   }
 
-  final Mutation$RefreshToken$refreshToken refreshToken;
+  final Mutation$RefreshToken$refreshToken? refreshToken;
 
   final String $__typename;
 
   Map<String, dynamic> toJson() {
     final _resultData = <String, dynamic>{};
     final l$refreshToken = refreshToken;
-    _resultData['refreshToken'] = l$refreshToken.toJson();
+    _resultData['refreshToken'] = l$refreshToken?.toJson();
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
@@ -1095,9 +1186,9 @@ class _CopyWithImpl$Mutation$RefreshToken<TRes>
     Object? $__typename = _undefined,
   }) =>
       _then(Mutation$RefreshToken(
-        refreshToken: refreshToken == _undefined || refreshToken == null
+        refreshToken: refreshToken == _undefined
             ? _instance.refreshToken
-            : (refreshToken as Mutation$RefreshToken$refreshToken),
+            : (refreshToken as Mutation$RefreshToken$refreshToken?),
         $__typename: $__typename == _undefined || $__typename == null
             ? _instance.$__typename
             : ($__typename as String),
@@ -1105,8 +1196,10 @@ class _CopyWithImpl$Mutation$RefreshToken<TRes>
 
   CopyWith$Mutation$RefreshToken$refreshToken<TRes> get refreshToken {
     final local$refreshToken = _instance.refreshToken;
-    return CopyWith$Mutation$RefreshToken$refreshToken(
-        local$refreshToken, (e) => call(refreshToken: e));
+    return local$refreshToken == null
+        ? CopyWith$Mutation$RefreshToken$refreshToken.stub(_then(_instance))
+        : CopyWith$Mutation$RefreshToken$refreshToken(
+            local$refreshToken, (e) => call(refreshToken: e));
   }
 }
 

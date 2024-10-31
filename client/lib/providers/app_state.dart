@@ -53,30 +53,29 @@ class AppState extends _$AppState {
 
   Future<void> loginWithEmailPassword(
       String email, String password, String captcha) async {
-    final result =
-        await ref.read(graphQLServiceProvider).mutate$LoginWithEmailPassword(
-              Options$Mutation$LoginWithEmailPassword(
-                variables: Variables$Mutation$LoginWithEmailPassword(
-                  email: email,
-                  password: password,
-                  token: captcha,
-                ),
-              ),
-            );
+    final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
+          Options$Mutation$LoginUser(
+            variables: Variables$Mutation$LoginUser(
+              email: email,
+              password: password,
+              // token: captcha,
+            ),
+          ),
+        );
 
     if (result.hasException) {
       print("login problem");
       throw result.exception!;
     }
     if (result.data == null) return;
-    final parsedData = result.parsedData!.loginWithEmailPassword;
+    final parsedData = result.parsedData!.loginUser;
 
     final token = Token(
-        id: parsedData.refreshToken,
-        user: parsedData.user,
-        accessToken: parsedData.accessToken,
-        accessTokenExpiry: parsedData.accessTokenExpiry,
-        refreshTokenExpiry: parsedData.refreshTokenExpiry,
+        id: parsedData!.token.refreshToken,
+        user: parsedData.userId,
+        accessToken: parsedData.token.accessToken,
+        accessTokenExpiry: parsedData.token.accessTokenExpiry,
+        refreshTokenExpiry: parsedData.token.refreshTokenExpiry,
         device: "",
         createdAt: DateTime.now());
 
@@ -141,7 +140,7 @@ class AppState extends _$AppState {
     final parsedData = result.parsedData!.refreshToken;
 
     final token = Token(
-        id: parsedData.refreshToken,
+        id: parsedData!.refreshToken,
         user: state.token!.user,
         accessToken: parsedData.accessToken,
         accessTokenExpiry: parsedData.accessTokenExpiry,

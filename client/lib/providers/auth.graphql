@@ -1,18 +1,18 @@
-mutation LoginWithEmailPassword(
+mutation LoginUser(
     $email: String!
     $password: String!
-    $token: String!
 ) {
-    loginWithEmailPassword(
+    loginUser(
         email: $email
         password: $password
-        token: $token
     ) {
-        user
-        accessToken
-        refreshToken
-        accessTokenExpiry
-        refreshTokenExpiry
+        userId
+        token {
+            accessToken
+            refreshToken
+            accessTokenExpiry
+            refreshTokenExpiry
+        }
     }
 }
 
