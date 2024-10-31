@@ -417,12 +417,6 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, err
 	}
 
-	a, err := json.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	println(string(a))
-
 	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
@@ -432,6 +426,47 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	}
 
 	remBefore := reminders[0]
+
+	// logic for when the reminder changes from not taken to taken, subtract the medication's remaining by its dosage
+	if isTaken != nil {
+		if !remBefore.IsTaken && *isTaken {
+			result, err = database.DB.Query(
+				`SELECT * FROM medication WHERE id=$med_id;`,
+				map[string]interface{}{
+					"med_id": remBefore.MedicationID,
+				},
+			)
+
+			if err != nil {
+				return nil, err
+			}
+
+			medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+			if err != nil {
+				return nil, err
+			}
+			if len(medications) == 0 {
+				return nil, fmt.Errorf("no medication linked to reminder found")
+			}
+
+			new_inventory := medications[0].Inventory - medications[0].Dosage
+
+			if new_inventory < 0 {
+				return nil, fmt.Errorf("negative inventory")
+			}
+
+			_, err = database.DB.Query(
+				`UPDATE ONLY $id SET inventory=$inventory`,
+				map[string]interface{}{
+					"id":        remBefore.MedicationID,
+					"inventory": new_inventory,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": reminderID}
@@ -455,59 +490,13 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, err
 	}
 
-	a, err = json.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	println(string(a))
-
 	results, err := surrealdb.SmartUnmarshal[[]*model.MedicationReminder](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	println("over")
-
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no medication object found")
-	}
-
-	// logic for when the reminder changes from not taken to taken, subtract the medication's remaining by its dosage
-	if isTaken != nil {
-		if !remBefore.IsTaken && *isTaken {
-			result, err = database.DB.Query(
-				`SELECT * FROM medication WHERE id=$med_id;`,
-				map[string]interface{}{
-					"med_id": results[0].MedicationID,
-				},
-			)
-
-			if err != nil {
-				return nil, err
-			}
-
-			medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
-			if err != nil {
-				return nil, err
-			}
-			if len(medications) == 0 {
-				return nil, fmt.Errorf("no medication linked to reminder found")
-			}
-
-			// TODO: allow nagative numbers for inventory??
-			new_inventory := medications[0].Inventory - medications[0].Dosage
-
-			_, err = database.DB.Query(
-				`UPDATE ONLY $id SET inventory=$inventory`,
-				map[string]interface{}{
-					"id":        results[0].MedicationID,
-					"inventory": new_inventory,
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	response := &model.UpdateMedicationReminderResponse{
