@@ -15,13 +15,18 @@ import (
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
+// RefreshToken is the resolver for the refreshToken field.
+func (r *mutationResolver) RefreshToken(ctx context.Context, accessToken string, refreshToken string, device string) (*model.Token, error) {
+	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
+}
+
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, password string, username string, role string) (*model.CreateUserResponse, error) {
 	// Check for unique email and username
 	result, err := database.DB.Query(`
-    SELECT * FROM user WHERE name=$name OR email=$email;`, map[string]interface{}{
-		"name":  username,
-		"email": strings.ToLower(email),
+    SELECT * FROM user WHERE name=$name OR phoneNumber=$phoneNumber;`, map[string]interface{}{
+		"name":        username,
+		"phoneNumber": phoneNumber,
 	})
 
 	if err != nil {
@@ -39,15 +44,15 @@ func (r *mutationResolver) CreateUser(ctx context.Context, email string, passwor
 	result, err = database.DB.Query(
 		`CREATE ONLY user:ulid() 
 		SET name=$username,
-		email=$email,
+		phoneNumber=$phoneNumber,
 		password=crypto::argon2::generate($password),
 		role=$role,
 		createdAt=time::now(),
 		updatedAt=time::now();`, map[string]interface{}{
-			"username": username,
-			"email":    strings.ToLower(email),
-			"password": password,
-			"role":     role,
+			"username":    username,
+			"phoneNumber": phoneNumber,
+			"password":    password,
+			"role":        role,
 		})
 	if err != nil {
 		return nil, err
@@ -67,7 +72,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, email string, passwor
 }
 
 // LoginUser is the resolver for the loginUser field.
-func (r *mutationResolver) LoginUser(ctx context.Context, email string, password string) (*model.LoginUserResponse, error) {
+func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error) {
 	panic(fmt.Errorf("not implemented: LoginUser - loginUser"))
 }
 
@@ -77,7 +82,7 @@ func (r *mutationResolver) GetUser(ctx context.Context, userID string) (*model.U
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *string, email *string, password *string) (*model.UpdateUserResponse, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
 	panic(fmt.Errorf("not implemented: UpdateUser - updateUser"))
 }
 
@@ -87,7 +92,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*mode
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
-func (r *mutationResolver) RequestPasswordReset(ctx context.Context, email string) (*model.RequestPasswordResetResponse, error) {
+func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error) {
 	panic(fmt.Errorf("not implemented: RequestPasswordReset - requestPasswordReset"))
 }
 

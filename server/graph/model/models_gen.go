@@ -172,7 +172,7 @@ type HealthRiskAssessmentResponse struct {
 
 type LoginUserResponse struct {
 	UserID  string `json:"userId"`
-	Token   string `json:"token"`
+	Token   *Token `json:"token"`
 	Message string `json:"message"`
 }
 
@@ -330,15 +330,15 @@ type UpdateUserResponse struct {
 }
 
 type User struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	LastLogin string `json:"last_login"`
-	Status    int    `json:"status"`
-	Role      string `json:"role"`
+	ID          string `json:"id"`
+	PhoneNumber string `json:"phoneNumber"`
+	Password    string `json:"password"`
+	Name        string `json:"name"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+	LastLogin   string `json:"last_login"`
+	Status      int    `json:"status"`
+	Role        string `json:"role"`
 }
 
 type UserAchievement struct {

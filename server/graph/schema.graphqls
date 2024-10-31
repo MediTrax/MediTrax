@@ -33,7 +33,7 @@ type Token {
 
 type User{
   id: String!
-  email: String!
+  phoneNumber: String!
   password: String!
   name: String!
   created_at: DateTime!
@@ -145,7 +145,7 @@ type CreateUserResponse {
 
 type LoginUserResponse {
   userId: String!
-  token: String!
+  token: Token!
   message: String!
 }
 
@@ -367,12 +367,14 @@ type UserAchievementDetail {
 }
 
 type Mutation {
-  createUser(email: String!, password: String!, username: String!, role: String!): CreateUserResponse
-  loginUser(email: String!, password: String!): LoginUserResponse
+  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+
+  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
   getUser(userId: String!): UserDetailResponse
-  updateUser(userId: String!, name: String, email: String, password: String): UpdateUserResponse
+  updateUser(userId: String!, name: String, phoneNumber: String, password: String): UpdateUserResponse
   deleteUser(userId: String!): DeleteUserResponse
-  requestPasswordReset(email: String!): RequestPasswordResetResponse
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
   
   createHealthRiskAssessment(userId: String!, questionnaireData: String!): HealthRiskAssessmentResponse

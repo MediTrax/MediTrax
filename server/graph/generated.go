@@ -285,7 +285,7 @@ type ComplexityRoot struct {
 		CreateHealthRiskAssessment func(childComplexity int, userID string, questionnaireData string) int
 		CreateMedicationReminder   func(childComplexity int, userID string, medicationID string, reminderTime string) int
 		CreateTreatmentSchedule    func(childComplexity int, userID string, treatmentType string, scheduledTime string, location string, notes *string) int
-		CreateUser                 func(childComplexity int, email string, password string, username string, role string) int
+		CreateUser                 func(childComplexity int, phoneNumber string, password string, username string, role string) int
 		DeleteDietPlan             func(childComplexity int, planID string) int
 		DeleteFamilyMember         func(childComplexity int, memberID string) int
 		DeleteHealthMetric         func(childComplexity int, metricID string) int
@@ -304,8 +304,9 @@ type ComplexityRoot struct {
 		GetTreatmentSchedules      func(childComplexity int, userID string) int
 		GetUser                    func(childComplexity int, userID string) int
 		GetUserAchievements        func(childComplexity int, userID string) int
-		LoginUser                  func(childComplexity int, email string, password string) int
-		RequestPasswordReset       func(childComplexity int, email string) int
+		LoginUser                  func(childComplexity int, phoneNumber string, password string) int
+		RefreshToken               func(childComplexity int, accessToken string, refreshToken string, device string) int
+		RequestPasswordReset       func(childComplexity int, phoneNumber string) int
 		ResetPassword              func(childComplexity int, token string, newPassword string) int
 		UpdateDietPlan             func(childComplexity int, planID string, mealType *string, foodItems *string, calories *float64) int
 		UpdateFamilyMember         func(childComplexity int, memberID string, relationship *string, accessLevel *string) int
@@ -315,7 +316,7 @@ type ComplexityRoot struct {
 		UpdateMedication           func(childComplexity int, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) int
 		UpdateMedicationReminder   func(childComplexity int, reminderID string, reminderTime *string, isTaken *bool) int
 		UpdateTreatmentSchedule    func(childComplexity int, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) int
-		UpdateUser                 func(childComplexity int, userID string, name *string, email *string, password *string) int
+		UpdateUser                 func(childComplexity int, userID string, name *string, phoneNumber *string, password *string) int
 	}
 
 	PasswordChange struct {
@@ -417,15 +418,15 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt func(childComplexity int) int
-		Email     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		LastLogin func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Password  func(childComplexity int) int
-		Role      func(childComplexity int) int
-		Status    func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		LastLogin   func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Password    func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		Role        func(childComplexity int) int
+		Status      func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 
 	UserAchievement struct {
@@ -453,12 +454,13 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateUser(ctx context.Context, email string, password string, username string, role string) (*model.CreateUserResponse, error)
-	LoginUser(ctx context.Context, email string, password string) (*model.LoginUserResponse, error)
+	RefreshToken(ctx context.Context, accessToken string, refreshToken string, device string) (*model.Token, error)
+	CreateUser(ctx context.Context, phoneNumber string, password string, username string, role string) (*model.CreateUserResponse, error)
+	LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error)
 	GetUser(ctx context.Context, userID string) (*model.UserDetailResponse, error)
-	UpdateUser(ctx context.Context, userID string, name *string, email *string, password *string) (*model.UpdateUserResponse, error)
+	UpdateUser(ctx context.Context, userID string, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error)
 	DeleteUser(ctx context.Context, userID string) (*model.DeleteUserResponse, error)
-	RequestPasswordReset(ctx context.Context, email string) (*model.RequestPasswordResetResponse, error)
+	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
 	ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error)
 	CreateHealthRiskAssessment(ctx context.Context, userID string, questionnaireData string) (*model.HealthRiskAssessmentResponse, error)
 	GetHealthRiskAssessment(ctx context.Context, userID string) (*model.HealthRiskAssessmentDetailResponse, error)
@@ -1502,7 +1504,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["email"].(string), args["password"].(string), args["username"].(string), args["role"].(string)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["phoneNumber"].(string), args["password"].(string), args["username"].(string), args["role"].(string)), true
 
 	case "Mutation.deleteDietPlan":
 		if e.complexity.Mutation.DeleteDietPlan == nil {
@@ -1725,7 +1727,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.LoginUser(childComplexity, args["email"].(string), args["password"].(string)), true
+		return e.complexity.Mutation.LoginUser(childComplexity, args["phoneNumber"].(string), args["password"].(string)), true
+
+	case "Mutation.refreshToken":
+		if e.complexity.Mutation.RefreshToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_refreshToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RefreshToken(childComplexity, args["accessToken"].(string), args["refreshToken"].(string), args["device"].(string)), true
 
 	case "Mutation.requestPasswordReset":
 		if e.complexity.Mutation.RequestPasswordReset == nil {
@@ -1737,7 +1751,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestPasswordReset(childComplexity, args["email"].(string)), true
+		return e.complexity.Mutation.RequestPasswordReset(childComplexity, args["phoneNumber"].(string)), true
 
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
@@ -1857,7 +1871,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["userId"].(string), args["name"].(*string), args["email"].(*string), args["password"].(*string)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["userId"].(string), args["name"].(*string), args["phoneNumber"].(*string), args["password"].(*string)), true
 
 	case "PasswordChange.createdAt":
 		if e.complexity.PasswordChange.CreatedAt == nil {
@@ -2174,13 +2188,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.CreatedAt(childComplexity), true
 
-	case "User.email":
-		if e.complexity.User.Email == nil {
-			break
-		}
-
-		return e.complexity.User.Email(childComplexity), true
-
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -2208,6 +2215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Password(childComplexity), true
+
+	case "User.phoneNumber":
+		if e.complexity.User.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.User.PhoneNumber(childComplexity), true
 
 	case "User.role":
 		if e.complexity.User.Role == nil {
@@ -3170,11 +3184,11 @@ func (ec *executionContext) field_Mutation_createTreatmentSchedule_argsNotes(
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_createUser_argsEmail(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_createUser_argsPhoneNumber(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["email"] = arg0
+	args["phoneNumber"] = arg0
 	arg1, err := ec.field_Mutation_createUser_argsPassword(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3192,12 +3206,12 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	args["role"] = arg3
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_createUser_argsEmail(
+func (ec *executionContext) field_Mutation_createUser_argsPhoneNumber(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-	if tmp, ok := rawArgs["email"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -3674,11 +3688,11 @@ func (ec *executionContext) field_Mutation_getUser_argsUserID(
 func (ec *executionContext) field_Mutation_loginUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_loginUser_argsEmail(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_loginUser_argsPhoneNumber(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["email"] = arg0
+	args["phoneNumber"] = arg0
 	arg1, err := ec.field_Mutation_loginUser_argsPassword(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3686,12 +3700,12 @@ func (ec *executionContext) field_Mutation_loginUser_args(ctx context.Context, r
 	args["password"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_loginUser_argsEmail(
+func (ec *executionContext) field_Mutation_loginUser_argsPhoneNumber(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-	if tmp, ok := rawArgs["email"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -3712,22 +3726,81 @@ func (ec *executionContext) field_Mutation_loginUser_argsPassword(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_requestPasswordReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_requestPasswordReset_argsEmail(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_refreshToken_argsAccessToken(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["email"] = arg0
+	args["accessToken"] = arg0
+	arg1, err := ec.field_Mutation_refreshToken_argsRefreshToken(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["refreshToken"] = arg1
+	arg2, err := ec.field_Mutation_refreshToken_argsDevice(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["device"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_requestPasswordReset_argsEmail(
+func (ec *executionContext) field_Mutation_refreshToken_argsAccessToken(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-	if tmp, ok := rawArgs["email"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accessToken"))
+	if tmp, ok := rawArgs["accessToken"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_refreshToken_argsRefreshToken(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
+	if tmp, ok := rawArgs["refreshToken"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_refreshToken_argsDevice(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
+	if tmp, ok := rawArgs["device"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestPasswordReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_requestPasswordReset_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phoneNumber"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_requestPasswordReset_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -4351,11 +4424,11 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 		return nil, err
 	}
 	args["name"] = arg1
-	arg2, err := ec.field_Mutation_updateUser_argsEmail(ctx, rawArgs)
+	arg2, err := ec.field_Mutation_updateUser_argsPhoneNumber(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["email"] = arg2
+	args["phoneNumber"] = arg2
 	arg3, err := ec.field_Mutation_updateUser_argsPassword(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -4389,12 +4462,12 @@ func (ec *executionContext) field_Mutation_updateUser_argsName(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_updateUser_argsEmail(
+func (ec *executionContext) field_Mutation_updateUser_argsPhoneNumber(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-	if tmp, ok := rawArgs["email"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
 		return ec.unmarshalOString2ᚖstring(ctx, tmp)
 	}
 
@@ -8259,9 +8332,9 @@ func (ec *executionContext) _LoginUserResponse_token(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.Token)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_LoginUserResponse_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8271,7 +8344,27 @@ func (ec *executionContext) fieldContext_LoginUserResponse_token(_ context.Conte
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Token_id(ctx, field)
+			case "user":
+				return ec.fieldContext_Token_user(ctx, field)
+			case "accessToken":
+				return ec.fieldContext_Token_accessToken(ctx, field)
+			case "refreshToken":
+				return ec.fieldContext_Token_refreshToken(ctx, field)
+			case "accessTokenExpiry":
+				return ec.fieldContext_Token_accessTokenExpiry(ctx, field)
+			case "refreshTokenExpiry":
+				return ec.fieldContext_Token_refreshTokenExpiry(ctx, field)
+			case "device":
+				return ec.fieldContext_Token_device(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Token_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Token_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
 	}
 	return fc, nil
@@ -9865,6 +9958,78 @@ func (ec *executionContext) fieldContext_MedicationReminderDetail_isTaken(_ cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_refreshToken(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RefreshToken(rctx, fc.Args["accessToken"].(string), fc.Args["refreshToken"].(string), fc.Args["device"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Token)
+	fc.Result = res
+	return ec.marshalOToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Token_id(ctx, field)
+			case "user":
+				return ec.fieldContext_Token_user(ctx, field)
+			case "accessToken":
+				return ec.fieldContext_Token_accessToken(ctx, field)
+			case "refreshToken":
+				return ec.fieldContext_Token_refreshToken(ctx, field)
+			case "accessTokenExpiry":
+				return ec.fieldContext_Token_accessTokenExpiry(ctx, field)
+			case "refreshTokenExpiry":
+				return ec.fieldContext_Token_refreshTokenExpiry(ctx, field)
+			case "device":
+				return ec.fieldContext_Token_device(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Token_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Token_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_refreshToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createUser(ctx, field)
 	if err != nil {
@@ -9879,7 +10044,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["email"].(string), fc.Args["password"].(string), fc.Args["username"].(string), fc.Args["role"].(string))
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["phoneNumber"].(string), fc.Args["password"].(string), fc.Args["username"].(string), fc.Args["role"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9937,7 +10102,7 @@ func (ec *executionContext) _Mutation_loginUser(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().LoginUser(rctx, fc.Args["email"].(string), fc.Args["password"].(string))
+		return ec.resolvers.Mutation().LoginUser(rctx, fc.Args["phoneNumber"].(string), fc.Args["password"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10063,7 +10228,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["userId"].(string), fc.Args["name"].(*string), fc.Args["email"].(*string), fc.Args["password"].(*string))
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["userId"].(string), fc.Args["name"].(*string), fc.Args["phoneNumber"].(*string), fc.Args["password"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10177,7 +10342,7 @@ func (ec *executionContext) _Mutation_requestPasswordReset(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RequestPasswordReset(rctx, fc.Args["email"].(string))
+		return ec.resolvers.Mutation().RequestPasswordReset(rctx, fc.Args["phoneNumber"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -12495,8 +12660,8 @@ func (ec *executionContext) fieldContext_Query_user(_ context.Context, field gra
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_User_phoneNumber(ctx, field)
 			case "password":
 				return ec.fieldContext_User_password(ctx, field)
 			case "name":
@@ -14410,8 +14575,8 @@ func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphq
 	return fc, nil
 }
 
-func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_email(ctx, field)
+func (ec *executionContext) _User_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_phoneNumber(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14424,7 +14589,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
+		return obj.PhoneNumber, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14441,7 +14606,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_phoneNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -18972,6 +19137,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "refreshToken":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_refreshToken(ctx, field)
+			})
 		case "createUser":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createUser(ctx, field)
@@ -20037,8 +20206,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "email":
-			out.Values[i] = ec._User_email(ctx, field, obj)
+		case "phoneNumber":
+			out.Values[i] = ec._User_phoneNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -20764,6 +20933,16 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v *model.Token) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Token(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUser2meditraxᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
@@ -21602,6 +21781,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v *model.Token) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Token(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx context.Context, sel ast.SelectionSet, v []*model.TreatmentScheduleDetail) graphql.Marshaler {
