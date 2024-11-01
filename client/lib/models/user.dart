@@ -8,7 +8,7 @@ part 'user.g.dart';
 class User extends HiveObject with _$User {
   User._();
 
-  @HiveType(typeId: 1)
+  @HiveType(typeId: 15)
   factory User({
     @HiveField(0) required String id,
     @HiveField(1) required String email,
