@@ -1,0 +1,72 @@
+query GetUser($userId: String!) {
+  getUser(userId: $userId) {
+    userId
+    email
+    name
+    role
+    createdAt
+    lastLogin
+  }
+}
+
+query GetUserAchievements($userId: String!) {
+  getUserAchievements(userId: $userId) {
+    userAchievementId
+    badgeId
+    earnedAt
+  }
+}
+
+query GetFamilyMembers($userId: String!) {
+  getFamilyMembers(userId: $userId) {
+    memberId
+    relatedUserId
+    relationship
+    accessLevel
+  }
+}
+
+mutation UpdateUser($userId: String!, $name: String, $email: String, $password: String) {
+  updateUser(userId: $userId, name: $name, email: $email, password: $password) {
+    userId
+    message
+  }
+}
+
+mutation DeleteUser($userId: String!) {
+  deleteUser(userId: $userId) {
+    message
+  }
+}
+
+mutation RequestPasswordReset($email: String!) {
+  requestPasswordReset(email: $email) {
+    message
+  }
+}
+
+mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword) {
+    message
+  }
+}
+
+mutation AddFamilyMember($userId: String!, $relatedUserId: String!, $relationship: String!, $accessLevel: String!) {
+  addFamilyMember(userId: $userId, relatedUserId: $relatedUserId, relationship: $relationship, accessLevel: $accessLevel) {
+    memberId
+    message
+  }
+}
+
+mutation UpdateFamilyMember($memberId: String!, $relationship: String, $accessLevel: String) {
+  updateFamilyMember(memberId: $memberId, relationship: $relationship, accessLevel: $accessLevel) {
+    memberId
+    message
+  }
+}
+
+mutation DeleteFamilyMember($memberId: String!) {
+  deleteFamilyMember(memberId: $memberId) {
+    message
+  }
+} 

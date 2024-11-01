@@ -208,7 +208,7 @@ class __$$UserImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 15)
 class _$UserImpl extends _User {
   _$UserImpl(
       {@HiveField(0) required this.id,
