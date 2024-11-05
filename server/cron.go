@@ -26,6 +26,7 @@ func init() {
 }
 
 func resetKeypair() {
+	println("resetting key pair")
 	if _, err := os.Stat(".private/keys.json"); err == nil {
 		e := os.Remove(".private/keys.json")
 		if e != nil {
@@ -72,7 +73,7 @@ func resetKeypair() {
 }
 
 func StartCron(build string) {
-	loc, _ := time.LoadLocation("Asia/Kuala_Lumpur")
+	loc, _ := time.LoadLocation("Asia/Shanghai")
 	option := cron.WithLocation(loc)
 	c := cron.New(option)
 	//addFormTeacherRoles()
