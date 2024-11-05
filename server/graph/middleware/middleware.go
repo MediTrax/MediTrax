@@ -23,7 +23,7 @@ type contextKey struct {
 // Middleware decodes the share session cookie and packs the session into context
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		println("middleware is forwarding")
+		// println("middleware is forwarding")
 
 		// Check if the Authorization header is present
 		if len(r.Header["Authorization"]) > 0 {
@@ -92,7 +92,7 @@ func Middleware(next http.Handler) http.Handler {
 						return
 					}
 
-					println("user context stored")
+					// println("user context stored")
 					// Add the user to the request context
 					ctx := context.WithValue(r.Context(), userCtxKey, &user)
 
@@ -103,7 +103,7 @@ func Middleware(next http.Handler) http.Handler {
 				}
 			}
 		}
-		println("user not added to context")
+		println("error: authorization headerr not found")
 		// If no valid Authorization header is found, continue without adding user to context
 		next.ServeHTTP(w, r)
 	})

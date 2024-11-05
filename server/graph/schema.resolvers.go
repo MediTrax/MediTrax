@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
@@ -344,18 +343,8 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("illegal medication id")
 	}
 
-	res_user_id, err := database.DB.Query(`SELECT user_id FROM ONLY $id LIMIT 1`, map[string]interface{}{"id": medicationID})
-	if err != nil {
-		return nil, err
-	}
-	user_id, err := json.Marshal(res_user_id)
-	if err != nil {
-		return nil, err
-	}
-	println(string(user_id))
-
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": medicationID}
+	updateValues := map[string]interface{}{"id": medicationID, "user_id": user.ID}
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
@@ -385,7 +374,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	// Construct the final query with the medicationID in quotes
-	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
 
 	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
@@ -399,7 +388,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, err
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id, no medication object found")
+		return nil, fmt.Errorf("invalid id. no associated medication object found")
 	}
 
 	// create response
@@ -426,9 +415,10 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 
 	// Execute the query
 	result, err := database.DB.Query(
-		`DELETE $id RETURN BEFORE;`,
+		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
 		map[string]interface{}{
-			"id": medicationID,
+			"id":      medicationID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
@@ -441,7 +431,7 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 		return nil, err
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id, no medication object found")
+		return nil, fmt.Errorf("invalid id, no associated medication object found")
 	}
 
 	// create response
@@ -481,7 +471,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		return nil, err
 	}
 	if len(medications) < 1 {
-		return nil, fmt.Errorf("invalid user or medication id")
+		return nil, fmt.Errorf("invalid medication id or medication id not associated with user")
 	}
 
 	// query database for medications with the same reminder time
@@ -552,9 +542,10 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 	// query database to see if the reminder exists
 	result, err := database.DB.Query(
-		`SELECT * FROM medication_reminder WHERE id=$reminder_id;`,
+		`SELECT * FROM medication_reminder WHERE id=$reminder_id AND user_id=$user_id;`,
 		map[string]interface{}{
 			"reminder_id": reminderID,
+			"user_id":     user.ID,
 		},
 	)
 	if err != nil {
@@ -853,7 +844,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": metricID}
+	updateValues := map[string]interface{}{"id": metricID, "user_id": user.ID}
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
@@ -867,7 +858,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	// write to the query
-	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
@@ -880,7 +871,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 		return nil, err
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id, no heath metric object found")
+		return nil, fmt.Errorf("invalid id, no user associated heath metric object found")
 	}
 
 	response := &model.UpdateHealthMetricResponse{
@@ -905,9 +896,10 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 
 	// Execute the query, returning the entry before it is deleted
 	result, err := database.DB.Query(
-		`DELETE $id RETURN BEFORE;`,
+		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
 		map[string]interface{}{
-			"id": metricID,
+			"id":      metricID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
