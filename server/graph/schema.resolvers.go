@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"meditrax/graph/database"
+	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
@@ -116,7 +117,7 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 }
 
 // GetUser is the resolver for the getUser field.
-func (r *mutationResolver) GetUser(ctx context.Context, userID string) (*model.UserDetailResponse, error) {
+func (r *mutationResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
 	panic(fmt.Errorf("waiting to be implemented"))
 	// // Fetch the user details
 	// result, err := database.DB.Query(`SELECT * FROM user WHERE id=$userID;`, map[string]interface{}{
@@ -144,7 +145,7 @@ func (r *mutationResolver) GetUser(ctx context.Context, userID string) (*model.U
 }
 
 // UpdateUser is the resolver for the updateUser field.
-func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
 	panic(fmt.Errorf("waiting to be implemented"))
 	// // Create update query
 	// updateFields := map[string]interface{}{}
@@ -179,7 +180,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, userID string, name *
 }
 
 // DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, userID string) (*model.DeleteUserResponse, error) {
+func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error) {
 	panic(fmt.Errorf("waiting to be implemented"))
 	// // Delete the user
 	// _, err := database.DB.Query(`DELETE FROM user WHERE id=$userID;`, map[string]interface{}{
@@ -248,7 +249,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newP
 }
 
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
-func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, userID string, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
+func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
 	panic(fmt.Errorf("not implemented: CreateHealthRiskAssessment - createHealthRiskAssessment"))
 }
 
@@ -258,32 +259,16 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 }
 
 // AddMedication is the resolver for the addMedication field.
-func (r *mutationResolver) AddMedication(ctx context.Context, userID string, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error) {
+func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error) {
 	// check legality of id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
-	}
+	userID := middlewares.ForContext(ctx)
 
-	// query the databse to see is the given user exists
-	result, err := database.DB.Query(
-		`SELECT * FROM $user_id;`,
-		map[string]interface{}{
-			"user_id": userID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) < 1 {
-		return nil, fmt.Errorf("invalid user id")
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
 
 	// query database for medications for the same user with the same name
-	result, err = database.DB.Query(
+	result, err := database.DB.Query(
 		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
 		map[string]interface{}{
 			"name":    name,
@@ -447,11 +432,14 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 }
 
 // CreateMedicationReminder is the resolver for the createMedicationReminder field.
-func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, userID string, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
+func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
 	// check legality of both user and medication id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
+	userID := middlewares.ForContext(ctx)
+
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
+
 	if !utils.MatchID(medicationID, "medication") {
 		return nil, fmt.Errorf("illegal medication id")
 	}
@@ -637,8 +625,14 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 }
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
-func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, userID string, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
+func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
 	// Create the treatment schedule
+	userID := middlewares.ForContext(ctx)
+
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	result, err := database.DB.Query(`CREATE ONLY treatment_schedule:ulid() 
     SET user_id=$userID,
         treatmentType=$treatmentType,
@@ -663,7 +657,7 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, userID s
 	}
 
 	response := &model.CreateTreatmentScheduleResponse{
-		ScheduleId: newSchedule.ScheduleId,
+		ScheduleID: newSchedule.ScheduleID,
 		Message:    "Treatment schedule created successfully",
 	}
 
@@ -671,7 +665,13 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, userID s
 }
 
 // GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
-func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context, userID string) ([]*model.TreatmentScheduleDetail, error) {
+func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
+	userID := middlewares.ForContext(ctx)
+
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// Fetch treatment schedules for the user
 	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
 		"userID": userID,
@@ -680,7 +680,8 @@ func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context, userID str
 		return nil, err
 	}
 
-	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	// TODO: please modify this line as it may result in a bug
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -719,7 +720,7 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	response := &model.UpdateTreatmentScheduleResponse{
-		ScheduleId: scheduleID,
+		ScheduleID: scheduleID,
 		Message:    "Treatment schedule updated successfully",
 	}
 
@@ -744,32 +745,15 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 }
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
-func (r *mutationResolver) AddHealthMetric(ctx context.Context, userID string, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
-	// check legality of the user id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
-	}
+func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
+	userID := middlewares.ForContext(ctx)
 
-	// query the database to make sure the user exists
-	result, err := database.DB.Query(
-		`SELECT * FROM $user_id;`,
-		map[string]interface{}{
-			"user_id": userID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) < 1 {
-		return nil, fmt.Errorf("invalid user id")
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
 
 	// check that there isn't already a metric entry for the user with the same type and record time
-	result, err = database.DB.Query(
+	result, err := database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
 		map[string]interface{}{
 			"user_id":    userID,
@@ -906,7 +890,7 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 }
 
 // CreateDietPlan is the resolver for the createDietPlan field.
-func (r *mutationResolver) CreateDietPlan(ctx context.Context, userID string, mealType string, foodItems string, calories float64) (*model.CreateDietPlanResponse, error) {
+func (r *mutationResolver) CreateDietPlan(ctx context.Context, mealType string, foodItems string, calories float64) (*model.CreateDietPlanResponse, error) {
 	panic(fmt.Errorf("not implemented: CreateDietPlan - createDietPlan"))
 }
 
@@ -921,12 +905,12 @@ func (r *mutationResolver) DeleteDietPlan(ctx context.Context, planID string) (*
 }
 
 // AddMedicalRecord is the resolver for the addMedicalRecord field.
-func (r *mutationResolver) AddMedicalRecord(ctx context.Context, userID string, recordType string, content string) (*model.AddMedicalRecordResponse, error) {
+func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType string, content string) (*model.AddMedicalRecordResponse, error) {
 	panic(fmt.Errorf("not implemented: AddMedicalRecord - addMedicalRecord"))
 }
 
 // GetMedicalRecords is the resolver for the getMedicalRecords field.
-func (r *mutationResolver) GetMedicalRecords(ctx context.Context, userID string) ([]*model.MedicalRecordDetail, error) {
+func (r *mutationResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
 	panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
 }
 
@@ -941,7 +925,7 @@ func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID str
 }
 
 // AddFamilyMember is the resolver for the addFamilyMember field.
-func (r *mutationResolver) AddFamilyMember(ctx context.Context, userID string, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error) {
+func (r *mutationResolver) AddFamilyMember(ctx context.Context, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error) {
 	panic(fmt.Errorf("not implemented: AddFamilyMember - addFamilyMember"))
 }
 
@@ -961,42 +945,25 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 }
 
 // AwardAchievement is the resolver for the awardAchievement field.
-func (r *mutationResolver) AwardAchievement(ctx context.Context, userID string, badgeID string) (*model.AwardAchievementResponse, error) {
+func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error) {
 	panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
 }
 
 // GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
-func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context, userID string) (*model.HealthRiskAssessmentDetailResponse, error) {
+func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error) {
 	panic(fmt.Errorf("not implemented: GetHealthRiskAssessment - getHealthRiskAssessment"))
 }
 
 // GetMedications is the resolver for the getMedications field.
-func (r *queryResolver) GetMedications(ctx context.Context, userID string) ([]*model.MedicationDetail, error) {
+func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.MedicationDetail, error) {
 	// check validity of given id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
-	}
+	userID := middlewares.ForContext(ctx)
 
-	// query the database to see if the user id really exists
-	result, err := database.DB.Query(
-		`SELECT * FROM $user_id;`,
-		map[string]interface{}{
-			"user_id": userID,
-		},
-	)
-	if err != nil {
-		return nil, err
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
-	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) < 1 {
-		return nil, fmt.Errorf("invalid user id")
-	}
-
 	// query for all the medications associated with the user
-	result, err = database.DB.Query(
+	result, err := database.DB.Query(
 		`SELECT * FROM medication WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -1029,32 +996,15 @@ func (r *queryResolver) GetMedications(ctx context.Context, userID string) ([]*m
 }
 
 // GetMedicationReminders is the resolver for the getMedicationReminders field.
-func (r *queryResolver) GetMedicationReminders(ctx context.Context, userID string) ([]*model.MedicationReminderDetail, error) {
-	// check legality of user id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
-	}
+func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error) {
+	userID := middlewares.ForContext(ctx)
 
-	// query the database to make sure the user exists
-	result, err := database.DB.Query(
-		`SELECT * FROM $user_id;`,
-		map[string]interface{}{
-			"user_id": userID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) < 1 {
-		return nil, fmt.Errorf("invalid user id")
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
 
 	// get all the medication reminders for the user
-	result, err = database.DB.Query(
+	result, err := database.DB.Query(
 		`SELECT * FROM medication_reminder WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -1084,32 +1034,15 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context, userID strin
 }
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
-func (r *queryResolver) GetHealthMetrics(ctx context.Context, userID string, startDate *string, endDate *string) ([]*model.HealthMetricDetail, error) {
-	// check legality of user id
-	if !utils.MatchID(userID, "user") {
-		return nil, fmt.Errorf("illegal user id")
-	}
+func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
+	userID := middlewares.ForContext(ctx)
 
-	// query the database and verify that the user exists
-	result, err := database.DB.Query(
-		`SELECT * FROM $user_id;`,
-		map[string]interface{}{
-			"user_id": userID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(users) < 1 {
-		return nil, fmt.Errorf("invalid user id")
+	if userID == nil {
+		return nil, fmt.Errorf("access denied")
 	}
 
 	// get all the health metric entries that is associated with the user
-	result, err = database.DB.Query(
+	result, err := database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": userID,
@@ -1145,12 +1078,12 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, userID string, sta
 }
 
 // GetDietPlans is the resolver for the getDietPlans field.
-func (r *queryResolver) GetDietPlans(ctx context.Context, userID string) ([]*model.DietPlanDetail, error) {
+func (r *queryResolver) GetDietPlans(ctx context.Context) ([]*model.DietPlanDetail, error) {
 	panic(fmt.Errorf("not implemented: GetDietPlans - getDietPlans"))
 }
 
 // GetFamilyMembers is the resolver for the getFamilyMembers field.
-func (r *queryResolver) GetFamilyMembers(ctx context.Context, userID string) ([]*model.FamilyMemberDetail, error) {
+func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMemberDetail, error) {
 	panic(fmt.Errorf("not implemented: GetFamilyMembers - getFamilyMembers"))
 }
 
@@ -1160,7 +1093,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 }
 
 // GetUserAchievements is the resolver for the getUserAchievements field.
-func (r *queryResolver) GetUserAchievements(ctx context.Context, userID string) ([]*model.UserAchievementDetail, error) {
+func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error) {
 	panic(fmt.Errorf("not implemented: GetUserAchievements - getUserAchievements"))
 }
 
