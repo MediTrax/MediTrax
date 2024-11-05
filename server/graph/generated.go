@@ -445,12 +445,12 @@ type ComplexityRoot struct {
 	}
 
 	UserDetailResponse struct {
-		CreatedAt func(childComplexity int) int
-		Email     func(childComplexity int) int
-		LastLogin func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Role      func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		LastLogin   func(childComplexity int) int
+		Name        func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		Role        func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 }
 
@@ -2264,13 +2264,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserDetailResponse.CreatedAt(childComplexity), true
 
-	case "UserDetailResponse.email":
-		if e.complexity.UserDetailResponse.Email == nil {
-			break
-		}
-
-		return e.complexity.UserDetailResponse.Email(childComplexity), true
-
 	case "UserDetailResponse.lastLogin":
 		if e.complexity.UserDetailResponse.LastLogin == nil {
 			break
@@ -2284,6 +2277,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserDetailResponse.Name(childComplexity), true
+
+	case "UserDetailResponse.phoneNumber":
+		if e.complexity.UserDetailResponse.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.UserDetailResponse.PhoneNumber(childComplexity), true
 
 	case "UserDetailResponse.role":
 		if e.complexity.UserDetailResponse.Role == nil {
@@ -9733,8 +9733,8 @@ func (ec *executionContext) fieldContext_Mutation_getUser(_ context.Context, fie
 			switch field.Name {
 			case "userId":
 				return ec.fieldContext_UserDetailResponse_userId(ctx, field)
-			case "email":
-				return ec.fieldContext_UserDetailResponse_email(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_UserDetailResponse_phoneNumber(ctx, field)
 			case "name":
 				return ec.fieldContext_UserDetailResponse_name(ctx, field)
 			case "role":
@@ -14788,8 +14788,8 @@ func (ec *executionContext) fieldContext_UserDetailResponse_userId(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _UserDetailResponse_email(ctx context.Context, field graphql.CollectedField, obj *model.UserDetailResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserDetailResponse_email(ctx, field)
+func (ec *executionContext) _UserDetailResponse_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *model.UserDetailResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserDetailResponse_phoneNumber(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -14802,7 +14802,7 @@ func (ec *executionContext) _UserDetailResponse_email(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
+		return obj.PhoneNumber, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14819,7 +14819,7 @@ func (ec *executionContext) _UserDetailResponse_email(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserDetailResponse_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserDetailResponse_phoneNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserDetailResponse",
 		Field:      field,
@@ -19966,8 +19966,8 @@ func (ec *executionContext) _UserDetailResponse(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "email":
-			out.Values[i] = ec._UserDetailResponse_email(ctx, field, obj)
+		case "phoneNumber":
+			out.Values[i] = ec._UserDetailResponse_phoneNumber(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
