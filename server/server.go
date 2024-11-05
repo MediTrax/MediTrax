@@ -23,6 +23,7 @@ func main() {
 	fmt.Println("Starting...")
 
 	database.Connect()
+	StartCron("DEBUG")
 
 	port := os.Getenv("PORT")
 	if port == "" {

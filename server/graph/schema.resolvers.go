@@ -23,97 +23,94 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, accessToken string,
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, password string, username string, role string) (*model.CreateUserResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Check for unique email and username
-	// result, err := database.DB.Query(`
-	// SELECT * FROM user WHERE name=$name OR phoneNumber=$phoneNumber;`, map[string]interface{}{
-	// 	"name":        username,
-	// 	"phoneNumber": phoneNumber,
-	// })
+	// panic(fmt.Errorf("waiting to be implemented"))
+	// Check for unique phoneNumber and username
+	result, err := database.DB.Query(`
+	SELECT * FROM user WHERE name=$name OR phoneNumber=$phoneNumber;`, map[string]interface{}{
+		"name":        username,
+		"phoneNumber": phoneNumber,
+	})
 
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if len(users) > 0 {
-	// 	return nil, fmt.Errorf("email and username should be unique")
-	// }
+	if err != nil {
+		return nil, err
+	}
+	//check the result of the query
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) > 0 {
+		return nil, fmt.Errorf("phoneNumber and username should be unique")
+	}
 
-	// // Create the new user
-	// result, err = database.DB.Query(
-	// 	`CREATE ONLY user:ulid()
-	// 	SET name=$username,
-	// 	phoneNumber=$phoneNumber,
-	// 	password=crypto::argon2::generate($password),
-	// 	role=$role,
-	// 	createdAt=time::now(),
-	// 	updatedAt=time::now();`, map[string]interface{}{
-	// 		"username":    username,
-	// 		"phoneNumber": phoneNumber,
-	// 		"password":    password,
-	// 		"role":        role,
-	// 	})
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Create the new user
+	result, err = database.DB.Query(
+		`CREATE ONLY user:ulid()
+		SET name=$username,
+		phoneNumber=$phoneNumber,
+		password=crypto::argon2::generate($password),
+		role=$role,
+		createdAt=time::now(),
+		updatedAt=time::now();`, map[string]interface{}{
+			"username":    username,
+			"phoneNumber": phoneNumber,
+			"password":    password,
+			"role":        role,
+		})
+	if err != nil {
+		return nil, err
+	}
 
-	// newUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	newUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
 
-	// response := &model.CreateUserResponse{
-	// 	UserID:  newUser.ID,
-	// 	Message: fmt.Sprintf("User %s created successfully", newUser.Name),
-	// }
+	response := &model.CreateUserResponse{
+		UserID:  newUser.ID,
+		Message: fmt.Sprintf("User %s created successfully", newUser.Name),
+	}
 
-	// return response, nil
+	return response, nil
 }
 
 // LoginUser is the resolver for the loginUser field.
 func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
+	//panic(fmt.Errorf("waiting to be implemented"))
 	// // Fetch the user based on phone number
-	// result, err := database.DB.Query(`SELECT * FROM user WHERE phoneNumber=$phoneNumber;`, map[string]interface{}{
-	// 	"phoneNumber": phoneNumber,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	result, err := database.DB.Query(`SELECT * FROM user WHERE phoneNumber=$phoneNumber AND crypto::argon2::compare(password, $pass);`, map[string]interface{}{
+		"phoneNumber": phoneNumber,
+		"pass":        password,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	// user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-	// if err != nil || user == nil {
-	// 	return nil, fmt.Errorf("user not found")
-	// }
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) <= 0 {
+		return nil, fmt.Errorf("user not found")
+	}
 
-	// // Verify password
-	// if !crypto.argon2.verify(password, user.Password) {
-	// 	return nil, fmt.Errorf("incorrect password")
-	// }
+	user := users[0]
+	if user.Password == "" {
+		return nil, fmt.Errorf("user not available for password sign in, use other sign in methods instead")
+	}
 
-	// // Create a token
-	// token := &model.Token{
-	// 	ID:                 user.ID,
-	// 	User:               user.ID,
-	// 	AccessToken:        generateAccessToken(user.ID),  // Assume this function exists
-	// 	RefreshToken:       generateRefreshToken(user.ID), // Assume this function exists
-	// 	AccessTokenExpiry:  time.Now().Add(time.Hour * 1),
-	// 	RefreshTokenExpiry: time.Now().Add(time.Hour * 24 * 30),
-	// 	Device:             "unknown", // Replace with actual device info if available
-	// 	CreatedAt:          time.Now(),
-	// 	UpdatedAt:          time.Now(),
-	// }
+	token, err := utils.HandleLogin(&user, ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	// response := &model.LoginUserResponse{
-	// 	UserId:  user.ID,
-	// 	Token:   token,
-	// 	Message: "Login successful",
-	// }
+	response := &model.LoginUserResponse{
+		UserID:  user.ID,
+		Token:   token,
+		Message: "Login successful",
+	}
 
-	// return response, nil
+	return response, nil
 }
 
 // GetUser is the resolver for the getUser field.
