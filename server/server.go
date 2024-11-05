@@ -7,18 +7,17 @@ import (
 
 	"meditrax/graph"
 	"meditrax/graph/database"
-	"meditrax/graph/middlewares"
+	middlewares "meditrax/graph/middleware"
 
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/rs/cors"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 const defaultPort = "8080"
@@ -47,7 +46,7 @@ func main() {
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
 
-	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+	// srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 
 	srv.Use(extension.Introspection{})
 	srv.Use(extension.AutomaticPersistedQuery{
@@ -59,7 +58,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	mux.Handle("/graphql", middlewares.Middleware(srv))
-	mux.Handle("/files/", middlewares.Middleware(MinioHandler()))
+	// mux.Handle("/files/", middlewares.Middleware(MinioHandler()))
 	corsConfig := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
