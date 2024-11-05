@@ -243,8 +243,10 @@ type Query struct {
 }
 
 type Question struct {
-	Question string `json:"question"`
-	Answer   string `json:"answer"`
+	Question     string   `json:"question"`
+	QuestionType int      `json:"questionType"`
+	Choices      []string `json:"choices"`
+	Answer       string   `json:"answer"`
 }
 
 type QuestionnaireObject struct {
