@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
@@ -257,10 +258,9 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 
 // AddMedication is the resolver for the addMedication field.
 func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error) {
-	// check legality of id
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	// check if they are logged in correctly
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -269,16 +269,20 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
 		map[string]interface{}{
 			"name":    name,
-			"user_id": userID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
-	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+
+	println("Finished query")
+	medications, err := surrealdb.SmartUnmarshal[[]*model.Medication](result, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	println("Finished unmarshaling medications")
 	if len(medications) > 0 {
 		return nil, fmt.Errorf("identical medication name already exists for the user, please use update medication instead")
 	}
@@ -306,7 +310,7 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 			"unit":      unit,
 			"frequency": frequency,
 			"inventory": inventory,
-			"user_id":   userID,
+			"user_id":   user.ID,
 		},
 	)
 	if err != nil {
@@ -329,10 +333,26 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 
 // UpdateMedication is the resolver for the updateMedication field.
 func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) (*model.UpdateMedicationResponse, error) {
+	// check if they are logged in correctly
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// check if id is legal
 	if !utils.MatchID(medicationID, "medication") {
 		return nil, fmt.Errorf("illegal medication id")
 	}
+
+	res_user_id, err := database.DB.Query(`SELECT user_id FROM ONLY $id LIMIT 1`, map[string]interface{}{"id": medicationID})
+	if err != nil {
+		return nil, err
+	}
+	user_id, err := json.Marshal(res_user_id)
+	if err != nil {
+		return nil, err
+	}
+	println(string(user_id))
 
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": medicationID}
@@ -394,6 +414,11 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 
 // DeleteMedication is the resolver for the deleteMedication field.
 func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// check legality of the provided id
 	if !utils.MatchID(medicationID, "medication") {
 		return nil, fmt.Errorf("illegal medication id")
@@ -431,9 +456,8 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 // CreateMedicationReminder is the resolver for the createMedicationReminder field.
 func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
 	// check legality of both user and medication id
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -446,7 +470,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		`SELECT * FROM $medication_id WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"medication_id": medicationID,
-			"user_id":       userID,
+			"user_id":       user.ID,
 		},
 	)
 	if err != nil {
@@ -466,7 +490,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		WHERE medication_id=$medication_id AND user_id=$user_id AND reminder_time=$reminder_time;`,
 		map[string]interface{}{
 			"medication_id": medicationID,
-			"user_id":       userID,
+			"user_id":       user.ID,
 			"reminder_time": reminderTime,
 		},
 	)
@@ -492,7 +516,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		`,
 		map[string]interface{}{
 			"medication_id": medicationID,
-			"user_id":       userID,
+			"user_id":       user.ID,
 			"reminder_time": reminderTime,
 		},
 	)
@@ -516,6 +540,11 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 
 // UpdateMedicationReminder is the resolver for the updateMedicationReminder field.
 func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// check legality of the reminder id
 	if !utils.MatchID(reminderID, "medication_reminder") {
 		return nil, fmt.Errorf("illegal reminder id")
@@ -623,10 +652,8 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
 func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
-	// Create the treatment schedule
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -638,7 +665,7 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
         notes=$notes,
         createdAt=time::now(),
         updatedAt=time::now();`, map[string]interface{}{
-		"userID":        userID,
+		"userID":        user.ID,
 		"treatmentType": treatmentType,
 		"scheduledTime": scheduledTime,
 		"location":      location,
@@ -663,15 +690,14 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 
 // GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
 func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
 	// Fetch treatment schedules for the user
 	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": userID,
+		"userID": user.ID,
 	})
 	if err != nil {
 		return nil, err
@@ -688,6 +714,11 @@ func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.
 
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
 func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// Create update fields
 	updateFields := map[string]interface{}{}
 	if treatmentType != nil {
@@ -726,6 +757,11 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 
 // DeleteTreatmentSchedule is the resolver for the deleteTreatmentSchedule field.
 func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// Delete the treatment schedule
 	_, err := database.DB.Query(`DELETE FROM treatment_schedule WHERE id=$scheduleID;`, map[string]interface{}{
 		"scheduleID": scheduleID,
@@ -743,9 +779,8 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
 func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -753,7 +788,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 	result, err := database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
 		map[string]interface{}{
-			"user_id":    userID,
+			"user_id":    user.ID,
 			"recordedAt": recordedAt,
 			"metricType": metricType,
 		},
@@ -781,7 +816,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 		created_at=time::now();
 		`,
 		map[string]interface{}{
-			"user_id":     userID,
+			"user_id":     user.ID,
 			"metric_type": metricType,
 			"value":       value,
 			"unit":        unit,
@@ -807,6 +842,11 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 
 // UpdateHealthMetric is the resolver for the updateHealthMetric field.
 func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// check legality of the health metric id
 	if !utils.MatchID(metricID, "health_metric") {
 		return nil, fmt.Errorf("illegal health metric id")
@@ -853,6 +893,11 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 
 // DeleteHealthMetric is the resolver for the deleteHealthMetric field.
 func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	// check the legality of the metric id
 	if !utils.MatchID(metricID, "health_metric") {
 		return nil, fmt.Errorf("illegal health metric id")
@@ -953,17 +998,16 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 
 // GetMedications is the resolver for the getMedications field.
 func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.MedicationDetail, error) {
-	// check validity of given id
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
+
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
 		`SELECT * FROM medication WHERE user_id = $user_id;`,
 		map[string]interface{}{
-			"user_id": userID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
@@ -994,9 +1038,8 @@ func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.Medication
 
 // GetMedicationReminders is the resolver for the getMedicationReminders field.
 func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error) {
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -1004,7 +1047,7 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.Me
 	result, err := database.DB.Query(
 		`SELECT * FROM medication_reminder WHERE user_id = $user_id;`,
 		map[string]interface{}{
-			"user_id": userID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
@@ -1032,9 +1075,8 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.Me
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
-	userID := middlewares.ForContext(ctx)
-
-	if userID == nil {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
@@ -1042,7 +1084,7 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 	result, err := database.DB.Query(
 		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
 		map[string]interface{}{
-			"user_id": userID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {

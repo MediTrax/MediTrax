@@ -4,14 +4,16 @@ go 1.23.1
 
 require (
 	github.com/99designs/gqlgen v0.17.55
+	github.com/hashicorp/golang-lru v1.0.2
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.78
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/robfig/cron/v3 v3.0.1
-	// github.com/rs/cors v1.11.1
+	github.com/rs/cors v1.11.1
 	github.com/square/go-jose v2.6.0+incompatible
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693
 	github.com/surrealdb/surrealdb.go v0.2.1
+	github.com/vektah/gqlparser v1.3.1
 	github.com/vektah/gqlparser/v2 v2.5.17
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
