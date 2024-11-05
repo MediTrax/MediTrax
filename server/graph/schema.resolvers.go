@@ -110,35 +110,46 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 		Message: "Login successful",
 	}
 
+	result, err = database.DB.Query(
+		`UPDATE $user_id SET last_login=time::now();`, map[string]interface{}{
+			"user_id": user.ID,
+		})
+	if err != nil {
+		return nil, err
+	}
+
 	return response, nil
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *mutationResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Fetch the user details
-	// result, err := database.DB.Query(`SELECT * FROM user WHERE id=$userID;`, map[string]interface{}{
-	// 	"userID": userID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Fetch the user details
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
 
-	// user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	result, err := database.DB.Query(`SELECT * FROM user WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	// response := &model.UserDetailResponse{
-	// 	UserId:    user.ID,
-	// 	Email:     user.PhoneNumber, // Assuming email is stored in phoneNumber for simplicity
-	// 	Name:      user.Name,
-	// 	Role:      user.Role,
-	// 	CreatedAt: user.CreatedAt,
-	// 	LastLogin: user.LastLogin,
-	// }
+	_user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
 
-	// return response, nil
+	response := &model.UserDetailResponse{
+		UserID:      _user.ID,
+		PhoneNumber: _user.PhoneNumber,
+		Name:        _user.Name,
+		Role:        _user.Role,
+		CreatedAt:   _user.CreatedAt,
+		LastLogin:   &_user.LastLogin,
+	}
+	return response, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
