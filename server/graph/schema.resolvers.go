@@ -290,7 +290,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
 	// Retrieve password reset request using the token
-	data, err := database.DB.Select("passwordReset:" + token)
+	data, err := database.DB.Select("passwordChange:" + token)
 	if err != nil {
 		// Token not found or an error occurred
 		return nil, fmt.Errorf("invalid or expired token")
@@ -715,64 +715,117 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
 func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
+	panic(fmt.Errorf("not implemented"))
+	// user := middlewares.ForContext(ctx)
+	// if user == nil {
+	// 	return nil, fmt.Errorf("access denied")
+	// }
 
-	result, err := database.DB.Query(`CREATE ONLY treatment_schedule:ulid() 
-    SET user_id=$userID,
-        treatmentType=$treatmentType,
-        scheduledTime=$scheduledTime,
-        location=$location,
-        notes=$notes,
-        createdAt=time::now(),
-        updatedAt=time::now();`, map[string]interface{}{
-		"userID":        user.ID,
-		"treatmentType": treatmentType,
-		"scheduledTime": scheduledTime,
-		"location":      location,
-		"notes":         notes,
-	})
-	if err != nil {
-		return nil, err
-	}
+	// // 检查是否已存在相同时间的治疗计划
+	// result, err := database.DB.Query(
+	// 	`SELECT * FROM treatment_schedule
+	//     WHERE user_id=$user_id AND scheduled_time=$scheduled_time;`,
+	// 	map[string]interface{}{
+	// 		"user_id":        user.ID,
+	// 		"scheduled_time": scheduledTime,
+	// 	},
+	// )
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentScheduleDetail](result, nil)
-	if err != nil {
-		return nil, err
-	}
+	// schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if len(schedules) > 0 {
+	// 	return nil, fmt.Errorf("a treatment schedule already exists at this time")
+	// }
 
-	response := &model.CreateTreatmentScheduleResponse{
-		ScheduleID: newSchedule.ScheduleID,
-		Message:    "Treatment schedule created successfully",
-	}
+	// // 创建新的治疗计划
+	// params := map[string]interface{}{
+	// 	"id":             "rand::ulid()",
+	// 	"treatment_type": treatmentType,
+	// 	"scheduled_time": scheduledTime,
+	// 	"location":       location,
+	// 	"created_at":     "time::now()",
+	// }
 
-	return response, nil
+	// // 如果提供了备注，则添加到参数中
+	// if notes != nil {
+	// 	params["notes"] = *notes
+	// }
+
+	// // 构建创建查询
+	// createQuery := `CREATE ONLY treatment_schedule:ulid()
+	//     SET
+	// 	id=$id,
+	//     treatment_type=$treatment_type,
+	//     scheduled_time=$scheduled_time,
+	//     location=$location,
+	//     created_at=$created_at`
+
+	// if notes != nil {
+	// 	createQuery += `,
+	//     notes=$notes`
+	// }
+	// createQuery += ` RETURN AFTER;`
+
+	// result, err = database.DB.Query(createQuery, params)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // 解析创建结果
+	// newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentScheduleDetail](result, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // 创建响应
+	// response := &model.CreateTreatmentScheduleResponse{
+	// 	ScheduleID: newSchedule.ScheduleID,
+	// 	Message:    fmt.Sprintf("Treatment schedule created successfully for %s", scheduledTime),
+	// }
+
+	// return response, nil
 }
 
 // GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
 func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
+	panic(fmt.Errorf("not implemented"))
+	// // 检查用户权限
+	// user := middlewares.ForContext(ctx)
+	// if user == nil {
+	// 	return nil, fmt.Errorf("access denied")
+	// }
 
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
+	// // 查询该用户的所有治疗计划
+	// result, err := database.DB.Query(
+	// 	`SELECT * FROM treatment_schedule
+	//     WHERE user_id = $user_id
+	//     ORDER BY scheduled_time;`,
+	// 	map[string]interface{}{
+	// 		"user_id": user.ID,
+	// 	},
+	// )
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// TODO: please modify this line as it may result in a bug
-	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
-	if err != nil {
-		return nil, err
-	}
+	// // 解析查询结果
+	// schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	return schedules, nil
+	// // 转换为指针数组
+	// schedulePtrs := make([]*model.TreatmentScheduleDetail, len(schedules))
+	// for i := range schedules {
+	// 	schedulePtrs[i] = &schedules[i]
+	// }
+
+	// return schedulePtrs, nil
 }
 
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
