@@ -51,14 +51,13 @@ class AppState extends _$AppState {
     await _hiveBox!.put("appState", state);
   }
 
-  Future<void> loginWithEmailPassword(
-      String email, String password, String captcha) async {
+  Future<void> loginWithPhoneNumberPassword(
+      String phoneNumber, String password, String captcha) async {
     final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
           Options$Mutation$LoginUser(
             variables: Variables$Mutation$LoginUser(
-              email: email,
+              phoneNumber: phoneNumber,
               password: password,
-              // token: captcha,
             ),
           ),
         );
@@ -68,25 +67,25 @@ class AppState extends _$AppState {
       throw result.exception!;
     }
     if (result.data == null) return;
-    final parsedData = result.parsedData!.loginUser;
+    final parsedData = result.parsedData!.loginUser!;
 
     final token = Token(
-        id: parsedData!.token.refreshToken,
-        user: parsedData.userId,
-        accessToken: parsedData.token.accessToken,
-        accessTokenExpiry: parsedData.token.accessTokenExpiry,
-        refreshTokenExpiry: parsedData.token.refreshTokenExpiry,
-        device: "",
-        createdAt: DateTime.now());
+      id: parsedData.token.refreshToken,
+      user: parsedData.userId,
+      accessToken: parsedData.token.accessToken,
+      accessTokenExpiry: parsedData.token.accessTokenExpiry,
+      refreshTokenExpiry: parsedData.token.refreshTokenExpiry,
+      device: '',
+      createdAt: parsedData.token.createdAt,
+    );
 
     _refreshTokenTimer = Timer(
-      token.accessTokenExpiry.difference(
-        DateTime.now(),
-      ),
+      token.accessTokenExpiry.difference(DateTime.now()),
       () {
         refreshToken();
       },
     );
+
     state = state.copyWith(token: token, autoLoginResult: true);
     ref.invalidate(graphQLServiceProvider);
     await _hiveBox!.put("appState", state);
@@ -170,4 +169,69 @@ class AppState extends _$AppState {
   //         isAuth: true,
   //       );
   // }
+
+  Future<void> loginWithPhonePassword(String phone, String password) async {
+    final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
+          Options$Mutation$LoginUser(
+            variables: Variables$Mutation$LoginUser(
+              phoneNumber: phone,
+              password: password,
+            ),
+          ),
+        );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+
+    final loginData = result.parsedData!.loginUser!;
+    final tokenData = loginData.token;
+
+    state = state.copyWith(
+      token: Token(
+        id: tokenData.refreshToken,
+        user: tokenData.user,
+        accessToken: tokenData.accessToken,
+        accessTokenExpiry: tokenData.accessTokenExpiry,
+        refreshTokenExpiry: tokenData.refreshTokenExpiry,
+        device: tokenData.device,
+        createdAt: tokenData.createdAt,
+      ),
+    );
+
+    // Set up token refresh timer
+    _refreshTokenTimer = Timer(
+      tokenData.accessTokenExpiry.difference(DateTime.now()),
+      () {
+        refreshToken();
+      },
+    );
+
+    ref.invalidate(graphQLServiceProvider);
+    await _hiveBox!.put("appState", state);
+  }
+
+  Future<void> signupWithPhone({
+    required String phone,
+    required String password,
+    required String username,
+  }) async {
+    final result = await ref.read(graphQLServiceProvider).mutate$CreateUser(
+          Options$Mutation$CreateUser(
+            variables: Variables$Mutation$CreateUser(
+              phoneNumber: phone,
+              password: password,
+              username: username,
+              role: 'USER', // Default role
+            ),
+          ),
+        );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+
+    // After successful signup, login with the new credentials
+    await loginWithPhonePassword(phone, password);
+  }
 }

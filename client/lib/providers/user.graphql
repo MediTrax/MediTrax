@@ -1,7 +1,7 @@
-query GetUser($userId: String!) {
-  getUser(userId: $userId) {
+query GetUser {
+  getUser {
     userId
-    email
+    phoneNumber
     name
     role
     createdAt
@@ -9,16 +9,16 @@ query GetUser($userId: String!) {
   }
 }
 
-query GetUserAchievements($userId: String!) {
-  getUserAchievements(userId: $userId) {
+query GetUserAchievements {
+  getUserAchievements {
     userAchievementId
     badgeId
     earnedAt
   }
 }
 
-query GetFamilyMembers($userId: String!) {
-  getFamilyMembers(userId: $userId) {
+query GetFamilyMembers {
+  getFamilyMembers {
     memberId
     relatedUserId
     relationship
@@ -26,21 +26,21 @@ query GetFamilyMembers($userId: String!) {
   }
 }
 
-mutation UpdateUser($userId: String!, $name: String, $email: String, $password: String) {
-  updateUser(userId: $userId, name: $name, email: $email, password: $password) {
+mutation UpdateUser($name: String, $phoneNumber: String, $password: String) {
+  updateUser(name: $name, phoneNumber: $phoneNumber, password: $password) {
     userId
     message
   }
 }
 
-mutation DeleteUser($userId: String!) {
-  deleteUser(userId: $userId) {
+mutation DeleteUser {
+  deleteUser {
     message
   }
 }
 
-mutation RequestPasswordReset($email: String!) {
-  requestPasswordReset(email: $email) {
+mutation RequestPasswordReset($phoneNumber: String!) {
+  requestPasswordReset(phoneNumber: $phoneNumber) {
     message
   }
 }
@@ -51,8 +51,8 @@ mutation ResetPassword($token: String!, $newPassword: String!) {
   }
 }
 
-mutation AddFamilyMember($userId: String!, $relatedUserId: String!, $relationship: String!, $accessLevel: String!) {
-  addFamilyMember(userId: $userId, relatedUserId: $relatedUserId, relationship: $relationship, accessLevel: $accessLevel) {
+mutation AddFamilyMember($relatedUserId: String!, $relationship: String!, $accessLevel: String!) {
+  addFamilyMember(relatedUserId: $relatedUserId, relationship: $relationship, accessLevel: $accessLevel) {
     memberId
     message
   }

@@ -21,48 +21,43 @@ class UserProvider extends _$UserProvider {
 
   Future<User?> _fetchCurrentUser() async {
     final result = await ref.read(graphQLServiceProvider).query$GetUser(
-          Options$Query$GetUser(
-            variables: Variables$Query$GetUser(
-              userId: ref.read(appStateProvider).token!.user,
-            ),
-          ),
+          Options$Query$GetUser(),
         );
 
     if (result.hasException) {
       throw result.exception!;
     }
 
-    if (result.data == null || result.data!.user == null) {
+    if (result.data == null) {
       return null;
     }
 
-    final userData = result.data!.user;
+    final userData = result.parsedData!.getUser!;
 
     return User(
       id: userData.userId,
-      email: userData.email,
+      phoneNumber: userData.phoneNumber,
       name: userData.name,
       password: '', // We don't store password in state
       role: userData.role,
       status: 1, // You might want to add status to your GraphQL schema
-      createdAt: userData.createdAt,
-      updatedAt:
+      created_at: userData.createdAt,
+      updated_at:
           DateTime.now(), // You might want to add updatedAt to your schema
-      lastLogin: userData.lastLogin ?? DateTime.now(),
+      last_login: userData.lastLogin ?? DateTime.now(),
     );
   }
 
   Future<void> updateUser({
     String? name,
-    String? email,
+    String? phoneNumber,
     String? password,
   }) async {
     final result = await ref.read(graphQLServiceProvider).mutate$UpdateUser(
           Options$Mutation$UpdateUser(
             variables: Variables$Mutation$UpdateUser(
-              userId: ref.read(appStateProvider).token!.user,
               name: name,
-              email: email,
+              phoneNumber: phoneNumber,
               password: password,
             ),
           ),
@@ -78,11 +73,7 @@ class UserProvider extends _$UserProvider {
 
   Future<void> deleteUser() async {
     final result = await ref.read(graphQLServiceProvider).mutate$DeleteUser(
-          Options$Mutation$DeleteUser(
-            variables: Variables$Mutation$DeleteUser(
-              userId: ref.read(appStateProvider).token!.user,
-            ),
-          ),
+          Options$Mutation$DeleteUser(),
         );
 
     if (result.hasException) {
@@ -93,12 +84,12 @@ class UserProvider extends _$UserProvider {
     await ref.read(appStateProvider.notifier).logout();
   }
 
-  Future<void> requestPasswordReset(String email) async {
+  Future<void> requestPasswordReset(String phoneNumber) async {
     final result =
         await ref.read(graphQLServiceProvider).mutate$RequestPasswordReset(
               Options$Mutation$RequestPasswordReset(
                 variables: Variables$Mutation$RequestPasswordReset(
-                  email: email,
+                  phoneNumber: phoneNumber,
                 ),
               ),
             );
@@ -125,26 +116,25 @@ class UserProvider extends _$UserProvider {
 
   // Family Member Methods
   Future<List<FamilyMember>> getFamilyMembers() async {
-    final result = await ref.read(graphQLServiceProvider).query$GetFamilyMembers(
-          Options$Query$GetFamilyMembers(
-            variables: Variables$Query$GetFamilyMembers(
-              userId: ref.read(appStateProvider).token!.user,
-            ),
-          ),
-        );
+    final result =
+        await ref.read(graphQLServiceProvider).query$GetFamilyMembers(
+              Options$Query$GetFamilyMembers(),
+            );
 
     if (result.hasException) {
       throw result.exception!;
     }
 
-    return result.parsedData!.familyMembers.map((member) => FamilyMember(
-          id: member.memberId,
-          userId: ref.read(appStateProvider).token!.user,
-          relatedUserId: member.relatedUserId,
-          relationship: member.relationship,
-          accessLevel: int.parse(member.accessLevel),
-          createdAt: DateTime.now(), // Add to schema if needed
-        )).toList();
+    return result.parsedData!.getFamilyMembers!
+        .map((member) => FamilyMember(
+              id: member!.memberId,
+              userId: ref.read(appStateProvider).token!.user,
+              relatedUserId: member.relatedUserId,
+              relationship: member.relationship,
+              accessLevel: int.parse(member.accessLevel),
+              createdAt: DateTime.now(), // Add to schema if needed
+            ))
+        .toList();
   }
 
   Future<void> addFamilyMember({
@@ -152,16 +142,16 @@ class UserProvider extends _$UserProvider {
     required String relationship,
     required String accessLevel,
   }) async {
-    final result = await ref.read(graphQLServiceProvider).mutate$AddFamilyMember(
-          Options$Mutation$AddFamilyMember(
-            variables: Variables$Mutation$AddFamilyMember(
-              userId: ref.read(appStateProvider).token!.user,
-              relatedUserId: relatedUserId,
-              relationship: relationship,
-              accessLevel: accessLevel,
-            ),
-          ),
-        );
+    final result =
+        await ref.read(graphQLServiceProvider).mutate$AddFamilyMember(
+              Options$Mutation$AddFamilyMember(
+                variables: Variables$Mutation$AddFamilyMember(
+                  relatedUserId: relatedUserId,
+                  relationship: relationship,
+                  accessLevel: accessLevel,
+                ),
+              ),
+            );
 
     if (result.hasException) {
       throw result.exception!;
@@ -173,15 +163,16 @@ class UserProvider extends _$UserProvider {
     String? relationship,
     String? accessLevel,
   }) async {
-    final result = await ref.read(graphQLServiceProvider).mutate$UpdateFamilyMember(
-          Options$Mutation$UpdateFamilyMember(
-            variables: Variables$Mutation$UpdateFamilyMember(
-              memberId: memberId,
-              relationship: relationship,
-              accessLevel: accessLevel,
-            ),
-          ),
-        );
+    final result =
+        await ref.read(graphQLServiceProvider).mutate$UpdateFamilyMember(
+              Options$Mutation$UpdateFamilyMember(
+                variables: Variables$Mutation$UpdateFamilyMember(
+                  memberId: memberId,
+                  relationship: relationship,
+                  accessLevel: accessLevel,
+                ),
+              ),
+            );
 
     if (result.hasException) {
       throw result.exception!;
@@ -189,13 +180,14 @@ class UserProvider extends _$UserProvider {
   }
 
   Future<void> deleteFamilyMember(String memberId) async {
-    final result = await ref.read(graphQLServiceProvider).mutate$DeleteFamilyMember(
-          Options$Mutation$DeleteFamilyMember(
-            variables: Variables$Mutation$DeleteFamilyMember(
-              memberId: memberId,
-            ),
-          ),
-        );
+    final result =
+        await ref.read(graphQLServiceProvider).mutate$DeleteFamilyMember(
+              Options$Mutation$DeleteFamilyMember(
+                variables: Variables$Mutation$DeleteFamilyMember(
+                  memberId: memberId,
+                ),
+              ),
+            );
 
     if (result.hasException) {
       throw result.exception!;
@@ -204,24 +196,23 @@ class UserProvider extends _$UserProvider {
 
   // Achievement Methods
   Future<List<AchievementBadge>> getUserAchievements() async {
-    final result = await ref.read(graphQLServiceProvider).query$GetUserAchievements(
-          Options$Query$GetUserAchievements(
-            variables: Variables$Query$GetUserAchievements(
-              userId: ref.read(appStateProvider).token!.user,
-            ),
-          ),
-        );
+    final result =
+        await ref.read(graphQLServiceProvider).query$GetUserAchievements(
+              Options$Query$GetUserAchievements(),
+            );
 
     if (result.hasException) {
       throw result.exception!;
     }
 
-    return result.parsedData!.userAchievements.map((achievement) => AchievementBadge(
-          id: achievement.badgeId,
-          name: '', // These fields need to be added to the schema
-          description: '',
-          iconUrl: '',
-          createdAt: achievement.earnedAt,
-        )).toList();
+    return result.parsedData!.getUserAchievements!
+        .map((achievement) => AchievementBadge(
+              id: achievement!.badgeId,
+              name: 'TODO', // These fields need to be added to the schema
+              description: '',
+              iconUrl: '',
+              createdAt: achievement.earnedAt,
+            ))
+        .toList();
   }
 }
