@@ -110,139 +110,211 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 		Message: "Login successful",
 	}
 
+	result, err = database.DB.Query(
+		`UPDATE $user_id SET last_login=time::now();`, map[string]interface{}{
+			"user_id": user.ID,
+		})
+	if err != nil {
+		return nil, err
+	}
+
 	return response, nil
 }
 
 // GetUser is the resolver for the getUser field.
 func (r *mutationResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Fetch the user details
-	// result, err := database.DB.Query(`SELECT * FROM user WHERE id=$userID;`, map[string]interface{}{
-	// 	"userID": userID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Fetch the user details
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
 
-	// user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// response := &model.UserDetailResponse{
-	// 	UserId:    user.ID,
-	// 	Email:     user.PhoneNumber, // Assuming email is stored in phoneNumber for simplicity
-	// 	Name:      user.Name,
-	// 	Role:      user.Role,
-	// 	CreatedAt: user.CreatedAt,
-	// 	LastLogin: user.LastLogin,
-	// }
-
-	// return response, nil
+	response := &model.UserDetailResponse{
+		UserID:      user.ID,
+		PhoneNumber: user.PhoneNumber,
+		Name:        user.Name,
+		Role:        user.Role,
+		CreatedAt:   user.CreatedAt,
+		LastLogin:   &user.LastLogin,
+	}
+	return response, nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Create update query
-	// updateFields := map[string]interface{}{}
-	// if name != nil {
-	// 	updateFields["name"] = *name
-	// }
-	// if phoneNumber != nil {
-	// 	updateFields["phoneNumber"] = *phoneNumber
-	// }
-	// if password != nil {
-	// 	updateFields["password"] = crypto.argon2.generate(*password)
-	// }
+	// check if the user is registed
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
 
-	// if len(updateFields) == 0 {
-	// 	return nil, fmt.Errorf("no fields to update")
-	// }
+	// 初始化更新值map
+	updateValues := map[string]interface{}{"id": user.ID}
 
-	// result, err := database.DB.Query(`UPDATE user SET $fields WHERE id=$userID;`, map[string]interface{}{
-	// 	"fields": updateFields,
-	// 	"userID": userID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// 准备需要更新的字段
+	updateFields := []string{}
 
-	// response := &model.UpdateUserResponse{
-	// 	UserId:  userID,
-	// 	Message: "User updated successfully",
-	// }
+	if name != nil {
+		updateValues["name"] = *name
+		updateFields = append(updateFields, "name = $name")
+	}
 
-	// return response, nil
+	if phoneNumber != nil {
+		// TODO:可以添加电话号码格式验证
+		updateValues["phone_number"] = *phoneNumber
+		updateFields = append(updateFields, "phone_number = $phone_number")
+	}
+
+	if password != nil {
+		updateValues["password"] = password
+		updateFields = append(updateFields, "password = $password")
+	}
+
+	// 如果没有要更新的字段，返回错误
+	if len(updateFields) == 0 {
+		return nil, fmt.Errorf("no fields to update")
+	}
+
+	// 构造更新查询
+	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
+
+	// 执行更新查询
+	result, err := database.DB.Query(query, updateValues)
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析结果
+	results, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	// 创建响应
+	response := &model.UpdateUserResponse{
+		UserID:  results[0].ID,
+		Message: "User updated successfully",
+	}
+
+	return response, nil
+
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Delete the user
-	// _, err := database.DB.Query(`DELETE FROM user WHERE id=$userID;`, map[string]interface{}{
-	// 	"userID": userID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// 检查用户是否已登录
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
 
-	// response := &model.DeleteUserResponse{
-	// 	Message: "User deleted successfully",
-	// }
+	// 执行删除查询，RETURN BEFORE 会返回删除前的用户数据
+	result, err := database.DB.Query(
+		`DELETE $id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
 
-	// return response, nil
+	// 解析结果并检查错误
+	results, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	// 创建响应
+	response := &model.DeleteUserResponse{
+		Message: fmt.Sprintf("User %s with name %s deleted successfully", results[0].ID, results[0].Name),
+	}
+
+	return response, nil
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Check if user exists
-	// result, err := database.DB.Query(`SELECT * FROM user WHERE phoneNumber=$phoneNumber;`, map[string]interface{}{
-	// 	"phoneNumber": phoneNumber,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	result, err := database.DB.Query(`
+    SELECT * FROM user WHERE phone_number=$phone_number;`,
+		map[string]interface{}{
+			"phone_number": phoneNumber,
+		})
+	if err != nil {
+		return nil, err
+	}
 
-	// user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-	// if err != nil || user == nil {
-	// 	return nil, fmt.Errorf("user not found")
-	// }
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) <= 0 {
+		return nil, fmt.Errorf("user not found")
+	}
 
-	// // Generate and send password reset token (this is just an example)
-	// token := generatePasswordResetToken(user.ID) // Assume this function exists
-	// sendPasswordResetEmail(user.Email, token)    // Assume this function exists
+	// 创建密码重置请求
+	result2, err := database.DB.Query(
+		`CREATE ONLY passwordChange:ulid() SET userId=$userId;`,
+		map[string]interface{}{
+			"userId": users[0].ID,
+		})
+	if err != nil {
+		return nil, err
+	}
 
-	// response := &model.RequestPasswordResetResponse{
-	// 	Message: "Password reset link sent to your phone",
-	// }
+	results2, err := surrealdb.SmartUnmarshal[model.PasswordChange](result2, nil)
+	if err != nil {
+		return nil, err
+	}
 
-	// return response, nil
+	// 获取重置码
+	resetCode := strings.Split(results2.ID, ":")[1]
+
+	// TODO: 在这里实现发送短信的逻辑
+	// 暂时只返回成功消息，实际项目中需要集成短信服务
+
+	// 创建响应
+	response := &model.RequestPasswordResetResponse{
+		Message: fmt.Sprintf("Password reset code %s has been sent to your phone %s", resetCode, phoneNumber),
+	}
+
+	return response, nil
 }
 
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
-	panic(fmt.Errorf("waiting to be implemented"))
-	// // Verify the token and reset the password
-	// userID, err := verifyPasswordResetToken(token) // Assume this function exists
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Retrieve password reset request using the token
+	data, err := database.DB.Select("passwordReset:" + token)
+	if err != nil {
+		// Token not found or an error occurred
+		return nil, fmt.Errorf("invalid or expired token")
+	}
+	passwordReset, err := surrealdb.SmartUnmarshal[model.PasswordChange](data, nil)
+	if err != nil {
+		// Unmarshal error, invalid data
+		return nil, fmt.Errorf("invalid token data")
+	}
 
-	// // Update the password
-	// _, err = database.DB.Query(`UPDATE $userID SET password=crypto::argon2::generate(newPassword);`, map[string]interface{}{
-	// 	"userID": userID,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// Update the user's password in the database
+	_, err = database.DB.Query("UPDATE $id SET password=crypto::argon2::generate($password);", map[string]interface{}{
+		"id":       passwordReset.User,
+		"password": newPassword,
+	})
+	if err != nil {
+		// Database query failed
+		return nil, fmt.Errorf("failed to reset password: %v", err)
+	}
 
-	// response := &model.ResetPasswordResponse{
-	// 	Message: "Password reset successfully",
-	// }
-
-	// return response, nil
+	// Return success message
+	return &model.ResetPasswordResponse{
+		Message: "Password reset successfully",
+	}, nil
 }
 
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
