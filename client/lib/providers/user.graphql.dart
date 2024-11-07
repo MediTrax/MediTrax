@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart' as widgets;
 import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
+import 'package:meditrax/scalar.dart';
 
 class Query$GetUser {
   Query$GetUser({
@@ -372,9 +373,8 @@ class Query$GetUser$getUser {
       phoneNumber: (l$phoneNumber as String),
       name: (l$name as String),
       role: (l$role as String),
-      createdAt: DateTime.parse((l$createdAt as String)),
-      lastLogin:
-          l$lastLogin == null ? null : DateTime.parse((l$lastLogin as String)),
+      createdAt: dateTimeFromJson(l$createdAt),
+      lastLogin: l$lastLogin == null ? null : dateTimeFromJson(l$lastLogin),
       $__typename: (l$$__typename as String),
     );
   }
@@ -404,9 +404,10 @@ class Query$GetUser$getUser {
     final l$role = role;
     _resultData['role'] = l$role;
     final l$createdAt = createdAt;
-    _resultData['createdAt'] = l$createdAt.toIso8601String();
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
     final l$lastLogin = lastLogin;
-    _resultData['lastLogin'] = l$lastLogin?.toIso8601String();
+    _resultData['lastLogin'] =
+        l$lastLogin == null ? null : dateTimeToJson(l$lastLogin);
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
@@ -961,7 +962,7 @@ class Query$GetUserAchievements$getUserAchievements {
     return Query$GetUserAchievements$getUserAchievements(
       userAchievementId: (l$userAchievementId as String),
       badgeId: (l$badgeId as String),
-      earnedAt: DateTime.parse((l$earnedAt as String)),
+      earnedAt: dateTimeFromJson(l$earnedAt),
       $__typename: (l$$__typename as String),
     );
   }
@@ -981,7 +982,7 @@ class Query$GetUserAchievements$getUserAchievements {
     final l$badgeId = badgeId;
     _resultData['badgeId'] = l$badgeId;
     final l$earnedAt = earnedAt;
-    _resultData['earnedAt'] = l$earnedAt.toIso8601String();
+    _resultData['earnedAt'] = dateTimeToJson(l$earnedAt);
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
