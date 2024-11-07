@@ -1,28 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meditrax/models/user.dart';
+import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/user_provider.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userProviderProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('个人资料'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileHeader(context),
-            _buildAccountSettings(),
-          ],
+      body: userAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('加载失败'),
+              TextButton(
+                onPressed: () => ref.refresh(userProviderProvider),
+                child: const Text('重试'),
+              ),
+            ],
+          ),
         ),
+        data: (user) => user == null
+            ? const Center(child: Text('未登录'))
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProfileHeader(context, user),
+                    _buildAccountSettings(context, ref),
+                  ],
+                ),
+              ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildProfileHeader(BuildContext context, User user) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -31,45 +55,45 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // User Info Row
               Row(
                 children: [
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.grey[200],
-                    child: const Text(
-                      '张三',
-                      style: TextStyle(
+                    child: Text(
+                      user.name.characters.first,
+                      style: const TextStyle(
                         fontSize: 20,
                         color: Colors.black,
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '张三',
-                          style: TextStyle(
+                          user.name,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          'zhangsan@example.com',
-                          style: TextStyle(color: Colors.grey),
+                          user.phoneNumber,
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ],
                     ),
                   ),
-                  const Chip(
-                    label: Text('VIP 会员'),
-                    backgroundColor: Color(0xFFF5F5F5),
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    labelStyle: TextStyle(fontSize: 12),
-                  ),
+                  if (user.role == 'VIP')
+                    const Chip(
+                      label: Text('VIP 会员'),
+                      backgroundColor: Color(0xFFF5F5F5),
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      labelStyle: TextStyle(fontSize: 12),
+                    ),
                 ],
               ),
               const Divider(height: 32),
@@ -147,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountSettings() {
+  Widget _buildAccountSettings(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -164,16 +188,25 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildSettingButton('通知设置'),
-              _buildSettingButton('隐私与安全'),
-              _buildSettingButton('帮助与支持'),
-              _buildSettingButton('应用设置'),
+              _buildSettingButton('通知设置', () => context.push('/notifications')),
+              _buildSettingButton('隐私与安全', () => context.push('/privacy')),
+              _buildSettingButton('帮助与支持', () => context.push('/support')),
+              _buildSettingButton('应用设置', () => context.push('/settings')),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement logout
+                  onPressed: () async {
+                    try {
+                      await ref.read(appStateProvider.notifier).logout();
+                      if (context.mounted) {
+                        context.go('/auth');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ErrorHandler.showErrorSnackBar(context, e);
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -190,11 +223,9 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingButton(String title) {
+  Widget _buildSettingButton(String title, VoidCallback onPressed) {
     return OutlinedButton(
-      onPressed: () {
-        // TODO: Implement settings navigation
-      },
+      onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

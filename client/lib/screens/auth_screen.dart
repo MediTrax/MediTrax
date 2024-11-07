@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -46,7 +47,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     try {
       if (_useOTP) {
-        // TODO: Implement OTP login
         throw UnimplementedError('OTP login not implemented yet');
       } else {
         await ref.read(appStateProvider.notifier).loginWithPhoneNumberPassword(
@@ -57,8 +57,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('登录失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '登录失败: ',
         );
       }
     } finally {
@@ -96,12 +98,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       await ref.read(appStateProvider.notifier).signupWithPhone(
             phone: _phoneController.text,
             password: _passwordController.text,
-            username: _phoneController.text, // Using phone as initial username
+            username: _phoneController.text,
           );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('注册失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '注册失败: ',
         );
       }
     } finally {
@@ -122,12 +126,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual OTP request when backend supports it
       throw UnimplementedError('OTP functionality not implemented yet');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('发送验证码失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '发送验证码失败: ',
         );
       }
     } finally {
@@ -141,12 +146,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement WeChat login when backend supports it
       throw UnimplementedError('WeChat login not implemented yet');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('微信登录失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '微信登录失败: ',
         );
       }
     } finally {

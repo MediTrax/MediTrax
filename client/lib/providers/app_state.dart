@@ -36,20 +36,20 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
-  Future<void> mockLoginEmailPassword(String email, String password) async {
-    state = state.copyWith(
-        token: Token(
-            id: "id",
-            user: "user",
-            accessToken: "accessToken",
-            accessTokenExpiry: DateTime.now().add(const Duration(days: 1)),
-            refreshTokenExpiry: DateTime.now().add(const Duration(days: 2)),
-            device: "device",
-            createdAt: DateTime.now()),
-        autoLoginResult: true);
-    ref.invalidate(graphQLServiceProvider);
-    await _hiveBox!.put("appState", state);
-  }
+  // Future<void> mockLoginEmailPassword(String email, String password) async {
+  //   state = state.copyWith(
+  //       token: Token(
+  //           id: "id",
+  //           user: "user",
+  //           accessToken: "accessToken",
+  //           accessTokenExpiry: DateTime.now().add(const Duration(days: 1)),
+  //           refreshTokenExpiry: DateTime.now().add(const Duration(days: 2)),
+  //           device: "device",
+  //           createdAt: DateTime.now()),
+  //       autoLoginResult: true);
+  //   ref.invalidate(graphQLServiceProvider);
+  //   await _hiveBox!.put("appState", state);
+  // }
 
   Future<void> loginWithPhoneNumberPassword(
       String phoneNumber, String password, String captcha) async {

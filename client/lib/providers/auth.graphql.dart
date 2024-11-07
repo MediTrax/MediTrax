@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart' as widgets;
 import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
+import 'package:meditrax/scalar.dart';
 
 class Variables$Mutation$CreateUser {
   factory Variables$Mutation$CreateUser({
@@ -1595,11 +1596,11 @@ class Mutation$LoginUser$loginUser$token {
       user: (l$user as String),
       accessToken: (l$accessToken as String),
       refreshToken: (l$refreshToken as String),
-      accessTokenExpiry: DateTime.parse((l$accessTokenExpiry as String)),
-      refreshTokenExpiry: DateTime.parse((l$refreshTokenExpiry as String)),
+      accessTokenExpiry: dateTimeFromJson(l$accessTokenExpiry),
+      refreshTokenExpiry: dateTimeFromJson(l$refreshTokenExpiry),
       device: (l$device as String),
-      createdAt: DateTime.parse((l$createdAt as String)),
-      updatedAt: DateTime.parse((l$updatedAt as String)),
+      createdAt: dateTimeFromJson(l$createdAt),
+      updatedAt: dateTimeFromJson(l$updatedAt),
       $__typename: (l$$__typename as String),
     );
   }
@@ -1635,15 +1636,15 @@ class Mutation$LoginUser$loginUser$token {
     final l$refreshToken = refreshToken;
     _resultData['refreshToken'] = l$refreshToken;
     final l$accessTokenExpiry = accessTokenExpiry;
-    _resultData['accessTokenExpiry'] = l$accessTokenExpiry.toIso8601String();
+    _resultData['accessTokenExpiry'] = dateTimeToJson(l$accessTokenExpiry);
     final l$refreshTokenExpiry = refreshTokenExpiry;
-    _resultData['refreshTokenExpiry'] = l$refreshTokenExpiry.toIso8601String();
+    _resultData['refreshTokenExpiry'] = dateTimeToJson(l$refreshTokenExpiry);
     final l$device = device;
     _resultData['device'] = l$device;
     final l$createdAt = createdAt;
-    _resultData['createdAt'] = l$createdAt.toIso8601String();
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
     final l$updatedAt = updatedAt;
-    _resultData['updatedAt'] = l$updatedAt.toIso8601String();
+    _resultData['updatedAt'] = dateTimeToJson(l$updatedAt);
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
@@ -2513,11 +2514,11 @@ class Mutation$RefreshToken$refreshToken {
       user: (l$user as String),
       accessToken: (l$accessToken as String),
       refreshToken: (l$refreshToken as String),
-      accessTokenExpiry: DateTime.parse((l$accessTokenExpiry as String)),
-      refreshTokenExpiry: DateTime.parse((l$refreshTokenExpiry as String)),
+      accessTokenExpiry: dateTimeFromJson(l$accessTokenExpiry),
+      refreshTokenExpiry: dateTimeFromJson(l$refreshTokenExpiry),
       device: (l$device as String),
-      createdAt: DateTime.parse((l$createdAt as String)),
-      updatedAt: DateTime.parse((l$updatedAt as String)),
+      createdAt: dateTimeFromJson(l$createdAt),
+      updatedAt: dateTimeFromJson(l$updatedAt),
       $__typename: (l$$__typename as String),
     );
   }
@@ -2553,15 +2554,15 @@ class Mutation$RefreshToken$refreshToken {
     final l$refreshToken = refreshToken;
     _resultData['refreshToken'] = l$refreshToken;
     final l$accessTokenExpiry = accessTokenExpiry;
-    _resultData['accessTokenExpiry'] = l$accessTokenExpiry.toIso8601String();
+    _resultData['accessTokenExpiry'] = dateTimeToJson(l$accessTokenExpiry);
     final l$refreshTokenExpiry = refreshTokenExpiry;
-    _resultData['refreshTokenExpiry'] = l$refreshTokenExpiry.toIso8601String();
+    _resultData['refreshTokenExpiry'] = dateTimeToJson(l$refreshTokenExpiry);
     final l$device = device;
     _resultData['device'] = l$device;
     final l$createdAt = createdAt;
-    _resultData['createdAt'] = l$createdAt.toIso8601String();
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
     final l$updatedAt = updatedAt;
-    _resultData['updatedAt'] = l$updatedAt.toIso8601String();
+    _resultData['updatedAt'] = dateTimeToJson(l$updatedAt);
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;

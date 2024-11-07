@@ -40,10 +40,9 @@ class UserProvider extends _$UserProvider {
       name: userData.name,
       password: '', // We don't store password in state
       role: userData.role,
-      status: 1, // You might want to add status to your GraphQL schema
+      status: 1,
       created_at: userData.createdAt,
-      updated_at:
-          DateTime.now(), // You might want to add updatedAt to your schema
+      updated_at: DateTime.now(),
       last_login: userData.lastLogin ?? DateTime.now(),
     );
   }
