@@ -358,10 +358,10 @@ type UserAchievementDetail struct {
 }
 
 type UserDetailResponse struct {
-	UserID    string  `json:"userId"`
-	Email     string  `json:"email"`
-	Name      string  `json:"name"`
-	Role      string  `json:"role"`
-	CreatedAt string  `json:"createdAt"`
-	LastLogin *string `json:"lastLogin,omitempty"`
+	UserID      string  `json:"userId"`
+	PhoneNumber string  `json:"phoneNumber"`
+	Name        string  `json:"name"`
+	Role        string  `json:"role"`
+	CreatedAt   string  `json:"createdAt"`
+	LastLogin   *string `json:"lastLogin,omitempty"`
 }
