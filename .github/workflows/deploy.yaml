@@ -64,6 +64,12 @@ jobs:
           username: root
           key: ${{ secrets.ECS_KEY }}
           script: |
+            # Login to Alibaba Cloud Registry
+            docker login -u ${{ secrets.ALICLOUD_DOCKER_USERNAME }} -p ${{ secrets.ALICLOUD_DOCKER_PASSWORD }} registry-intl.ap-southeast-1.aliyuncs.com
+            
+            # Set environment variables
             export BUILD_NUMBER=${{ github.run_number }}
+            export REGISTRY=registry-intl.ap-southeast-1.aliyuncs.com/swmeng/meditrax-
+            
             cd /root/meditrax/
             sh ./deploy.sh
