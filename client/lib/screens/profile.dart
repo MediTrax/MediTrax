@@ -11,7 +11,7 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProviderProvider);
+    final userAsync = ref.watch(userDataProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +25,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               const Text('加载失败'),
               TextButton(
-                onPressed: () => ref.refresh(userProviderProvider),
+                onPressed: () => ref.refresh(userDataProvider),
                 child: const Text('重试'),
               ),
             ],
@@ -133,23 +133,53 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               // Family Section
-              InkWell(
-                onTap: () => context.push('/family-collaboration'),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('家庭协作', style: TextStyle(fontSize: 16)),
-                        Text('2位家庭成员',
-                            style: TextStyle(color: Colors.grey, fontSize: 14)),
-                      ],
+              Consumer(
+                builder: (context, ref, child) {
+                  final familyMembersAsync = ref.watch(familyMembersProvider);
+
+                  return familyMembersAsync.when(
+                    loading: () => const CircularProgressIndicator(),
+                    error: (error, stack) => InkWell(
+                      onTap: () => context.push('/family-collaboration'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('家庭协作', style: TextStyle(fontSize: 16)),
+                              Text('加载失败',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 14)),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.grey[400], size: 20),
+                        ],
+                      ),
                     ),
-                    Icon(Icons.arrow_forward_ios,
-                        color: Colors.grey[400], size: 20),
-                  ],
-                ),
+                    data: (members) => InkWell(
+                      onTap: () => context.push('/family-collaboration'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('家庭协作',
+                                  style: TextStyle(fontSize: 16)),
+                              Text('${members.length}位家庭成员',
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 14)),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.grey[400], size: 20),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

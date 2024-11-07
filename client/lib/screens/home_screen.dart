@@ -8,7 +8,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProviderProvider);
+    final userAsync = ref.watch(userDataProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -20,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 const Text('加载失败'),
                 TextButton(
-                  onPressed: () => ref.refresh(userProviderProvider),
+                  onPressed: () => ref.refresh(userDataProvider),
                   child: const Text('重试'),
                 ),
               ],
