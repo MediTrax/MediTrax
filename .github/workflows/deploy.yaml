@@ -1,0 +1,69 @@
+name: Build and Deploy
+
+env:
+  REGISTRY: registry-intl.ap-southeast-1.aliyuncs.com/swmeng/meditrax-
+  DOCKER_BUILDKIT: '1'
+
+on:
+  push:
+    branches: [ master ] # Adjust branch name as needed
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Login to Alibaba Cloud Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry-intl.ap-southeast-1.aliyuncs.com
+          username: ${{ secrets.ALICLOUD_DOCKER_USERNAME }}
+          password: ${{ secrets.ALICLOUD_DOCKER_PASSWORD }}
+      
+      - name: Build Client Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}client:latest
+            ${{ env.REGISTRY }}client:${{ github.run_number }}
+          build-args: |
+            ENABLED_MODULES=brotli
+            BUILD_NUM=${{ github.run_number }}
+          memory: 2000m
+      
+      - name: Build Server Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}server:latest
+            ${{ env.REGISTRY }}server:${{ github.run_number }}
+          build-args: |
+            ENABLED_MODULES=brotli
+
+      - name: Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ECS_IP }}
+          username: root
+          key: ${{ secrets.ECS_KEY }}
+          source: "deploy/*"
+          target: "/root/meditrax"
+          strip_components: 1
+
+      - name: Execute Remote Deploy Script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ECS_IP }}
+          username: root
+          key: ${{ secrets.ECS_KEY }}
+          script: |
+            export BUILD_NUMBER=${{ github.run_number }}
+            cd /root/meditrax/
+            sh ./deploy.sh
