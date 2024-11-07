@@ -1072,13 +1072,27 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 		return nil, fmt.Errorf("access denied")
 	}
 
+	var result interface{}
+	var err error
+
 	// get all the health metric entries that is associated with the user
-	result, err := database.DB.Query(
-		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-		},
-	)
+	if metricType == nil {
+		result, err = database.DB.Query(
+			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
+			map[string]interface{}{
+				"user_id": user.ID,
+			},
+		)
+	} else {
+		result, err = database.DB.Query(
+			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
+			map[string]interface{}{
+				"user_id":     user.ID,
+				"metric_type": *metricType,
+			},
+		)
+	}
+
 	if err != nil {
 		return nil, err
 	}
