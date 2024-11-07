@@ -1,36 +1,64 @@
+mutation CreateUser(
+    $phoneNumber: String!
+    $password: String!
+    $username: String!
+    $role: String!
+) {
+    createUser(
+        phoneNumber: $phoneNumber
+        password: $password
+        username: $username
+        role: $role
+    ) {
+        userId
+        message
+    }
+}
+
 mutation LoginUser(
-    $email: String!
+    $phoneNumber: String!
     $password: String!
 ) {
     loginUser(
-        email: $email
+        phoneNumber: $phoneNumber
         password: $password
     ) {
         userId
         token {
+            id
+            user
             accessToken
             refreshToken
             accessTokenExpiry
             refreshTokenExpiry
+            device
+            createdAt
+            updatedAt
         }
+        message
     }
 }
 
 mutation RefreshToken(
-  $accessToken: String!
-  $refreshToken: String!
-  $device: String!
+    $accessToken: String!
+    $refreshToken: String!
+    $device: String!
 ) {
-  refreshToken(
-    accessToken: $accessToken
-    refreshToken: $refreshToken
-    device: $device
-  ) {
-    accessToken
-    refreshToken
-    accessTokenExpiry
-    refreshTokenExpiry
-  }
+    refreshToken(
+        accessToken: $accessToken
+        refreshToken: $refreshToken
+        device: $device
+    ) {
+        id
+        user
+        accessToken
+        refreshToken
+        accessTokenExpiry
+        refreshTokenExpiry
+        device
+        createdAt
+        updatedAt
+    }
 }
 
 # query User() {

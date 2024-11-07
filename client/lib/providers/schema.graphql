@@ -6,8 +6,11 @@
 
 scalar DateTime
 
+
 type Question{
   question: String!
+  questionType: Int!
+  choices: [String!]!
   answer: String!
 }
 
@@ -33,7 +36,7 @@ type Token {
 
 type User{
   id: String!
-  email: String!
+  phoneNumber: String!
   password: String!
   name: String!
   created_at: DateTime!
@@ -127,10 +130,6 @@ type UserAchievement{
   created_at: DateTime!
 }
 
-type Query {
-  user: User!
-}
-
 type PasswordChange {
   id: String!
   user: String!
@@ -151,7 +150,7 @@ type LoginUserResponse {
 
 type UserDetailResponse {
   userId: String!
-  email: String!
+  phoneNumber: String!
   name: String!
   role: String!
   createdAt: DateTime!
@@ -366,55 +365,64 @@ type UserAchievementDetail {
   earnedAt: DateTime!
 }
 
+
+type Query{
+  getUser: UserDetailResponse
+  getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
+  getMedications: [MedicationDetail]
+  getMedicationReminders: [MedicationReminderDetail]
+  
+  getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  getDietPlans: [DietPlanDetail]
+  getFamilyMembers: [FamilyMemberDetail]
+  getAchievementBadges: [AchievementBadgeDetail]
+  getUserAchievements: [UserAchievementDetail]
+}
+
 type Mutation {
-  createUser(email: String!, password: String!, username: String!, role: String!): CreateUserResponse
-  loginUser(email: String!, password: String!): LoginUserResponse
-  refreshToken(accessToken: String!, refreshToken: String!, device: String!): Token
-  getUser(userId: String!): UserDetailResponse
-  updateUser(userId: String!, name: String, email: String, password: String): UpdateUserResponse
-  deleteUser(userId: String!): DeleteUserResponse
-  requestPasswordReset(email: String!): RequestPasswordResetResponse
+  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+
+  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
+  
+  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+  deleteUser: DeleteUserResponse
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
   
-  createHealthRiskAssessment(userId: String!, questionnaireData: String!): HealthRiskAssessmentResponse
-  getHealthRiskAssessment(userId: String!): HealthRiskAssessmentDetailResponse
+  createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
   updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
   
-  addMedication(userId: String!, name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
-  getMedications(userId: String!): [MedicationDetail]
+  addMedication(name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
   updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Float): UpdateMedicationResponse
   deleteMedication(medicationId: String!): DeleteMedicationResponse
-  createMedicationReminder(userId: String!, medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
-  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
-  getMedicationReminders(userId: String!): [MedicationReminderDetail]
   
-  createTreatmentSchedule(userId: String!, treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
-  getTreatmentSchedules(userId: String!): [TreatmentScheduleDetail]
+  createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
+  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  
+  createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
+  getTreatmentSchedules: [TreatmentScheduleDetail]
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
   
-  addHealthMetric(userId: String!, metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse
-  getHealthMetrics(userId: String!, startDate: DateTime, endDate: DateTime): [HealthMetricDetail]
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
   updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
   deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
   
-  createDietPlan(userId: String!, mealType: String!, foodItems: String!, calories: Float!): CreateDietPlanResponse
-  getDietPlans(userId: String!): [DietPlanDetail]
+  createDietPlan(mealType: String!, foodItems: String!, calories: Float!): CreateDietPlanResponse  
   updateDietPlan(planId: String!, mealType: String, foodItems: String, calories: Float): UpdateDietPlanResponse
   deleteDietPlan(planId: String!): DeleteDietPlanResponse
   
-  addMedicalRecord(userId: String!, recordType: String!, content: String!): AddMedicalRecordResponse
-  getMedicalRecords(userId: String!): [MedicalRecordDetail]
+  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
+  getMedicalRecords: [MedicalRecordDetail]
   updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
   deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
   
-  addFamilyMember(userId: String!, relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
-  getFamilyMembers(userId: String!): [FamilyMemberDetail]
+  addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
   updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
   deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
   
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
-  getAchievementBadges: [AchievementBadgeDetail]
-  awardAchievement(userId: String!, badgeId: String!): AwardAchievementResponse
-  getUserAchievements(userId: String!): [UserAchievementDetail]
+  awardAchievement(badgeId: String!): AwardAchievementResponse
+  
 }

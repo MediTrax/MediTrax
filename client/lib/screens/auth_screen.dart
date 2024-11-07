@@ -45,10 +45,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            _phoneController.text,
-            _useOTP ? _otpCode ?? '' : _passwordController.text,
-          );
+      if (_useOTP) {
+        // TODO: Implement OTP login
+        throw UnimplementedError('OTP login not implemented yet');
+      } else {
+        await ref.read(appStateProvider.notifier).loginWithPhoneNumberPassword(
+              _phoneController.text,
+              _passwordController.text,
+              '', // captcha parameter
+            );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,10 +93,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual signup
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            _phoneController.text,
-            _passwordController.text,
+      await ref.read(appStateProvider.notifier).signupWithPhone(
+            phone: _phoneController.text,
+            password: _passwordController.text,
+            username: _phoneController.text, // Using phone as initial username
           );
     } catch (e) {
       if (mounted) {
@@ -116,11 +122,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual OTP request
-      setState(() => _otpCode = '123456'); // Mock OTP
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('验证码已发送')),
-      );
+      // TODO: Implement actual OTP request when backend supports it
+      throw UnimplementedError('OTP functionality not implemented yet');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -138,11 +141,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual WeChat login
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            'wechat-user@example.com',
-            'wechat-dummy-password',
-          );
+      // TODO: Implement WeChat login when backend supports it
+      throw UnimplementedError('WeChat login not implemented yet');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -257,7 +257,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         children: [
                           Expanded(
                             child: TextField(
-                              onChanged: (value) => setState(() => _otpCode = value),
+                              onChanged: (value) =>
+                                  setState(() => _otpCode = value),
                               keyboardType: TextInputType.number,
                               decoration: InputDecoration(
                                 labelText: '验证码',
@@ -329,7 +330,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                         icon: const Icon(
-                          Icons.wechat,  // You might want to use a proper WeChat icon
+                          Icons
+                              .wechat, // You might want to use a proper WeChat icon
                           color: Color(0xFF07C160),
                         ),
                         label: const Text(
