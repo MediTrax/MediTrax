@@ -9,7 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'user_provider.g.dart';
 
 @riverpod
-class UserProvider extends _$UserProvider {
+class UserData extends _$UserData {
   @override
   FutureOr<User?> build() async {
     // Return null if not authenticated
@@ -112,9 +112,12 @@ class UserProvider extends _$UserProvider {
       throw result.exception!;
     }
   }
+}
 
-  // Family Member Methods
-  Future<List<FamilyMember>> getFamilyMembers() async {
+@riverpod
+class FamilyMembers extends _$FamilyMembers {
+  @override
+  Future<List<FamilyMember>> build() async {
     final result =
         await ref.read(graphQLServiceProvider).query$GetFamilyMembers(
               Options$Query$GetFamilyMembers(),
@@ -131,12 +134,12 @@ class UserProvider extends _$UserProvider {
               relatedUserId: member.relatedUserId,
               relationship: member.relationship,
               accessLevel: int.parse(member.accessLevel),
-              createdAt: DateTime.now(), // Add to schema if needed
+              createdAt: DateTime.now(),
             ))
         .toList();
   }
 
-  Future<void> addFamilyMember({
+  Future<void> addMember({
     required String relatedUserId,
     required String relationship,
     required String accessLevel,
@@ -155,9 +158,11 @@ class UserProvider extends _$UserProvider {
     if (result.hasException) {
       throw result.exception!;
     }
+
+    ref.invalidateSelf();
   }
 
-  Future<void> updateFamilyMember({
+  Future<void> updateMember({
     required String memberId,
     String? relationship,
     String? accessLevel,
@@ -176,9 +181,11 @@ class UserProvider extends _$UserProvider {
     if (result.hasException) {
       throw result.exception!;
     }
+
+    ref.invalidateSelf();
   }
 
-  Future<void> deleteFamilyMember(String memberId) async {
+  Future<void> deleteMember(String memberId) async {
     final result =
         await ref.read(graphQLServiceProvider).mutate$DeleteFamilyMember(
               Options$Mutation$DeleteFamilyMember(
@@ -191,10 +198,15 @@ class UserProvider extends _$UserProvider {
     if (result.hasException) {
       throw result.exception!;
     }
-  }
 
-  // Achievement Methods
-  Future<List<AchievementBadge>> getUserAchievements() async {
+    ref.invalidateSelf();
+  }
+}
+
+@riverpod
+class Achievements extends _$Achievements {
+  @override
+  Future<List<AchievementBadge>> build() async {
     final result =
         await ref.read(graphQLServiceProvider).query$GetUserAchievements(
               Options$Query$GetUserAchievements(),
@@ -213,5 +225,37 @@ class UserProvider extends _$UserProvider {
               createdAt: achievement.earnedAt,
             ))
         .toList();
+  }
+}
+
+@riverpod
+class UserPoints extends _$UserPoints {
+  @override
+  Future<Map<String, dynamic>> build() async {
+    // TODO: Add GraphQL query for points data
+    // For now returning mock data
+    return {
+      'currentPoints': 750,
+      'nextLevelPoints': 1000,
+      'currentLevel': 3,
+      'nextLevel': 4,
+      'dailyTasks': [
+        {
+          'task': '按时服用早间药物~',
+          'points': 10,
+          'completed': false,
+        },
+        {
+          'task': '记录今日血压~',
+          'points': 15,
+          'completed': false,
+        },
+        {
+          'task': '完成15分钟步行~',
+          'points': 20,
+          'completed': false,
+        },
+      ],
+    };
   }
 }
