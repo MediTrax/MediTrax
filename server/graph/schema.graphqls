@@ -2,7 +2,7 @@
 #
 # https://gqlgen.com/getting-started/
 
-# go run: go run github.com/99designs/gqlgen generate
+# go: go run github.com/99designs/gqlgen generate
 
 scalar DateTime
 
@@ -100,7 +100,8 @@ type DietPlan{
   user_id: String!
   meal_type: String!
   food_items: [String!]!
-  calories: Int!
+  meals: [String!]!
+  calories: Int
   created_at: DateTime!
   updated_at: DateTime!
 }
@@ -283,6 +284,17 @@ type CreateDietPlanResponse {
   message: String!
 }
 
+type FoodSpec{
+  name: String!
+  value: String!
+  unit: String!
+}
+
+type FoodSpecs{
+  specs: [FoodSpec!]!
+  # is_recommended: Boolean!
+}
+
 type DietPlanDetail {
   planId: String!
   mealType: String!
@@ -378,6 +390,8 @@ type Query{
   getFamilyMembers: [FamilyMemberDetail]
   getAchievementBadges: [AchievementBadgeDetail]
   getUserAchievements: [UserAchievementDetail]
+
+  getFoodSpecs(food: String!) : FoodSpecs
 }
 
 type Mutation {
