@@ -100,7 +100,8 @@ type DietPlan struct {
 	UserID    string   `json:"user_id"`
 	MealType  string   `json:"meal_type"`
 	FoodItems []string `json:"food_items"`
-	Calories  int      `json:"calories"`
+	Meals     []string `json:"meals"`
+	Calories  *int     `json:"calories,omitempty"`
 	CreatedAt string   `json:"created_at"`
 	UpdatedAt string   `json:"updated_at"`
 }
@@ -127,6 +128,16 @@ type FamilyMemberDetail struct {
 	RelatedUserID string `json:"relatedUserId"`
 	Relationship  string `json:"relationship"`
 	AccessLevel   string `json:"accessLevel"`
+}
+
+type FoodSpec struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+	Unit  string `json:"unit"`
+}
+
+type FoodSpecs struct {
+	Specs []*FoodSpec `json:"specs"`
 }
 
 type HealthMetric struct {

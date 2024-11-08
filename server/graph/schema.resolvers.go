@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"meditrax/graph/chat"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
@@ -1211,6 +1212,38 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 // GetUserAchievements is the resolver for the getUserAchievements field.
 func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error) {
 	panic(fmt.Errorf("not implemented: GetUserAchievements - getUserAchievements"))
+}
+
+// GetFoodSpecs is the resolver for the getFoodSpecs field.
+func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+	client := chat.GetClient()
+
+	result, err := chat.GetFoodSpec(food, client)
+	if err != nil {
+		return nil, err
+	}
+
+	lines := strings.Split(*result, "\n")
+
+	var specs []*model.FoodSpec
+	for _, line := range lines {
+		parameters := strings.Split(line, ":")
+		info := strings.Split(parameters[1], " ")
+
+		spec := &model.FoodSpec{
+			Name:  parameters[0],
+			Value: info[0],
+			Unit:  info[1],
+		}
+
+		specs = append(specs, spec)
+	}
+
+	foodSpecs := &model.FoodSpecs{
+		Specs: specs,
+	}
+
+	return foodSpecs, nil
 }
 
 // Mutation returns MutationResolver implementation.
