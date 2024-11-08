@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -45,14 +46,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            _phoneController.text,
-            _useOTP ? _otpCode ?? '' : _passwordController.text,
-          );
+      if (_useOTP) {
+        throw UnimplementedError('OTP login not implemented yet');
+      } else {
+        await ref.read(appStateProvider.notifier).loginWithPhoneNumberPassword(
+              _phoneController.text,
+              _passwordController.text,
+              '', // captcha parameter
+            );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('登录失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '登录失败: ',
         );
       }
     } finally {
@@ -87,15 +95,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual signup
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            _phoneController.text,
-            _passwordController.text,
+      await ref.read(appStateProvider.notifier).signupWithPhone(
+            phone: _phoneController.text,
+            password: _passwordController.text,
+            username: _phoneController.text,
           );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('注册失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '注册失败: ',
         );
       }
     } finally {
@@ -116,15 +126,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual OTP request
-      setState(() => _otpCode = '123456'); // Mock OTP
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('验证码已发送')),
-      );
+      throw UnimplementedError('OTP functionality not implemented yet');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('发送验证码失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '发送验证码失败: ',
         );
       }
     } finally {
@@ -138,15 +146,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement actual WeChat login
-      await ref.read(appStateProvider.notifier).mockLoginEmailPassword(
-            'wechat-user@example.com',
-            'wechat-dummy-password',
-          );
+      throw UnimplementedError('WeChat login not implemented yet');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('微信登录失败: ${e.toString()}')),
+        ErrorHandler.showErrorSnackBar(
+          context,
+          e,
+          prefix: '微信登录失败: ',
         );
       }
     } finally {
@@ -257,7 +263,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         children: [
                           Expanded(
                             child: TextField(
-                              onChanged: (value) => setState(() => _otpCode = value),
+                              onChanged: (value) =>
+                                  setState(() => _otpCode = value),
                               keyboardType: TextInputType.number,
                               decoration: InputDecoration(
                                 labelText: '验证码',
@@ -329,7 +336,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                         icon: const Icon(
-                          Icons.wechat,  // You might want to use a proper WeChat icon
+                          Icons
+                              .wechat, // You might want to use a proper WeChat icon
                           color: Color(0xFF07C160),
                         ),
                         label: const Text(
