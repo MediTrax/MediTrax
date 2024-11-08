@@ -367,12 +367,13 @@ type UserAchievementDetail {
 
 
 type Query{
-  
+  getUser: UserDetailResponse
   getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
   getMedications: [MedicationDetail]
   getMedicationReminders: [MedicationReminderDetail]
-  
+  getTreatmentSchedules: [TreatmentScheduleDetail]
   getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  getMedicalRecords: [MedicalRecordDetail]
   getDietPlans: [DietPlanDetail]
   getFamilyMembers: [FamilyMemberDetail]
   getAchievementBadges: [AchievementBadgeDetail]
@@ -384,7 +385,6 @@ type Mutation {
 
   createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
   loginUser(phoneNumber: String!, password: String!): LoginUserResponse
-  getUser: UserDetailResponse
   updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
@@ -401,7 +401,6 @@ type Mutation {
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
-  getTreatmentSchedules: [TreatmentScheduleDetail]
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
   
@@ -414,14 +413,12 @@ type Mutation {
   deleteDietPlan(planId: String!): DeleteDietPlanResponse
   
   addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
-  getMedicalRecords: [MedicalRecordDetail]
   updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
   deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
   
   addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
   updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
   deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
-  
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
   awardAchievement(badgeId: String!): AwardAchievementResponse
   

@@ -110,7 +110,7 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 		Message: "Login successful",
 	}
 
-	result, err = database.DB.Query(
+	_, err = database.DB.Query(
 		`UPDATE $user_id SET last_login=time::now();`, map[string]interface{}{
 			"user_id": user.ID,
 		})
@@ -118,25 +118,6 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 		return nil, err
 	}
 
-	return response, nil
-}
-
-// GetUser is the resolver for the getUser field.
-func (r *mutationResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
-	// Fetch the user details
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	response := &model.UserDetailResponse{
-		UserID:      user.ID,
-		PhoneNumber: user.PhoneNumber,
-		Name:        user.Name,
-		Role:        user.Role,
-		CreatedAt:   user.CreatedAt,
-		LastLogin:   &user.LastLogin,
-	}
 	return response, nil
 }
 
@@ -200,7 +181,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, name *string, phoneNu
 	}
 
 	return response, nil
-
 }
 
 // DeleteUser is the resolver for the deleteUser field.
@@ -1517,6 +1497,30 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.Me
 	return reminderDetails, nil
 }
 
+// GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
+func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Fetch treatment schedules for the user
+	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: please modify this line as it may result in a bug
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return schedules, nil
+}
+
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
 	user := middlewares.ForContext(ctx)
@@ -1524,13 +1528,27 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 		return nil, fmt.Errorf("access denied")
 	}
 
+	var result interface{}
+	var err error
+
 	// get all the health metric entries that is associated with the user
-	result, err := database.DB.Query(
-		`SELECT * FROM health_metric WHERE user_id = $user_id;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-		},
-	)
+	if metricType == nil {
+		result, err = database.DB.Query(
+			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
+			map[string]interface{}{
+				"user_id": user.ID,
+			},
+		)
+	} else {
+		result, err = database.DB.Query(
+			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
+			map[string]interface{}{
+				"user_id":     user.ID,
+				"metric_type": *metricType,
+			},
+		)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -1558,6 +1576,11 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 	}
 
 	return metricDetails, nil
+}
+
+// GetMedicalRecords is the resolver for the getMedicalRecords field.
+func (r *queryResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
+	panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
 }
 
 // GetDietPlans is the resolver for the getDietPlans field.

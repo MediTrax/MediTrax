@@ -1,0 +1,29 @@
+# build.yaml
+global_options:
+  freezed:freezed:
+    runs_before:
+      - hive_generator:hive_generator
+targets:
+  $default:
+    builders:
+      graphql_codegen:
+        options:
+          addTypenameExcludedPaths:
+            - subscription 
+          scalars:
+            ObjectID:
+              type: String
+            DateTime:
+              type: DateTime
+            Float:
+              type: double
+            JSON:
+              type: Map<String, dynamic>
+            Upload:
+              type: MultipartFile
+              fromJsonFunctionName: multipartFileFromJson
+              toJsonFunctionName: multipartFileToJson
+              import: 'package:meditrax/scalar.dart'
+          clients:
+            - graphql
+            - graphql_flutter
