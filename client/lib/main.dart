@@ -1,125 +1,206 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:meditrax/models/achievement_badge.dart';
+import 'package:meditrax/models/app_state.dart';
+import 'package:meditrax/models/diet_plan.dart';
+import 'package:meditrax/models/family_member.dart';
+import 'package:meditrax/models/health_metric.dart';
+import 'package:meditrax/models/health_risk_assessment.dart';
+import 'package:meditrax/models/medical_record.dart';
+import 'package:meditrax/models/medication.dart';
+import 'package:meditrax/models/medication_reminder.dart';
+import 'package:meditrax/models/token.dart';
+import 'package:meditrax/models/treatment_schedule.dart';
+import 'package:meditrax/models/user.dart';
+import 'package:meditrax/models/user_achievement.dart';
+import 'package:meditrax/screens/profile.dart';
 
-void main() {
-  runApp(const MyApp());
+// Import all screens
+import 'screens/home_screen.dart';
+import 'screens/auth_screen.dart';
+import 'screens/ai_helper_screen.dart';
+import 'screens/diet_management_screen.dart';
+import 'screens/family_collaboration_screen.dart';
+import 'screens/health_risk_assessment_screen.dart';
+import 'screens/health_risk_report_screen.dart';
+import 'screens/medical_records_screen.dart';
+import 'screens/medicine_inventory_screen.dart';
+import 'screens/prescription_management_screen.dart';
+import 'screens/rewards_screen.dart';
+import 'screens/treatment_monitoring_screen.dart';
+import 'providers/app_state.dart';
+import 'widgets/bottom_nav_bar.dart';
+
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(AppStateDataImplAdapter());
+  Hive.registerAdapter(TokenAdapter());
+  Hive.registerAdapter(UserImplAdapter());
+  Hive.registerAdapter(HealthRiskAssessmentImplAdapter());
+  Hive.registerAdapter(MedicationImplAdapter());
+  Hive.registerAdapter(MedicationReminderImplAdapter());
+  Hive.registerAdapter(TreatmentScheduleImplAdapter());
+  Hive.registerAdapter(HealthMetricImplAdapter());
+  Hive.registerAdapter(DietPlanImplAdapter());
+  Hive.registerAdapter(MedicalRecordImplAdapter());
+  Hive.registerAdapter(FamilyMemberImplAdapter());
+  Hive.registerAdapter(AchievementBadgeImplAdapter());
+  Hive.registerAdapter(UserAchievementImplAdapter());
+  await Hive.openBox<AppStateData>('appState');
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+final routerProvider = Provider<GoRouter>((ref) {
+  final router = RouterNotifier(ref);
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  return GoRouter(
+    refreshListenable: router,
+    redirect: router.redirect,
+    routes: router.routes,
+    initialLocation: '/auth',
+    debugLogDiagnostics: true,
+  );
+});
+
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen(appStateProvider, (_, __) => notifyListeners());
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  String? redirect(BuildContext context, GoRouterState state) {
+    final isAuth = _ref.read(appStateProvider).token != null;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+    if (!isAuth && state.matchedLocation != '/auth') {
+      return '/auth';
+    }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+    if (isAuth && state.matchedLocation == '/auth') {
+      return '/';
+    }
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+  // Helper method to determine current index based on path
+  int _getCurrentIndex(String location) {
+    // Use startsWith to handle sub-routes
+    if (location.startsWith('/treatment')) {
+      return 0;
+    } else if (location.startsWith('/medicine-inventory')) {
+      return 1;
+    } else if (location == '/') {
+      return 2;
+    } else if (location.startsWith('/medical-records')) {
+      return 3;
+    } else if (location.startsWith('/profile')) {
+      return 4;
+    }
+    // Check if the route is a sub-route of any main routes
+    else if (location.startsWith('/ai-helper') ||
+        location.startsWith('/diet-management') ||
+        location.startsWith('/family-collaboration') ||
+        location.startsWith('/health-risk-assessment') ||
+        location.startsWith('/health-risk-report') ||
+        location.startsWith('/prescription-management') ||
+        location.startsWith('/rewards')) {
+      return 2; // These are accessed from home, so keep home selected
+    }
+    return 2; // Default to home
+  }
+
+  List<RouteBase> get routes => [
+        GoRoute(
+          path: '/auth',
+          builder: (context, state) => const AuthScreen(),
+        ),
+        ShellRoute(
+          builder: (context, state, child) {
+            final currentIndex = _getCurrentIndex(state.matchedLocation);
+
+            return Scaffold(
+              body: child,
+              bottomNavigationBar: BottomNavBar(
+                currentIndex: currentIndex,
+              ),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => const HomeScreen(),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            GoRoute(
+              path: '/treatment',
+              builder: (context, state) => const TreatmentMonitoringScreen(),
+            ),
+            GoRoute(
+              path: '/medicine-inventory',
+              builder: (context, state) => const MedicineInventoryScreen(),
+            ),
+            GoRoute(
+              path: '/medical-records',
+              builder: (context, state) => const MedicalRecordsScreen(),
+            ),
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+            // Feature routes
+            GoRoute(
+              path: '/ai-helper',
+              builder: (context, state) => const AiHelperScreen(),
+            ),
+            GoRoute(
+              path: '/diet-management',
+              builder: (context, state) => const DietManagementScreen(),
+            ),
+            GoRoute(
+              path: '/family-collaboration',
+              builder: (context, state) => const FamilyCollaborationScreen(),
+            ),
+            GoRoute(
+              path: '/health-risk-assessment',
+              builder: (context, state) => const HealthRiskAssessmentScreen(),
+            ),
+            GoRoute(
+              path: '/health-risk-report',
+              builder: (context, state) => const HealthRiskReportScreen(),
+            ),
+            GoRoute(
+              path: '/prescription-management',
+              builder: (context, state) => const PrescriptionManagementScreen(),
+            ),
+            GoRoute(
+              path: '/rewards',
+              builder: (context, state) => const RewardsScreen(),
             ),
           ],
         ),
+      ];
+}
+
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      title: 'Health Care App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      routerConfig: router,
     );
   }
 }

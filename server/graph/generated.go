@@ -293,9 +293,6 @@ type ComplexityRoot struct {
 		DeleteMedication           func(childComplexity int, medicationID string) int
 		DeleteTreatmentSchedule    func(childComplexity int, scheduleID string) int
 		DeleteUser                 func(childComplexity int) int
-		GetMedicalRecords          func(childComplexity int) int
-		GetTreatmentSchedules      func(childComplexity int) int
-		GetUser                    func(childComplexity int) int
 		LoginUser                  func(childComplexity int, phoneNumber string, password string) int
 		RefreshToken               func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset       func(childComplexity int, phoneNumber string) int
@@ -324,8 +321,11 @@ type ComplexityRoot struct {
 		GetFamilyMembers        func(childComplexity int) int
 		GetHealthMetrics        func(childComplexity int, startDate *string, endDate *string, metricType *string) int
 		GetHealthRiskAssessment func(childComplexity int) int
+		GetMedicalRecords       func(childComplexity int) int
 		GetMedicationReminders  func(childComplexity int) int
 		GetMedications          func(childComplexity int) int
+		GetTreatmentSchedules   func(childComplexity int) int
+		GetUser                 func(childComplexity int) int
 		GetUserAchievements     func(childComplexity int) int
 	}
 
@@ -458,7 +458,6 @@ type MutationResolver interface {
 	RefreshToken(ctx context.Context, accessToken string, refreshToken string, device string) (*model.Token, error)
 	CreateUser(ctx context.Context, phoneNumber string, password string, username string, role string) (*model.CreateUserResponse, error)
 	LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error)
-	GetUser(ctx context.Context) (*model.UserDetailResponse, error)
 	UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error)
 	DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error)
 	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
@@ -471,7 +470,6 @@ type MutationResolver interface {
 	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error)
 	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
 	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
-	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
 	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
 	DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error)
 	AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error)
@@ -481,7 +479,6 @@ type MutationResolver interface {
 	UpdateDietPlan(ctx context.Context, planID string, mealType *string, foodItems *string, calories *float64) (*model.UpdateDietPlanResponse, error)
 	DeleteDietPlan(ctx context.Context, planID string) (*model.DeleteDietPlanResponse, error)
 	AddMedicalRecord(ctx context.Context, recordType string, content string) (*model.AddMedicalRecordResponse, error)
-	GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error)
 	UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error)
 	DeleteMedicalRecord(ctx context.Context, recordID string) (*model.DeleteMedicalRecordResponse, error)
 	AddFamilyMember(ctx context.Context, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error)
@@ -491,10 +488,13 @@ type MutationResolver interface {
 	AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error)
 }
 type QueryResolver interface {
+	GetUser(ctx context.Context) (*model.UserDetailResponse, error)
 	GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error)
 	GetMedications(ctx context.Context) ([]*model.MedicationDetail, error)
 	GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error)
+	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
 	GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
+	GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error)
 	GetDietPlans(ctx context.Context) ([]*model.DietPlanDetail, error)
 	GetFamilyMembers(ctx context.Context) ([]*model.FamilyMemberDetail, error)
 	GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error)
@@ -1585,27 +1585,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteUser(childComplexity), true
 
-	case "Mutation.getMedicalRecords":
-		if e.complexity.Mutation.GetMedicalRecords == nil {
-			break
-		}
-
-		return e.complexity.Mutation.GetMedicalRecords(childComplexity), true
-
-	case "Mutation.getTreatmentSchedules":
-		if e.complexity.Mutation.GetTreatmentSchedules == nil {
-			break
-		}
-
-		return e.complexity.Mutation.GetTreatmentSchedules(childComplexity), true
-
-	case "Mutation.getUser":
-		if e.complexity.Mutation.GetUser == nil {
-			break
-		}
-
-		return e.complexity.Mutation.GetUser(childComplexity), true
-
 	case "Mutation.loginUser":
 		if e.complexity.Mutation.LoginUser == nil {
 			break
@@ -1830,6 +1809,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetHealthRiskAssessment(childComplexity), true
 
+	case "Query.getMedicalRecords":
+		if e.complexity.Query.GetMedicalRecords == nil {
+			break
+		}
+
+		return e.complexity.Query.GetMedicalRecords(childComplexity), true
+
 	case "Query.getMedicationReminders":
 		if e.complexity.Query.GetMedicationReminders == nil {
 			break
@@ -1843,6 +1829,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetMedications(childComplexity), true
+
+	case "Query.getTreatmentSchedules":
+		if e.complexity.Query.GetTreatmentSchedules == nil {
+			break
+		}
+
+		return e.complexity.Query.GetTreatmentSchedules(childComplexity), true
+
+	case "Query.getUser":
+		if e.complexity.Query.GetUser == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUser(childComplexity), true
 
 	case "Query.getUserAchievements":
 		if e.complexity.Query.GetUserAchievements == nil {
@@ -9695,61 +9695,6 @@ func (ec *executionContext) fieldContext_Mutation_loginUser(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_getUser(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GetUser(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.UserDetailResponse)
-	fc.Result = res
-	return ec.marshalOUserDetailResponse2ᚖmeditraxᚋgraphᚋmodelᚐUserDetailResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_getUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "userId":
-				return ec.fieldContext_UserDetailResponse_userId(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_UserDetailResponse_phoneNumber(ctx, field)
-			case "name":
-				return ec.fieldContext_UserDetailResponse_name(ctx, field)
-			case "role":
-				return ec.fieldContext_UserDetailResponse_role(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_UserDetailResponse_createdAt(ctx, field)
-			case "lastLogin":
-				return ec.fieldContext_UserDetailResponse_lastLogin(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserDetailResponse", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_updateUser(ctx, field)
 	if err != nil {
@@ -10431,59 +10376,6 @@ func (ec *executionContext) fieldContext_Mutation_createTreatmentSchedule(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_getTreatmentSchedules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_getTreatmentSchedules(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GetTreatmentSchedules(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.TreatmentScheduleDetail)
-	fc.Result = res
-	return ec.marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_getTreatmentSchedules(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "scheduleId":
-				return ec.fieldContext_TreatmentScheduleDetail_scheduleId(ctx, field)
-			case "treatmentType":
-				return ec.fieldContext_TreatmentScheduleDetail_treatmentType(ctx, field)
-			case "scheduledTime":
-				return ec.fieldContext_TreatmentScheduleDetail_scheduledTime(ctx, field)
-			case "location":
-				return ec.fieldContext_TreatmentScheduleDetail_location(ctx, field)
-			case "notes":
-				return ec.fieldContext_TreatmentScheduleDetail_notes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type TreatmentScheduleDetail", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_updateTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_updateTreatmentSchedule(ctx, field)
 	if err != nil {
@@ -10996,57 +10888,6 @@ func (ec *executionContext) fieldContext_Mutation_addMedicalRecord(ctx context.C
 	if fc.Args, err = ec.field_Mutation_addMedicalRecord_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_getMedicalRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_getMedicalRecords(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GetMedicalRecords(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.MedicalRecordDetail)
-	fc.Result = res
-	return ec.marshalOMedicalRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicalRecordDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_getMedicalRecords(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "recordId":
-				return ec.fieldContext_MedicalRecordDetail_recordId(ctx, field)
-			case "recordType":
-				return ec.fieldContext_MedicalRecordDetail_recordType(ctx, field)
-			case "content":
-				return ec.fieldContext_MedicalRecordDetail_content(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_MedicalRecordDetail_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MedicalRecordDetail", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -11629,6 +11470,61 @@ func (ec *executionContext) fieldContext_PasswordChange_createdAt(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUser(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserDetailResponse)
+	fc.Result = res
+	return ec.marshalOUserDetailResponse2ᚖmeditraxᚋgraphᚋmodelᚐUserDetailResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_UserDetailResponse_userId(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_UserDetailResponse_phoneNumber(ctx, field)
+			case "name":
+				return ec.fieldContext_UserDetailResponse_name(ctx, field)
+			case "role":
+				return ec.fieldContext_UserDetailResponse_role(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UserDetailResponse_createdAt(ctx, field)
+			case "lastLogin":
+				return ec.fieldContext_UserDetailResponse_lastLogin(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserDetailResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getHealthRiskAssessment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getHealthRiskAssessment(ctx, field)
 	if err != nil {
@@ -11788,6 +11684,59 @@ func (ec *executionContext) fieldContext_Query_getMedicationReminders(_ context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getTreatmentSchedules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getTreatmentSchedules(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetTreatmentSchedules(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TreatmentScheduleDetail)
+	fc.Result = res
+	return ec.marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getTreatmentSchedules(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "scheduleId":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduleId(ctx, field)
+			case "treatmentType":
+				return ec.fieldContext_TreatmentScheduleDetail_treatmentType(ctx, field)
+			case "scheduledTime":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduledTime(ctx, field)
+			case "location":
+				return ec.fieldContext_TreatmentScheduleDetail_location(ctx, field)
+			case "notes":
+				return ec.fieldContext_TreatmentScheduleDetail_notes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TreatmentScheduleDetail", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getHealthMetrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getHealthMetrics(ctx, field)
 	if err != nil {
@@ -11848,6 +11797,57 @@ func (ec *executionContext) fieldContext_Query_getHealthMetrics(ctx context.Cont
 	if fc.Args, err = ec.field_Query_getHealthMetrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getMedicalRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getMedicalRecords(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetMedicalRecords(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MedicalRecordDetail)
+	fc.Result = res
+	return ec.marshalOMedicalRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicalRecordDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getMedicalRecords(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "recordId":
+				return ec.fieldContext_MedicalRecordDetail_recordId(ctx, field)
+			case "recordType":
+				return ec.fieldContext_MedicalRecordDetail_recordType(ctx, field)
+			case "content":
+				return ec.fieldContext_MedicalRecordDetail_content(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_MedicalRecordDetail_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MedicalRecordDetail", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -18614,10 +18614,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_loginUser(ctx, field)
 			})
-		case "getUser":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_getUser(ctx, field)
-			})
 		case "updateUser":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateUser(ctx, field)
@@ -18666,10 +18662,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createTreatmentSchedule(ctx, field)
 			})
-		case "getTreatmentSchedules":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_getTreatmentSchedules(ctx, field)
-			})
 		case "updateTreatmentSchedule":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTreatmentSchedule(ctx, field)
@@ -18705,10 +18697,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addMedicalRecord":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addMedicalRecord(ctx, field)
-			})
-		case "getMedicalRecords":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_getMedicalRecords(ctx, field)
 			})
 		case "updateMedicalRecord":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -18834,6 +18822,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getUser":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUser(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getHealthRiskAssessment":
 			field := field
 
@@ -18891,6 +18898,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getTreatmentSchedules":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTreatmentSchedules(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getHealthMetrics":
 			field := field
 
@@ -18901,6 +18927,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getHealthMetrics(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getMedicalRecords":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getMedicalRecords(ctx, field)
 				return res
 			}
 
