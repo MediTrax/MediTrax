@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:meditrax/models/token.dart';
 
 part "health_metric.freezed.dart";
 part "health_metric.g.dart";
@@ -19,5 +18,4 @@ class HealthMetric extends HiveObject with _$HealthMetric {
     @HiveField(5) required DateTime recordedAt,
     @HiveField(6) required DateTime createdAt,
   }) = _HealthMetric;
-
 }
