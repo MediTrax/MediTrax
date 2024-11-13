@@ -1750,14 +1750,67 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 
 // GetAchievementBadges is the resolver for the getAchievementBadges field.
 func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error) {
-	// TODO
-	panic(fmt.Errorf("not implemented: GetAchievementBadges - getAchievementBadges"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// TODO: could mofify this
+	result, err := database.DB.Query(`SELECT * FROM achievement_badge`, map[string]interface{}{})
+	if err != nil {
+		return nil, err
+	}
+
+	badges, err := surrealdb.SmartUnmarshal[[]*model.AchievementBadge](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var badgeDetails []*model.AchievementBadgeDetail
+	for _, badge := range badges {
+		badgeDetail := &model.AchievementBadgeDetail{
+			BadgeID:     badge.ID,
+			Name:        badge.Name,
+			Description: badge.Description,
+			IconURL:     badge.IconURL,
+		}
+		badgeDetails = append(badgeDetails, badgeDetail)
+	}
+
+	return badgeDetails, nil
 }
 
 // GetUserAchievements is the resolver for the getUserAchievements field.
 func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error) {
-	// TODO
-	panic(fmt.Errorf("not implemented: GetUserAchievements - getUserAchievements"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Fetch treatment schedules for the user
+	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	achievements, err := surrealdb.SmartUnmarshal[[]*model.UserAchievement](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var achievementDetails []*model.UserAchievementDetail
+	for _, achievement := range achievements {
+		badgeDetail := &model.UserAchievementDetail{
+			BadgeID:           achievement.ID,
+			UserAchievementID: achievement.ID,
+			EarnedAt:          achievement.EarnedAt,
+		}
+		achievementDetails = append(achievementDetails, badgeDetail)
+	}
+
+	return achievementDetails, nil
 }
 
 // GetFoodSpecs is the resolver for the getFoodSpecs field.
