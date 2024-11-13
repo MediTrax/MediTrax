@@ -7,28 +7,26 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 
 	chatgpt "github.com/ayush6624/go-chatgpt"
 	"github.com/surrealdb/surrealdb.go"
 )
 
-type FoodSpec string
+type FoodSpec struct {
+	Name       string
+	UpperRange float64
+}
 type SpecUnit string
 
-const (
-	animal_protein FoodSpec = "animal protein"
-	plant_protin   FoodSpec = "plant protein"
-	sodium         FoodSpec = "sodium"
-	pootassium     FoodSpec = "potassium"
-	phosphorous    FoodSpec = "phosphorus"
-)
+// var gpt4o_mini chatgpt.ChatGPTModel = "gpt-4o-mini-2024-07-18"
 
-const (
-	mg_per_hundred_g SpecUnit = "mg/100g"
-)
-
-var rFoodSpec = regexp.MustCompile(`()`)
+var SpecLimits = []FoodSpec{
+	{Name: "animal protein", UpperRange: 10.0},
+	{Name: "plant protein", UpperRange: 12.3},
+	{Name: "sodium", UpperRange: 10.0},
+	{Name: "potassium", UpperRange: 12.3},
+	{Name: "phosphorus", UpperRange: 12.3},
+}
 
 var conv_food_info = []chatgpt.ChatMessage{
 	{
@@ -129,10 +127,4 @@ func GetFoodSpec(food string, c *chatgpt.Client) (*string, error) {
 
 	choice := response.Choices[0]
 	return &choice.Message.Content, nil
-}
-
-func main() {
-	c := GetClient()
-
-	GetFoodSpec("鱼肉", c)
 }
