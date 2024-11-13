@@ -305,7 +305,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
 	// Retrieve password reset request using the token
-	data, err := database.DB.Select("passwordReset:" + token)
+	data, err := database.DB.Select("passwordChange:" + token)
 	if err != nil {
 		// Token not found or an error occurred
 		return nil, fmt.Errorf("invalid or expired token")
@@ -332,14 +332,106 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newP
 	}, nil
 }
 
+// evaluateHealthRisk 根据问卷数据计算健康风险等级和推荐措施
+func evaluateHealthRisk(questionnaireData string) (string, string) {
+	// 假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
+	var riskLevel, recommendations string
+	if questionnaireData == "" {
+		riskLevel = "Unknown"
+		recommendations = "Please complete the health questionnaire."
+	} else {
+		// 简单的例子，实际应根据数据分析
+		riskLevel = "Medium"
+		recommendations = "Monitor lifestyle and consult a healthcare provider."
+	}
+	return riskLevel, recommendations
+}
+
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateHealthRiskAssessment - createHealthRiskAssessment"))
+	//panic(fmt.Errorf("not implemented: CreateHealthRiskAssessment - createHealthRiskAssessment"))
+	// check if they are logged in correctly
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// TODO:计算健康风险等级和推荐措施（假设基于问卷数据进行分析）
+	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+
+	// 插入新的健康风险评估记录
+	result, err := database.DB.Query(
+		`CREATE ONLY health_risk_assessment:ulid() 
+        SET questionnaireData=$questionnaireData,
+            riskLevel=$riskLevel,
+            recommendations=$recommendations,
+            createdAt=time::now(),
+            updatedAt=time::now();`,
+		map[string]interface{}{
+			"questionnaireData": questionnaireData,
+			"riskLevel":         riskLevel,
+			"recommendations":   recommendations,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newAssessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessmentResponse](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.HealthRiskAssessmentResponse{
+		AssessmentID:    newAssessment.AssessmentID,
+		RiskLevel:       newAssessment.RiskLevel,
+		Recommendations: newAssessment.Recommendations,
+	}
+
+	return response, nil
 }
 
 // UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
 func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
+	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
+	// check if they are logged in correctly
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// TODO:计算新的健康风险等级和推荐措施（假设基于问卷数据进行分析）
+	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+
+	// 更新健康风险评估记录
+	result, err := database.DB.Query(
+		`UPDATE health_risk_assessment 
+        SET questionnaireData=$questionnaireData,
+            riskLevel=$riskLevel,
+            recommendations=$recommendations,
+            updatedAt=time::now() 
+        WHERE id=$id;`,
+		map[string]interface{}{
+			"questionnaireData": questionnaireData,
+			"riskLevel":         riskLevel,
+			"recommendations":   recommendations,
+			"id":                assessmentID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAssessment, err := surrealdb.SmartUnmarshal[model.UpdateHealthRiskAssessmentResponse](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.UpdateHealthRiskAssessmentResponse{
+		AssessmentID:    updatedAssessment.AssessmentID,
+		RiskLevel:       updatedAssessment.RiskLevel,
+		Recommendations: updatedAssessment.Recommendations,
+	}
+
+	return response, nil
 }
 
 // AddMedication is the resolver for the addMedication field.
@@ -730,40 +822,71 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
 func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
+	// 验证用户权限
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
-	result, err := database.DB.Query(`CREATE ONLY treatment_schedule:ulid() 
-    SET user_id=$userID,
-        treatmentType=$treatmentType,
-        scheduledTime=$scheduledTime,
+	// 创建治疗计划记录
+	result, err := database.DB.Query(
+		`CREATE ONLY treatment_schedule:ulid()
+        SET treatment_type=$treatment_type,
+        scheduled_time=$scheduled_time,
         location=$location,
         notes=$notes,
-        createdAt=time::now(),
-        updatedAt=time::now();`, map[string]interface{}{
-		"userID":        user.ID,
-		"treatmentType": treatmentType,
-		"scheduledTime": scheduledTime,
-		"location":      location,
-		"notes":         notes,
-	})
+        user_id=$user_id,
+        created_at=time::now(),
+        updated_at=time::now();`,
+		map[string]interface{}{
+			"treatment_type": treatmentType,
+			"scheduled_time": scheduledTime,
+			"location":       location,
+			"notes":          notes,
+			"user_id":        user.ID,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
 
+	// 解析返回结果
 	newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentScheduleDetail](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
 	response := &model.CreateTreatmentScheduleResponse{
 		ScheduleID: newSchedule.ScheduleID,
 		Message:    "Treatment schedule created successfully",
 	}
 
 	return response, nil
+}
+
+// GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
+func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// 查询该用户的所有治疗计划
+	result, err := database.DB.Query(
+		`SELECT * FROM treatment_schedule WHERE user_id = $user_id ORDER BY scheduled_time;`,
+		map[string]interface{}{
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return schedules, nil
 }
 
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
@@ -773,36 +896,50 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// Create update fields
-	updateFields := map[string]interface{}{}
+	if !utils.MatchID(scheduleID, "treatment_schedule") {
+		return nil, fmt.Errorf("illegal schedule id")
+	}
+
+	// 准备更新字段
+	updateValues := map[string]interface{}{"id": scheduleID, "user_id": user.ID}
+	updateFields := []string{}
+
 	if treatmentType != nil {
-		updateFields["treatmentType"] = *treatmentType
+		updateValues["treatment_type"] = *treatmentType
+		updateFields = append(updateFields, "treatment_type = $treatment_type")
 	}
 	if scheduledTime != nil {
-		updateFields["scheduledTime"] = *scheduledTime
+		updateValues["scheduled_time"] = *scheduledTime
+		updateFields = append(updateFields, "scheduled_time = $scheduled_time")
 	}
 	if location != nil {
-		updateFields["location"] = *location
+		updateValues["location"] = *location
+		updateFields = append(updateFields, "location = $location")
 	}
 	if notes != nil {
-		updateFields["notes"] = *notes
+		updateValues["notes"] = *notes
+		updateFields = append(updateFields, "notes = $notes")
 	}
+	updateFields = append(updateFields, "updated_at = time::now()")
 
-	if len(updateFields) == 0 {
-		return nil, fmt.Errorf("no fields to update")
-	}
-
-	// Update the treatment schedule
-	_, err := database.DB.Query(`UPDATE treatment_schedule SET $fields WHERE id=$scheduleID;`, map[string]interface{}{
-		"fields":     updateFields,
-		"scheduleID": scheduleID,
-	})
+	// 构建并执行更新查询
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id = $user_id;", strings.Join(updateFields, ", "))
+	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// 验证更新结果
+	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(schedules) == 0 {
+		return nil, fmt.Errorf("schedule not found or update failed")
+	}
+
 	response := &model.UpdateTreatmentScheduleResponse{
-		ScheduleID: scheduleID,
+		ScheduleID: schedules[0].ScheduleID,
 		Message:    "Treatment schedule updated successfully",
 	}
 
@@ -816,16 +953,33 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// Delete the treatment schedule
-	_, err := database.DB.Query(`DELETE FROM treatment_schedule WHERE id=$scheduleID;`, map[string]interface{}{
-		"scheduleID": scheduleID,
-	})
+	if !utils.MatchID(scheduleID, "treatment_schedule") {
+		return nil, fmt.Errorf("illegal schedule id")
+	}
+
+	// 执行删除操作
+	result, err := database.DB.Query(
+		`DELETE $id WHERE user_id = $user_id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":      scheduleID,
+			"user_id": user.ID,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
 
+	// 验证删除结果
+	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(schedules) == 0 {
+		return nil, fmt.Errorf("schedule not found or delete failed")
+	}
+
 	response := &model.DeleteTreatmentScheduleResponse{
-		Message: "Treatment schedule deleted successfully",
+		Message: fmt.Sprintf("Treatment schedule %s deleted successfully", scheduleID),
 	}
 
 	return response, nil
@@ -988,17 +1142,116 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 
 // AddMedicalRecord is the resolver for the addMedicalRecord field.
 func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType string, content string) (*model.AddMedicalRecordResponse, error) {
-	panic(fmt.Errorf("not implemented: AddMedicalRecord - addMedicalRecord"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 插入新的医疗记录
+	result, err := database.DB.Query(
+		`CREATE ONLY medical_record:ulid() 
+        SET recordType=$recordType,
+            content=$content,
+            createdAt=time::now(),
+            updatedAt=time::now();`,
+		map[string]interface{}{
+			"recordType": recordType,
+			"content":    content,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newRecord, err := surrealdb.SmartUnmarshal[model.MedicalRecordDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.AddMedicalRecordResponse{
+		RecordID: newRecord.RecordID,
+		Message:  "Medical record added successfully",
+	}
+
+	return response, nil
+}
+
+// GetMedicalRecords is the resolver for the getMedicalRecords field.
+func (r *mutationResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
+	// panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 查询所有医疗记录
+	result, err := database.DB.Query(`SELECT * FROM medical_record;`, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecordDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
 }
 
 // UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
 func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
+	//panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 构建更新查询
+	query := `UPDATE medical_record SET updatedAt=time::now()`
+	params := map[string]interface{}{}
+
+	if recordType != nil {
+		query += `, recordType=$recordType`
+		params["recordType"] = *recordType
+	}
+	if content != nil {
+		query += `, content=$content`
+		params["content"] = *content
+	}
+	query += ` WHERE id=$id;`
+	params["id"] = recordID
+
+	// 执行更新
+	_, err := database.DB.Query(query, params)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.UpdateMedicalRecordResponse{
+		RecordID: recordID,
+		Message:  "Medical record updated successfully",
+	}
+
+	return response, nil
 }
 
 // DeleteMedicalRecord is the resolver for the deleteMedicalRecord field.
 func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID string) (*model.DeleteMedicalRecordResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteMedicalRecord - deleteMedicalRecord"))
+	//panic(fmt.Errorf("not implemented: DeleteMedicalRecord - deleteMedicalRecord"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 执行删除
+	_, err := database.DB.Query(`DELETE FROM medical_record WHERE id=$id;`, map[string]interface{}{
+		"id": recordID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.DeleteMedicalRecordResponse{
+		Message: "Medical record deleted successfully",
+	}
+
+	return response, nil
 }
 
 // AddFamilyMember is the resolver for the addFamilyMember field.
@@ -1160,12 +1413,73 @@ func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID stri
 
 // CreateAchievementBadge is the resolver for the createAchievementBadge field.
 func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name string, description string, iconURL string) (*model.CreateAchievementBadgeResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateAchievementBadge - createAchievementBadge"))
+	//panic(fmt.Errorf("not implemented: CreateAchievementBadge - createAchievementBadge"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 插入新的成就徽章
+	result, err := database.DB.Query(
+		`CREATE ONLY achievement_badge:ulid() 
+        SET name=$name,
+            description=$description,
+            iconUrl=$iconUrl,
+            createdAt=time::now();`,
+		map[string]interface{}{
+			"name":        name,
+			"description": description,
+			"iconUrl":     iconURL,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newBadge, err := surrealdb.SmartUnmarshal[model.AchievementBadgeDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.CreateAchievementBadgeResponse{
+		BadgeID: newBadge.BadgeID,
+		Message: "Achievement badge created successfully",
+	}
+
+	return response, nil
 }
 
 // AwardAchievement is the resolver for the awardAchievement field.
 func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error) {
-	panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
+	//panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 颁发成就徽章
+	result, err := database.DB.Query(
+		`CREATE ONLY user_achievement:ulid() 
+        SET badgeID=$badgeID,
+            earnedAt=time::now(),
+            createdAt=time::now();`,
+		map[string]interface{}{
+			"badgeID": badgeID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievementDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.AwardAchievementResponse{
+		UserAchievementID: newUserAchievement.UserAchievementID,
+		Message:           "Achievement awarded successfully",
+	}
+
+	return response, nil
 }
 
 // GetUser is the resolver for the getUser field.
@@ -1189,7 +1503,22 @@ func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse,
 
 // GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
 func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error) {
-	panic(fmt.Errorf("not implemented: GetHealthRiskAssessment - getHealthRiskAssessment"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 查询最新的健康风险评估（假设根据创建时间或其他条件进行排序）
+	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY createdAt DESC LIMIT 1;`, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	assessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessmentDetailResponse](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &assessment, nil
 }
 
 // GetMedications is the resolver for the getMedications field.
