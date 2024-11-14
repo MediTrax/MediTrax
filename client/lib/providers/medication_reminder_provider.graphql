@@ -1,0 +1,38 @@
+query GetMedicationReminders($userId: String!) {
+  getMedicationReminders(userId: $userId) {
+    reminderId
+    medicationId
+    reminderTime
+    isTaken
+  }
+}
+
+mutation CreateMedicationReminder(
+  $userId: String!
+  $medicationId: String!
+  $reminderTime: DateTime!
+) {
+  createMedicationReminder(
+    userId: $userId
+    medicationId: $medicationId
+    reminderTime: $reminderTime
+  ) {
+    reminderId
+    message
+  }
+}
+
+mutation UpdateMedicationReminder(
+  $reminderId: String!
+  $reminderTime: DateTime
+  $isTaken: Boolean
+) {
+  updateMedicationReminder(
+    reminderId: $reminderId
+    reminderTime: $reminderTime
+    isTaken: $isTaken
+  ) {
+    reminderId
+    message
+  }
+}
