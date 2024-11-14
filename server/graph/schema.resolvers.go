@@ -7,10 +7,12 @@ package graph
 import (
 	"context"
 	"fmt"
+	"meditrax/graph/chat"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
+	"strconv"
 	"strings"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
@@ -18,7 +20,40 @@ import (
 
 // RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, accessToken string, refreshToken string, device string) (*model.Token, error) {
-	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
+	result, err := database.DB.Query("SELECT * FROM token WHERE accessToken=$accessToken AND refreshToken=$refreshToken;", map[string]string{
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := surrealdb.SmartUnmarshal[[]model.Token](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) <= 0 {
+		return nil, fmt.Errorf("token not found")
+	}
+	token := results[0]
+	// Retrieve the user associated with the token
+	var user model.User
+	data, err := database.DB.Select(token.User)
+	if err != nil {
+		return nil, err
+	}
+	user, err = surrealdb.SmartUnmarshal[model.User](data, nil)
+	if err != nil {
+		return nil, err
+	}
+	// Generate a new token
+	newToken, err := utils.HandleLogin(&user, ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Delete the old token
+	database.DB.Delete(token.ID)
+	return newToken, nil
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -1105,21 +1140,6 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 	return response, nil
 }
 
-// CreateDietPlan is the resolver for the createDietPlan field.
-func (r *mutationResolver) CreateDietPlan(ctx context.Context, mealType string, foodItems string, calories float64) (*model.CreateDietPlanResponse, error) {
-	panic(fmt.Errorf("not implemented: CreateDietPlan - createDietPlan"))
-}
-
-// UpdateDietPlan is the resolver for the updateDietPlan field.
-func (r *mutationResolver) UpdateDietPlan(ctx context.Context, planID string, mealType *string, foodItems *string, calories *float64) (*model.UpdateDietPlanResponse, error) {
-	panic(fmt.Errorf("not implemented: UpdateDietPlan - updateDietPlan"))
-}
-
-// DeleteDietPlan is the resolver for the deleteDietPlan field.
-func (r *mutationResolver) DeleteDietPlan(ctx context.Context, planID string) (*model.DeleteDietPlanResponse, error) {
-	panic(fmt.Errorf("not implemented: DeleteDietPlan - deleteDietPlan"))
-}
-
 // AddMedicalRecord is the resolver for the addMedicalRecord field.
 func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType string, content string) (*model.AddMedicalRecordResponse, error) {
 	user := middlewares.ForContext(ctx)
@@ -1236,96 +1256,158 @@ func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID str
 
 // AddFamilyMember is the resolver for the addFamilyMember field.
 func (r *mutationResolver) AddFamilyMember(ctx context.Context, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error) {
-	//panic(fmt.Errorf("not implemented: AddFamilyMember - addFamilyMember"))
+	// TODO
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// 插入新的家庭成员
+
 	result, err := database.DB.Query(
-		`CREATE ONLY family_member:ulid() 
-        SET relatedUserID=$relatedUserID,
-            relationship=$relationship,
-            accessLevel=$accessLevel,
-            createdAt=time::now();`,
+		`SELECT * FROM user:$related_id LIMIT 1;`,
 		map[string]interface{}{
-			"relatedUserID": relatedUserID,
-			"relationship":  relationship,
-			"accessLevel":   accessLevel,
+			"related_id": relatedUserID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	related_users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(related_users) < 1 {
+		return nil, fmt.Errorf("error, can not find user with given related user id")
+	}
+
+	related := related_users[0]
+
+	// finally, send the create reminder query
+	result, err = database.DB.Query(
+		`CREATE ONLY family_member:ulid()
+		SET user_id: $user_id,
+		related_user_id: $related_id,
+		relationship: $relationship,
+		access_level: $access_level,
+		created_at: time::now()
+		`,
+		map[string]interface{}{
+			"user_id":      user.ID,
+			"related_id":   related.ID,
+			"relationship": relationship,
+			"access_level": accessLevel,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	newMember, err := surrealdb.SmartUnmarshal[model.FamilyMemberDetail](result, nil)
+	// unmarshal the results of the CREATE query
+	member, err := surrealdb.SmartUnmarshal[model.FamilyMember](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	// create response
 	response := &model.AddFamilyMemberResponse{
-		MemberID: newMember.MemberID,
-		Message:  "Family member added successfully",
+		MemberID: member.ID,
+		Message:  "new family member added successfully",
 	}
-
 	return response, nil
 }
 
 // UpdateFamilyMember is the resolver for the updateFamilyMember field.
 func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID string, relationship *string, accessLevel *string) (*model.UpdateFamilyMemberResponse, error) {
-	//panic(fmt.Errorf("not implemented: UpdateFamilyMember - updateFamilyMember"))
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// 构建更新查询
-	query := `UPDATE family_member SET updatedAt=time::now()`
-	params := map[string]interface{}{}
 
+	// check legality of the member id
+	if !utils.MatchID(memberID, "family_member") {
+		return nil, fmt.Errorf("illegal member id")
+	}
+
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{"id": memberID, "user_id": user.ID}
+
+	// Prepare the fields to be updated
+	updateFields := []string{}
 	if relationship != nil {
-		query += `, relationship=$relationship`
-		params["relationship"] = *relationship
+		updateValues["relationship"] = *relationship
+		updateFields = append(updateFields, "relationship = $relationship")
 	}
 	if accessLevel != nil {
-		query += `, accessLevel=$accessLevel`
-		params["accessLevel"] = *accessLevel
+		updateValues["access_level"] = *accessLevel
+		updateFields = append(updateFields, "access_level = $access_level")
 	}
-	query += ` WHERE id=$id;`
-	params["id"] = memberID
 
-	// 执行更新
-	_, err := database.DB.Query(query, params)
+	// Construct the final query with the medicationID in quotes
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
+
+	// send the UPDATE query
+	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// unmarshal the results and check for errors
+	results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id. no associated family member object found")
+	}
+
+	// create response
 	response := &model.UpdateFamilyMemberResponse{
-		MemberID: memberID,
+		MemberID: results[0].ID,
 		Message:  "Family member updated successfully",
 	}
 
+	// Return the response with the medication ID and a success message
 	return response, nil
 }
 
 // DeleteFamilyMember is the resolver for the deleteFamilyMember field.
 func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID string) (*model.DeleteFamilyMemberResponse, error) {
-	//panic(fmt.Errorf("not implemented: DeleteFamilyMember - deleteFamilyMember"))
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// 执行删除
-	_, err := database.DB.Query(`DELETE FROM family_member WHERE id=$id;`, map[string]interface{}{
-		"id": memberID,
-	})
+
+	// check legality of the provided id
+	if !utils.MatchID(memberID, "family_member") {
+		return nil, fmt.Errorf("illegal family member id")
+	}
+
+	// Execute the query
+	result, err := database.DB.Query(
+		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":      memberID,
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err // Return the error if the query fails
+	}
+
+	// unmarshal results and check for errors
+	results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	response := &model.DeleteFamilyMemberResponse{
-		Message: "Family member deleted successfully",
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no associated family member object found")
 	}
 
+	// create response
+	response := &model.DeleteFamilyMemberResponse{
+		Message: fmt.Sprintf("Family member %s with related member id %s deleted successfully", results[0].ID, results[0].RelatedUserID),
+	}
+
+	// Return the response with the medication ID and a success message
 	return response, nil
 }
 
@@ -1397,6 +1479,25 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 		Message:           "Achievement awarded successfully",
 	}
 
+	return response, nil
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
+	// Fetch the user details
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	response := &model.UserDetailResponse{
+		UserID:      user.ID,
+		PhoneNumber: user.PhoneNumber,
+		Name:        user.Name,
+		Role:        user.Role,
+		CreatedAt:   user.CreatedAt,
+		LastLogin:   &user.LastLogin,
+	}
 	return response, nil
 }
 
@@ -1580,27 +1681,217 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 
 // GetMedicalRecords is the resolver for the getMedicalRecords field.
 func (r *queryResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
-	panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
-}
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
 
-// GetDietPlans is the resolver for the getDietPlans field.
-func (r *queryResolver) GetDietPlans(ctx context.Context) ([]*model.DietPlanDetail, error) {
-	panic(fmt.Errorf("not implemented: GetDietPlans - getDietPlans"))
+	// Fetch treatment schedules for the user
+	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: please modify this line as it may result in a bug
+	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecord](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var record_details []*model.MedicalRecordDetail
+	for _, record := range records {
+		recordDetail := &model.MedicalRecordDetail{
+			RecordID:   record.ID,
+			RecordType: record.RecordType,
+			Content:    record.Content,
+			CreatedAt:  record.CreatedAt,
+		}
+		record_details = append(record_details, recordDetail)
+	}
+
+	return record_details, nil
 }
 
 // GetFamilyMembers is the resolver for the getFamilyMembers field.
 func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMemberDetail, error) {
-	panic(fmt.Errorf("not implemented: GetFamilyMembers - getFamilyMembers"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Fetch treatment schedules for the user
+	result, err := database.DB.Query(`SELECT * FROM family_member WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var record_details []*model.FamilyMemberDetail
+	for _, member := range members {
+		recordDetail := &model.FamilyMemberDetail{
+			MemberID:      member.ID,
+			RelatedUserID: member.RelatedUserID,
+			Relationship:  member.Relationship,
+			AccessLevel:   member.AccessLevel,
+		}
+		record_details = append(record_details, recordDetail)
+	}
+
+	return record_details, nil
 }
 
 // GetAchievementBadges is the resolver for the getAchievementBadges field.
 func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error) {
-	panic(fmt.Errorf("not implemented: GetAchievementBadges - getAchievementBadges"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// TODO: could mofify this
+	result, err := database.DB.Query(`SELECT * FROM achievement_badge`, map[string]interface{}{})
+	if err != nil {
+		return nil, err
+	}
+
+	badges, err := surrealdb.SmartUnmarshal[[]*model.AchievementBadge](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var badgeDetails []*model.AchievementBadgeDetail
+	for _, badge := range badges {
+		badgeDetail := &model.AchievementBadgeDetail{
+			BadgeID:     badge.ID,
+			Name:        badge.Name,
+			Description: badge.Description,
+			IconURL:     badge.IconURL,
+		}
+		badgeDetails = append(badgeDetails, badgeDetail)
+	}
+
+	return badgeDetails, nil
 }
 
 // GetUserAchievements is the resolver for the getUserAchievements field.
 func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error) {
-	panic(fmt.Errorf("not implemented: GetUserAchievements - getUserAchievements"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Fetch treatment schedules for the user
+	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	achievements, err := surrealdb.SmartUnmarshal[[]*model.UserAchievement](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var achievementDetails []*model.UserAchievementDetail
+	for _, achievement := range achievements {
+		badgeDetail := &model.UserAchievementDetail{
+			BadgeID:           achievement.ID,
+			UserAchievementID: achievement.ID,
+			EarnedAt:          achievement.EarnedAt,
+		}
+		achievementDetails = append(achievementDetails, badgeDetail)
+	}
+
+	return achievementDetails, nil
+}
+
+// GetFoodSpecs is the resolver for the getFoodSpecs field.
+func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+	client := chat.GetClient()
+
+	result, err := chat.GetFoodSpec(food, client)
+	if err != nil {
+		return nil, err
+	}
+
+	println(*result)
+
+	lines := strings.Split(*result, "\n")
+
+	var specs []*model.FoodSpec
+	var n_spec = 0.0
+	var s_total = 0.0
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+
+		parameters := strings.Split(line, ": ")
+		info := strings.Split(strings.TrimSpace(parameters[1]), " ")
+
+		println(parameters[0] + parameters[1])
+		println(info[0])
+
+		value, err := strconv.ParseFloat(info[0], 32)
+		if err != nil {
+			continue
+		}
+
+		spec := &model.FoodSpec{
+			Name:  parameters[0],
+			Value: value,
+			Unit:  info[1],
+		}
+
+		var valid_spec = false
+		for _, spec_limit := range chat.SpecLimits {
+			if spec.Name == spec_limit.Name {
+				valid_spec = true
+
+				spec.HowHigh = min(1, value/spec_limit.UpperRange)
+				n_spec = n_spec + 1
+				s_total = s_total + value/spec_limit.UpperRange
+				// if value > spec_limit.UpperRange {
+				// 	spec.IsTooHigh = true
+				// 	recommend = false
+				// } else {
+				// 	spec.IsTooHigh = false
+				// }
+			}
+		}
+
+		if valid_spec {
+			specs = append(specs, spec)
+		}
+	}
+
+	foodSpecs := &model.FoodSpecs{
+		Specs:        specs,
+		HowRecommend: min(1, s_total/n_spec),
+	}
+
+	return foodSpecs, nil
+}
+
+// GetMockFoodSepcs is the resolver for the getMockFoodSepcs field.
+func (r *queryResolver) GetMockFoodSepcs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+	var specs []*model.FoodSpec
+	for _, spec_limit := range chat.SpecLimits {
+		specs = append(specs, &model.FoodSpec{Name: spec_limit.Name, Value: spec_limit.UpperRange / 2})
+	}
+
+	foodSpecs := &model.FoodSpecs{
+		Specs:        specs,
+		HowRecommend: 0.5,
+	}
+
+	return foodSpecs, nil
 }
 
 // Mutation returns MutationResolver implementation.
