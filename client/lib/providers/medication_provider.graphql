@@ -1,0 +1,58 @@
+query GetMedications($userId: String!) {
+  getMedications(userId: $userId) {
+    medicationId
+    name
+    dosage
+    unit
+    frequency
+    inventory
+  }
+}
+
+mutation AddMedication(
+  $userId: String!
+  $name: String!
+  $dosage: Float!
+  $unit: String!
+  $frequency: String!
+  $inventory: Float!
+) {
+  addMedication(
+    userId: $userId
+    name: $name
+    dosage: $dosage
+    unit: $unit
+    frequency: $frequency
+    inventory: $inventory
+  ) {
+    medicationId
+    message
+  }
+}
+
+mutation UpdateMedication(
+  $medicationId: String!
+  $name: String
+  $dosage: Float
+  $unit: String
+  $frequency: String
+  $inventory: Float
+) {
+  updateMedication(
+    medicationId: $medicationId
+    name: $name
+    dosage: $dosage
+    unit: $unit
+    frequency: $frequency
+    inventory: $inventory
+  ) {
+    medicationId
+    message
+  }
+}
+
+mutation DeleteMedication($medicationId: String!) {
+  deleteMedication(medicationId: $medicationId) {
+    message
+  }
+}

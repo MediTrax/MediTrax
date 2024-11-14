@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:meditrax/models/token.dart';
 
 part "medical_record.freezed.dart";
 part "medical_record.g.dart";
@@ -18,5 +17,4 @@ class MedicalRecord extends HiveObject with _$MedicalRecord {
     @HiveField(4) required DateTime createdAt,
     @HiveField(5) required DateTime updatedAt,
   }) = _MedicalRecord;
-
 }

@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:meditrax/models/token.dart';
 
 part "diet_plan.freezed.dart";
 part "diet_plan.g.dart";
@@ -19,5 +18,4 @@ class DietPlan extends HiveObject with _$DietPlan {
     @HiveField(5) required DateTime createdAt,
     @HiveField(6) required DateTime updatedAt,
   }) = _DietPlan;
-
 }
