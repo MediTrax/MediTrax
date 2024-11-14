@@ -47,11 +47,6 @@ type CreateAchievementBadgeResponse struct {
 	Message string `json:"message"`
 }
 
-type CreateDietPlanResponse struct {
-	PlanID  string `json:"planId"`
-	Message string `json:"message"`
-}
-
 type CreateMedicationReminderResponse struct {
 	ReminderID string `json:"reminderId"`
 	Message    string `json:"message"`
@@ -64,10 +59,6 @@ type CreateTreatmentScheduleResponse struct {
 
 type CreateUserResponse struct {
 	UserID  string `json:"userId"`
-	Message string `json:"message"`
-}
-
-type DeleteDietPlanResponse struct {
 	Message string `json:"message"`
 }
 
@@ -95,24 +86,6 @@ type DeleteUserResponse struct {
 	Message string `json:"message"`
 }
 
-type DietPlan struct {
-	ID        string   `json:"id"`
-	UserID    string   `json:"user_id"`
-	MealType  string   `json:"meal_type"`
-	FoodItems []string `json:"food_items"`
-	Calories  int      `json:"calories"`
-	CreatedAt string   `json:"created_at"`
-	UpdatedAt string   `json:"updated_at"`
-}
-
-type DietPlanDetail struct {
-	PlanID    string  `json:"planId"`
-	MealType  string  `json:"mealType"`
-	FoodItems string  `json:"foodItems"`
-	Calories  float64 `json:"calories"`
-	CreatedAt string  `json:"createdAt"`
-}
-
 type FamilyMember struct {
 	ID            string `json:"id"`
 	UserID        string `json:"user_id"`
@@ -126,7 +99,19 @@ type FamilyMemberDetail struct {
 	MemberID      string `json:"memberId"`
 	RelatedUserID string `json:"relatedUserId"`
 	Relationship  string `json:"relationship"`
-	AccessLevel   string `json:"accessLevel"`
+	AccessLevel   int    `json:"accessLevel"`
+}
+
+type FoodSpec struct {
+	Name    string  `json:"name"`
+	Value   float64 `json:"value"`
+	Unit    string  `json:"unit"`
+	HowHigh float64 `json:"howHigh"`
+}
+
+type FoodSpecs struct {
+	Specs        []*FoodSpec `json:"specs"`
+	HowRecommend float64     `json:"howRecommend"`
 }
 
 type HealthMetric struct {
@@ -186,10 +171,10 @@ type MedicalRecord struct {
 }
 
 type MedicalRecordDetail struct {
-	RecordID   string `json:"recordId"`
-	RecordType string `json:"recordType"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"createdAt"`
+	RecordID   string        `json:"recordId"`
+	RecordType string        `json:"recordType"`
+	Content    *RecordObject `json:"content"`
+	CreatedAt  string        `json:"createdAt"`
 }
 
 type Medication struct {
@@ -283,11 +268,6 @@ type TreatmentScheduleDetail struct {
 	ScheduledTime string  `json:"scheduledTime"`
 	Location      string  `json:"location"`
 	Notes         *string `json:"notes,omitempty"`
-}
-
-type UpdateDietPlanResponse struct {
-	PlanID  string `json:"planId"`
-	Message string `json:"message"`
 }
 
 type UpdateFamilyMemberResponse struct {
