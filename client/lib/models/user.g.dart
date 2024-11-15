@@ -8,7 +8,7 @@ part of 'user.dart';
 
 class UserImplAdapter extends TypeAdapter<_$UserImpl> {
   @override
-  final int typeId = 2;
+  final int typeId = 15;
 
   @override
   _$UserImpl read(BinaryReader reader) {
@@ -18,36 +18,39 @@ class UserImplAdapter extends TypeAdapter<_$UserImpl> {
     };
     return _$UserImpl(
       id: fields[0] as String,
-      email: fields[1] as String,
-      name: fields[2] as String,
-      createdAt: fields[3] as DateTime,
-      updatedAt: fields[4] as DateTime,
-      lastLogin: fields[5] as DateTime,
-      status: fields[6] as int,
-      role: fields[7] as String,
+      phoneNumber: fields[1] as String,
+      password: fields[2] as String,
+      name: fields[3] as String,
+      role: fields[4] as String,
+      status: fields[5] as int,
+      created_at: fields[6] as DateTime,
+      updated_at: fields[7] as DateTime,
+      last_login: fields[8] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$UserImpl obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.email)
+      ..write(obj.phoneNumber)
       ..writeByte(2)
-      ..write(obj.name)
+      ..write(obj.password)
       ..writeByte(3)
-      ..write(obj.createdAt)
+      ..write(obj.name)
       ..writeByte(4)
-      ..write(obj.updatedAt)
+      ..write(obj.role)
       ..writeByte(5)
-      ..write(obj.lastLogin)
-      ..writeByte(6)
       ..write(obj.status)
+      ..writeByte(6)
+      ..write(obj.created_at)
       ..writeByte(7)
-      ..write(obj.role);
+      ..write(obj.updated_at)
+      ..writeByte(8)
+      ..write(obj.last_login);
   }
 
   @override
