@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:meditrax/models/token.dart';
 
 part "achievement_badge.freezed.dart";
 part "achievement_badge.g.dart";
@@ -17,5 +16,4 @@ class AchievementBadge extends HiveObject with _$AchievementBadge {
     @HiveField(3) required String iconUrl,
     @HiveField(4) required DateTime createdAt,
   }) = _AchievementBadge;
-
 }

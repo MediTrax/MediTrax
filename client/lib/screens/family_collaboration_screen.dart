@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/providers/user_provider.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
 class FamilyCollaborationScreen extends StatefulWidget {
   const FamilyCollaborationScreen({super.key});
 
   @override
-  State<FamilyCollaborationScreen> createState() => _FamilyCollaborationScreenState();
+  State<FamilyCollaborationScreen> createState() =>
+      _FamilyCollaborationScreenState();
 }
 
-class _FamilyCollaborationScreenState extends State<FamilyCollaborationScreen> with SingleTickerProviderStateMixin {
+class _FamilyCollaborationScreenState extends State<FamilyCollaborationScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -46,11 +51,13 @@ class _FamilyCollaborationScreenState extends State<FamilyCollaborationScreen> w
   }
 }
 
-class FamilyMembersTab extends StatelessWidget {
+class FamilyMembersTab extends ConsumerWidget {
   const FamilyMembersTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final familyMembersAsync = ref.watch(familyMembersProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -65,23 +72,70 @@ class FamilyMembersTab extends StatelessWidget {
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
-          _buildMemberCard(
-            name: '李华',
-            relation: '配偶',
-            hasAccess: true,
+          Expanded(
+            child: familyMembersAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('加载失败'),
+                    TextButton(
+                      onPressed: () => ref.refresh(familyMembersProvider),
+                      child: const Text('重试'),
+                    ),
+                  ],
+                ),
+              ),
+              data: (members) => members.isEmpty
+                  ? const Center(child: Text('暂无家庭成员'))
+                  : ListView.builder(
+                      itemCount: members.length,
+                      itemBuilder: (context, index) {
+                        final member = members[index];
+                        return _buildMemberCard(
+                          name: member
+                              .relatedUserId, // You might want to fetch user details
+                          relation: member.relationship,
+                          hasAccess: member.accessLevel > 0,
+                          onAccessChanged: (value) async {
+                            try {
+                              await ref
+                                  .read(familyMembersProvider.notifier)
+                                  .updateMember(
+                                    memberId: member.id,
+                                    accessLevel: value ? '1' : '0',
+                                  );
+                              ref.refresh(familyMembersProvider);
+                            } catch (e) {
+                              if (context.mounted) {
+                                ErrorHandler.showErrorSnackBar(context, e);
+                              }
+                            }
+                          },
+                          onDelete: () async {
+                            try {
+                              await ref
+                                  .read(familyMembersProvider.notifier)
+                                  .deleteMember(member.id);
+                              ref.refresh(familyMembersProvider);
+                            } catch (e) {
+                              if (context.mounted) {
+                                ErrorHandler.showErrorSnackBar(context, e);
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
           ),
-          const SizedBox(height: 12),
-          _buildMemberCard(
-            name: '张明',
-            relation: '子女',
-            hasAccess: false,
-          ),
-          const Spacer(),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: Implement add family member
+              onPressed: () async {
+                // TODO: Show add family member dialog
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
@@ -100,6 +154,8 @@ class FamilyMembersTab extends StatelessWidget {
     required String name,
     required String relation,
     required bool hasAccess,
+    required Function(bool) onAccessChanged,
+    required VoidCallback onDelete,
   }) {
     return Card(
       child: Padding(
@@ -130,9 +186,12 @@ class FamilyMembersTab extends StatelessWidget {
                 const SizedBox(width: 8),
                 Switch(
                   value: hasAccess,
-                  onChanged: (value) {
-                    // TODO: Implement permission toggle
-                  },
+                  onChanged: onAccessChanged,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: onDelete,
+                  color: Colors.red,
                 ),
               ],
             ),

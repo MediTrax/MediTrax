@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive/hive.dart';
-import 'package:meditrax/models/token.dart';
 
 part "medication_reminder.freezed.dart";
 part "medication_reminder.g.dart";
@@ -18,5 +17,4 @@ class MedicationReminder extends HiveObject with _$MedicationReminder {
     @HiveField(4) required bool isTaken,
     @HiveField(5) required DateTime createdAt,
   }) = _MedicationReminder;
-
 }
