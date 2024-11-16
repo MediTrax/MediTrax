@@ -22,7 +22,7 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
       dosage: fields[2] as double,
       unit: fields[3] as String,
       frequency: fields[4] as String,
-      inventory: fields[5] as int,
+      inventory: fields[5] as double,
       userId: fields[6] as String,
       createdAt: fields[7] as DateTime,
       updatedAt: fields[8] as DateTime,

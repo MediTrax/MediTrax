@@ -27,7 +27,7 @@ mixin _$Medication {
   @HiveField(4)
   String get frequency => throw _privateConstructorUsedError;
   @HiveField(5)
-  int get inventory => throw _privateConstructorUsedError;
+  double get inventory => throw _privateConstructorUsedError;
   @HiveField(6)
   String get userId => throw _privateConstructorUsedError;
   @HiveField(7)
@@ -54,7 +54,7 @@ abstract class $MedicationCopyWith<$Res> {
       @HiveField(2) double dosage,
       @HiveField(3) String unit,
       @HiveField(4) String frequency,
-      @HiveField(5) int inventory,
+      @HiveField(5) double inventory,
       @HiveField(6) String userId,
       @HiveField(7) DateTime createdAt,
       @HiveField(8) DateTime updatedAt});
@@ -109,7 +109,7 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
       inventory: null == inventory
           ? _value.inventory
           : inventory // ignore: cast_nullable_to_non_nullable
-              as int,
+              as double,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -140,7 +140,7 @@ abstract class _$$MedicationImplCopyWith<$Res>
       @HiveField(2) double dosage,
       @HiveField(3) String unit,
       @HiveField(4) String frequency,
-      @HiveField(5) int inventory,
+      @HiveField(5) double inventory,
       @HiveField(6) String userId,
       @HiveField(7) DateTime createdAt,
       @HiveField(8) DateTime updatedAt});
@@ -193,7 +193,7 @@ class __$$MedicationImplCopyWithImpl<$Res>
       inventory: null == inventory
           ? _value.inventory
           : inventory // ignore: cast_nullable_to_non_nullable
-              as int,
+              as double,
       userId: null == userId
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
@@ -243,7 +243,7 @@ class _$MedicationImpl extends _Medication {
   final String frequency;
   @override
   @HiveField(5)
-  final int inventory;
+  final double inventory;
   @override
   @HiveField(6)
   final String userId;
@@ -299,7 +299,7 @@ abstract class _Medication extends Medication {
       @HiveField(2) required final double dosage,
       @HiveField(3) required final String unit,
       @HiveField(4) required final String frequency,
-      @HiveField(5) required final int inventory,
+      @HiveField(5) required final double inventory,
       @HiveField(6) required final String userId,
       @HiveField(7) required final DateTime createdAt,
       @HiveField(8) required final DateTime updatedAt}) = _$MedicationImpl;
@@ -322,7 +322,7 @@ abstract class _Medication extends Medication {
   String get frequency;
   @override
   @HiveField(5)
-  int get inventory;
+  double get inventory;
   @override
   @HiveField(6)
   String get userId;
