@@ -332,9 +332,8 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newP
 	}, nil
 }
 
-// evaluateHealthRisk 根据问卷数据计算健康风险等级和推荐措施
 func evaluateHealthRisk(questionnaireData string) (string, string) {
-	// 假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
+	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
 	var riskLevel, recommendations string
 	if questionnaireData == "" {
 		riskLevel = "Unknown"
@@ -349,42 +348,42 @@ func evaluateHealthRisk(questionnaireData string) (string, string) {
 
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
-	//panic(fmt.Errorf("not implemented: CreateHealthRiskAssessment - createHealthRiskAssessment"))
-	// check if they are logged in correctly
+	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// TODO:计算健康风险等级和推荐措施（假设基于问卷数据进行分析）
+
 	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
 
-	// 插入新的健康风险评估记录
 	result, err := database.DB.Query(
-		`CREATE ONLY health_risk_assessment:ulid() 
-        SET questionnaireData=$questionnaireData,
-            riskLevel=$riskLevel,
-            recommendations=$recommendations,
-            createdAt=time::now(),
-            updatedAt=time::now();`,
+		`CREATE ONLY health_risk_assessment:ulid()
+	    SET 
+			user_id=$user_id,
+			questionnaireData=$questionnaireData,
+	        riskLevel=$riskLevel,
+	        recommendations=$recommendations,
+	        createdAt=time::now();`,
 		map[string]interface{}{
 			"questionnaireData": questionnaireData,
 			"riskLevel":         riskLevel,
 			"recommendations":   recommendations,
+			"user_id":           user.ID,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	newAssessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessmentResponse](result, nil)
+	newAssessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessment](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &model.HealthRiskAssessmentResponse{
-		AssessmentID:    newAssessment.AssessmentID,
-		RiskLevel:       newAssessment.RiskLevel,
-		Recommendations: newAssessment.Recommendations,
+		AssessmentID:    newAssessment.ID,
+		RiskLevel:       riskLevel,
+		Recommendations: recommendations,
 	}
 
 	return response, nil
@@ -393,42 +392,72 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 // UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
 func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
-	// check if they are logged in correctly
+	//check if they are logged in correctly
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// TODO:计算新的健康风险等级和推荐措施（假设基于问卷数据进行分析）
-	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+	// check if id is legal
+	if !utils.MatchID(assessmentID, "health_risk_assessment") {
+		return nil, fmt.Errorf("illegal assessment id")
+	}
 
-	// 更新健康风险评估记录
+	// 验证评估记录存在且属于当前用户
 	result, err := database.DB.Query(
-		`UPDATE health_risk_assessment 
-        SET questionnaireData=$questionnaireData,
-            riskLevel=$riskLevel,
-            recommendations=$recommendations,
-            updatedAt=time::now() 
-        WHERE id=$id;`,
+		`SELECT * FROM health_risk_assessment WHERE id=$id AND user_id=$user_id;`,
 		map[string]interface{}{
-			"questionnaireData": questionnaireData,
-			"riskLevel":         riskLevel,
-			"recommendations":   recommendations,
-			"id":                assessmentID,
+			"id":      assessmentID,
+			"user_id": user.ID,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	updatedAssessment, err := surrealdb.SmartUnmarshal[model.UpdateHealthRiskAssessmentResponse](result, nil)
+	existingAssessments, err := surrealdb.SmartUnmarshal[[]*model.HealthRiskAssessment](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
+	if len(existingAssessments) == 0 {
+		return nil, fmt.Errorf("assessment not found or access denied")
+	}
+	// TODO:计算新的健康风险等级和推荐措施（假设基于问卷数据进行分析）
+	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+
+	// 更新评估记录
+	result, err = database.DB.Query(
+		`UPDATE $id 
+        SET questionnaire_data=$questionnaire_data,
+            risk_level=$risk_level,
+            recommendations=$recommendations,
+            updated_at=time::now()
+        WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"id":                 assessmentID,
+			"questionnaire_data": questionnaireData,
+			"risk_level":         riskLevel,
+			"recommendations":    recommendations,
+			"user_id":            user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedAssessments, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(updatedAssessments) == 0 {
+		return nil, fmt.Errorf("failed to update assessment")
+	}
+
 	response := &model.UpdateHealthRiskAssessmentResponse{
-		AssessmentID:    updatedAssessment.AssessmentID,
-		RiskLevel:       updatedAssessment.RiskLevel,
-		Recommendations: updatedAssessment.Recommendations,
+		AssessmentID:    updatedAssessments[0].ID,
+		RiskLevel:       riskLevel,
+		Recommendations: recommendations,
 	}
 
 	return response, nil
@@ -863,32 +892,6 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 	return response, nil
 }
 
-// GetTreatmentSchedules is the resolver for the getTreatmentSchedules field.
-func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// 查询该用户的所有治疗计划
-	result, err := database.DB.Query(
-		`SELECT * FROM treatment_schedule WHERE user_id = $user_id ORDER BY scheduled_time;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return schedules, nil
-}
-
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
 func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
 	user := middlewares.ForContext(ctx)
@@ -1175,27 +1178,6 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 	return response, nil
 }
 
-// GetMedicalRecords is the resolver for the getMedicalRecords field.
-func (r *mutationResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
-	// panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-	// 查询所有医疗记录
-	result, err := database.DB.Query(`SELECT * FROM medical_record;`, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecordDetail](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return records, nil
-}
-
 // UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
 func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
@@ -1435,13 +1417,13 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 		return nil, err
 	}
 
-	newBadge, err := surrealdb.SmartUnmarshal[model.AchievementBadgeDetail](result, nil)
+	newBadge, err := surrealdb.SmartUnmarshal[model.AchievementBadge](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &model.CreateAchievementBadgeResponse{
-		BadgeID: newBadge.BadgeID,
+		BadgeID: newBadge.ID,
 		Message: "Achievement badge created successfully",
 	}
 
@@ -1458,10 +1440,13 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 	// 颁发成就徽章
 	result, err := database.DB.Query(
 		`CREATE ONLY user_achievement:ulid() 
-        SET badgeID=$badgeID,
+        SET 
+			user_id=$user_id,
+			badgeID=$badgeID,
             earnedAt=time::now(),
             createdAt=time::now();`,
 		map[string]interface{}{
+			"user_id": user.ID,
 			"badgeID": badgeID,
 		},
 	)
@@ -1469,13 +1454,13 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 		return nil, err
 	}
 
-	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievementDetail](result, nil)
+	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievement](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &model.AwardAchievementResponse{
-		UserAchievementID: newUserAchievement.UserAchievementID,
+		UserAchievementID: newUserAchievement.ID,
 		Message:           "Achievement awarded successfully",
 	}
 
@@ -1902,3 +1887,55 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *mutationResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// 查询该用户的所有治疗计划
+	result, err := database.DB.Query(
+		`SELECT * FROM treatment_schedule WHERE user_id = $user_id ORDER BY scheduled_time;`,
+		map[string]interface{}{
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return schedules, nil
+}
+func (r *mutationResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
+	// panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 查询所有医疗记录
+	result, err := database.DB.Query(`SELECT * FROM medical_record;`, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecordDetail](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+*/
