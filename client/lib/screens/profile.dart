@@ -1,35 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meditrax/models/user.dart';
+import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/user_provider.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userDataProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('个人资料'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildProfileHeader(context),
-            _buildPersonalInfo(),
-            _buildFamilySection(context),
-            _buildAccountSettings(),
-          ],
+      body: userAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('加载失败'),
+              TextButton(
+                onPressed: () => ref.refresh(userDataProvider),
+                child: const Text('重试'),
+              ),
+            ],
+          ),
         ),
+        data: (user) => user == null
+            ? const Center(child: Text('未登录'))
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProfileHeader(context, user),
+                    _buildAccountSettings(context, ref),
+                  ],
+                ),
+              ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  Widget _buildProfileHeader(BuildContext context, User user) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -38,64 +60,126 @@ class ProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.grey[200],
-                    child: const Text(
-                      '张三',
-                      style: TextStyle(
+                    child: Text(
+                      user.name.characters.first,
+                      style: const TextStyle(
                         fontSize: 20,
                         color: Colors.black,
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '张三',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'zhangsan@example.com',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      SizedBox(height: 4),
-                      Chip(
-                        label: Text('VIP 会员'),
-                        backgroundColor: Color(0xFFF5F5F5),
-                        padding: EdgeInsets.symmetric(horizontal: 4),
-                        labelStyle: TextStyle(fontSize: 12),
-                      ),
-                    ],
+                        Text(
+                          user.phoneNumber,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
                   ),
+                  if (user.role == 'VIP')
+                    const Chip(
+                      label: Text('VIP 会员'),
+                      backgroundColor: Color(0xFFF5F5F5),
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      labelStyle: TextStyle(fontSize: 12),
+                    ),
+                ],
+              ),
+              const Divider(height: 32),
+              // Health Points
+              InkWell(
+                onTap: () => context.push('/rewards'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('健康积分', style: TextStyle(color: Colors.grey)),
+                        Text(
+                          '1,250',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Icon(Icons.arrow_forward_ios,
+                        color: Colors.grey[400], size: 20),
+                  ],
+                ),
+              ),
+              const Divider(height: 32),
+              // Quick Info Grid
+              Row(
+                children: [
+                  _buildInfoItem('年龄', '35岁'),
+                  _buildInfoItem('血型', 'A型'),
+                  _buildInfoItem('身高', '175cm'),
+                  _buildInfoItem('体重', '70kg'),
                 ],
               ),
               const SizedBox(height: 16),
-              InkWell(
-                onTap: () {
-                  context.go('/rewards');
+              // Family Section
+              Consumer(
+                builder: (context, ref, child) {
+                  final familyMembersAsync = ref.watch(familyMembersProvider);
+
+                  return familyMembersAsync.when(
+                    loading: () => const CircularProgressIndicator(),
+                    error: (error, stack) => InkWell(
+                      onTap: () => context.push('/family-collaboration'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('家庭协作', style: TextStyle(fontSize: 16)),
+                              Text('加载失败',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 14)),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.grey[400], size: 20),
+                        ],
+                      ),
+                    ),
+                    data: (members) => InkWell(
+                      onTap: () => context.push('/family-collaboration'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('家庭协作',
+                                  style: TextStyle(fontSize: 16)),
+                              Text('${members.length}位家庭成员',
+                                  style: const TextStyle(
+                                      color: Colors.grey, fontSize: 14)),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.grey[400], size: 20),
+                        ],
+                      ),
+                    ),
+                  );
                 },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '健康积分',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(
-                        '1,250',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),
@@ -104,93 +188,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPersonalInfo() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '个人信息',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('年龄', '35岁', '性别', '男'),
-              _buildInfoRow('血型', 'A型', '身高', '175cm'),
-              _buildInfoRow('体重', '70kg', 'BMI', '22.9'),
-              _buildInfoRow('过敏原', '无', '慢性病', '高血压'),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
-                  // TODO: Implement edit profile
-                },
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-                child: const Text('编辑个人信息'),
-              ),
-            ],
-          ),
-        ),
+  Widget _buildInfoItem(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          const SizedBox(height: 4),
+          Text(value, style: const TextStyle(fontSize: 16)),
+        ],
       ),
     );
   }
 
-  Widget _buildFamilySection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Card(
-        child: InkWell(
-          onTap: () {
-            context.go('/family-collaboration');
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '家庭协作',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  '管理您的家庭成员和共享设置',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                _buildFamilyMemberRow(
-                  name: '李',
-                  fullName: '李四',
-                  relation: '配偶',
-                  status: '已连接',
-                  isConnected: true,
-                ),
-                const SizedBox(height: 12),
-                _buildFamilyMemberRow(
-                  name: '王',
-                  fullName: '王五',
-                  relation: '父亲',
-                  status: '待确认',
-                  isConnected: false,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAccountSettings() {
+  Widget _buildAccountSettings(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -207,16 +218,25 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildSettingButton('通知设置'),
-              _buildSettingButton('隐私与安全'),
-              _buildSettingButton('帮助与支持'),
-              _buildSettingButton('应用设置'),
+              _buildSettingButton('通知设置', () => context.push('/notifications')),
+              _buildSettingButton('隐私与安全', () => context.push('/privacy')),
+              _buildSettingButton('帮助与支持', () => context.push('/support')),
+              _buildSettingButton('应用设置', () => context.push('/settings')),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement logout
+                  onPressed: () async {
+                    try {
+                      await ref.read(appStateProvider.notifier).logout();
+                      if (context.mounted) {
+                        context.go('/auth');
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ErrorHandler.showErrorSnackBar(context, e);
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -233,87 +253,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label1, String value1, String label2, String value2) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(label1, style: const TextStyle(color: Colors.grey)),
-                Text(value1),
-              ],
-            ),
-          ),
-          const SizedBox(width: 32),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(label2, style: const TextStyle(color: Colors.grey)),
-                Text(value2),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFamilyMemberRow({
-    required String name,
-    required String fullName,
-    required String relation,
-    required String status,
-    required bool isConnected,
-  }) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.grey[200],
-          child: Text(name),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(fullName),
-              Text(
-                '($relation)',
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isConnected ? Colors.black : Colors.grey[200],
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            status,
-            style: TextStyle(
-              color: isConnected ? Colors.white : Colors.grey,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSettingButton(String title) {
+  Widget _buildSettingButton(String title, VoidCallback onPressed) {
     return OutlinedButton(
-      onPressed: () {
-        // TODO: Implement settings navigation
-      },
+      onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

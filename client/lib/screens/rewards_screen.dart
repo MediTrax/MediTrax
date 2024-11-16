@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/providers/user_provider.dart';
 
 class RewardsScreen extends StatefulWidget {
   const RewardsScreen({super.key});
@@ -7,7 +9,8 @@ class RewardsScreen extends StatefulWidget {
   State<RewardsScreen> createState() => _RewardsScreenState();
 }
 
-class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProviderStateMixin {
+class _RewardsScreenState extends State<RewardsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -46,74 +49,116 @@ class _RewardsScreenState extends State<RewardsScreen> with SingleTickerProvider
   }
 }
 
-class PointsSystemTab extends StatelessWidget {
+class PointsSystemTab extends ConsumerWidget {
   const PointsSystemTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pointsAsync = ref.watch(userPointsProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '积分系统',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      child: pointsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('加载失败'),
+              TextButton(
+                onPressed: () => ref.refresh(userPointsProvider),
+                child: const Text('重试'),
+              ),
+            ],
           ),
-          const Text(
-            '通过按时服药和完成健康任务获得积分',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          Center(
-            child: Column(
-              children: [
-                const Text(
-                  '750',
-                  style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-                ),
-                const Text('当前积分', style: TextStyle(color: Colors.grey)),
-                const SizedBox(height: 16),
-                LinearProgressIndicator(
-                  value: 0.75,
-                  backgroundColor: Colors.grey[200],
-                  color: Colors.black,
-                ),
-                const SizedBox(height: 8),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('等级 3'),
-                    Text('等级 4'),
-                  ],
-                ),
-              ],
+        ),
+        data: (pointsData) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '积分系统',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 32),
-          const Text(
-            '今日任务',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          _buildTaskItem('按时服用早间药物', '+10分'),
-          _buildTaskItem('记录今日血压', '+15分'),
-          _buildTaskItem('完成15分钟步行', '+20分'),
-        ],
+            const Text(
+              '通过按时服药和完成健康任务获得积分',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    pointsData['currentPoints'].toString(),
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Text('当前积分', style: TextStyle(color: Colors.grey)),
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    value: pointsData['currentPoints'] /
+                        pointsData['nextLevelPoints'],
+                    backgroundColor: Colors.grey[200],
+                    color: Colors.black,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('等级 ${pointsData['currentLevel']}'),
+                      Text('等级 ${pointsData['nextLevel']}'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              '今日任务',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            ...pointsData['dailyTasks'].map<Widget>((task) => _buildTaskItem(
+                  task['task'],
+                  '+${task['points']}分',
+                  completed: task['completed'],
+                )),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTaskItem(String task, String points) {
+  Widget _buildTaskItem(String task, String points, {bool completed = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(task),
+          Row(
+            children: [
+              Icon(
+                completed ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: completed ? Colors.green : Colors.grey,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                task,
+                style: TextStyle(
+                  decoration: completed ? TextDecoration.lineThrough : null,
+                  color: completed ? Colors.grey : Colors.black,
+                ),
+              ),
+            ],
+          ),
           Text(
             points,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: completed ? Colors.grey : Colors.black,
+            ),
           ),
         ],
       ),
@@ -121,11 +166,13 @@ class PointsSystemTab extends StatelessWidget {
   }
 }
 
-class AchievementsTab extends StatelessWidget {
+class AchievementsTab extends ConsumerWidget {
   const AchievementsTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final achievementsAsync = ref.watch(achievementsProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -141,31 +188,35 @@ class AchievementsTab extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _buildAchievementCard('连续服药7天', true),
-                _buildAchievementCard('按时复诊5次', true),
-                _buildAchievementCard('完成30天健康日记', false),
-                _buildAchievementCard('连续监测血压30天', false),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO: Implement view all achievements
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+            child: achievementsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('加载失败'),
+                    TextButton(
+                      onPressed: () => ref.refresh(userDataProvider),
+                      child: const Text('重试'),
+                    ),
+                  ],
+                ),
               ),
-              child: const Text('查看所有成就'),
+              data: (achievements) => achievements.isEmpty
+                  ? const Center(child: Text('暂无成就'))
+                  : GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      children: achievements
+                          .map((achievement) => _buildAchievementCard(
+                                title: achievement.name,
+                                description: achievement.description,
+                                iconUrl: achievement.iconUrl,
+                                earnedAt: achievement.createdAt,
+                              ))
+                          .toList(),
+                    ),
             ),
           ),
         ],
@@ -173,23 +224,46 @@ class AchievementsTab extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievementCard(String title, bool achieved) {
+  Widget _buildAchievementCard({
+    required String title,
+    required String description,
+    required String iconUrl,
+    required DateTime earnedAt,
+  }) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (iconUrl.isNotEmpty)
+              Image.network(
+                iconUrl,
+                width: 48,
+                height: 48,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.emoji_events, size: 48),
+              )
+            else
+              const Icon(Icons.emoji_events, size: 48),
+            const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
             const SizedBox(height: 8),
             Text(
-              achieved ? '已获得' : '未获得',
-              style: TextStyle(
-                color: achieved ? Colors.green : Colors.grey,
+              '获得于 ${earnedAt.toString().split(' ')[0]}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontSize: 12,
               ),
             ),
           ],
