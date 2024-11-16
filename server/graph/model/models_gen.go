@@ -136,8 +136,8 @@ type HealthRiskAssessment struct {
 	ID                string               `json:"id"`
 	UserID            string               `json:"user_id"`
 	QuestionnaireData *QuestionnaireObject `json:"questionnaire_data,omitempty"`
-	RiskLevel         int                  `json:"risk_level"`
-	Recommendations   []string             `json:"recommendations"`
+	RiskLevel         string               `json:"risk_level"`
+	Recommendations   string               `json:"recommendations"`
 	CreatedAt         string               `json:"created_at"`
 }
 

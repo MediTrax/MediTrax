@@ -6732,9 +6732,9 @@ func (ec *executionContext) _HealthRiskAssessment_risk_level(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthRiskAssessment_risk_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6744,7 +6744,7 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_risk_level(_ conte
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6776,9 +6776,9 @@ func (ec *executionContext) _HealthRiskAssessment_recommendations(ctx context.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthRiskAssessment_recommendations(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {

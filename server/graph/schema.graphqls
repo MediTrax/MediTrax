@@ -50,8 +50,8 @@ type HealthRiskAssessment{
   id: String!
   user_id: String!
   questionnaire_data: QuestionnaireObject
-  risk_level: Int!
-  recommendations: [String!]!
+  risk_level: String!
+  recommendations: String!
   created_at: DateTime!
 }
 
