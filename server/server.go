@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"meditrax/graph"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
+	graph "meditrax/graph/resolvers"
 
 	"net/http"
 	"os"
