@@ -1,0 +1,71 @@
+type MedicalRecord{
+  id: String!
+  user_id: String!
+  record_type: String!
+  content: RecordObject!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type HealthMetric{
+  id: String!
+  user_id: String!
+  metric_type: String!
+  value: Float!
+  unit: String!
+  recorded_at: DateTime!
+  created_at: DateTime!
+}
+
+type AddHealthMetricResponse {
+  metricId: String!
+  message: String!
+}
+
+type HealthMetricDetail {
+  metricId: String!
+  metricType: String!
+  value: Float!
+  unit: String!
+  recordedAt: DateTime!
+}
+
+type UpdateHealthMetricResponse {
+  metricId: String!
+  message: String!
+}
+
+type DeleteHealthMetricResponse {
+  message: String!
+}
+
+type RecordObject{
+  data: String!
+}
+
+type AddMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type MedicalRecordDetail {
+  recordId: String!
+  recordType: String!
+  content: RecordObject!
+  createdAt: DateTime!
+}
+
+extend type Query{
+  getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  getMedicalRecords: [MedicalRecordDetail]
+}
+
+extend type Mutation{
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
+  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
+  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
+   
+  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
+  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
+  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
+}
