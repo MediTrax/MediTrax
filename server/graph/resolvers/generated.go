@@ -5,7 +5,6 @@ package graph
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"meditrax/graph/model"
@@ -2282,25 +2281,437 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "schemas/achievements.graphqls" "schemas/assessment.graphqls" "schemas/foodspec.graphqls" "schemas/medications.graphqls" "schemas/record.graphqls" "schemas/schema.graphqls" "schemas/user.graphqls"
-var sourcesFS embed.FS
-
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not available", filename))
-	}
-	return string(data)
+var sources = []*ast.Source{
+	{Name: "../schemas/achievements.graphqls", Input: `type AchievementBadge{
+  id: String!
+  name: String!
+  description: String!
+  icon_url: String!
+  created_at: DateTime!
 }
 
-var sources = []*ast.Source{
-	{Name: "schemas/achievements.graphqls", Input: sourceData("schemas/achievements.graphqls"), BuiltIn: false},
-	{Name: "schemas/assessment.graphqls", Input: sourceData("schemas/assessment.graphqls"), BuiltIn: false},
-	{Name: "schemas/foodspec.graphqls", Input: sourceData("schemas/foodspec.graphqls"), BuiltIn: false},
-	{Name: "schemas/medications.graphqls", Input: sourceData("schemas/medications.graphqls"), BuiltIn: false},
-	{Name: "schemas/record.graphqls", Input: sourceData("schemas/record.graphqls"), BuiltIn: false},
-	{Name: "schemas/schema.graphqls", Input: sourceData("schemas/schema.graphqls"), BuiltIn: false},
-	{Name: "schemas/user.graphqls", Input: sourceData("schemas/user.graphqls"), BuiltIn: false},
+type UserAchievement{
+  id: String!
+  user_id: String!
+  badge_id: String!
+  earned_at: DateTime!
+  created_at: DateTime!
+}
+
+type UpdateMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type DeleteMedicalRecordResponse {
+  message: String!
+}
+
+type CreateAchievementBadgeResponse {
+  badgeId: String!
+  message: String!
+}
+
+type AchievementBadgeDetail {
+  badgeId: String!
+  name: String!
+  description: String!
+  iconUrl: String!
+}
+
+type AwardAchievementResponse {
+  userAchievementId: String!
+  message: String!
+}
+
+type UserAchievementDetail {
+  userAchievementId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+}
+
+extend type Query{
+  getAchievementBadges: [AchievementBadgeDetail]
+  getUserAchievements: [UserAchievementDetail]
+}
+
+extend type Mutation{
+  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
+  awardAchievement(badgeId: String!): AwardAchievementResponse  
+}`, BuiltIn: false},
+	{Name: "../schemas/assessment.graphqls", Input: `type Question{
+  question: String!
+  questionType: Int!
+  choices: [String!]!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type HealthRiskAssessment{
+  id: String!
+  user_id: String!
+  questionnaire_data: QuestionnaireObject
+  risk_level: String!
+  recommendations: String!
+  created_at: DateTime!
+}
+
+type HealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+type HealthRiskAssessmentDetailResponse {
+  assessmentId: String!
+  questionnaireData: String!
+  riskLevel: String!
+  recommendations: String!
+  createdAt: DateTime!
+}
+
+type UpdateHealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+extend type Query{
+  getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
+}
+
+extend type Mutation{
+  createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
+  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse  
+}`, BuiltIn: false},
+	{Name: "../schemas/foodspec.graphqls", Input: `type FoodSpec{
+  name: String!
+  value: Float!
+  unit: String!
+  howHigh: Float!
+}
+
+type FoodSpecs{
+  specs: [FoodSpec!]!
+  howRecommend: Float!
+}
+
+extend type Query{
+  getFoodSpecs(food: String!) : FoodSpecs
+  getMockFoodSepcs(food: String!) : FoodSpecs  
+}`, BuiltIn: false},
+	{Name: "../schemas/medications.graphqls", Input: `type Medication{
+  id: String!
+  name: String!
+  dosage: Float!
+  unit: String!
+  frequency: String!
+  inventory: Float!
+  user_id: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MedicationReminder{
+  id: String!
+  medication_id: String!
+  user_id: String!
+  reminder_time: DateTime!
+  is_taken: Boolean!
+  created_at: DateTime!
+}
+
+type AddMedicationResponse {
+  medicationId: String!
+  message: String!
+}
+
+type MedicationDetail {
+  medicationId: String!
+  name: String!
+  dosage: Float!
+  unit: String!
+  frequency: String!
+  inventory: Float!
+}
+
+type UpdateMedicationResponse {
+  medicationId: String!
+  message: String!
+}
+
+type DeleteMedicationResponse {
+  message: String!
+}
+
+type CreateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
+}
+
+type UpdateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
+}
+
+type MedicationReminderDetail {
+  reminderId: String!
+  medicationId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+}
+
+type CreateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
+}
+
+type TreatmentScheduleDetail {
+  scheduleId: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
+}
+
+type UpdateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
+}
+
+type DeleteTreatmentScheduleResponse {
+  message: String!
+}
+
+
+extend type Query{
+  getMedications: [MedicationDetail]
+  getMedicationReminders: [MedicationReminderDetail]
+  getTreatmentSchedules: [TreatmentScheduleDetail]
+}
+
+extend type Mutation{
+  addMedication(name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
+  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Float): UpdateMedicationResponse
+  deleteMedication(medicationId: String!): DeleteMedicationResponse
+  
+  createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
+  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  
+  createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
+  updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
+  deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
+
+}
+`, BuiltIn: false},
+	{Name: "../schemas/record.graphqls", Input: `type MedicalRecord{
+  id: String!
+  user_id: String!
+  record_type: String!
+  content: RecordObject!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type HealthMetric{
+  id: String!
+  user_id: String!
+  metric_type: String!
+  value: Float!
+  unit: String!
+  recorded_at: DateTime!
+  created_at: DateTime!
+}
+
+type AddHealthMetricResponse {
+  metricId: String!
+  message: String!
+}
+
+type HealthMetricDetail {
+  metricId: String!
+  metricType: String!
+  value: Float!
+  unit: String!
+  recordedAt: DateTime!
+}
+
+type UpdateHealthMetricResponse {
+  metricId: String!
+  message: String!
+}
+
+type DeleteHealthMetricResponse {
+  message: String!
+}
+
+type RecordObject{
+  data: String!
+}
+
+type AddMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type MedicalRecordDetail {
+  recordId: String!
+  recordType: String!
+  content: RecordObject!
+  createdAt: DateTime!
+}
+
+extend type Query{
+  getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  getMedicalRecords: [MedicalRecordDetail]
+}
+
+extend type Mutation{
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
+  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
+  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
+   
+  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
+  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
+  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
+}
+`, BuiltIn: false},
+	{Name: "../schemas/schema.graphqls", Input: `# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar DateTime
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query
+
+type Mutation
+`, BuiltIn: false},
+	{Name: "../schemas/user.graphqls", Input: `type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User{
+  id: String!
+  phoneNumber: String!
+  password: String!
+  name: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  last_login: DateTime!
+  status: Int!
+  role: String!
+}
+
+type PasswordChange {
+  id: String!
+  user: String!
+  token: String!
+  createdAt: DateTime!
+}
+
+type CreateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type LoginUserResponse {
+  userId: String!
+  token: Token!
+  message: String!
+}
+
+type UserDetailResponse {
+  userId: String!
+  phoneNumber: String!
+  name: String!
+  role: String!
+  createdAt: DateTime!
+  lastLogin: DateTime
+}
+
+type UpdateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type DeleteUserResponse {
+  message: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
+type FamilyMember{
+  id: String!
+  user_id: String!
+  related_user_id: String!
+  relationship: String!
+  access_level: Int!
+  created_at: DateTime!
+}
+
+type AddFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type FamilyMemberDetail {
+  memberId: String!
+  relatedUserId: String!
+  relationship: String!
+  accessLevel: Int!
+}
+
+type UpdateFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type DeleteFamilyMemberResponse {
+  message: String!
+}
+
+extend type Query{
+  getUser: UserDetailResponse
+  getFamilyMembers: [FamilyMemberDetail]
+
+}
+
+extend type Mutation{
+  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+
+  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
+  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+  deleteUser: DeleteUserResponse
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
+  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
+  updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+  deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
