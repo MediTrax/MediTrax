@@ -1,35 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/health_risk_provider.dart';
 
-class HealthRiskReportScreen extends StatelessWidget {
+class HealthRiskReportScreen extends ConsumerWidget {
   const HealthRiskReportScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final assessmentState = ref.watch(healthRiskProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('健康风险评估报告'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOverallRiskCard(),
-              const SizedBox(height: 16),
-              _buildCategoryTabs(),
-              const SizedBox(height: 16),
-              _buildKidneyFunctionCard(),
-              const SizedBox(height: 16),
-              _buildRecommendationsCard(),
-            ],
-          ),
+      body: assessmentState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Text('加载失败: ${error.toString()}'),
         ),
+        data: (assessment) {
+          if (assessment == null) {
+            return const Center(child: Text('暂无评估数据'));
+          }
+
+          final riskLevel = assessment.riskLevel;
+          // final recommendations = assessment.recommendations;
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildOverallRiskCard(riskLevel),
+                  const SizedBox(height: 16),
+                  _buildCategoryTabs(),
+                  const SizedBox(height: 16),
+                  _buildKidneyFunctionCard(riskLevel),
+                  const SizedBox(height: 16),
+                  // _buildRecommendationsCard(recommendations),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildOverallRiskCard() {
+  Widget _buildOverallRiskCard(String riskLevel) {
+    final (riskText, riskPercentage) = _getRiskDetails(riskLevel);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,17 +71,17 @@ class HealthRiskReportScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '中度风险',
-                      style: TextStyle(
+                      riskText,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
+                    const Text(
                       '需要关注并采取措施',
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -74,15 +95,15 @@ class HealthRiskReportScreen extends StatelessWidget {
                       width: 60,
                       height: 60,
                       child: CircularProgressIndicator(
-                        value: 0.65,
+                        value: riskPercentage / 100,
                         backgroundColor: Colors.grey,
-                        color: Colors.black,
+                        color: _getRiskColor(riskLevel),
                         strokeWidth: 10,
                       ),
                     ),
-                    const Text(
-                      '65%',
-                      style: TextStyle(
+                    Text(
+                      '$riskPercentage%',
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -147,7 +168,9 @@ class HealthRiskReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKidneyFunctionCard() {
+  Widget _buildKidneyFunctionCard(String riskLevel) {
+    final (riskText, _) = _getRiskDetails(riskLevel);
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -191,20 +214,15 @@ class HealthRiskReportScreen extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3E0),
+                    color: _getRiskColor(riskLevel).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text(
-                    '中度风险',
-                    style: TextStyle(color: Colors.orange),
+                  child: Text(
+                    riskText,
+                    style: TextStyle(color: _getRiskColor(riskLevel)),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '您的eGFR值显示轻度至中度肾功能下降。这表明您的肾脏过滤血液的能力有所减弱，需要密切监测和管理。',
-              style: TextStyle(fontSize: 14),
             ),
           ],
         ),
@@ -212,7 +230,7 @@ class HealthRiskReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecommendationsCard() {
+  Widget _buildRecommendationsCard(List<String> recommendations) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -227,12 +245,9 @@ class HealthRiskReportScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildRecommendationItem('定期监测肾功能，每3-6个月进行一次eGFR检查'),
-            _buildRecommendationItem('控制血压在目标范围内（通常<130/80 mmHg)'),
-            _buildRecommendationItem('限制蛋白质摄入，每日不超过0.8g/kg体重'),
-            _buildRecommendationItem('减少钠的摄入，每日不超过2300mg'),
-            _buildRecommendationItem('保持适度运动，每周至少150分钟中等强度有氧运动'),
-            _buildRecommendationItem('避免使用肾毒性药物，如需服用止痛药请咨询医生'),
+            ...recommendations.map((recommendation) => 
+              _buildRecommendationItem(recommendation)
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -265,5 +280,31 @@ class HealthRiskReportScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  (String, int) _getRiskDetails(String riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'low':
+        return ('低风险', 25);
+      case 'medium':
+        return ('中度风险', 65);
+      case 'high':
+        return ('高风险', 90);
+      default:
+        return ('未知风险', 0);
+    }
+  }
+
+  Color _getRiskColor(String riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'low':
+        return Colors.green;
+      case 'medium':
+        return Colors.orange;
+      case 'high':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

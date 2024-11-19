@@ -1,136 +1,79 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../models/health_risk_assessment.dart';
+import 'health_risk_provider.graphql.dart';
+import 'package:meditrax/providers/graphql.dart';
 
-// import 'package:flutter/material.dart';
-// import 'package:graphql_flutter/graphql_flutter.dart';
+final healthRiskProvider = StateNotifierProvider<HealthRiskNotifier, AsyncValue<Query$GetHealthRiskAssessment$getHealthRiskAssessment?>>((ref) {
+  final client = ref.read(graphQLServiceProvider);
+  return HealthRiskNotifier(client);
+});
 
-// class HealthRiskProvider with ChangeNotifier {
-//   final GraphQLClient _client;
-  
-//   HealthRiskAssessment? _currentAssessment;
-//   bool _loading = false;
-//   String? _error;
+class HealthRiskNotifier extends StateNotifier<AsyncValue<Query$GetHealthRiskAssessment$getHealthRiskAssessment?>> { /// Updated type
+  HealthRiskNotifier(this.client) : super(const AsyncValue.loading());
 
-//   HealthRiskProvider(this._client);
+  final GraphQLClient client;
 
-//   HealthRiskAssessment? get currentAssessment => _currentAssessment;
-//   bool get isLoading => _loading;
-//   String? get error => _error;
+  Future<void> fetchHealthRiskAssessment(String userId) async {
+    try {
+      state = const AsyncValue.loading();
+      final result = await client.query$GetHealthRiskAssessment(
+        Options$Query$GetHealthRiskAssessment(
+          variables: Variables$Query$GetHealthRiskAssessment(userId: userId),
+        ),
+      );
 
-//   Future<void> createHealthRiskAssessment(String userId, String questionnaireData) async {
-//     try {
-//       _loading = true;
-//       _error = null;
-//       notifyListeners();
+      if (result.hasException) {
+        throw result.exception!;
+      }
 
-//       final options = MutationOptions(
-//         document: gql(createHealthRiskAssessmentMutation),
-//         variables: {
-//           'userId': userId,
-//           'questionnaireData': questionnaireData,
-//         },
-//       );
+      state = AsyncValue.data(result.parsedData?.getHealthRiskAssessment);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
 
-//       final result = await _client.mutate(options);
+  Future<void> createHealthRiskAssessment(String userId, String questionnaireData) async {
+    try {
+      final result = await client.mutate$CreateHealthRiskAssessment(
+        Options$Mutation$CreateHealthRiskAssessment(
+          variables: Variables$Mutation$CreateHealthRiskAssessment(
+            userId: userId,
+            questionnaireData: questionnaireData,
+          ),
+        ),
+      );
 
-//       if (result.hasException) {
-//         throw Exception(result.exception?.graphqlErrors.first.message);
-//       }
+      if (result.hasException) {
+        throw result.exception!;
+      }
 
-//       final response = result.data?['createHealthRiskAssessment'];
-//       _currentAssessment = HealthRiskAssessment(
-//         assessmentId: response['assessmentId'],
-//         riskLevel: response['riskLevel'],
-//         recommendations: response['recommendations'],
-//       );
-//     } catch (e) {
-//       _error = e.toString();
-//     } finally {
-//       _loading = false;
-//       notifyListeners();
-//     }
-//   }
+      // Update the state with the new assessment
+       state = AsyncValue.data(result.parsedData?.createHealthRiskAssessment as Query$GetHealthRiskAssessment$getHealthRiskAssessment?);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
 
-//   Future<void> getHealthRiskAssessment(String userId) async {
-//     try {
-//       _loading = true;
-//       _error = null;
-//       notifyListeners();
+  Future<void> updateHealthRiskAssessment(String assessmentId, String questionnaireData) async {
+    try {
+      final result = await client.mutate$UpdateHealthRiskAssessment(
+        Options$Mutation$UpdateHealthRiskAssessment(
+          variables: Variables$Mutation$UpdateHealthRiskAssessment(
+            assessmentId: assessmentId,
+            questionnaireData: questionnaireData,
+          ),
+        ),
+      );
 
-//       final options = QueryOptions(
-//         document: gql(getHealthRiskAssessmentQuery),
-//         variables: {
-//           'userId': userId,
-//         },
-//       );
+      if (result.hasException) {
+        throw result.exception!;
+      }
 
-//       final result = await _client.query(options);
-
-//       if (result.hasException) {
-//         throw Exception(result.exception?.graphqlErrors.first.message);
-//       }
-
-//       final response = result.data?['getHealthRiskAssessment'];
-//       _currentAssessment = HealthRiskAssessment(
-//         assessmentId: response['assessmentId'],
-//         questionnaireData: response['questionnaireData'],
-//         riskLevel: response['riskLevel'],
-//         recommendations: response['recommendations'],
-//         createdAt: DateTime.parse(response['createdAt']),
-//       );
-//     } catch (e) {
-//       _error = e.toString();
-//     } finally {
-//       _loading = false;
-//       notifyListeners();
-//     }
-//   }
-
-//   Future<void> updateHealthRiskAssessment(String assessmentId, String questionnaireData) async {
-//     try {
-//       _loading = true;
-//       _error = null;
-//       notifyListeners();
-
-//       final options = MutationOptions(
-//         document: gql(updateHealthRiskAssessmentMutation),
-//         variables: {
-//           'assessmentId': assessmentId,
-//           'questionnaireData': questionnaireData,
-//         },
-//       );
-
-//       final result = await _client.mutate(options);
-
-//       if (result.hasException) {
-//         throw Exception(result.exception?.graphqlErrors.first.message);
-//       }
-
-//       final response = result.data?['updateHealthRiskAssessment'];
-//       _currentAssessment = HealthRiskAssessment(
-//         assessmentId: response['assessmentId'],
-//         riskLevel: response['riskLevel'],
-//         recommendations: response['recommendations'],
-//       );
-//     } catch (e) {
-//       _error = e.toString();
-//     } finally {
-//       _loading = false;
-//       notifyListeners();
-//     }
-//   }
-// }
-
-// class HealthRiskAssessment {
-//   final String assessmentId;
-//   final String? questionnaireData;
-//   final String riskLevel;
-//   final String recommendations;
-//   final DateTime? createdAt;
-
-//   HealthRiskAssessment({
-//     required this.assessmentId,
-//     this.questionnaireData,
-//     required this.riskLevel,
-//     required this.recommendations,
-//     this.createdAt,
-//   });
-// }
+      // Update the state with the updated assessment
+      state = AsyncValue.data(result.parsedData?.updateHealthRiskAssessment as Query$GetHealthRiskAssessment$getHealthRiskAssessment?);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}

@@ -18,4 +18,22 @@ class DietPlan extends HiveObject with _$DietPlan {
     @HiveField(5) required DateTime createdAt,
     @HiveField(6) required DateTime updatedAt,
   }) = _DietPlan;
+
+  factory DietPlan.fromJson(Map<String, dynamic> json) {
+    return DietPlan(
+      id: json['id'] ?? '', 
+      userId: json['userId'] ?? '',
+      mealType: json['mealType'] ?? '', 
+      foodItems: (json['foodItems'] as List<dynamic>? ?? [])
+          .map((item) => item.toString()) 
+          .toList(),
+      calories: (json['calories'] as num?)?.toInt() ?? 0, 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt']) 
+          : DateTime.now(), 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt']) 
+          : DateTime.now(), 
+    );
+  }
 }

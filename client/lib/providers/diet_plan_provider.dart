@@ -1,162 +1,167 @@
-// import 'package:graphql_flutter/graphql_flutter.dart';
-// import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../models/diet_plan.dart';
 
-// class DietPlanProvider with ChangeNotifier {
-//   final GraphQLClient _client;
-//   List<DietPlan> _dietPlans = [];
-//   bool _loading = false;
-//   String? _error;
+class DietPlanService {
+  final GraphQLClient _client;
 
-//   DietPlanProvider(this._client);
+  DietPlanService(this._client);
 
-//   List<DietPlan> get dietPlans => _dietPlans;
-//   bool get loading => _loading;
-//   String? get error => _error;
+  // Fetch all diet plans for a user
+  Future<List<DietPlan>> fetchDietPlans(String userId) async {
+    const String query = r'''
+      query getDietPlans($userId: String!) {
+        getDietPlans(userId: $userId) {
+          id: planId
+          userId
+          mealType
+          foodItems
+          calories
+          createdAt
+          updatedAt
+        }
+      }
+    ''';
 
-//   Future<void> getDietPlans(String userId) async {
-//     _loading = true;
-//     _error = null;
-//     notifyListeners();
+    final result = await _client.query(
+      QueryOptions(
+        document: gql(query),
+        variables: {'userId': userId},
+        fetchPolicy: FetchPolicy.networkOnly,
+      ),
+    );
 
-//     try {
-//       final result = await _client.query(
-//         QueryOptions(
-//           document: gql(getDietPlansQuery),
-//           variables: {'userId': userId},
-//         ),
-//       );
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
 
-//       if (result.hasException) {
-//         _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-//       } else {
-//         final List<dynamic> plansData = result.data?['getDietPlans'] ?? [];
-//         _dietPlans = plansData.map((plan) => DietPlan.fromJson(plan)).toList();
-//       }
-//     } catch (e) {
-//       _error = e.toString();
-//     } finally {
-//       _loading = false;
-//       notifyListeners();
-//     }
-//   }
+    final plans = (result.data?['getDietPlans'] as List? ?? [])
+        .map((plan) => DietPlan(
+              id: plan['id'] ?? '',
+              userId: plan['userId'] ?? '',
+              mealType: plan['mealType'] ?? '',
+              foodItems: (plan['foodItems'] as List<dynamic>? ?? [])
+                  .map((item) => item.toString())
+                  .toList(),
+              calories: plan['calories'] ?? 0,
+              createdAt: DateTime.parse(plan['createdAt']),
+              updatedAt: DateTime.parse(plan['updatedAt']),
+            ))
+        .toList();
 
-//   Future<String?> createDietPlan({
-//     required String userId,
-//     required String mealType,
-//     required String foodItems,
-//     required double calories,
-//   }) async {
-//     try {
-//       final result = await _client.mutate(
-//         MutationOptions(
-//           document: gql(createDietPlanMutation),
-//           variables: {
-//             'userId': userId,
-//             'mealType': mealType,
-//             'foodItems': foodItems,
-//             'calories': calories,
-//           },
-//         ),
-//       );
+    return plans;
+  }
 
-//       if (result.hasException) {
-//         _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-//         return null;
-//       }
+  // Create a new diet plan
+  Future<Map<String, dynamic>> createDietPlan({
+    required String userId,
+    required String mealType,
+    required List<String> foodItems,
+    required int calories,
+  }) async {
+    const String mutation = r'''
+      mutation createDietPlan(
+        $userId: String!
+        $mealType: String!
+        $foodItems: [String!]!
+        $calories: Int!
+      ) {
+        createDietPlan(
+          userId: $userId
+          mealType: $mealType
+          foodItems: $foodItems
+          calories: $calories
+        ) {
+          id: planId
+          message
+        }
+      }
+    ''';
 
-//       await getDietPlans(userId);
-//       return result.data?['createDietPlan']['planId'];
-//     } catch (e) {
-//       _error = e.toString();
-//       return null;
-//     }
-//   }
+    final result = await _client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {
+          'userId': userId,
+          'mealType': mealType,
+          'foodItems': foodItems,
+          'calories': calories,
+        },
+      ),
+    );
 
-//   Future<bool> updateDietPlan({
-//     required String planId,
-//     String? mealType,
-//     String? foodItems,
-//     double? calories,
-//   }) async {
-//     try {
-//       final result = await _client.mutate(
-//         MutationOptions(
-//           document: gql(updateDietPlanMutation),
-//           variables: {
-//             'planId': planId,
-//             if (mealType != null) 'mealType': mealType,
-//             if (foodItems != null) 'foodItems': foodItems,
-//             if (calories != null) 'calories': calories,
-//           },
-//         ),
-//       );
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
 
-//       if (result.hasException) {
-//         _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-//         return false;
-//       }
+    return result.data?['createDietPlan'] ?? {};
+  }
 
-//       // Refresh the diet plans list
-//       final userId = _dietPlans.firstWhere((plan) => plan.planId == planId).userId;
-//       await getDietPlans(userId);
-//       return true;
-//     } catch (e) {
-//       _error = e.toString();
-//       return false;
-//     }
-//   }
+  // Update an existing diet plan
+  Future<Map<String, dynamic>> updateDietPlan({
+    required String id,
+    String? mealType,
+    List<String>? foodItems,
+    int? calories,
+  }) async {
+    const String mutation = r'''
+      mutation updateDietPlan(
+        $planId: String!
+        $mealType: String
+        $foodItems: [String!]
+        $calories: Int
+      ) {
+        updateDietPlan(
+          planId: $planId
+          mealType: $mealType
+          foodItems: $foodItems
+          calories: $calories
+        ) {
+          id: planId
+          message
+        }
+      }
+    ''';
 
-//   Future<bool> deleteDietPlan(String planId) async {
-//     try {
-//       final result = await _client.mutate(
-//         MutationOptions(
-//           document: gql(deleteDietPlanMutation),
-//           variables: {
-//             'planId': planId,
-//           },
-//         ),
-//       );
+    final result = await _client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {
+          'planId': id,
+          'mealType': mealType,
+          'foodItems': foodItems,
+          'calories': calories,
+        },
+      ),
+    );
 
-//       if (result.hasException) {
-//         _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-//         return false;
-//       }
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
 
-//       _dietPlans.removeWhere((plan) => plan.planId == planId);
-//       notifyListeners();
-//       return true;
-//     } catch (e) {
-//       _error = e.toString();
-//       return false;
-//     }
-//   }
-// }
+    return result.data?['updateDietPlan'] ?? {};
+  }
 
-// class DietPlan {
-//   final String planId;
-//   final String userId;
-//   final String mealType;
-//   final String foodItems;
-//   final double calories;
-//   final DateTime createdAt;
+  // Delete a diet plan
+  Future<String> deleteDietPlan(String id) async {
+    const String mutation = r'''
+      mutation deleteDietPlan($planId: String!) {
+        deleteDietPlan(planId: $planId) {
+          message
+        }
+      }
+    ''';
 
-//   DietPlan({
-//     required this.planId,
-//     required this.userId,
-//     required this.mealType,
-//     required this.foodItems,
-//     required this.calories,
-//     required this.createdAt,
-//   });
+    final result = await _client.mutate(
+      MutationOptions(
+        document: gql(mutation),
+        variables: {'planId': id},
+      ),
+    );
 
-//   factory DietPlan.fromJson(Map<String, dynamic> json) {
-//     return DietPlan(
-//       planId: json['planId'],
-//       userId: json['userId'],
-//       mealType: json['mealType'],
-//       foodItems: json['foodItems'],
-//       calories: json['calories'].toDouble(),
-//       createdAt: DateTime.parse(json['createdAt']),
-//     );
-//   }
-// }
+    if (result.hasException) {
+      throw Exception(result.exception.toString());
+    }
+
+    return result.data?['deleteDietPlan']['message'] ?? 'No message';
+  }
+}
