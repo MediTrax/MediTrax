@@ -59,6 +59,10 @@ type MedicationReminderDetail {
   isTaken: Boolean!
 }
 
+type DeleteMedicationReminderResponse{
+  message: String!
+}
+
 type CreateTreatmentScheduleResponse {
   scheduleId: String!
   message: String!
@@ -95,6 +99,7 @@ extend type Mutation{
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
