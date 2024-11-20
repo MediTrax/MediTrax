@@ -402,6 +402,48 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	return response, nil
 }
 
+// DeleteMedicationReminder is the resolver for the deleteMedicationReminder field.
+func (r *mutationResolver) DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// check legality of the provided id
+	if !utils.MatchID(reminderID, "medication_reminder") {
+		return nil, fmt.Errorf("illegal medication reminder id")
+	}
+
+	// Execute the query
+	result, err := database.DB.Query(
+		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":      reminderID,
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err // Return the error if the query fails
+	}
+
+	// unmarshal results and check for errors
+	results, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id, no associated medication reminder object found")
+	}
+
+	// create response
+	response := &model.DeleteMedicationReminderResponse{
+		Message: fmt.Sprintf("Medication reminder %s for medication %s was deleted successfully", results[0].ID, results[0].MedicationID),
+	}
+
+	// Return the response with the medication ID and a success message
+	return response, nil
+}
+
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
 func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
 	// 验证用户权限
