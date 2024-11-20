@@ -1,0 +1,57 @@
+type AchievementBadge{
+  id: String!
+  name: String!
+  description: String!
+  icon_url: String!
+  created_at: DateTime!
+}
+
+type UserAchievement{
+  id: String!
+  user_id: String!
+  badge_id: String!
+  earned_at: DateTime!
+  created_at: DateTime!
+}
+
+type UpdateMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type DeleteMedicalRecordResponse {
+  message: String!
+}
+
+type CreateAchievementBadgeResponse {
+  badgeId: String!
+  message: String!
+}
+
+type AchievementBadgeDetail {
+  badgeId: String!
+  name: String!
+  description: String!
+  iconUrl: String!
+}
+
+type AwardAchievementResponse {
+  userAchievementId: String!
+  message: String!
+}
+
+type UserAchievementDetail {
+  userAchievementId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+}
+
+extend type Query{
+  getAchievementBadges: [AchievementBadgeDetail]
+  getUserAchievements: [UserAchievementDetail]
+}
+
+extend type Mutation{
+  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
+  awardAchievement(badgeId: String!): AwardAchievementResponse  
+}
