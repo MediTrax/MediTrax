@@ -2,7 +2,7 @@
 #
 # https://gqlgen.com/getting-started/
 
-# go run: go run github.com/99designs/gqlgen generate
+# go: go run github.com/99designs/gqlgen generate
 
 scalar DateTime
 
@@ -50,8 +50,8 @@ type HealthRiskAssessment{
   id: String!
   user_id: String!
   questionnaire_data: String!
-  risk_level: Int!
-  recommendations: [String!]!
+  risk_level: String!
+  recommendations: String!
   created_at: DateTime!
 }
 
@@ -95,14 +95,12 @@ type HealthMetric{
   created_at: DateTime!
 }
 
-type DietPlan{
+type TreatmentSchedule{
   id: String!
-  user_id: String!
-  meal_type: String!
-  food_items: [String!]!
-  calories: Int!
-  created_at: DateTime!
-  updated_at: DateTime!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
 }
 
 type FamilyMember{
@@ -278,26 +276,16 @@ type DeleteHealthMetricResponse {
   message: String!
 }
 
-type CreateDietPlanResponse {
-  planId: String!
-  message: String!
+type FoodSpec{
+  name: String!
+  value: Float!
+  unit: String!
+  howHigh: Float!
 }
 
-type DietPlanDetail {
-  planId: String!
-  mealType: String!
-  foodItems: String!
-  calories: Float!
-  createdAt: DateTime!
-}
-
-type UpdateDietPlanResponse {
-  planId: String!
-  message: String!
-}
-
-type DeleteDietPlanResponse {
-  message: String!
+type FoodSpecs{
+  specs: [FoodSpec!]!
+  howRecommend: Float!
 }
 
 type AddMedicalRecordResponse {
@@ -308,7 +296,7 @@ type AddMedicalRecordResponse {
 type MedicalRecordDetail {
   recordId: String!
   recordType: String!
-  content: String!
+  content: RecordObject!
   createdAt: DateTime!
 }
 
@@ -330,7 +318,7 @@ type FamilyMemberDetail {
   memberId: String!
   relatedUserId: String!
   relationship: String!
-  accessLevel: String!
+  accessLevel: Int!
 }
 
 type UpdateFamilyMemberResponse {
@@ -367,24 +355,29 @@ type UserAchievementDetail {
 
 
 type Query{
+  # finish unwritten get functions
   getUser: UserDetailResponse
   getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
   getMedications: [MedicationDetail]
   getMedicationReminders: [MedicationReminderDetail]
-  
+  getTreatmentSchedules: [TreatmentScheduleDetail]
   getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
-  getDietPlans: [DietPlanDetail]
+  getMedicalRecords: [MedicalRecordDetail]
   getFamilyMembers: [FamilyMemberDetail]
   getAchievementBadges: [AchievementBadgeDetail]
   getUserAchievements: [UserAchievementDetail]
+
+  # make mock endpoint: DONE
+  getFoodSpecs(food: String!) : FoodSpecs
+  getMockFoodSepcs(food: String!) : FoodSpecs
 }
 
 type Mutation {
+  # to do: DONE
   refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
 
   createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
   loginUser(phoneNumber: String!, password: String!): LoginUserResponse
-  
   updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
@@ -401,28 +394,22 @@ type Mutation {
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
-  getTreatmentSchedules: [TreatmentScheduleDetail]
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
   
   addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
   updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
   deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
-  
-  createDietPlan(mealType: String!, foodItems: String!, calories: Float!): CreateDietPlanResponse  
-  updateDietPlan(planId: String!, mealType: String, foodItems: String, calories: Float): UpdateDietPlanResponse
-  deleteDietPlan(planId: String!): DeleteDietPlanResponse
-  
+   
   addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
-  getMedicalRecords: [MedicalRecordDetail]
   updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
   deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
   
+  # to do
   addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
   updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
   deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
-  
+
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
-  awardAchievement(badgeId: String!): AwardAchievementResponse
-  
+  awardAchievement(badgeId: String!): AwardAchievementResponse  
 }
