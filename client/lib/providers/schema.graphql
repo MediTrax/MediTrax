@@ -49,7 +49,7 @@ type User{
 type HealthRiskAssessment{
   id: String!
   user_id: String!
-  questionnaire_data: QuestionnaireObject
+  questionnaire_data: String!
   risk_level: Int!
   recommendations: [String!]!
   created_at: DateTime!
