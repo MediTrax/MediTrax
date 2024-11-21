@@ -12,5 +12,7 @@ type FoodSpecs{
 
 extend type Query{
   getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSepcs(food: String!) : FoodSpecs  
+  getMockFoodSpecs(food: String!) : FoodSpecs  
+
+  # add endpoint for recommending ONE food
 }
