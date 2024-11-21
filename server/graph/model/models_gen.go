@@ -74,6 +74,10 @@ type DeleteMedicalRecordResponse struct {
 	Message string `json:"message"`
 }
 
+type DeleteMedicationReminderResponse struct {
+	Message string `json:"message"`
+}
+
 type DeleteMedicationResponse struct {
 	Message string `json:"message"`
 }

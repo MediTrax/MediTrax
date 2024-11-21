@@ -118,6 +118,10 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	DeleteMedicationReminderResponse struct {
+		Message func(childComplexity int) int
+	}
+
 	DeleteMedicationResponse struct {
 		Message func(childComplexity int) int
 	}
@@ -273,6 +277,7 @@ type ComplexityRoot struct {
 		DeleteHealthMetric         func(childComplexity int, metricID string) int
 		DeleteMedicalRecord        func(childComplexity int, recordID string) int
 		DeleteMedication           func(childComplexity int, medicationID string) int
+		DeleteMedicationReminder   func(childComplexity int, reminderID string) int
 		DeleteTreatmentSchedule    func(childComplexity int, scheduleID string) int
 		DeleteUser                 func(childComplexity int) int
 		LoginUser                  func(childComplexity int, phoneNumber string, password string) int
@@ -449,6 +454,7 @@ type MutationResolver interface {
 	DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error)
 	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error)
 	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
+	DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error)
 	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
 	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
 	DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error)
@@ -712,6 +718,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeleteMedicalRecordResponse.Message(childComplexity), true
+
+	case "DeleteMedicationReminderResponse.message":
+		if e.complexity.DeleteMedicationReminderResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.DeleteMedicationReminderResponse.Message(childComplexity), true
 
 	case "DeleteMedicationResponse.message":
 		if e.complexity.DeleteMedicationResponse.Message == nil {
@@ -1461,6 +1474,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteMedication(childComplexity, args["medicationId"].(string)), true
+
+	case "Mutation.deleteMedicationReminder":
+		if e.complexity.Mutation.DeleteMedicationReminder == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteMedicationReminder_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteMedicationReminder(childComplexity, args["reminderId"].(string)), true
 
 	case "Mutation.deleteTreatmentSchedule":
 		if e.complexity.Mutation.DeleteTreatmentSchedule == nil {
@@ -2508,12 +2533,17 @@ type MedicationReminderDetail {
   isTaken: Boolean!
 }
 
+<<<<<<< HEAD
 type TreatmentSchedule{
   id: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
   notes: String
+=======
+type DeleteMedicationReminderResponse{
+  message: String!
+>>>>>>> 891032bcf16aaeef7566f3f44d3eb00fab15236d
 }
 
 type CreateTreatmentScheduleResponse {
@@ -2552,6 +2582,7 @@ extend type Mutation{
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
@@ -3405,6 +3436,29 @@ func (ec *executionContext) field_Mutation_deleteMedicalRecord_argsRecordID(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("recordId"))
 	if tmp, ok := rawArgs["recordId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteMedicationReminder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteMedicationReminder_argsReminderID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["reminderId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteMedicationReminder_argsReminderID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderId"))
+	if tmp, ok := rawArgs["reminderId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -5658,6 +5712,50 @@ func (ec *executionContext) _DeleteMedicalRecordResponse_message(ctx context.Con
 func (ec *executionContext) fieldContext_DeleteMedicalRecordResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DeleteMedicalRecordResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteMedicationReminderResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.DeleteMedicationReminderResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteMedicationReminderResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteMedicationReminderResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteMedicationReminderResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -9876,6 +9974,62 @@ func (ec *executionContext) fieldContext_Mutation_updateMedicationReminder(ctx c
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateMedicationReminder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteMedicationReminder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteMedicationReminder(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteMedicationReminder(rctx, fc.Args["reminderId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteMedicationReminderResponse)
+	fc.Result = res
+	return ec.marshalODeleteMedicationReminderResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteMedicationReminderResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteMedicationReminder(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_DeleteMedicationReminderResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteMedicationReminderResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteMedicationReminder_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -17285,6 +17439,45 @@ func (ec *executionContext) _DeleteMedicalRecordResponse(ctx context.Context, se
 	return out
 }
 
+var deleteMedicationReminderResponseImplementors = []string{"DeleteMedicationReminderResponse"}
+
+func (ec *executionContext) _DeleteMedicationReminderResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteMedicationReminderResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteMedicationReminderResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteMedicationReminderResponse")
+		case "message":
+			out.Values[i] = ec._DeleteMedicationReminderResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var deleteMedicationResponseImplementors = []string{"DeleteMedicationResponse"}
 
 func (ec *executionContext) _DeleteMedicationResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteMedicationResponse) graphql.Marshaler {
@@ -18400,6 +18593,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateMedicationReminder":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateMedicationReminder(ctx, field)
+			})
+		case "deleteMedicationReminder":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteMedicationReminder(ctx, field)
 			})
 		case "createTreatmentSchedule":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -20824,6 +21021,13 @@ func (ec *executionContext) marshalODeleteMedicalRecordResponse2ᚖmeditraxᚋgr
 		return graphql.Null
 	}
 	return ec._DeleteMedicalRecordResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeleteMedicationReminderResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteMedicationReminderResponse(ctx context.Context, sel ast.SelectionSet, v *model.DeleteMedicationReminderResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteMedicationReminderResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODeleteMedicationResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteMedicationResponse(ctx context.Context, sel ast.SelectionSet, v *model.DeleteMedicationResponse) graphql.Marshaler {
