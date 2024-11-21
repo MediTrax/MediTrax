@@ -342,12 +342,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         flex: 2,
                         child: TextFormField(
                           controller: dosageController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: '剂量',
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.scale),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return '请输入剂量';
@@ -384,7 +384,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     decoration: const InputDecoration(
                       labelText: '服用频率',
                       border: OutlineInputBorder(),
-                      hintText: '例如：每日一次',
+                      hintText:'格式：次数/天数，例如 3/1',
                       prefixIcon: Icon(Icons.schedule),
                     ),
                     validator: (value) {
@@ -434,7 +434,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   try {
                     final success = await ref.read(medicationProvider.notifier)
                         .updateMedication(
-                          id: medication.id,
+                          medicationId: medication.id,
                           name: nameController.text,
                           dosage: double.parse(dosageController.text),
                           unit: unitController.text,
@@ -510,7 +510,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                 final newInventory = medication.inventory + amount;
                 final success = await ref.read(medicationProvider.notifier)
                     .updateMedication(
-                      id: medication.id,
+                      medicationId: medication.id,
                       inventory: newInventory,
                     );
                 
@@ -781,7 +781,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null) {
         await ref.read(medicationReminderProvider.notifier)
-            .fetchReminders(userData.id);
+            .fetchReminders();
       }
     } catch (e) {
       print("Error fetching reminders: $e");
@@ -933,8 +933,11 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       },
       onDismissed: (_) async {
         try {
+          print('开始删除提醒: ${reminder.id}');
+
           final success = await ref.read(medicationReminderProvider.notifier)
               .deleteReminder(reminder.id);
+          print('删除提醒结果: success=$success');
           
           if (success && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

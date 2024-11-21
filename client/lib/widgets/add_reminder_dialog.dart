@@ -103,7 +103,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
               try {
                 final userData = await ref.read(userDataProvider.future);
                 if (userData != null) {
-                  await ref.read(medicationReminderProvider.notifier).fetchReminders(userData.id);
+                  await ref.read(medicationReminderProvider.notifier).fetchReminders();
                 } else {
                   print("No user data available");
                 }

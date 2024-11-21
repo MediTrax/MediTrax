@@ -133,7 +133,7 @@ class FamilyMembers extends _$FamilyMembers {
               userId: ref.read(appStateProvider).token!.user,
               relatedUserId: member.relatedUserId,
               relationship: member.relationship,
-              accessLevel: int.parse(member.accessLevel),
+              accessLevel: (member.accessLevel),
               createdAt: DateTime.now(),
             ))
         .toList();

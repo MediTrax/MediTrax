@@ -16,26 +16,15 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
 
   Future<void> fetchMedications(String userId) async {
     try {
-      // print("Fetching medications for user: $userId");
+      print("Fetching medications for user: $userId");
       state = const AsyncValue.loading();
-      
-    final result = await _client.query(
-      QueryOptions(
-        document: gql('''
-          query GetMedications {
-            getMedications {
-              medicationId
-              name
-              dosage
-              unit
-              frequency
-              inventory
-            }
-          }
-        '''), 
+      final result = await _client.query$GetMedications(
+      Options$Query$GetMedications(
         fetchPolicy: FetchPolicy.networkOnly, 
       ),
     );
+
+      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
@@ -82,42 +71,23 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       // print("Inventory: $inventory");
 
       // Perform the mutation request
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation AddMedication(
-              \$name: String!
-              \$dosage: Float!
-              \$unit: String!
-              \$frequency: String!
-              \$inventory: Float!
-            ) {
-              addMedication(
-                name: \$name
-                dosage: \$dosage
-                unit: \$unit
-                frequency: \$frequency
-                inventory: \$inventory
-              ) {
-                medicationId 
-                message       
-              }
-            }
-          '''),
-          variables: {
-            'name': name,
-            'dosage': dosage,
-            'unit': unit,
-            'frequency': frequency,
-            'inventory': inventory,
-          },
-        ),
+      final result = await _client.mutate$AddMedication(
+        Options$Mutation$AddMedication(
+          variables: Variables$Mutation$AddMedication(
+            name: name, 
+            dosage: dosage,
+            unit: unit,
+            frequency: frequency, 
+            inventory: inventory
+            )
+          )
       );
+
+      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
       }
-
 
       // Update the state with the new medication
       final newMedication = Medication(
@@ -143,7 +113,7 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
   }
 
   Future<bool> updateMedication({
-    required String id,
+    required String medicationId,
     String? name,
     double? dosage,
     String? unit,
@@ -152,41 +122,19 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
   }) async {
     try {
       print("Attempting to update medication with the following parameters:");
-      print("ID: $id");
+      print("ID: $medicationId");
 
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation UpdateMedication(
-              \$medicationId: String!
-              \$name: String
-              \$dosage: Float
-              \$unit: String
-              \$frequency: String
-              \$inventory: Float
-            ) {
-              updateMedication(
-                medicationId: \$medicationId 
-                name: \$name
-                dosage: \$dosage
-                unit: \$unit
-                frequency: \$frequency
-                inventory: \$inventory
-              ) {
-                medicationId
-                message
-              }
-            }
-          '''),
-          variables: {
-            'medicationId': id,
-            if (name != null) 'name': name,
-            if (dosage != null) 'dosage': dosage,
-            if (unit != null) 'unit': unit,
-            if (frequency != null) 'frequency': frequency,
-            if (inventory != null) 'inventory': inventory,
-          },
-        ),
+      final result = await _client.mutate$UpdateMedication(
+        Options$Mutation$UpdateMedication(
+          variables: Variables$Mutation$UpdateMedication(
+            medicationId: medicationId,
+            name: name,
+            dosage: dosage,
+            unit: unit,
+            frequency: frequency,
+            inventory: inventory,
+            )
+          )
       );
 
     print("GraphQL result: ${result.data}");
@@ -200,7 +148,7 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       state.whenData((medications) {
         final updatedMedication = Medication.fromJson(result.data!['updateMedication']);
         final updatedList = medications.map((med) => 
-          med.id == id ? updatedMedication : med
+          med.id == medicationId ? updatedMedication : med
         ).toList();
         state = AsyncValue.data(updatedList);
       });
@@ -215,20 +163,14 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
     try {
       print('Starting deletion of medication with ID: $medicationId');
 
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation DeleteMedication(\$medicationId: String!) {
-              deleteMedication(medicationId: \$medicationId) {
-                message
-              }
-            }
-          '''),
-          variables: {
-            'medicationId': medicationId,
-          },
-        ),
+      final result = await _client.mutate$DeleteMedication(
+        Options$Mutation$DeleteMedication(
+          variables: Variables$Mutation$DeleteMedication(
+            medicationId: medicationId
+            )
+          )
       );
+
       print('Mutation result: ${result.data}');
 
       if (result.hasException) {

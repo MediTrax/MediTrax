@@ -1,5 +1,5 @@
-query GetMedications($userId: String!) {
-  getMedications(userId: $userId) {
+query GetMedications() {
+  getMedications {
     medicationId
     name
     dosage
