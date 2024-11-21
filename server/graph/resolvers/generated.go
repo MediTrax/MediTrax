@@ -310,7 +310,7 @@ type ComplexityRoot struct {
 		GetMedicalRecords       func(childComplexity int) int
 		GetMedicationReminders  func(childComplexity int) int
 		GetMedications          func(childComplexity int) int
-		GetMockFoodSepcs        func(childComplexity int, food string) int
+		GetMockFoodSpecs        func(childComplexity int, food string) int
 		GetTreatmentSchedules   func(childComplexity int) int
 		GetUser                 func(childComplexity int) int
 		GetUserAchievements     func(childComplexity int) int
@@ -349,14 +349,6 @@ type ComplexityRoot struct {
 		RefreshTokenExpiry func(childComplexity int) int
 		UpdatedAt          func(childComplexity int) int
 		User               func(childComplexity int) int
-	}
-
-	TreatmentSchedule struct {
-		ID            func(childComplexity int) int
-		Location      func(childComplexity int) int
-		Notes         func(childComplexity int) int
-		ScheduledTime func(childComplexity int) int
-		TreatmentType func(childComplexity int) int
 	}
 
 	TreatmentScheduleDetail struct {
@@ -480,7 +472,7 @@ type QueryResolver interface {
 	GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error)
 	GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error)
 	GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
-	GetMockFoodSepcs(ctx context.Context, food string) (*model.FoodSpecs, error)
+	GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetMedications(ctx context.Context) ([]*model.MedicationDetail, error)
 	GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error)
 	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
@@ -1744,17 +1736,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetMedications(childComplexity), true
 
-	case "Query.getMockFoodSepcs":
-		if e.complexity.Query.GetMockFoodSepcs == nil {
+	case "Query.getMockFoodSpecs":
+		if e.complexity.Query.GetMockFoodSpecs == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getMockFoodSepcs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getMockFoodSpecs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetMockFoodSepcs(childComplexity, args["food"].(string)), true
+		return e.complexity.Query.GetMockFoodSpecs(childComplexity, args["food"].(string)), true
 
 	case "Query.getTreatmentSchedules":
 		if e.complexity.Query.GetTreatmentSchedules == nil {
@@ -1895,41 +1887,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Token.User(childComplexity), true
-
-	case "TreatmentSchedule.id":
-		if e.complexity.TreatmentSchedule.ID == nil {
-			break
-		}
-
-		return e.complexity.TreatmentSchedule.ID(childComplexity), true
-
-	case "TreatmentSchedule.location":
-		if e.complexity.TreatmentSchedule.Location == nil {
-			break
-		}
-
-		return e.complexity.TreatmentSchedule.Location(childComplexity), true
-
-	case "TreatmentSchedule.notes":
-		if e.complexity.TreatmentSchedule.Notes == nil {
-			break
-		}
-
-		return e.complexity.TreatmentSchedule.Notes(childComplexity), true
-
-	case "TreatmentSchedule.scheduledTime":
-		if e.complexity.TreatmentSchedule.ScheduledTime == nil {
-			break
-		}
-
-		return e.complexity.TreatmentSchedule.ScheduledTime(childComplexity), true
-
-	case "TreatmentSchedule.treatmentType":
-		if e.complexity.TreatmentSchedule.TreatmentType == nil {
-			break
-		}
-
-		return e.complexity.TreatmentSchedule.TreatmentType(childComplexity), true
 
 	case "TreatmentScheduleDetail.location":
 		if e.complexity.TreatmentScheduleDetail.Location == nil {
@@ -2469,7 +2426,7 @@ type FoodSpecs{
 
 extend type Query{
   getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSepcs(food: String!) : FoodSpecs  
+  getMockFoodSpecs(food: String!) : FoodSpecs  
 }`, BuiltIn: false},
 	{Name: "../schemas/medications.graphqls", Input: `type Medication{
   id: String!
@@ -4315,17 +4272,17 @@ func (ec *executionContext) field_Query_getHealthMetrics_argsMetricType(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_getMockFoodSepcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getMockFoodSpecs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getMockFoodSepcs_argsFood(ctx, rawArgs)
+	arg0, err := ec.field_Query_getMockFoodSpecs_argsFood(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["food"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_getMockFoodSepcs_argsFood(
+func (ec *executionContext) field_Query_getMockFoodSpecs_argsFood(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -7239,14 +7196,11 @@ func (ec *executionContext) _HealthRiskAssessment_questionnaire_data(ctx context
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.QuestionnaireObject)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOQuestionnaireObject2ᚖmeditraxᚋgraphᚋmodelᚐQuestionnaireObject(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthRiskAssessment_questionnaire_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7256,7 +7210,11 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_questionnaire_data
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_QuestionnaireObject_data(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type QuestionnaireObject", field.Name)
 		},
 	}
 	return fc, nil
@@ -11506,8 +11464,8 @@ func (ec *executionContext) fieldContext_Query_getFoodSpecs(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getMockFoodSepcs(ctx, field)
+func (ec *executionContext) _Query_getMockFoodSpecs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getMockFoodSpecs(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -11520,7 +11478,7 @@ func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetMockFoodSepcs(rctx, fc.Args["food"].(string))
+		return ec.resolvers.Query().GetMockFoodSpecs(rctx, fc.Args["food"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11534,7 +11492,7 @@ func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field g
 	return ec.marshalOFoodSpecs2ᚖmeditraxᚋgraphᚋmodelᚐFoodSpecs(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getMockFoodSepcs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getMockFoodSpecs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -11557,7 +11515,7 @@ func (ec *executionContext) fieldContext_Query_getMockFoodSepcs(ctx context.Cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getMockFoodSepcs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_getMockFoodSpecs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12826,223 +12784,6 @@ func (ec *executionContext) fieldContext_Token_updatedAt(_ context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TreatmentSchedule_id(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TreatmentSchedule_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TreatmentSchedule",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TreatmentSchedule_treatmentType(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_treatmentType(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TreatmentType, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TreatmentSchedule_treatmentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TreatmentSchedule",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TreatmentSchedule_scheduledTime(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_scheduledTime(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ScheduledTime, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TreatmentSchedule_scheduledTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TreatmentSchedule",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TreatmentSchedule_location(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_location(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Location, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TreatmentSchedule_location(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TreatmentSchedule",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _TreatmentSchedule_notes(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_notes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Notes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_TreatmentSchedule_notes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "TreatmentSchedule",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -17952,9 +17693,6 @@ func (ec *executionContext) _HealthRiskAssessment(ctx context.Context, sel ast.S
 			}
 		case "questionnaire_data":
 			out.Values[i] = ec._HealthRiskAssessment_questionnaire_data(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "risk_level":
 			out.Values[i] = ec._HealthRiskAssessment_risk_level(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -18836,7 +18574,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getMockFoodSepcs":
+		case "getMockFoodSpecs":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -18845,7 +18583,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getMockFoodSepcs(ctx, field)
+				res = ec._Query_getMockFoodSpecs(ctx, field)
 				return res
 			}
 
@@ -19285,62 +19023,6 @@ func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var treatmentScheduleImplementors = []string{"TreatmentSchedule"}
-
-func (ec *executionContext) _TreatmentSchedule(ctx context.Context, sel ast.SelectionSet, obj *model.TreatmentSchedule) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, treatmentScheduleImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("TreatmentSchedule")
-		case "id":
-			out.Values[i] = ec._TreatmentSchedule_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "treatmentType":
-			out.Values[i] = ec._TreatmentSchedule_treatmentType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "scheduledTime":
-			out.Values[i] = ec._TreatmentSchedule_scheduledTime(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "location":
-			out.Values[i] = ec._TreatmentSchedule_location(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "notes":
-			out.Values[i] = ec._TreatmentSchedule_notes(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21323,6 +21005,13 @@ func (ec *executionContext) marshalOMedicationReminderDetail2ᚖmeditraxᚋgraph
 		return graphql.Null
 	}
 	return ec._MedicationReminderDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOQuestionnaireObject2ᚖmeditraxᚋgraphᚋmodelᚐQuestionnaireObject(ctx context.Context, sel ast.SelectionSet, v *model.QuestionnaireObject) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._QuestionnaireObject(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalORequestPasswordResetResponse2ᚖmeditraxᚋgraphᚋmodelᚐRequestPasswordResetResponse(ctx context.Context, sel ast.SelectionSet, v *model.RequestPasswordResetResponse) graphql.Marshaler {

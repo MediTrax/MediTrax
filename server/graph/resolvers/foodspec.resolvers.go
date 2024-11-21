@@ -78,8 +78,8 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 	return foodSpecs, nil
 }
 
-// GetMockFoodSepcs is the resolver for the getMockFoodSepcs field.
-func (r *queryResolver) GetMockFoodSepcs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+// GetMockFoodSpecs is the resolver for the getMockFoodSpecs field.
+func (r *queryResolver) GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error) {
 	var specs []*model.FoodSpec
 	for _, spec_limit := range chat.SpecLimits {
 		specs = append(specs, &model.FoodSpec{Name: spec_limit.Name, Value: spec_limit.UpperRange / 2})
