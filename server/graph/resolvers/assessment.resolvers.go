@@ -16,20 +16,6 @@ import (
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
-func evaluateHealthRisk(questionnaireData string) (string, string) {
-	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
-	var riskLevel, recommendations string
-	if questionnaireData == "" {
-		riskLevel = "Unknown"
-		recommendations = "Please complete the health questionnaire."
-	} else {
-		// 简单的例子，实际应根据数据分析
-		riskLevel = "Medium"
-		recommendations = "Monitor lifestyle and consult a healthcare provider."
-	}
-	return riskLevel, recommendations
-}
-
 // // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
@@ -38,7 +24,7 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 		return nil, fmt.Errorf("access denied")
 	}
 
-	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+	riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
 
 	result, err := database.DB.Query(
 		`CREATE ONLY health_risk_assessment:ulid()
@@ -100,7 +86,7 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 		updateFields = append(updateFields, "questionnaireData=$questionnaireData")
 
 		// Calculate new risk level and recommendations
-		riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+		riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
 		updateValues["risk_level"] = riskLevel
 		updateValues["recommendations"] = recommendations
 		updateFields = append(updateFields,
@@ -161,25 +147,3 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 
 	return &assessment, nil
 }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func evaluateHealthRisk(questionnaireData string) (string, string) {
-	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
-	var riskLevel, recommendations string
-	if questionnaireData == "" {
-		riskLevel = "Unknown"
-		recommendations = "Please complete the health questionnaire."
-	} else {
-		// 简单的例子，实际应根据数据分析
-		riskLevel = "Medium"
-		recommendations = "Monitor lifestyle and consult a healthcare provider."
-	}
-	return riskLevel, recommendations
-}
-*/
