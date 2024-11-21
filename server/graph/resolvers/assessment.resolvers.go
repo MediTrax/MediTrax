@@ -11,11 +11,26 @@ import (
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
+	"strings"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
-// CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
+func evaluateHealthRisk(questionnaireData string) (string, string) {
+	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
+	var riskLevel, recommendations string
+	if questionnaireData == "" {
+		riskLevel = "Unknown"
+		recommendations = "Please complete the health questionnaire."
+	} else {
+		// 简单的例子，实际应根据数据分析
+		riskLevel = "Medium"
+		recommendations = "Monitor lifestyle and consult a healthcare provider."
+	}
+	return riskLevel, recommendations
+}
+
+// // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	user := middlewares.ForContext(ctx)
@@ -23,16 +38,16 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 		return nil, fmt.Errorf("access denied")
 	}
 
-	riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
+	riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
 
 	result, err := database.DB.Query(
 		`CREATE ONLY health_risk_assessment:ulid()
-	    SET 
-			user_id=$user_id,
-			questionnaireData=$questionnaireData,
-	        riskLevel=$riskLevel,
-	        recommendations=$recommendations,
-	        createdAt=time::now();`,
+		    SET
+				user_id=$user_id,
+				questionnaireData=$questionnaireData,
+		        riskLevel=$riskLevel,
+		        recommendations=$recommendations,
+		        createdAt=time::now();`,
 		map[string]interface{}{
 			"questionnaireData": questionnaireData,
 			"riskLevel":         riskLevel,
@@ -58,7 +73,7 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 	return response, nil
 }
 
-// UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
+// // UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
 func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	//check if they are logged in correctly
@@ -70,63 +85,58 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 	if !utils.MatchID(assessmentID, "health_risk_assessment") {
 		return nil, fmt.Errorf("illegal assessment id")
 	}
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{
+		"id":      assessmentID,
+		"user_id": user.ID,
+	}
 
-	// 验证评估记录存在且属于当前用户
-	result, err := database.DB.Query(
-		`SELECT * FROM health_risk_assessment WHERE id=$id AND user_id=$user_id;`,
-		map[string]interface{}{
-			"id":      assessmentID,
-			"user_id": user.ID,
-		},
-	)
+	// Prepare the fields to be updated
+	updateFields := []string{}
+
+	// Add questionnaire data if provided
+	if questionnaireData != "" {
+		updateValues["questionnaireData"] = questionnaireData
+		updateFields = append(updateFields, "questionnaireData=$questionnaireData")
+
+		// Calculate new risk level and recommendations
+		riskLevel, recommendations := evaluateHealthRisk(questionnaireData)
+		updateValues["risk_level"] = riskLevel
+		updateValues["recommendations"] = recommendations
+		updateFields = append(updateFields,
+			"riskLevel=$riskLevel",
+			"recommendations = $recommendations",
+		)
+	}
+
+	// Add timestamp
+	updateValues["updated_at"] = "time::now()"
+	updateFields = append(updateFields, "updated_at = $updated_at")
+
+	// Construct the final query
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;",
+		strings.Join(updateFields, ", "))
+
+	// Send the UPDATE query
+	result, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
-	existingAssessments, err := surrealdb.SmartUnmarshal[[]*model.HealthRiskAssessment](result, nil)
+	// Unmarshal the results and check for errors
+	results, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(existingAssessments) == 0 {
-		return nil, fmt.Errorf("assessment not found or access denied")
-	}
-	// TODO:计算新的健康风险等级和推荐措施（假设基于问卷数据进行分析）
-	riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
-
-	// 更新评估记录
-	result, err = database.DB.Query(
-		`UPDATE $id 
-        SET questionnaire_data=$questionnaire_data,
-            risk_level=$risk_level,
-            recommendations=$recommendations,
-            updated_at=time::now()
-        WHERE user_id=$user_id;`,
-		map[string]interface{}{
-			"id":                 assessmentID,
-			"questionnaire_data": questionnaireData,
-			"risk_level":         riskLevel,
-			"recommendations":    recommendations,
-			"user_id":            user.ID,
-		},
-	)
-	if err != nil {
-		return nil, err
+	if len(results) == 0 {
+		return nil, fmt.Errorf("invalid id. no associated assessment found")
 	}
 
-	updatedAssessments, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(updatedAssessments) == 0 {
-		return nil, fmt.Errorf("failed to update assessment")
-	}
-
+	// Create response
 	response := &model.UpdateHealthRiskAssessmentResponse{
-		AssessmentID:    updatedAssessments[0].ID,
-		RiskLevel:       riskLevel,
-		Recommendations: recommendations,
+		AssessmentID:    results[0].ID,
+		RiskLevel:       results[0].RiskLevel,
+		Recommendations: results[0].Recommendations,
 	}
 
 	return response, nil
@@ -151,3 +161,25 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 
 	return &assessment, nil
 }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func evaluateHealthRisk(questionnaireData string) (string, string) {
+	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
+	var riskLevel, recommendations string
+	if questionnaireData == "" {
+		riskLevel = "Unknown"
+		recommendations = "Please complete the health questionnaire."
+	} else {
+		// 简单的例子，实际应根据数据分析
+		riskLevel = "Medium"
+		recommendations = "Monitor lifestyle and consult a healthcare provider."
+	}
+	return riskLevel, recommendations
+}
+*/
