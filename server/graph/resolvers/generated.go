@@ -2378,7 +2378,7 @@ type QuestionnaireObject{
 type HealthRiskAssessment{
   id: String!
   user_id: String!
-  questionnaire_data: QuestionnaireObject
+  questionnaire_data: String!
   risk_level: String!
   recommendations: String!
   created_at: DateTime!
@@ -2410,7 +2410,8 @@ extend type Query{
 
 extend type Mutation{
   createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
-  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse  
+  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
+
 }`, BuiltIn: false},
 	{Name: "../schemas/foodspec.graphqls", Input: `type FoodSpec{
   name: String!
@@ -2489,8 +2490,17 @@ type MedicationReminderDetail {
   isTaken: Boolean!
 }
 
+<<<<<<< HEAD
+type TreatmentSchedule{
+  id: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
+=======
 type DeleteMedicationReminderResponse{
   message: String!
+>>>>>>> 891032bcf16aaeef7566f3f44d3eb00fab15236d
 }
 
 type CreateTreatmentScheduleResponse {
