@@ -73,6 +73,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                 .updateReminder(
                   reminderId: widget.reminder.id,
                   reminderTime: reminderTime.toIso8601String(),
+                  isTaken: false,
                 );
 
             if (success && mounted) {
@@ -80,6 +81,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('提醒已更新')),
               );
+              print("Reminder Time after updateReminder: $reminderTime");
             }
           },
           child: const Text('保存'),

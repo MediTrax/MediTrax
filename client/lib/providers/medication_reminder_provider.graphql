@@ -1,5 +1,5 @@
-query GetMedicationReminders($userId: String!) {
-  getMedicationReminders(userId: $userId) {
+query GetMedicationReminders() {
+  getMedicationReminders() {
     reminderId
     medicationId
     reminderTime
@@ -8,12 +8,10 @@ query GetMedicationReminders($userId: String!) {
 }
 
 mutation CreateMedicationReminder(
-  $userId: String!
   $medicationId: String!
   $reminderTime: DateTime!
 ) {
   createMedicationReminder(
-    userId: $userId
     medicationId: $medicationId
     reminderTime: $reminderTime
   ) {

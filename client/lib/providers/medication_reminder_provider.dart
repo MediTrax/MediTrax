@@ -20,24 +20,14 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   MedicationReminderNotifier(this._client) : super(const AsyncValue.loading());
 
-  Future<void> fetchReminders(String userId) async {
+  Future<void> fetchReminders() async {
     state = const AsyncValue.loading();
     try {
-      final result = await _client.query(
-        QueryOptions(
-          document: gql('''
-            query GetMedicationReminders {
-              getMedicationReminders {
-                reminderId
-                medicationId
-                reminderTime
-                isTaken
-              }
-            }
-          '''), 
-        ),
+      final result = await _client.query$GetMedicationReminders(
+        Options$Query$GetMedicationReminders(
+          fetchPolicy: FetchPolicy.networkOnly, 
+        )
       );
-
       if (result.hasException) {
         print("GraphQL Exception: ${result.exception}");
         throw result.exception!;
@@ -71,29 +61,13 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     required String reminderTime,
   }) async {
     try {
-      DateTime parsedReminderTime = DateTime.parse(reminderTime);
-
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation CreateMedicationReminder(
-              \$medicationId: String!
-              \$reminderTime: DateTime!
-            ) {
-              createMedicationReminder(
-                medicationId: \$medicationId
-                reminderTime: \$reminderTime
-              ) {
-                reminderId
-                message
-              }
-            }
-          '''), // GraphQL Mutation 查询
-          variables: {
-            'medicationId': medicationId,
-            'reminderTime': parsedReminderTime.toIso8601String(), // 转换为 ISO 8601 字符串
-          },
-        ),
+      final result = await _client.mutate$CreateMedicationReminder(
+        Options$Mutation$CreateMedicationReminder(
+          variables: Variables$Mutation$CreateMedicationReminder(
+            medicationId: medicationId, 
+            reminderTime: DateTime.parse(reminderTime),
+            )
+          )
       );
 
       if (result.hasException) {
@@ -101,7 +75,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         throw result.exception!;
       }
 
-      // await fetchReminders();
+      await fetchReminders();
       return true;
     } catch (e) {
       return false;
@@ -110,40 +84,30 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> updateReminder({
     required String reminderId,
-    String? reminderTime,
-    bool? isTaken,
+    required String reminderTime,
+    required bool? isTaken,
   }) async {
     try {
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation UpdateMedicationReminder(
-              \$reminderId: String!
-              \$reminderTime: String
-              \$isTaken: Boolean
-            ) {
-              updateMedicationReminder(
-                reminderId: \$reminderId
-                reminderTime: \$reminderTime
-                isTaken: \$isTaken
-              ) {
-                reminderId
-              }
-            }
-          '''),
-          variables: {
-            'reminderId': reminderId,
-            if (reminderTime != null) 'reminderTime': reminderTime,
-            if (isTaken != null) 'isTaken': isTaken,
-          },
-        ),
+          DateTime parsedReminderTime;
+            try {
+            parsedReminderTime = DateTime.parse(reminderTime);
+            print("Parsed reminderTime as DateTime: $parsedReminderTime");
+          } catch (e) {
+            print("Error parsing reminderTime: $e");
+            return false;  
+          }
+          
+      final result = await _client.mutate$UpdateMedicationReminder(
+        Options$Mutation$UpdateMedicationReminder(
+          variables: Variables$Mutation$UpdateMedicationReminder(
+            reminderId: reminderId,
+            reminderTime: DateTime.parse(reminderTime),
+            isTaken: isTaken,
+            )
+          )
       );
-
       if (!result.hasException) {
-        state.whenData((reminders) async {
-          final userId = reminders.first.userId;
-          await fetchReminders(userId);
-        });
+        await fetchReminders();
         return true;
       }
       return false;
@@ -154,6 +118,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> deleteReminder(String reminderId) async {
     try {
+      print('Deleting reminder with ID: $reminderId');
       final result = await _client.mutate(
         MutationOptions(
           document: gql('''
@@ -168,14 +133,17 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
           },
         ),
       );
+       print('GraphQL result: ${result.data}');
 
       if (!result.hasException) {
+        print('Delete operation successful. Updating reminders list.');
         state.whenData((reminders) {
           final updatedReminders = reminders.where((r) => r.id != reminderId).toList();
           state = AsyncValue.data(updatedReminders);
         });
         return true;
       }
+      print('Error occurred during mutation: ${result.exception.toString()}');
       return false;
     } catch (e) {
       return false;
@@ -184,26 +152,13 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> toggleReminderStatus(String reminderId, bool isTaken) async {
     try {
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql('''
-            mutation ToggleMedicationReminder(
-              \$reminderId: String!
-              \$isTaken: Boolean!
-            ) {
-              updateMedicationReminder(
-                reminderId: \$reminderId
-                isTaken: \$isTaken
-              ) {
-                reminderId
-              }
-            }
-          '''),
-          variables: {
-            'reminderId': reminderId,
-            'isTaken': isTaken,
-          },
-        ),
+      final result = await _client.mutate$UpdateMedicationReminder(
+        Options$Mutation$UpdateMedicationReminder(
+          variables: Variables$Mutation$UpdateMedicationReminder(
+            reminderId: reminderId,
+            isTaken: isTaken,
+            )
+          )
       );
 
       if (!result.hasException) {
