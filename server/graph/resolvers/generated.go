@@ -310,7 +310,7 @@ type ComplexityRoot struct {
 		GetMedicalRecords       func(childComplexity int) int
 		GetMedicationReminders  func(childComplexity int) int
 		GetMedications          func(childComplexity int) int
-		GetMockFoodSepcs        func(childComplexity int, food string) int
+		GetMockFoodSpecs        func(childComplexity int, food string) int
 		GetTreatmentSchedules   func(childComplexity int) int
 		GetUser                 func(childComplexity int) int
 		GetUserAchievements     func(childComplexity int) int
@@ -480,7 +480,7 @@ type QueryResolver interface {
 	GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error)
 	GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error)
 	GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
-	GetMockFoodSepcs(ctx context.Context, food string) (*model.FoodSpecs, error)
+	GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetMedications(ctx context.Context) ([]*model.MedicationDetail, error)
 	GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error)
 	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
@@ -1744,17 +1744,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetMedications(childComplexity), true
 
-	case "Query.getMockFoodSepcs":
-		if e.complexity.Query.GetMockFoodSepcs == nil {
+	case "Query.getMockFoodSpecs":
+		if e.complexity.Query.GetMockFoodSpecs == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getMockFoodSepcs_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getMockFoodSpecs_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetMockFoodSepcs(childComplexity, args["food"].(string)), true
+		return e.complexity.Query.GetMockFoodSpecs(childComplexity, args["food"].(string)), true
 
 	case "Query.getTreatmentSchedules":
 		if e.complexity.Query.GetTreatmentSchedules == nil {
@@ -2470,7 +2470,9 @@ type FoodSpecs{
 
 extend type Query{
   getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSepcs(food: String!) : FoodSpecs  
+  getMockFoodSpecs(food: String!) : FoodSpecs  
+
+  # add endpoint for recommending ONE food
 }`, BuiltIn: false},
 	{Name: "../schemas/medications.graphqls", Input: `type Medication{
   id: String!
@@ -2533,17 +2535,16 @@ type MedicationReminderDetail {
   isTaken: Boolean!
 }
 
-<<<<<<< HEAD
 type TreatmentSchedule{
   id: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
   notes: String
-=======
+}
+
 type DeleteMedicationReminderResponse{
   message: String!
->>>>>>> 891032bcf16aaeef7566f3f44d3eb00fab15236d
 }
 
 type CreateTreatmentScheduleResponse {
@@ -4325,17 +4326,17 @@ func (ec *executionContext) field_Query_getHealthMetrics_argsMetricType(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_getMockFoodSepcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getMockFoodSpecs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getMockFoodSepcs_argsFood(ctx, rawArgs)
+	arg0, err := ec.field_Query_getMockFoodSpecs_argsFood(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["food"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_getMockFoodSepcs_argsFood(
+func (ec *executionContext) field_Query_getMockFoodSpecs_argsFood(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -11516,8 +11517,8 @@ func (ec *executionContext) fieldContext_Query_getFoodSpecs(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getMockFoodSepcs(ctx, field)
+func (ec *executionContext) _Query_getMockFoodSpecs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getMockFoodSpecs(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -11530,7 +11531,7 @@ func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetMockFoodSepcs(rctx, fc.Args["food"].(string))
+		return ec.resolvers.Query().GetMockFoodSpecs(rctx, fc.Args["food"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11544,7 +11545,7 @@ func (ec *executionContext) _Query_getMockFoodSepcs(ctx context.Context, field g
 	return ec.marshalOFoodSpecs2ᚖmeditraxᚋgraphᚋmodelᚐFoodSpecs(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getMockFoodSepcs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getMockFoodSpecs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -11567,7 +11568,7 @@ func (ec *executionContext) fieldContext_Query_getMockFoodSepcs(ctx context.Cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getMockFoodSepcs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_getMockFoodSpecs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -18846,7 +18847,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getMockFoodSepcs":
+		case "getMockFoodSpecs":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -18855,7 +18856,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getMockFoodSepcs(ctx, field)
+				res = ec._Query_getMockFoodSpecs(ctx, field)
 				return res
 			}
 

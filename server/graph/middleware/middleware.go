@@ -103,7 +103,6 @@ func Middleware(next http.Handler) http.Handler {
 				}
 			}
 		}
-		println("error: authorization headerr not found")
 		// If no valid Authorization header is found, continue without adding user to context
 		next.ServeHTTP(w, r)
 	})

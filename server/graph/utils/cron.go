@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"crypto/ed25519"
@@ -25,7 +25,7 @@ func init() {
 
 }
 
-func resetKeypair() {
+func ResetKeypair() {
 	println("resetting key pair")
 	if _, err := os.Stat(".private/keys.json"); err == nil {
 		e := os.Remove(".private/keys.json")
@@ -78,7 +78,7 @@ func StartCron(build string) {
 	c := cron.New(option)
 	//addFormTeacherRoles()
 	_, err := c.AddFunc("0 0 * * 0", func() {
-		resetKeypair()
+		ResetKeypair()
 	})
 	if err != nil {
 		fmt.Println(err)
