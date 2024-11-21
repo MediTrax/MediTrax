@@ -475,12 +475,12 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 	}
 
 	// 解析返回结果
-	newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentScheduleDetail](result, nil)
+	newSchedule, err := surrealdb.SmartUnmarshal[model.TreatmentSchedule](result, nil)
 	if err != nil {
 		return nil, err
 	}
 	response := &model.CreateTreatmentScheduleResponse{
-		ScheduleID: newSchedule.ScheduleID,
+		ScheduleID: newSchedule.ID,
 		Message:    "Treatment schedule created successfully",
 	}
 
@@ -499,7 +499,10 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	// 准备更新字段
-	updateValues := map[string]interface{}{"id": scheduleID, "user_id": user.ID}
+	updateValues := map[string]interface{}{
+		"id":      scheduleID,
+		"user_id": user.ID,
+	}
 	updateFields := []string{}
 
 	if treatmentType != nil {
@@ -528,16 +531,16 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	// 验证更新结果
-	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentSchedule](result, nil)
 	if err != nil {
 		return nil, err
 	}
 	if len(schedules) == 0 {
-		return nil, fmt.Errorf("schedule not found or update failed")
+		return nil, fmt.Errorf("invalid id. no associated treatment schedule found")
 	}
 
 	response := &model.UpdateTreatmentScheduleResponse{
-		ScheduleID: schedules[0].ScheduleID,
+		ScheduleID: schedules[0].ID,
 		Message:    "Treatment schedule updated successfully",
 	}
 
