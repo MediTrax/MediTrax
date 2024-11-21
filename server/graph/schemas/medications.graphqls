@@ -59,17 +59,16 @@ type MedicationReminderDetail {
   isTaken: Boolean!
 }
 
-<<<<<<< HEAD
 type TreatmentSchedule{
   id: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
   notes: String
-=======
+}
+
 type DeleteMedicationReminderResponse{
   message: String!
->>>>>>> 891032bcf16aaeef7566f3f44d3eb00fab15236d
 }
 
 type CreateTreatmentScheduleResponse {
