@@ -11,10 +11,9 @@ class MedicalRecord extends HiveObject with _$MedicalRecord {
   @HiveType(typeId: 9)
   factory MedicalRecord({
     @HiveField(0) required String id,
-    @HiveField(1) required String userId,
-    @HiveField(2) required String recordType,
-    @HiveField(3) required Object content,
-    @HiveField(4) required DateTime createdAt,
-    @HiveField(5) required DateTime updatedAt,
+    @HiveField(1) required String recordType,
+    @HiveField(2) required String content,
+    @HiveField(3) required DateTime createdAt,
+    @HiveField(4) required DateTime updatedAt,
   }) = _MedicalRecord;
 }
