@@ -1,0 +1,49 @@
+type Question{
+  question: String!
+  questionType: Int!
+  choices: [String!]!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type HealthRiskAssessment{
+  id: String!
+  user_id: String!
+  questionnaire_data: String!
+  risk_level: String!
+  recommendations: String!
+  created_at: DateTime!
+}
+
+type HealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+type HealthRiskAssessmentDetailResponse {
+  assessmentId: String!
+  questionnaireData: String!
+  riskLevel: String!
+  recommendations: String!
+  createdAt: DateTime!
+}
+
+type UpdateHealthRiskAssessmentResponse {
+  assessmentId: String!
+  riskLevel: String!
+  recommendations: String!
+}
+
+extend type Query{
+  getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
+}
+
+extend type Mutation{
+  createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
+  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
+
+}
