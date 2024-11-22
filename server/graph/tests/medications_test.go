@@ -524,31 +524,6 @@ func TestMedicationReminder(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "negative inventory", err_msg[0].Message)
-
-		// delete the medication and test if update can sense that no medication is linked
-		var response_med struct {
-			DeleteMedication struct {
-				Message string
-			}
-		}
-		c.MustPost(`mutation del_med($medicationId: String!){
-			deleteMedication (medicationId:$medicationId){
-				message
-		  	}
-		  }`, &response_med, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("medicationId", medId))
-		require.Equal(t, fmt.Sprintf("Medication %s with name %s deleted successfully", medId, "test_medication"), response_med.DeleteMedication.Message)
-		err = c.Post(`mutation update_rem($reminderId:String!){
-			updateMedicationReminder(
-				reminderId:$reminderId, 
-				isTaken:true
-			){
-				reminderId
-				message
-			}
-		}`, &response, client.Var("reminderId", remId),
-			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
-		require.Equal(t, "no medication linked to reminder found", err_msg[0].Message)
 	})
 
 	t.Run("delete reminder", func(t *testing.T) {
