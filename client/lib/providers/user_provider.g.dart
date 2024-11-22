@@ -21,7 +21,7 @@ final userDataProvider =
 );
 
 typedef _$UserData = AutoDisposeAsyncNotifier<User?>;
-String _$familyMembersHash() => r'37d9918d74438b18f8fd6d3e2ca04a8ecdf94a68';
+String _$familyMembersHash() => r'fa1a7f84b0adf457adf33700e9816932b92d42b5';
 
 /// See also [FamilyMembers].
 @ProviderFor(FamilyMembers)
@@ -37,7 +37,7 @@ final familyMembersProvider = AutoDisposeAsyncNotifierProvider<FamilyMembers,
 );
 
 typedef _$FamilyMembers = AutoDisposeAsyncNotifier<List<FamilyMember>>;
-String _$achievementsHash() => r'8d5bdb930b97fb157d3b8bd6c274394ee30942c8';
+String _$achievementsHash() => r'28a1b2da6c0bfe8dad03657ad52192526b5aa686';
 
 /// See also [Achievements].
 @ProviderFor(Achievements)
@@ -52,7 +52,7 @@ final achievementsProvider = AutoDisposeAsyncNotifierProvider<Achievements,
 );
 
 typedef _$Achievements = AutoDisposeAsyncNotifier<List<AchievementBadge>>;
-String _$userPointsHash() => r'd3e3c5ac0c2c7bf19a9a548bde3295f4b8ca844d';
+String _$userPointsHash() => r'8e318e03cf541fd8aa5bef661cb5fc899f2c5d6e';
 
 /// See also [UserPoints].
 @ProviderFor(UserPoints)
