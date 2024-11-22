@@ -3,6 +3,8 @@ services:
   client:
     container_name: meditrax-client
     restart: unless-stopped
+    ports:
+      - 8080:80
     expose:
       - 80
     labels:
@@ -16,6 +18,8 @@ services:
     restart: always
     hostname: meditrax-api
     container_name: meditrax-api
+    ports:
+      - 8081:80
     image: registry-intl.ap-southeast-1.aliyuncs.com/swmeng/meditrax-server:${BUILD_NUMBER}
     environment:
       - BUILD_NUMBER=${BUILD_NUMBER}
@@ -26,5 +30,5 @@ services:
       - ./assets:/assets
 networks:
   default:
-    name: nginx-proxy
+    name: caddy
     external: true
