@@ -1,0 +1,118 @@
+type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User{
+  id: String!
+  phoneNumber: String!
+  password: String!
+  name: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  last_login: DateTime!
+  status: Int!
+  role: String!
+}
+
+type PasswordChange {
+  id: String!
+  user: String!
+  token: String!
+  createdAt: DateTime!
+}
+
+type CreateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type LoginUserResponse {
+  userId: String!
+  token: Token!
+  message: String!
+}
+
+type UserDetailResponse {
+  userId: String!
+  phoneNumber: String!
+  name: String!
+  role: String!
+  createdAt: DateTime!
+  lastLogin: DateTime
+}
+
+type UpdateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type DeleteUserResponse {
+  message: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
+type FamilyMember{
+  id: String!
+  user_id: String!
+  related_user_id: String!
+  relationship: String!
+  access_level: Int!
+  created_at: DateTime!
+}
+
+type AddFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type FamilyMemberDetail {
+  memberId: String!
+  relatedUserId: String!
+  relationship: String!
+  accessLevel: Int!
+}
+
+type UpdateFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type DeleteFamilyMemberResponse {
+  message: String!
+}
+
+extend type Query{
+  getUser: UserDetailResponse
+  getFamilyMembers: [FamilyMemberDetail]
+
+}
+
+extend type Mutation{
+  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+
+  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
+  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+  deleteUser: DeleteUserResponse
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
+  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
+  updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+  deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+}
