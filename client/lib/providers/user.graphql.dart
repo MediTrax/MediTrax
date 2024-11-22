@@ -1503,7 +1503,7 @@ class Query$GetFamilyMembers$getFamilyMembers {
       memberId: (l$memberId as String),
       relatedUserId: (l$relatedUserId as String),
       relationship: (l$relationship as String),
-      accessLevel: (l$accessLevel as String),
+      accessLevel: (l$accessLevel as int),
       $__typename: (l$$__typename as String),
     );
   }
@@ -1514,7 +1514,7 @@ class Query$GetFamilyMembers$getFamilyMembers {
 
   final String relationship;
 
-  final String accessLevel;
+  final int accessLevel;
 
   final String $__typename;
 
@@ -1610,7 +1610,7 @@ abstract class CopyWith$Query$GetFamilyMembers$getFamilyMembers<TRes> {
     String? memberId,
     String? relatedUserId,
     String? relationship,
-    String? accessLevel,
+    int? accessLevel,
     String? $__typename,
   });
 }
@@ -1647,7 +1647,7 @@ class _CopyWithImpl$Query$GetFamilyMembers$getFamilyMembers<TRes>
             : (relationship as String),
         accessLevel: accessLevel == _undefined || accessLevel == null
             ? _instance.accessLevel
-            : (accessLevel as String),
+            : (accessLevel as int),
         $__typename: $__typename == _undefined || $__typename == null
             ? _instance.$__typename
             : ($__typename as String),
@@ -1664,7 +1664,7 @@ class _CopyWithStubImpl$Query$GetFamilyMembers$getFamilyMembers<TRes>
     String? memberId,
     String? relatedUserId,
     String? relationship,
-    String? accessLevel,
+    int? accessLevel,
     String? $__typename,
   }) =>
       _res;
