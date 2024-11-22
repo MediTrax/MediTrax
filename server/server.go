@@ -5,9 +5,10 @@ import (
 	"log"
 	"time"
 
-	"meditrax/graph"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
+	graph "meditrax/graph/resolvers"
+	"meditrax/graph/utils"
 
 	"net/http"
 	"os"
@@ -24,7 +25,7 @@ const defaultPort = "8080"
 
 func main() {
 	if _, err := os.Stat(".private/keys.json"); errors.Is(err, os.ErrNotExist) {
-		resetKeypair()
+		utils.ResetKeypair()
 	}
 	database.Connect()
 	port := os.Getenv("PORT")
