@@ -49,9 +49,9 @@ type User{
 type HealthRiskAssessment{
   id: String!
   user_id: String!
-  questionnaire_data: QuestionnaireObject
-  risk_level: Int!
-  recommendations: [String!]!
+  questionnaire_data: String!
+  risk_level: String!
+  recommendations: String!
   created_at: DateTime!
 }
 
@@ -93,6 +93,14 @@ type HealthMetric{
   unit: String!
   recorded_at: DateTime!
   created_at: DateTime!
+}
+
+type TreatmentSchedule{
+  id: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
 }
 
 type FamilyMember{
@@ -214,6 +222,10 @@ type CreateMedicationReminderResponse {
 
 type UpdateMedicationReminderResponse {
   reminderId: String!
+  message: String!
+}
+
+type DeleteMedicationReminderResponse {
   message: String!
 }
 
@@ -384,6 +396,7 @@ type Mutation {
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  deleteMedicationReminder(reminderId: String!): DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse

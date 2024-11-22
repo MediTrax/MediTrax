@@ -34,3 +34,9 @@ mutation UpdateMedicationReminder(
     message
   }
 }
+
+mutation DeleteMedicationReminder($reminderId: String!) {
+  deleteMedicationReminder(reminderId: $reminderId) {
+    message
+  }
+}
