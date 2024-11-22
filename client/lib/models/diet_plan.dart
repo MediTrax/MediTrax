@@ -36,4 +36,5 @@ class DietPlan extends HiveObject with _$DietPlan {
           : DateTime.now(), 
     );
   }
+
 }

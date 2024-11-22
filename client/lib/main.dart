@@ -16,6 +16,7 @@ import 'package:meditrax/models/treatment_schedule.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/models/user_achievement.dart';
 import 'package:meditrax/screens/profile.dart';
+import 'package:meditrax/screens/splash_screen.dart';
 
 // Import all screens
 import 'screens/home_screen.dart';
@@ -63,23 +64,36 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: router,
     redirect: router.redirect,
     routes: router.routes,
-    initialLocation: '/auth',
     debugLogDiagnostics: true,
   );
 });
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
+  late AppStateData _appState;
 
   RouterNotifier(this._ref) {
-    _ref.listen(appStateProvider, (_, __) => notifyListeners());
+    _appState = _ref.read(appStateProvider);
+    _ref.listen(appStateProvider, (_, next) {
+      _appState = next;
+      print("appState changed");
+      print(_appState.autoLoginResult);
+      notifyListeners();
+    });
   }
 
   String? redirect(BuildContext context, GoRouterState state) {
-    final isAuth = _ref.read(appStateProvider).token != null;
+    final isAuth = _appState.token != null;
 
-    if (!isAuth && state.matchedLocation != '/auth') {
+    if (!isAuth) {
       return '/auth';
+    }
+
+    if (_appState.autoLoginResult == null) {
+      print("autoLoginResult is null");
+      return '/splash';
+    } else if (state.matchedLocation == '/splash') {
+      return '/';
     }
 
     if (isAuth && state.matchedLocation == '/auth') {
@@ -120,6 +134,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/auth',
           builder: (context, state) => const AuthScreen(),
+        ),
+        GoRoute(
+          path: '/splash',
+          builder: (context, state) => const SplashScreen(),
         ),
         ShellRoute(
           builder: (context, state, child) {

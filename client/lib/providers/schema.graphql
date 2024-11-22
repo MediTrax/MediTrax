@@ -4,7 +4,29 @@
 
 # go: go run github.com/99designs/gqlgen generate
 
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# go: go run github.com/99designs/gqlgen generate
+
 scalar DateTime
+
+
+type Question{
+  question: String!
+  questionType: Int!
+  choices: [String!]!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type RecordObject{
+  data: String!
+}
 
 
 type Question{

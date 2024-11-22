@@ -1,3 +1,4 @@
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/family_member.dart';
 import 'package:meditrax/models/user.dart';
@@ -127,13 +128,13 @@ class FamilyMembers extends _$FamilyMembers {
       throw result.exception!;
     }
 
-    return result.parsedData!.getFamilyMembers!
+    return (result.parsedData!.getFamilyMembers ?? [])
         .map((member) => FamilyMember(
               id: member!.memberId,
               userId: ref.read(appStateProvider).token!.user,
               relatedUserId: member.relatedUserId,
               relationship: member.relationship,
-              accessLevel: (member.accessLevel),
+              accessLevel: member.accessLevel,
               createdAt: DateTime.now(),
             ))
         .toList();
@@ -216,7 +217,7 @@ class Achievements extends _$Achievements {
       throw result.exception!;
     }
 
-    return result.parsedData!.getUserAchievements!
+    return (result.parsedData!.getUserAchievements ?? [])
         .map((achievement) => AchievementBadge(
               id: achievement!.badgeId,
               name: 'TODO', // These fields need to be added to the schema
@@ -232,30 +233,19 @@ class Achievements extends _$Achievements {
 class UserPoints extends _$UserPoints {
   @override
   Future<Map<String, dynamic>> build() async {
-    // TODO: Add GraphQL query for points data
-    // For now returning mock data
+    final achievementsResult = await ref.watch(achievementsProvider.future);
+
+    // Calculate points based on achievements
+    int totalPoints = achievementsResult.length * 100; // Example calculation
+    int nextLevelPoints = ((totalPoints / 100 + 1) * 100).round();
+    int currentLevel = totalPoints ~/ 100;
+
     return {
-      'currentPoints': 750,
-      'nextLevelPoints': 1000,
-      'currentLevel': 3,
-      'nextLevel': 4,
-      'dailyTasks': [
-        {
-          'task': '按时服用早间药物~',
-          'points': 10,
-          'completed': false,
-        },
-        {
-          'task': '记录今日血压~',
-          'points': 15,
-          'completed': false,
-        },
-        {
-          'task': '完成15分钟步行~',
-          'points': 20,
-          'completed': false,
-        },
-      ],
+      'currentPoints': totalPoints,
+      'nextLevelPoints': nextLevelPoints,
+      'currentLevel': currentLevel,
+      'nextLevel': currentLevel + 1,
+      'achievements': achievementsResult,
     };
   }
 }
