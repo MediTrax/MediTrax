@@ -18,29 +18,26 @@ class MedicalRecordImplAdapter extends TypeAdapter<_$MedicalRecordImpl> {
     };
     return _$MedicalRecordImpl(
       id: fields[0] as String,
-      userId: fields[1] as String,
-      recordType: fields[2] as String,
-      content: fields[3] as Object,
-      createdAt: fields[4] as DateTime,
-      updatedAt: fields[5] as DateTime,
+      recordType: fields[1] as String,
+      content: fields[2] as Object,
+      createdAt: fields[3] as DateTime,
+      updatedAt: fields[4] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$MedicalRecordImpl obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.userId)
-      ..writeByte(2)
       ..write(obj.recordType)
-      ..writeByte(3)
+      ..writeByte(2)
       ..write(obj.content)
-      ..writeByte(4)
+      ..writeByte(3)
       ..write(obj.createdAt)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.updatedAt);
   }
 

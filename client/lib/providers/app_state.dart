@@ -105,13 +105,17 @@ class AppState extends _$AppState {
   }
 
   Future<bool> tryAutoLogin() async {
+    print("tryAutoLogin");
     if (state.token == null) {
+      print("token is null");
       return false;
     }
     try {
+      print("refreshing token");
       await refreshToken();
       return true;
     } catch (e) {
+      print("error refreshing token");
       await logout();
       return false;
     }
