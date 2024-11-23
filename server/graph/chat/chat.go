@@ -128,3 +128,25 @@ func GetFoodSpec(food string, c *chatgpt.Client) (*string, error) {
 	choice := response.Choices[0]
 	return &choice.Message.Content, nil
 }
+
+func GetFoodRecommend(c *chatgpt.Client) (*string, error) {
+	ctx := context.Background()
+
+	result, err := c.SimpleSend(ctx, "chat,我是一名慢性肾病患者，你可以为我推荐一种适合食用的食物吗？请仅回答食物的名称，不要加任何的修饰词")
+
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := surrealdb.SmartUnmarshal[chatgpt.ChatResponse](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(response.Choices) == 0 {
+		return nil, fmt.Errorf("no response was returned by gpt")
+	}
+
+	choice := response.Choices[0]
+	return &choice.Message.Content, nil
+}

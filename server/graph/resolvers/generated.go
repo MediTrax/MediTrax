@@ -150,6 +150,10 @@ type ComplexityRoot struct {
 		Relationship  func(childComplexity int) int
 	}
 
+	FoodRecommendation struct {
+		Name func(childComplexity int) int
+	}
+
 	FoodSpec struct {
 		HowHigh func(childComplexity int) int
 		Name    func(childComplexity int) int
@@ -302,18 +306,20 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAchievementBadges    func(childComplexity int) int
-		GetFamilyMembers        func(childComplexity int) int
-		GetFoodSpecs            func(childComplexity int, food string) int
-		GetHealthMetrics        func(childComplexity int, startDate *string, endDate *string, metricType *string) int
-		GetHealthRiskAssessment func(childComplexity int) int
-		GetMedicalRecords       func(childComplexity int) int
-		GetMedicationReminders  func(childComplexity int) int
-		GetMedications          func(childComplexity int) int
-		GetMockFoodSpecs        func(childComplexity int, food string) int
-		GetTreatmentSchedules   func(childComplexity int) int
-		GetUser                 func(childComplexity int) int
-		GetUserAchievements     func(childComplexity int) int
+		GetAchievementBadges      func(childComplexity int) int
+		GetFamilyMembers          func(childComplexity int) int
+		GetFoodRecommendation     func(childComplexity int) int
+		GetFoodSpecs              func(childComplexity int, food string) int
+		GetHealthMetrics          func(childComplexity int, startDate *string, endDate *string, metricType *string) int
+		GetHealthRiskAssessment   func(childComplexity int) int
+		GetMedicalRecords         func(childComplexity int) int
+		GetMedicationReminders    func(childComplexity int) int
+		GetMedications            func(childComplexity int) int
+		GetMockFoodRecommendation func(childComplexity int) int
+		GetMockFoodSpecs          func(childComplexity int, food string) int
+		GetTreatmentSchedules     func(childComplexity int) int
+		GetUser                   func(childComplexity int) int
+		GetUserAchievements       func(childComplexity int) int
 	}
 
 	Question struct {
@@ -481,6 +487,8 @@ type QueryResolver interface {
 	GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error)
 	GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
+	GetFoodRecommendation(ctx context.Context) (*model.FoodRecommendation, error)
+	GetMockFoodRecommendation(ctx context.Context) (*model.FoodRecommendation, error)
 	GetMedications(ctx context.Context) ([]*model.MedicationDetail, error)
 	GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error)
 	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
@@ -816,6 +824,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FamilyMemberDetail.Relationship(childComplexity), true
+
+	case "FoodRecommendation.name":
+		if e.complexity.FoodRecommendation.Name == nil {
+			break
+		}
+
+		return e.complexity.FoodRecommendation.Name(childComplexity), true
 
 	case "FoodSpec.howHigh":
 		if e.complexity.FoodSpec.HowHigh == nil {
@@ -1692,6 +1707,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetFamilyMembers(childComplexity), true
 
+	case "Query.getFoodRecommendation":
+		if e.complexity.Query.GetFoodRecommendation == nil {
+			break
+		}
+
+		return e.complexity.Query.GetFoodRecommendation(childComplexity), true
+
 	case "Query.getFoodSpecs":
 		if e.complexity.Query.GetFoodSpecs == nil {
 			break
@@ -1743,6 +1765,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetMedications(childComplexity), true
+
+	case "Query.getMockFoodRecommendation":
+		if e.complexity.Query.GetMockFoodRecommendation == nil {
+			break
+		}
+
+		return e.complexity.Query.GetMockFoodRecommendation(childComplexity), true
 
 	case "Query.getMockFoodSpecs":
 		if e.complexity.Query.GetMockFoodSpecs == nil {
@@ -2463,6 +2492,10 @@ extend type Mutation{
   howHigh: Float!
 }
 
+type FoodRecommendation{
+  name: String!
+}
+
 type FoodSpecs{
   specs: [FoodSpec!]!
   howRecommend: Float!
@@ -2473,6 +2506,8 @@ extend type Query{
   getMockFoodSpecs(food: String!) : FoodSpecs  
 
   # add endpoint for recommending ONE food
+  getFoodRecommendation : FoodRecommendation
+  getMockFoodRecommendation : FoodRecommendation
 }`, BuiltIn: false},
 	{Name: "../schemas/medications.graphqls", Input: `type Medication{
   id: String!
@@ -6334,6 +6369,50 @@ func (ec *executionContext) fieldContext_FamilyMemberDetail_accessLevel(_ contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FoodRecommendation_name(ctx context.Context, field graphql.CollectedField, obj *model.FoodRecommendation) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FoodRecommendation_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FoodRecommendation_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FoodRecommendation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11571,6 +11650,96 @@ func (ec *executionContext) fieldContext_Query_getMockFoodSpecs(ctx context.Cont
 	if fc.Args, err = ec.field_Query_getMockFoodSpecs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getFoodRecommendation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getFoodRecommendation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetFoodRecommendation(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.FoodRecommendation)
+	fc.Result = res
+	return ec.marshalOFoodRecommendation2ᚖmeditraxᚋgraphᚋmodelᚐFoodRecommendation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getFoodRecommendation(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_FoodRecommendation_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FoodRecommendation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getMockFoodRecommendation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getMockFoodRecommendation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetMockFoodRecommendation(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.FoodRecommendation)
+	fc.Result = res
+	return ec.marshalOFoodRecommendation2ᚖmeditraxᚋgraphᚋmodelᚐFoodRecommendation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getMockFoodRecommendation(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_FoodRecommendation_name(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FoodRecommendation", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -17714,6 +17883,45 @@ func (ec *executionContext) _FamilyMemberDetail(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var foodRecommendationImplementors = []string{"FoodRecommendation"}
+
+func (ec *executionContext) _FoodRecommendation(ctx context.Context, sel ast.SelectionSet, obj *model.FoodRecommendation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, foodRecommendationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FoodRecommendation")
+		case "name":
+			out.Values[i] = ec._FoodRecommendation_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var foodSpecImplementors = []string{"FoodSpec"}
 
 func (ec *executionContext) _FoodSpec(ctx context.Context, sel ast.SelectionSet, obj *model.FoodSpec) graphql.Marshaler {
@@ -18857,6 +19065,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getMockFoodSpecs(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getFoodRecommendation":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getFoodRecommendation(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getMockFoodRecommendation":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getMockFoodRecommendation(ctx, field)
 				return res
 			}
 
@@ -21114,6 +21360,13 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	}
 	res := graphql.MarshalFloatContext(*v)
 	return graphql.WrapContextMarshaler(ctx, res)
+}
+
+func (ec *executionContext) marshalOFoodRecommendation2ᚖmeditraxᚋgraphᚋmodelᚐFoodRecommendation(ctx context.Context, sel ast.SelectionSet, v *model.FoodRecommendation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._FoodRecommendation(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOFoodSpecs2ᚖmeditraxᚋgraphᚋmodelᚐFoodSpecs(ctx context.Context, sel ast.SelectionSet, v *model.FoodSpecs) graphql.Marshaler {
