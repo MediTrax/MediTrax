@@ -106,6 +106,10 @@ type FamilyMemberDetail struct {
 	AccessLevel   int    `json:"accessLevel"`
 }
 
+type FoodRecommendation struct {
+	Name string `json:"name"`
+}
+
 type FoodSpec struct {
 	Name    string  `json:"name"`
 	Value   float64 `json:"value"`
