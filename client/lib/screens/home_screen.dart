@@ -59,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
                             Expanded(
                               child: _buildInfoCard(
                                 title: '下次预约',
-                                content: '10月20日',
+                                content: '10���20日',
                                 subtitle: '距今2天',
                                 onTap: () => context.go('/treatment'),
                               ),

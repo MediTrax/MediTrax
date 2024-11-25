@@ -1,1 +1,59 @@
- 
+query GetHealthMetrics($startDate: DateTime, $endDate: DateTime, $metricType: String) {
+  getHealthMetrics(startDate: $startDate, endDate: $endDate, metricType: $metricType) {
+    metricId
+    metricType
+    value
+    unit
+    recordedAt
+  }
+}
+
+mutation AddHealthMetric($metricType: String!, $value: Float!, $unit: String!, $recordedAt: String!) {
+  addHealthMetric(metricType: $metricType, value: $value, unit: $unit, recordedAt: $recordedAt) {
+    metricId
+    message
+  }
+}
+
+mutation UpdateHealthMetric($metricId: String!, $value: Float, $unit: String) {
+  updateHealthMetric(metricId: $metricId, value: $value, unit: $unit) {
+    metricId
+    message
+  }
+}
+
+mutation DeleteHealthMetric($metricId: String!) {
+  deleteHealthMetric(metricId: $metricId) {
+    message
+  }
+}
+
+query GetTreatmentSchedules {
+  getTreatmentSchedules {
+    scheduleId
+    treatmentType
+    scheduledTime
+    location
+    notes
+  }
+}
+
+mutation CreateTreatmentSchedule($treatmentType: String!, $scheduledTime: DateTime!, $location: String!, $notes: String) {
+  createTreatmentSchedule(treatmentType: $treatmentType, scheduledTime: $scheduledTime, location: $location, notes: $notes) {
+    scheduleId
+    message
+  }
+}
+
+mutation UpdateTreatmentSchedule($scheduleId: String!, $treatmentType: String, $scheduledTime: DateTime, $location: String, $notes: String) {
+  updateTreatmentSchedule(scheduleId: $scheduleId, treatmentType: $treatmentType, scheduledTime: $scheduledTime, location: $location, notes: $notes) {
+    scheduleId
+    message
+  }
+}
+
+mutation DeleteTreatmentSchedule($scheduleId: String!) {
+  deleteTreatmentSchedule(scheduleId: $scheduleId) {
+    message
+  }
+} 

@@ -4,104 +4,6 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
 
-class Variables$Query$GetMedications {
-  factory Variables$Query$GetMedications({required String userId}) =>
-      Variables$Query$GetMedications._({
-        r'userId': userId,
-      });
-
-  Variables$Query$GetMedications._(this._$data);
-
-  factory Variables$Query$GetMedications.fromJson(Map<String, dynamic> data) {
-    final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
-    return Variables$Query$GetMedications._(result$data);
-  }
-
-  Map<String, dynamic> _$data;
-
-  String get userId => (_$data['userId'] as String);
-
-  Map<String, dynamic> toJson() {
-    final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
-    return result$data;
-  }
-
-  CopyWith$Variables$Query$GetMedications<Variables$Query$GetMedications>
-      get copyWith => CopyWith$Variables$Query$GetMedications(
-            this,
-            (i) => i,
-          );
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (!(other is Variables$Query$GetMedications) ||
-        runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode {
-    final l$userId = userId;
-    return Object.hashAll([l$userId]);
-  }
-}
-
-abstract class CopyWith$Variables$Query$GetMedications<TRes> {
-  factory CopyWith$Variables$Query$GetMedications(
-    Variables$Query$GetMedications instance,
-    TRes Function(Variables$Query$GetMedications) then,
-  ) = _CopyWithImpl$Variables$Query$GetMedications;
-
-  factory CopyWith$Variables$Query$GetMedications.stub(TRes res) =
-      _CopyWithStubImpl$Variables$Query$GetMedications;
-
-  TRes call({String? userId});
-}
-
-class _CopyWithImpl$Variables$Query$GetMedications<TRes>
-    implements CopyWith$Variables$Query$GetMedications<TRes> {
-  _CopyWithImpl$Variables$Query$GetMedications(
-    this._instance,
-    this._then,
-  );
-
-  final Variables$Query$GetMedications _instance;
-
-  final TRes Function(Variables$Query$GetMedications) _then;
-
-  static const _undefined = <dynamic, dynamic>{};
-
-  TRes call({Object? userId = _undefined}) =>
-      _then(Variables$Query$GetMedications._({
-        ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
-      }));
-}
-
-class _CopyWithStubImpl$Variables$Query$GetMedications<TRes>
-    implements CopyWith$Variables$Query$GetMedications<TRes> {
-  _CopyWithStubImpl$Variables$Query$GetMedications(this._res);
-
-  TRes _res;
-
-  call({String? userId}) => _res;
-}
-
 class Query$GetMedications {
   Query$GetMedications({
     this.getMedications,
@@ -270,28 +172,13 @@ const documentNodeQueryGetMedications = DocumentNode(definitions: [
   OperationDefinitionNode(
     type: OperationType.query,
     name: NameNode(value: 'GetMedications'),
-    variableDefinitions: [
-      VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      )
-    ],
+    variableDefinitions: [],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
       FieldNode(
         name: NameNode(value: 'getMedications'),
         alias: null,
-        arguments: [
-          ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          )
-        ],
+        arguments: [],
         directives: [],
         selectionSet: SelectionSetNode(selections: [
           FieldNode(
@@ -367,7 +254,6 @@ class Options$Query$GetMedications
     extends graphql.QueryOptions<Query$GetMedications> {
   Options$Query$GetMedications({
     String? operationName,
-    required Variables$Query$GetMedications variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -379,7 +265,6 @@ class Options$Query$GetMedications
     graphql.OnQueryError? onError,
   })  : onCompleteWithParsed = onComplete,
         super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -413,7 +298,6 @@ class WatchOptions$Query$GetMedications
     extends graphql.WatchQueryOptions<Query$GetMedications> {
   WatchOptions$Query$GetMedications({
     String? operationName,
-    required Variables$Query$GetMedications variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -425,7 +309,6 @@ class WatchOptions$Query$GetMedications
     bool carryForwardDataOnException = true,
     bool fetchResults = false,
   }) : super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -442,46 +325,37 @@ class WatchOptions$Query$GetMedications
 }
 
 class FetchMoreOptions$Query$GetMedications extends graphql.FetchMoreOptions {
-  FetchMoreOptions$Query$GetMedications({
-    required graphql.UpdateQuery updateQuery,
-    required Variables$Query$GetMedications variables,
-  }) : super(
+  FetchMoreOptions$Query$GetMedications(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
           updateQuery: updateQuery,
-          variables: variables.toJson(),
           document: documentNodeQueryGetMedications,
         );
 }
 
 extension ClientExtension$Query$GetMedications on graphql.GraphQLClient {
   Future<graphql.QueryResult<Query$GetMedications>> query$GetMedications(
-          Options$Query$GetMedications options) async =>
-      await this.query(options);
+          [Options$Query$GetMedications? options]) async =>
+      await this.query(options ?? Options$Query$GetMedications());
   graphql.ObservableQuery<Query$GetMedications> watchQuery$GetMedications(
-          WatchOptions$Query$GetMedications options) =>
-      this.watchQuery(options);
+          [WatchOptions$Query$GetMedications? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetMedications());
   void writeQuery$GetMedications({
     required Query$GetMedications data,
-    required Variables$Query$GetMedications variables,
     bool broadcast = true,
   }) =>
       this.writeQuery(
         graphql.Request(
-          operation:
-              graphql.Operation(document: documentNodeQueryGetMedications),
-          variables: variables.toJson(),
-        ),
+            operation:
+                graphql.Operation(document: documentNodeQueryGetMedications)),
         data: data.toJson(),
         broadcast: broadcast,
       );
-  Query$GetMedications? readQuery$GetMedications({
-    required Variables$Query$GetMedications variables,
-    bool optimistic = true,
-  }) {
+  Query$GetMedications? readQuery$GetMedications({bool optimistic = true}) {
     final result = this.readQuery(
       graphql.Request(
-        operation: graphql.Operation(document: documentNodeQueryGetMedications),
-        variables: variables.toJson(),
-      ),
+          operation:
+              graphql.Operation(document: documentNodeQueryGetMedications)),
       optimistic: optimistic,
     );
     return result == null ? null : Query$GetMedications.fromJson(result);
@@ -489,21 +363,22 @@ extension ClientExtension$Query$GetMedications on graphql.GraphQLClient {
 }
 
 graphql_flutter.QueryHookResult<Query$GetMedications> useQuery$GetMedications(
-        Options$Query$GetMedications options) =>
-    graphql_flutter.useQuery(options);
+        [Options$Query$GetMedications? options]) =>
+    graphql_flutter.useQuery(options ?? Options$Query$GetMedications());
 graphql.ObservableQuery<Query$GetMedications> useWatchQuery$GetMedications(
-        WatchOptions$Query$GetMedications options) =>
-    graphql_flutter.useWatchQuery(options);
+        [WatchOptions$Query$GetMedications? options]) =>
+    graphql_flutter
+        .useWatchQuery(options ?? WatchOptions$Query$GetMedications());
 
 class Query$GetMedications$Widget
     extends graphql_flutter.Query<Query$GetMedications> {
   Query$GetMedications$Widget({
     widgets.Key? key,
-    required Options$Query$GetMedications options,
+    Options$Query$GetMedications? options,
     required graphql_flutter.QueryBuilder<Query$GetMedications> builder,
   }) : super(
           key: key,
-          options: options,
+          options: options ?? Options$Query$GetMedications(),
           builder: builder,
         );
 }
@@ -1147,10 +1022,6 @@ const documentNodeMutationAddMedication = DocumentNode(definitions: [
         name: NameNode(value: 'addMedication'),
         alias: null,
         arguments: [
-          ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          ),
           ArgumentNode(
             name: NameNode(value: 'name'),
             value: VariableNode(name: NameNode(value: 'name')),

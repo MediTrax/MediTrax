@@ -3,106 +3,7 @@ import 'package:flutter/widgets.dart' as widgets;
 import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
-
-class Variables$Query$GetHealthRiskAssessment {
-  factory Variables$Query$GetHealthRiskAssessment({required String userId}) =>
-      Variables$Query$GetHealthRiskAssessment._({
-        r'userId': userId,
-      });
-
-  Variables$Query$GetHealthRiskAssessment._(this._$data);
-
-  factory Variables$Query$GetHealthRiskAssessment.fromJson(
-      Map<String, dynamic> data) {
-    final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
-    return Variables$Query$GetHealthRiskAssessment._(result$data);
-  }
-
-  Map<String, dynamic> _$data;
-
-  String get userId => (_$data['userId'] as String);
-
-  Map<String, dynamic> toJson() {
-    final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
-    return result$data;
-  }
-
-  CopyWith$Variables$Query$GetHealthRiskAssessment<
-          Variables$Query$GetHealthRiskAssessment>
-      get copyWith => CopyWith$Variables$Query$GetHealthRiskAssessment(
-            this,
-            (i) => i,
-          );
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (!(other is Variables$Query$GetHealthRiskAssessment) ||
-        runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode {
-    final l$userId = userId;
-    return Object.hashAll([l$userId]);
-  }
-}
-
-abstract class CopyWith$Variables$Query$GetHealthRiskAssessment<TRes> {
-  factory CopyWith$Variables$Query$GetHealthRiskAssessment(
-    Variables$Query$GetHealthRiskAssessment instance,
-    TRes Function(Variables$Query$GetHealthRiskAssessment) then,
-  ) = _CopyWithImpl$Variables$Query$GetHealthRiskAssessment;
-
-  factory CopyWith$Variables$Query$GetHealthRiskAssessment.stub(TRes res) =
-      _CopyWithStubImpl$Variables$Query$GetHealthRiskAssessment;
-
-  TRes call({String? userId});
-}
-
-class _CopyWithImpl$Variables$Query$GetHealthRiskAssessment<TRes>
-    implements CopyWith$Variables$Query$GetHealthRiskAssessment<TRes> {
-  _CopyWithImpl$Variables$Query$GetHealthRiskAssessment(
-    this._instance,
-    this._then,
-  );
-
-  final Variables$Query$GetHealthRiskAssessment _instance;
-
-  final TRes Function(Variables$Query$GetHealthRiskAssessment) _then;
-
-  static const _undefined = <dynamic, dynamic>{};
-
-  TRes call({Object? userId = _undefined}) =>
-      _then(Variables$Query$GetHealthRiskAssessment._({
-        ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
-      }));
-}
-
-class _CopyWithStubImpl$Variables$Query$GetHealthRiskAssessment<TRes>
-    implements CopyWith$Variables$Query$GetHealthRiskAssessment<TRes> {
-  _CopyWithStubImpl$Variables$Query$GetHealthRiskAssessment(this._res);
-
-  TRes _res;
-
-  call({String? userId}) => _res;
-}
+import 'package:meditrax/scalar.dart';
 
 class Query$GetHealthRiskAssessment {
   Query$GetHealthRiskAssessment({
@@ -259,28 +160,13 @@ const documentNodeQueryGetHealthRiskAssessment = DocumentNode(definitions: [
   OperationDefinitionNode(
     type: OperationType.query,
     name: NameNode(value: 'GetHealthRiskAssessment'),
-    variableDefinitions: [
-      VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      )
-    ],
+    variableDefinitions: [],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
       FieldNode(
         name: NameNode(value: 'getHealthRiskAssessment'),
         alias: null,
-        arguments: [
-          ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          )
-        ],
+        arguments: [],
         directives: [],
         selectionSet: SelectionSetNode(selections: [
           FieldNode(
@@ -349,7 +235,6 @@ class Options$Query$GetHealthRiskAssessment
     extends graphql.QueryOptions<Query$GetHealthRiskAssessment> {
   Options$Query$GetHealthRiskAssessment({
     String? operationName,
-    required Variables$Query$GetHealthRiskAssessment variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -361,7 +246,6 @@ class Options$Query$GetHealthRiskAssessment
     graphql.OnQueryError? onError,
   })  : onCompleteWithParsed = onComplete,
         super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -397,7 +281,6 @@ class WatchOptions$Query$GetHealthRiskAssessment
     extends graphql.WatchQueryOptions<Query$GetHealthRiskAssessment> {
   WatchOptions$Query$GetHealthRiskAssessment({
     String? operationName,
-    required Variables$Query$GetHealthRiskAssessment variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -409,7 +292,6 @@ class WatchOptions$Query$GetHealthRiskAssessment
     bool carryForwardDataOnException = true,
     bool fetchResults = false,
   }) : super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -427,12 +309,10 @@ class WatchOptions$Query$GetHealthRiskAssessment
 
 class FetchMoreOptions$Query$GetHealthRiskAssessment
     extends graphql.FetchMoreOptions {
-  FetchMoreOptions$Query$GetHealthRiskAssessment({
-    required graphql.UpdateQuery updateQuery,
-    required Variables$Query$GetHealthRiskAssessment variables,
-  }) : super(
+  FetchMoreOptions$Query$GetHealthRiskAssessment(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
           updateQuery: updateQuery,
-          variables: variables.toJson(),
           document: documentNodeQueryGetHealthRiskAssessment,
         );
 }
@@ -441,36 +321,29 @@ extension ClientExtension$Query$GetHealthRiskAssessment
     on graphql.GraphQLClient {
   Future<graphql.QueryResult<Query$GetHealthRiskAssessment>>
       query$GetHealthRiskAssessment(
-              Options$Query$GetHealthRiskAssessment options) async =>
-          await this.query(options);
-  graphql.ObservableQuery<Query$GetHealthRiskAssessment>
-      watchQuery$GetHealthRiskAssessment(
-              WatchOptions$Query$GetHealthRiskAssessment options) =>
-          this.watchQuery(options);
+              [Options$Query$GetHealthRiskAssessment? options]) async =>
+          await this.query(options ?? Options$Query$GetHealthRiskAssessment());
+  graphql.ObservableQuery<
+      Query$GetHealthRiskAssessment> watchQuery$GetHealthRiskAssessment(
+          [WatchOptions$Query$GetHealthRiskAssessment? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetHealthRiskAssessment());
   void writeQuery$GetHealthRiskAssessment({
     required Query$GetHealthRiskAssessment data,
-    required Variables$Query$GetHealthRiskAssessment variables,
     bool broadcast = true,
   }) =>
       this.writeQuery(
         graphql.Request(
-          operation: graphql.Operation(
-              document: documentNodeQueryGetHealthRiskAssessment),
-          variables: variables.toJson(),
-        ),
+            operation: graphql.Operation(
+                document: documentNodeQueryGetHealthRiskAssessment)),
         data: data.toJson(),
         broadcast: broadcast,
       );
-  Query$GetHealthRiskAssessment? readQuery$GetHealthRiskAssessment({
-    required Variables$Query$GetHealthRiskAssessment variables,
-    bool optimistic = true,
-  }) {
+  Query$GetHealthRiskAssessment? readQuery$GetHealthRiskAssessment(
+      {bool optimistic = true}) {
     final result = this.readQuery(
       graphql.Request(
-        operation: graphql.Operation(
-            document: documentNodeQueryGetHealthRiskAssessment),
-        variables: variables.toJson(),
-      ),
+          operation: graphql.Operation(
+              document: documentNodeQueryGetHealthRiskAssessment)),
       optimistic: optimistic,
     );
     return result == null
@@ -481,23 +354,25 @@ extension ClientExtension$Query$GetHealthRiskAssessment
 
 graphql_flutter.QueryHookResult<Query$GetHealthRiskAssessment>
     useQuery$GetHealthRiskAssessment(
-            Options$Query$GetHealthRiskAssessment options) =>
-        graphql_flutter.useQuery(options);
+            [Options$Query$GetHealthRiskAssessment? options]) =>
+        graphql_flutter
+            .useQuery(options ?? Options$Query$GetHealthRiskAssessment());
 graphql.ObservableQuery<Query$GetHealthRiskAssessment>
     useWatchQuery$GetHealthRiskAssessment(
-            WatchOptions$Query$GetHealthRiskAssessment options) =>
-        graphql_flutter.useWatchQuery(options);
+            [WatchOptions$Query$GetHealthRiskAssessment? options]) =>
+        graphql_flutter.useWatchQuery(
+            options ?? WatchOptions$Query$GetHealthRiskAssessment());
 
 class Query$GetHealthRiskAssessment$Widget
     extends graphql_flutter.Query<Query$GetHealthRiskAssessment> {
   Query$GetHealthRiskAssessment$Widget({
     widgets.Key? key,
-    required Options$Query$GetHealthRiskAssessment options,
+    Options$Query$GetHealthRiskAssessment? options,
     required graphql_flutter.QueryBuilder<Query$GetHealthRiskAssessment>
         builder,
   }) : super(
           key: key,
-          options: options,
+          options: options ?? Options$Query$GetHealthRiskAssessment(),
           builder: builder,
         );
 }
@@ -525,7 +400,7 @@ class Query$GetHealthRiskAssessment$getHealthRiskAssessment {
       questionnaireData: (l$questionnaireData as String),
       riskLevel: (l$riskLevel as String),
       recommendations: (l$recommendations as String),
-      createdAt: DateTime.parse((l$createdAt as String)),
+      createdAt: dateTimeFromJson(l$createdAt),
       $__typename: (l$$__typename as String),
     );
   }
@@ -553,7 +428,7 @@ class Query$GetHealthRiskAssessment$getHealthRiskAssessment {
     final l$recommendations = recommendations;
     _resultData['recommendations'] = l$recommendations;
     final l$createdAt = createdAt;
-    _resultData['createdAt'] = l$createdAt.toIso8601String();
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
     final l$$__typename = $__typename;
     _resultData['__typename'] = l$$__typename;
     return _resultData;
@@ -720,12 +595,9 @@ class _CopyWithStubImpl$Query$GetHealthRiskAssessment$getHealthRiskAssessment<
 }
 
 class Variables$Mutation$CreateHealthRiskAssessment {
-  factory Variables$Mutation$CreateHealthRiskAssessment({
-    required String userId,
-    required String questionnaireData,
-  }) =>
+  factory Variables$Mutation$CreateHealthRiskAssessment(
+          {required String questionnaireData}) =>
       Variables$Mutation$CreateHealthRiskAssessment._({
-        r'userId': userId,
         r'questionnaireData': questionnaireData,
       });
 
@@ -734,8 +606,6 @@ class Variables$Mutation$CreateHealthRiskAssessment {
   factory Variables$Mutation$CreateHealthRiskAssessment.fromJson(
       Map<String, dynamic> data) {
     final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
     final l$questionnaireData = data['questionnaireData'];
     result$data['questionnaireData'] = (l$questionnaireData as String);
     return Variables$Mutation$CreateHealthRiskAssessment._(result$data);
@@ -743,14 +613,10 @@ class Variables$Mutation$CreateHealthRiskAssessment {
 
   Map<String, dynamic> _$data;
 
-  String get userId => (_$data['userId'] as String);
-
   String get questionnaireData => (_$data['questionnaireData'] as String);
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
     final l$questionnaireData = questionnaireData;
     result$data['questionnaireData'] = l$questionnaireData;
     return result$data;
@@ -772,11 +638,6 @@ class Variables$Mutation$CreateHealthRiskAssessment {
         runtimeType != other.runtimeType) {
       return false;
     }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
-      return false;
-    }
     final l$questionnaireData = questionnaireData;
     final lOther$questionnaireData = other.questionnaireData;
     if (l$questionnaireData != lOther$questionnaireData) {
@@ -787,12 +648,8 @@ class Variables$Mutation$CreateHealthRiskAssessment {
 
   @override
   int get hashCode {
-    final l$userId = userId;
     final l$questionnaireData = questionnaireData;
-    return Object.hashAll([
-      l$userId,
-      l$questionnaireData,
-    ]);
+    return Object.hashAll([l$questionnaireData]);
   }
 }
 
@@ -806,10 +663,7 @@ abstract class CopyWith$Variables$Mutation$CreateHealthRiskAssessment<TRes> {
           TRes res) =
       _CopyWithStubImpl$Variables$Mutation$CreateHealthRiskAssessment;
 
-  TRes call({
-    String? userId,
-    String? questionnaireData,
-  });
+  TRes call({String? questionnaireData});
 }
 
 class _CopyWithImpl$Variables$Mutation$CreateHealthRiskAssessment<TRes>
@@ -825,14 +679,9 @@ class _CopyWithImpl$Variables$Mutation$CreateHealthRiskAssessment<TRes>
 
   static const _undefined = <dynamic, dynamic>{};
 
-  TRes call({
-    Object? userId = _undefined,
-    Object? questionnaireData = _undefined,
-  }) =>
+  TRes call({Object? questionnaireData = _undefined}) =>
       _then(Variables$Mutation$CreateHealthRiskAssessment._({
         ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
         if (questionnaireData != _undefined && questionnaireData != null)
           'questionnaireData': (questionnaireData as String),
       }));
@@ -844,11 +693,7 @@ class _CopyWithStubImpl$Variables$Mutation$CreateHealthRiskAssessment<TRes>
 
   TRes _res;
 
-  call({
-    String? userId,
-    String? questionnaireData,
-  }) =>
-      _res;
+  call({String? questionnaireData}) => _res;
 }
 
 class Mutation$CreateHealthRiskAssessment {
@@ -1012,15 +857,6 @@ const documentNodeMutationCreateHealthRiskAssessment =
     name: NameNode(value: 'CreateHealthRiskAssessment'),
     variableDefinitions: [
       VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      ),
-      VariableDefinitionNode(
         variable: VariableNode(name: NameNode(value: 'questionnaireData')),
         type: NamedTypeNode(
           name: NameNode(value: 'String'),
@@ -1028,7 +864,7 @@ const documentNodeMutationCreateHealthRiskAssessment =
         ),
         defaultValue: DefaultValueNode(value: null),
         directives: [],
-      ),
+      )
     ],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
@@ -1037,13 +873,9 @@ const documentNodeMutationCreateHealthRiskAssessment =
         alias: null,
         arguments: [
           ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          ),
-          ArgumentNode(
             name: NameNode(value: 'questionnaireData'),
             value: VariableNode(name: NameNode(value: 'questionnaireData')),
-          ),
+          )
         ],
         directives: [],
         selectionSet: SelectionSetNode(selections: [

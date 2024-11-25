@@ -3,106 +3,7 @@ import 'package:flutter/widgets.dart' as widgets;
 import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
-
-class Variables$Query$GetMedicationReminders {
-  factory Variables$Query$GetMedicationReminders({required String userId}) =>
-      Variables$Query$GetMedicationReminders._({
-        r'userId': userId,
-      });
-
-  Variables$Query$GetMedicationReminders._(this._$data);
-
-  factory Variables$Query$GetMedicationReminders.fromJson(
-      Map<String, dynamic> data) {
-    final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
-    return Variables$Query$GetMedicationReminders._(result$data);
-  }
-
-  Map<String, dynamic> _$data;
-
-  String get userId => (_$data['userId'] as String);
-
-  Map<String, dynamic> toJson() {
-    final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
-    return result$data;
-  }
-
-  CopyWith$Variables$Query$GetMedicationReminders<
-          Variables$Query$GetMedicationReminders>
-      get copyWith => CopyWith$Variables$Query$GetMedicationReminders(
-            this,
-            (i) => i,
-          );
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (!(other is Variables$Query$GetMedicationReminders) ||
-        runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode {
-    final l$userId = userId;
-    return Object.hashAll([l$userId]);
-  }
-}
-
-abstract class CopyWith$Variables$Query$GetMedicationReminders<TRes> {
-  factory CopyWith$Variables$Query$GetMedicationReminders(
-    Variables$Query$GetMedicationReminders instance,
-    TRes Function(Variables$Query$GetMedicationReminders) then,
-  ) = _CopyWithImpl$Variables$Query$GetMedicationReminders;
-
-  factory CopyWith$Variables$Query$GetMedicationReminders.stub(TRes res) =
-      _CopyWithStubImpl$Variables$Query$GetMedicationReminders;
-
-  TRes call({String? userId});
-}
-
-class _CopyWithImpl$Variables$Query$GetMedicationReminders<TRes>
-    implements CopyWith$Variables$Query$GetMedicationReminders<TRes> {
-  _CopyWithImpl$Variables$Query$GetMedicationReminders(
-    this._instance,
-    this._then,
-  );
-
-  final Variables$Query$GetMedicationReminders _instance;
-
-  final TRes Function(Variables$Query$GetMedicationReminders) _then;
-
-  static const _undefined = <dynamic, dynamic>{};
-
-  TRes call({Object? userId = _undefined}) =>
-      _then(Variables$Query$GetMedicationReminders._({
-        ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
-      }));
-}
-
-class _CopyWithStubImpl$Variables$Query$GetMedicationReminders<TRes>
-    implements CopyWith$Variables$Query$GetMedicationReminders<TRes> {
-  _CopyWithStubImpl$Variables$Query$GetMedicationReminders(this._res);
-
-  TRes _res;
-
-  call({String? userId}) => _res;
-}
+import 'package:meditrax/scalar.dart';
 
 class Query$GetMedicationReminders {
   Query$GetMedicationReminders({
@@ -283,28 +184,13 @@ const documentNodeQueryGetMedicationReminders = DocumentNode(definitions: [
   OperationDefinitionNode(
     type: OperationType.query,
     name: NameNode(value: 'GetMedicationReminders'),
-    variableDefinitions: [
-      VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      )
-    ],
+    variableDefinitions: [],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
       FieldNode(
         name: NameNode(value: 'getMedicationReminders'),
         alias: null,
-        arguments: [
-          ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          )
-        ],
+        arguments: [],
         directives: [],
         selectionSet: SelectionSetNode(selections: [
           FieldNode(
@@ -366,7 +252,6 @@ class Options$Query$GetMedicationReminders
     extends graphql.QueryOptions<Query$GetMedicationReminders> {
   Options$Query$GetMedicationReminders({
     String? operationName,
-    required Variables$Query$GetMedicationReminders variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -378,7 +263,6 @@ class Options$Query$GetMedicationReminders
     graphql.OnQueryError? onError,
   })  : onCompleteWithParsed = onComplete,
         super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -414,7 +298,6 @@ class WatchOptions$Query$GetMedicationReminders
     extends graphql.WatchQueryOptions<Query$GetMedicationReminders> {
   WatchOptions$Query$GetMedicationReminders({
     String? operationName,
-    required Variables$Query$GetMedicationReminders variables,
     graphql.FetchPolicy? fetchPolicy,
     graphql.ErrorPolicy? errorPolicy,
     graphql.CacheRereadPolicy? cacheRereadPolicy,
@@ -426,7 +309,6 @@ class WatchOptions$Query$GetMedicationReminders
     bool carryForwardDataOnException = true,
     bool fetchResults = false,
   }) : super(
-          variables: variables.toJson(),
           operationName: operationName,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -444,12 +326,10 @@ class WatchOptions$Query$GetMedicationReminders
 
 class FetchMoreOptions$Query$GetMedicationReminders
     extends graphql.FetchMoreOptions {
-  FetchMoreOptions$Query$GetMedicationReminders({
-    required graphql.UpdateQuery updateQuery,
-    required Variables$Query$GetMedicationReminders variables,
-  }) : super(
+  FetchMoreOptions$Query$GetMedicationReminders(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
           updateQuery: updateQuery,
-          variables: variables.toJson(),
           document: documentNodeQueryGetMedicationReminders,
         );
 }
@@ -458,36 +338,29 @@ extension ClientExtension$Query$GetMedicationReminders
     on graphql.GraphQLClient {
   Future<graphql.QueryResult<Query$GetMedicationReminders>>
       query$GetMedicationReminders(
-              Options$Query$GetMedicationReminders options) async =>
-          await this.query(options);
-  graphql.ObservableQuery<Query$GetMedicationReminders>
-      watchQuery$GetMedicationReminders(
-              WatchOptions$Query$GetMedicationReminders options) =>
-          this.watchQuery(options);
+              [Options$Query$GetMedicationReminders? options]) async =>
+          await this.query(options ?? Options$Query$GetMedicationReminders());
+  graphql.ObservableQuery<
+      Query$GetMedicationReminders> watchQuery$GetMedicationReminders(
+          [WatchOptions$Query$GetMedicationReminders? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetMedicationReminders());
   void writeQuery$GetMedicationReminders({
     required Query$GetMedicationReminders data,
-    required Variables$Query$GetMedicationReminders variables,
     bool broadcast = true,
   }) =>
       this.writeQuery(
         graphql.Request(
-          operation: graphql.Operation(
-              document: documentNodeQueryGetMedicationReminders),
-          variables: variables.toJson(),
-        ),
+            operation: graphql.Operation(
+                document: documentNodeQueryGetMedicationReminders)),
         data: data.toJson(),
         broadcast: broadcast,
       );
-  Query$GetMedicationReminders? readQuery$GetMedicationReminders({
-    required Variables$Query$GetMedicationReminders variables,
-    bool optimistic = true,
-  }) {
+  Query$GetMedicationReminders? readQuery$GetMedicationReminders(
+      {bool optimistic = true}) {
     final result = this.readQuery(
       graphql.Request(
-        operation: graphql.Operation(
-            document: documentNodeQueryGetMedicationReminders),
-        variables: variables.toJson(),
-      ),
+          operation: graphql.Operation(
+              document: documentNodeQueryGetMedicationReminders)),
       optimistic: optimistic,
     );
     return result == null
@@ -498,22 +371,24 @@ extension ClientExtension$Query$GetMedicationReminders
 
 graphql_flutter.QueryHookResult<Query$GetMedicationReminders>
     useQuery$GetMedicationReminders(
-            Options$Query$GetMedicationReminders options) =>
-        graphql_flutter.useQuery(options);
+            [Options$Query$GetMedicationReminders? options]) =>
+        graphql_flutter
+            .useQuery(options ?? Options$Query$GetMedicationReminders());
 graphql.ObservableQuery<Query$GetMedicationReminders>
     useWatchQuery$GetMedicationReminders(
-            WatchOptions$Query$GetMedicationReminders options) =>
-        graphql_flutter.useWatchQuery(options);
+            [WatchOptions$Query$GetMedicationReminders? options]) =>
+        graphql_flutter.useWatchQuery(
+            options ?? WatchOptions$Query$GetMedicationReminders());
 
 class Query$GetMedicationReminders$Widget
     extends graphql_flutter.Query<Query$GetMedicationReminders> {
   Query$GetMedicationReminders$Widget({
     widgets.Key? key,
-    required Options$Query$GetMedicationReminders options,
+    Options$Query$GetMedicationReminders? options,
     required graphql_flutter.QueryBuilder<Query$GetMedicationReminders> builder,
   }) : super(
           key: key,
-          options: options,
+          options: options ?? Options$Query$GetMedicationReminders(),
           builder: builder,
         );
 }
@@ -537,7 +412,7 @@ class Query$GetMedicationReminders$getMedicationReminders {
     return Query$GetMedicationReminders$getMedicationReminders(
       reminderId: (l$reminderId as String),
       medicationId: (l$medicationId as String),
-      reminderTime: DateTime.parse((l$reminderTime as String)),
+      reminderTime: dateTimeFromJson(l$reminderTime),
       isTaken: (l$isTaken as bool),
       $__typename: (l$$__typename as String),
     );
@@ -560,7 +435,7 @@ class Query$GetMedicationReminders$getMedicationReminders {
     final l$medicationId = medicationId;
     _resultData['medicationId'] = l$medicationId;
     final l$reminderTime = reminderTime;
-    _resultData['reminderTime'] = l$reminderTime.toIso8601String();
+    _resultData['reminderTime'] = dateTimeToJson(l$reminderTime);
     final l$isTaken = isTaken;
     _resultData['isTaken'] = l$isTaken;
     final l$$__typename = $__typename;
@@ -715,12 +590,10 @@ class _CopyWithStubImpl$Query$GetMedicationReminders$getMedicationReminders<
 
 class Variables$Mutation$CreateMedicationReminder {
   factory Variables$Mutation$CreateMedicationReminder({
-    required String userId,
     required String medicationId,
     required DateTime reminderTime,
   }) =>
       Variables$Mutation$CreateMedicationReminder._({
-        r'userId': userId,
         r'medicationId': medicationId,
         r'reminderTime': reminderTime,
       });
@@ -730,18 +603,14 @@ class Variables$Mutation$CreateMedicationReminder {
   factory Variables$Mutation$CreateMedicationReminder.fromJson(
       Map<String, dynamic> data) {
     final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
     final l$medicationId = data['medicationId'];
     result$data['medicationId'] = (l$medicationId as String);
     final l$reminderTime = data['reminderTime'];
-    result$data['reminderTime'] = DateTime.parse((l$reminderTime as String));
+    result$data['reminderTime'] = dateTimeFromJson(l$reminderTime);
     return Variables$Mutation$CreateMedicationReminder._(result$data);
   }
 
   Map<String, dynamic> _$data;
-
-  String get userId => (_$data['userId'] as String);
 
   String get medicationId => (_$data['medicationId'] as String);
 
@@ -749,12 +618,10 @@ class Variables$Mutation$CreateMedicationReminder {
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
     final l$medicationId = medicationId;
     result$data['medicationId'] = l$medicationId;
     final l$reminderTime = reminderTime;
-    result$data['reminderTime'] = l$reminderTime.toIso8601String();
+    result$data['reminderTime'] = dateTimeToJson(l$reminderTime);
     return result$data;
   }
 
@@ -774,11 +641,6 @@ class Variables$Mutation$CreateMedicationReminder {
         runtimeType != other.runtimeType) {
       return false;
     }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
-      return false;
-    }
     final l$medicationId = medicationId;
     final lOther$medicationId = other.medicationId;
     if (l$medicationId != lOther$medicationId) {
@@ -794,11 +656,9 @@ class Variables$Mutation$CreateMedicationReminder {
 
   @override
   int get hashCode {
-    final l$userId = userId;
     final l$medicationId = medicationId;
     final l$reminderTime = reminderTime;
     return Object.hashAll([
-      l$userId,
       l$medicationId,
       l$reminderTime,
     ]);
@@ -815,7 +675,6 @@ abstract class CopyWith$Variables$Mutation$CreateMedicationReminder<TRes> {
       _CopyWithStubImpl$Variables$Mutation$CreateMedicationReminder;
 
   TRes call({
-    String? userId,
     String? medicationId,
     DateTime? reminderTime,
   });
@@ -835,14 +694,11 @@ class _CopyWithImpl$Variables$Mutation$CreateMedicationReminder<TRes>
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
-    Object? userId = _undefined,
     Object? medicationId = _undefined,
     Object? reminderTime = _undefined,
   }) =>
       _then(Variables$Mutation$CreateMedicationReminder._({
         ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
         if (medicationId != _undefined && medicationId != null)
           'medicationId': (medicationId as String),
         if (reminderTime != _undefined && reminderTime != null)
@@ -857,7 +713,6 @@ class _CopyWithStubImpl$Variables$Mutation$CreateMedicationReminder<TRes>
   TRes _res;
 
   call({
-    String? userId,
     String? medicationId,
     DateTime? reminderTime,
   }) =>
@@ -1022,15 +877,6 @@ const documentNodeMutationCreateMedicationReminder = DocumentNode(definitions: [
     name: NameNode(value: 'CreateMedicationReminder'),
     variableDefinitions: [
       VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      ),
-      VariableDefinitionNode(
         variable: VariableNode(name: NameNode(value: 'medicationId')),
         type: NamedTypeNode(
           name: NameNode(value: 'String'),
@@ -1055,10 +901,6 @@ const documentNodeMutationCreateMedicationReminder = DocumentNode(definitions: [
         name: NameNode(value: 'createMedicationReminder'),
         alias: null,
         arguments: [
-          ArgumentNode(
-            name: NameNode(value: 'userId'),
-            value: VariableNode(name: NameNode(value: 'userId')),
-          ),
           ArgumentNode(
             name: NameNode(value: 'medicationId'),
             value: VariableNode(name: NameNode(value: 'medicationId')),
@@ -1504,9 +1346,8 @@ class Variables$Mutation$UpdateMedicationReminder {
     result$data['reminderId'] = (l$reminderId as String);
     if (data.containsKey('reminderTime')) {
       final l$reminderTime = data['reminderTime'];
-      result$data['reminderTime'] = l$reminderTime == null
-          ? null
-          : DateTime.parse((l$reminderTime as String));
+      result$data['reminderTime'] =
+          l$reminderTime == null ? null : dateTimeFromJson(l$reminderTime);
     }
     if (data.containsKey('isTaken')) {
       final l$isTaken = data['isTaken'];
@@ -1529,7 +1370,8 @@ class Variables$Mutation$UpdateMedicationReminder {
     result$data['reminderId'] = l$reminderId;
     if (_$data.containsKey('reminderTime')) {
       final l$reminderTime = reminderTime;
-      result$data['reminderTime'] = l$reminderTime?.toIso8601String();
+      result$data['reminderTime'] =
+          l$reminderTime == null ? null : dateTimeToJson(l$reminderTime);
     }
     if (_$data.containsKey('isTaken')) {
       final l$isTaken = isTaken;

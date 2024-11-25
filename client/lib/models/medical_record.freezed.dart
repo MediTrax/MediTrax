@@ -21,7 +21,7 @@ mixin _$MedicalRecord {
   @HiveField(1)
   String get recordType => throw _privateConstructorUsedError;
   @HiveField(2)
-  Object get content => throw _privateConstructorUsedError;
+  String get content => throw _privateConstructorUsedError;
   @HiveField(3)
   DateTime get createdAt => throw _privateConstructorUsedError;
   @HiveField(4)
@@ -43,7 +43,7 @@ abstract class $MedicalRecordCopyWith<$Res> {
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String recordType,
-      @HiveField(2) Object content,
+      @HiveField(2) String content,
       @HiveField(3) DateTime createdAt,
       @HiveField(4) DateTime updatedAt});
 }
@@ -78,7 +78,10 @@ class _$MedicalRecordCopyWithImpl<$Res, $Val extends MedicalRecord>
           ? _value.recordType
           : recordType // ignore: cast_nullable_to_non_nullable
               as String,
-      content: null == content ? _value.content : content,
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -102,7 +105,7 @@ abstract class _$$MedicalRecordImplCopyWith<$Res>
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String recordType,
-      @HiveField(2) Object content,
+      @HiveField(2) String content,
       @HiveField(3) DateTime createdAt,
       @HiveField(4) DateTime updatedAt});
 }
@@ -135,7 +138,10 @@ class __$$MedicalRecordImplCopyWithImpl<$Res>
           ? _value.recordType
           : recordType // ignore: cast_nullable_to_non_nullable
               as String,
-      content: null == content ? _value.content : content,
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -168,7 +174,7 @@ class _$MedicalRecordImpl extends _MedicalRecord {
   final String recordType;
   @override
   @HiveField(2)
-  final Object content;
+  final String content;
   @override
   @HiveField(3)
   final DateTime createdAt;
@@ -189,7 +195,7 @@ class _$MedicalRecordImpl extends _MedicalRecord {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.recordType, recordType) ||
                 other.recordType == recordType) &&
-            const DeepCollectionEquality().equals(other.content, content) &&
+            (identical(other.content, content) || other.content == content) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -197,8 +203,8 @@ class _$MedicalRecordImpl extends _MedicalRecord {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, recordType,
-      const DeepCollectionEquality().hash(content), createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(runtimeType, id, recordType, content, createdAt, updatedAt);
 
   /// Create a copy of MedicalRecord
   /// with the given fields replaced by the non-null parameter values.
@@ -213,7 +219,7 @@ abstract class _MedicalRecord extends MedicalRecord {
   factory _MedicalRecord(
       {@HiveField(0) required final String id,
       @HiveField(1) required final String recordType,
-      @HiveField(2) required final Object content,
+      @HiveField(2) required final String content,
       @HiveField(3) required final DateTime createdAt,
       @HiveField(4) required final DateTime updatedAt}) = _$MedicalRecordImpl;
   _MedicalRecord._() : super._();
@@ -226,7 +232,7 @@ abstract class _MedicalRecord extends MedicalRecord {
   String get recordType;
   @override
   @HiveField(2)
-  Object get content;
+  String get content;
   @override
   @HiveField(3)
   DateTime get createdAt;

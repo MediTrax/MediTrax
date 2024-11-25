@@ -36,21 +36,6 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
-  // Future<void> mockLoginEmailPassword(String email, String password) async {
-  //   state = state.copyWith(
-  //       token: Token(
-  //           id: "id",
-  //           user: "user",
-  //           accessToken: "accessToken",
-  //           accessTokenExpiry: DateTime.now().add(const Duration(days: 1)),
-  //           refreshTokenExpiry: DateTime.now().add(const Duration(days: 2)),
-  //           device: "device",
-  //           createdAt: DateTime.now()),
-  //       autoLoginResult: true);
-  //   ref.invalidate(graphQLServiceProvider);
-  //   await _hiveBox!.put("appState", state);
-  // }
-
   Future<void> loginWithPhoneNumberPassword(
       String phoneNumber, String password, String captcha) async {
     final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
@@ -67,15 +52,15 @@ class AppState extends _$AppState {
       throw result.exception!;
     }
     if (result.data == null) return;
-    final parsedData = result.parsedData!.loginUser!;
+    final parsedData = result.parsedData!.loginUser;
 
     final token = Token(
-      id: parsedData.token.refreshToken,
+      id: parsedData!.token.refreshToken,
       user: parsedData.userId,
       accessToken: parsedData.token.accessToken,
       accessTokenExpiry: parsedData.token.accessTokenExpiry,
       refreshTokenExpiry: parsedData.token.refreshTokenExpiry,
-      device: '',
+      device: parsedData.token.device,
       createdAt: parsedData.token.createdAt,
     );
 

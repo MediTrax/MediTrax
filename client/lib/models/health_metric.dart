@@ -11,11 +11,10 @@ class HealthMetric extends HiveObject with _$HealthMetric {
   @HiveType(typeId: 7)
   factory HealthMetric({
     @HiveField(0) required String id,
-    @HiveField(1) required String userId,
-    @HiveField(2) required String metricType,
-    @HiveField(3) required double value,
-    @HiveField(4) required String unit,
-    @HiveField(5) required DateTime recordedAt,
-    @HiveField(6) required DateTime createdAt,
+    @HiveField(1) required String metricType,
+    @HiveField(2) required double value,
+    @HiveField(3) required String unit,
+    @HiveField(4) required DateTime recordedAt,
+    @HiveField(5) required DateTime createdAt,
   }) = _HealthMetric;
 }
