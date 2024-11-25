@@ -23,14 +23,13 @@ class MedicalRecords extends _$MedicalRecords {
       throw result.exception!;
     }
 
-    return (result.parsedData!.getMedicalRecords ?? [])
+    return result.parsedData!.getMedicalRecords!
         .map((record) => MedicalRecord(
               id: record!.recordId,
               recordType: record.recordType,
               content: record.content.data,
               createdAt: record.createdAt,
-              updatedAt:
-                  record.createdAt, // Using createdAt as updatedAt for now
+              updatedAt: record.createdAt,
             ))
         .toList();
   }
@@ -49,7 +48,7 @@ class MedicalRecords extends _$MedicalRecords {
               Options$Mutation$AddMedicalRecord(
                 variables: Variables$Mutation$AddMedicalRecord(
                   recordType: recordType,
-                  content: jsonEncode({'data': content}),
+                  content: jsonEncode(content),
                 ),
               ),
             );

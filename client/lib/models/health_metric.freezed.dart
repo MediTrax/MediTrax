@@ -19,16 +19,14 @@ mixin _$HealthMetric {
   @HiveField(0)
   String get id => throw _privateConstructorUsedError;
   @HiveField(1)
-  String get userId => throw _privateConstructorUsedError;
-  @HiveField(2)
   String get metricType => throw _privateConstructorUsedError;
-  @HiveField(3)
+  @HiveField(2)
   double get value => throw _privateConstructorUsedError;
-  @HiveField(4)
+  @HiveField(3)
   String get unit => throw _privateConstructorUsedError;
-  @HiveField(5)
+  @HiveField(4)
   DateTime get recordedAt => throw _privateConstructorUsedError;
-  @HiveField(6)
+  @HiveField(5)
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of HealthMetric
@@ -46,12 +44,11 @@ abstract class $HealthMetricCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String metricType,
-      @HiveField(3) double value,
-      @HiveField(4) String unit,
-      @HiveField(5) DateTime recordedAt,
-      @HiveField(6) DateTime createdAt});
+      @HiveField(1) String metricType,
+      @HiveField(2) double value,
+      @HiveField(3) String unit,
+      @HiveField(4) DateTime recordedAt,
+      @HiveField(5) DateTime createdAt});
 }
 
 /// @nodoc
@@ -70,7 +67,6 @@ class _$HealthMetricCopyWithImpl<$Res, $Val extends HealthMetric>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? metricType = null,
     Object? value = null,
     Object? unit = null,
@@ -81,10 +77,6 @@ class _$HealthMetricCopyWithImpl<$Res, $Val extends HealthMetric>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       metricType: null == metricType
           ? _value.metricType
@@ -120,12 +112,11 @@ abstract class _$$HealthMetricImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String metricType,
-      @HiveField(3) double value,
-      @HiveField(4) String unit,
-      @HiveField(5) DateTime recordedAt,
-      @HiveField(6) DateTime createdAt});
+      @HiveField(1) String metricType,
+      @HiveField(2) double value,
+      @HiveField(3) String unit,
+      @HiveField(4) DateTime recordedAt,
+      @HiveField(5) DateTime createdAt});
 }
 
 /// @nodoc
@@ -142,7 +133,6 @@ class __$$HealthMetricImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? metricType = null,
     Object? value = null,
     Object? unit = null,
@@ -153,10 +143,6 @@ class __$$HealthMetricImplCopyWithImpl<$Res>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       metricType: null == metricType
           ? _value.metricType
@@ -188,12 +174,11 @@ class __$$HealthMetricImplCopyWithImpl<$Res>
 class _$HealthMetricImpl extends _HealthMetric {
   _$HealthMetricImpl(
       {@HiveField(0) required this.id,
-      @HiveField(1) required this.userId,
-      @HiveField(2) required this.metricType,
-      @HiveField(3) required this.value,
-      @HiveField(4) required this.unit,
-      @HiveField(5) required this.recordedAt,
-      @HiveField(6) required this.createdAt})
+      @HiveField(1) required this.metricType,
+      @HiveField(2) required this.value,
+      @HiveField(3) required this.unit,
+      @HiveField(4) required this.recordedAt,
+      @HiveField(5) required this.createdAt})
       : super._();
 
   @override
@@ -201,26 +186,23 @@ class _$HealthMetricImpl extends _HealthMetric {
   final String id;
   @override
   @HiveField(1)
-  final String userId;
-  @override
-  @HiveField(2)
   final String metricType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   final double value;
   @override
-  @HiveField(4)
+  @HiveField(3)
   final String unit;
   @override
-  @HiveField(5)
+  @HiveField(4)
   final DateTime recordedAt;
   @override
-  @HiveField(6)
+  @HiveField(5)
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'HealthMetric(id: $id, userId: $userId, metricType: $metricType, value: $value, unit: $unit, recordedAt: $recordedAt, createdAt: $createdAt)';
+    return 'HealthMetric(id: $id, metricType: $metricType, value: $value, unit: $unit, recordedAt: $recordedAt, createdAt: $createdAt)';
   }
 
   @override
@@ -229,7 +211,6 @@ class _$HealthMetricImpl extends _HealthMetric {
         (other.runtimeType == runtimeType &&
             other is _$HealthMetricImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.metricType, metricType) ||
                 other.metricType == metricType) &&
             (identical(other.value, value) || other.value == value) &&
@@ -242,7 +223,7 @@ class _$HealthMetricImpl extends _HealthMetric {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, userId, metricType, value, unit, recordedAt, createdAt);
+      runtimeType, id, metricType, value, unit, recordedAt, createdAt);
 
   /// Create a copy of HealthMetric
   /// with the given fields replaced by the non-null parameter values.
@@ -256,12 +237,11 @@ class _$HealthMetricImpl extends _HealthMetric {
 abstract class _HealthMetric extends HealthMetric {
   factory _HealthMetric(
       {@HiveField(0) required final String id,
-      @HiveField(1) required final String userId,
-      @HiveField(2) required final String metricType,
-      @HiveField(3) required final double value,
-      @HiveField(4) required final String unit,
-      @HiveField(5) required final DateTime recordedAt,
-      @HiveField(6) required final DateTime createdAt}) = _$HealthMetricImpl;
+      @HiveField(1) required final String metricType,
+      @HiveField(2) required final double value,
+      @HiveField(3) required final String unit,
+      @HiveField(4) required final DateTime recordedAt,
+      @HiveField(5) required final DateTime createdAt}) = _$HealthMetricImpl;
   _HealthMetric._() : super._();
 
   @override
@@ -269,21 +249,18 @@ abstract class _HealthMetric extends HealthMetric {
   String get id;
   @override
   @HiveField(1)
-  String get userId;
-  @override
-  @HiveField(2)
   String get metricType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   double get value;
   @override
-  @HiveField(4)
+  @HiveField(3)
   String get unit;
   @override
-  @HiveField(5)
+  @HiveField(4)
   DateTime get recordedAt;
   @override
-  @HiveField(6)
+  @HiveField(5)
   DateTime get createdAt;
 
   /// Create a copy of HealthMetric
