@@ -23,16 +23,14 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
   @override
   void initState() {
     super.initState();
-    selectedTime = TimeOfDay(
-      hour: widget.reminder.reminderTime.hour,
-      minute: widget.reminder.reminderTime.minute,
-    );
+    final now = DateTime.now();
+    selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('编辑 ${widget.medicationName} 的提醒'),
+      title: Text('编辑${widget.medicationName}的提醒'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -61,7 +59,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
         FilledButton(
           onPressed: () async {
             final now = DateTime.now();
-            final reminderTime = DateTime(
+            var reminderTime = DateTime(
               now.year,
               now.month,
               now.day,
@@ -69,11 +67,17 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               selectedTime.minute,
             );
 
+            if (reminderTime.isBefore(now)) {
+              reminderTime = reminderTime.add(const Duration(days: 1));
+            }
+
+            final utcReminderTime = reminderTime.toUtc();
+
             final success = await ref.read(medicationReminderProvider.notifier)
                 .updateReminder(
                   reminderId: widget.reminder.id,
-                  reminderTime: reminderTime.toIso8601String(),
-                  isTaken: false,
+                  reminderTime: utcReminderTime.toIso8601String(),
+                  isTaken: widget.reminder.isTaken,
                 );
 
             if (success && mounted) {
@@ -81,7 +85,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('提醒已更新')),
               );
-              print("Reminder Time after updateReminder: $reminderTime");
+              await ref.read(medicationReminderProvider.notifier).fetchReminders();
             }
           },
           child: const Text('保存'),

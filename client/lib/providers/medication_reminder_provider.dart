@@ -84,34 +84,39 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> updateReminder({
     required String reminderId,
-    required String reminderTime,
-    required bool? isTaken,
+    String? reminderTime,
+    bool? isTaken,
   }) async {
     try {
-          DateTime parsedReminderTime;
-            try {
-            parsedReminderTime = DateTime.parse(reminderTime);
-            print("Parsed reminderTime as DateTime: $parsedReminderTime");
-          } catch (e) {
-            print("Error parsing reminderTime: $e");
-            return false;  
-          }
-          
       final result = await _client.mutate$UpdateMedicationReminder(
         Options$Mutation$UpdateMedicationReminder(
           variables: Variables$Mutation$UpdateMedicationReminder(
             reminderId: reminderId,
-            reminderTime: DateTime.parse(reminderTime),
+            reminderTime: reminderTime != null ? DateTime.parse(reminderTime) : null, 
             isTaken: isTaken,
-            )
-          )
+          ),
+        ),
       );
-      if (!result.hasException) {
-        await fetchReminders();
-        return true;
+
+      if (result.hasException) {
+        print('Error updating reminder: ${result.exception}');
+        throw result.exception!;
       }
-      return false;
+
+      // Update the state with the updated reminder
+      state.whenData((reminders) {
+        final updatedReminder = MedicationReminder.fromJson(
+          result.data!['updateMedicationReminder'],
+        );
+        final updatedList = reminders.map((reminder) =>
+          reminder.id == reminderId ? updatedReminder : reminder
+        ).toList();
+        state = AsyncValue.data(updatedList);
+      });
+
+      return true;
     } catch (e) {
+      print('Error in updateReminder: $e');
       return false;
     }
   }
@@ -152,30 +157,114 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> toggleReminderStatus(String reminderId, bool isTaken) async {
     try {
+      print('Attempting to update reminder status:');
+      print('ReminderId: $reminderId');
+      print('New status (isTaken): $isTaken');
+
+      // Only check inventory when marking as taken
+      if (isTaken) {
+        // Get the current reminder
+        final currentReminder = state.value?.firstWhere(
+          (reminder) => reminder.id == reminderId,
+          orElse: () => throw Exception('提醒未找到'),
+        );
+
+        if (currentReminder == null) {
+          throw Exception('提醒未找到');
+        }
+
+        // Get the medication details
+        final medicationResult = await _client.query(
+          QueryOptions(
+            document: gql('''
+              query GetMedications {
+                getMedications {
+                  medicationId
+                  inventory
+                  dosage
+                }
+              }
+            '''),
+          ),
+        );
+
+        if (medicationResult.hasException) {
+          throw medicationResult.exception!;
+        }
+
+        final medications = medicationResult.data?['getMedications'] as List?;
+        if (medications == null) {
+          throw Exception('药品未找到');
+        }
+
+        final medicationData = medications.firstWhere(
+          (med) => med['medicationId'] == currentReminder.medicationId,
+          orElse: () => throw Exception('药品未找到'),
+        );
+
+        final currentInventory = (medicationData['inventory'] as num).toDouble();
+        final dosage = (medicationData['dosage'] as num).toDouble();
+
+        // Check if there's enough inventory
+        if (currentInventory < dosage) {
+          throw Exception('库存不足，无法标记为已服用。请及时补充库存。');
+        }
+      }
+
       final result = await _client.mutate$UpdateMedicationReminder(
         Options$Mutation$UpdateMedicationReminder(
           variables: Variables$Mutation$UpdateMedicationReminder(
             reminderId: reminderId,
             isTaken: isTaken,
-            )
-          )
+          ),
+        ),
       );
 
-      if (!result.hasException) {
-        state.whenData((reminders) {
-          final updatedReminders = reminders.map((reminder) {
-            if (reminder.id == reminderId) {
-              return reminder.copyWith(isTaken: isTaken);
-            }
-            return reminder;
-          }).toList();
-          state = AsyncValue.data(updatedReminders);
-        });
-        return true;
+      if (result.hasException) {
+        print('Backend returned error:');
+        print('Exception: ${result.exception}');
+        print('GraphQL Errors: ${result.exception?.graphqlErrors}');
+        print('Link Exception: ${result.exception?.linkException}');
+        throw result.exception!;
       }
-      return false;
+
+      print('Backend response:');
+      print('Data: ${result.data}');
+      print('Response data type: ${result.data.runtimeType}');
+      print('UpdateMedicationReminder result: ${result.data?['updateMedicationReminder']}');
+
+      // Update the local state
+      state.whenData((reminders) {
+        final updatedReminders = reminders.map((reminder) {
+          if (reminder.id == reminderId) {
+            print('Updating local reminder state:');
+            print('Old status: ${reminder.isTaken}');
+            print('New status: $isTaken');
+            return reminder.copyWith(isTaken: isTaken);
+          }
+          return reminder;
+        }).toList();
+        state = AsyncValue.data(updatedReminders);
+      });
+
+      return true;
     } catch (e) {
-      return false;
+      print('Error in toggleReminderStatus:');
+      print('Error type: ${e.runtimeType}');
+      print('Error details: $e');
+      
+      // Update the local state to show "Taken Failed" status
+      state.whenData((reminders) {
+        final updatedReminders = reminders.map((reminder) {
+          if (reminder.id == reminderId) {
+            return reminder.copyWith(isTaken: false);  // Set to not taken
+          }
+          return reminder;
+        }).toList();
+        state = AsyncValue.data(updatedReminders);
+      });
+      
+      rethrow;  // Rethrow to show error message to user
     }
   }
 }

@@ -1,25 +1,23 @@
-query GetHealthRiskAssessment() {
-  getHealthRiskAssessment() {
-    assessmentId
-    questionnaireData
-    riskLevel
-    recommendations
-    createdAt
+query GetFoodSpecs($food: String!) {
+  getFoodSpecs(food: $food) {
+    specs {
+      name
+      value
+      unit
+      howHigh
+    }
+    howRecommend
   }
 }
 
-mutation CreateHealthRiskAssessment($questionnaireData: String!) {
-  createHealthRiskAssessment(questionnaireData: $questionnaireData) {
-    assessmentId
-    riskLevel
-    recommendations
-  }
-}
-
-mutation UpdateHealthRiskAssessment($assessmentId: String!, $questionnaireData: String!) {
-  updateHealthRiskAssessment(assessmentId: $assessmentId, questionnaireData: $questionnaireData) {
-    assessmentId
-    riskLevel
-    recommendations
+query GetMockFoodSpecs($food: String!) {
+  getMockFoodSpecs(food: $food) {
+    specs {
+      name
+      value
+      unit
+      howHigh
+    }
+    howRecommend
   }
 }
