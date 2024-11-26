@@ -691,10 +691,22 @@ func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.Tre
 	}
 
 	// TODO: please modify this line as it may result in a bug
-	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentSchedule](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return schedules, nil
+	var scheduleDetails []*model.TreatmentScheduleDetail
+	for _, schedule := range schedules {
+		scheduleDetail := &model.TreatmentScheduleDetail{
+			ScheduleID:    schedule.ID,
+			TreatmentType: schedule.TreatmentType,
+			ScheduledTime: schedule.ScheduledTime,
+			Location:      schedule.Location,
+			Notes:         schedule.Notes,
+		}
+		scheduleDetails = append(scheduleDetails, scheduleDetail)
+	}
+
+	return scheduleDetails, nil
 }
