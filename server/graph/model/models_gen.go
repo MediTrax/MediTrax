@@ -170,19 +170,19 @@ type LoginUserResponse struct {
 }
 
 type MedicalRecord struct {
-	ID         string        `json:"id"`
-	UserID     string        `json:"user_id"`
-	RecordType string        `json:"record_type"`
-	Content    *RecordObject `json:"content"`
-	CreatedAt  string        `json:"created_at"`
-	UpdatedAt  string        `json:"updated_at"`
+	ID         string `json:"id"`
+	UserID     string `json:"user_id"`
+	RecordType string `json:"record_type"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type MedicalRecordDetail struct {
-	RecordID   string        `json:"recordId"`
-	RecordType string        `json:"recordType"`
-	Content    *RecordObject `json:"content"`
-	CreatedAt  string        `json:"createdAt"`
+	RecordID   string `json:"recordId"`
+	RecordType string `json:"recordType"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"createdAt"`
 }
 
 type Medication struct {

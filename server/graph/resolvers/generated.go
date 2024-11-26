@@ -2797,7 +2797,8 @@ extend type Mutation{
   id: String!
   user_id: String!
   record_type: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   created_at: DateTime!
   updated_at: DateTime!
 }
@@ -2846,7 +2847,8 @@ type AddMedicalRecordResponse {
 type MedicalRecordDetail {
   recordId: String!
   recordType: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   createdAt: DateTime!
 }
 
@@ -8356,9 +8358,9 @@ func (ec *executionContext) _MedicalRecord_content(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RecordObject)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecord_content(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8368,11 +8370,7 @@ func (ec *executionContext) fieldContext_MedicalRecord_content(_ context.Context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "data":
-				return ec.fieldContext_RecordObject_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecordObject", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8580,9 +8578,9 @@ func (ec *executionContext) _MedicalRecordDetail_content(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RecordObject)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecordDetail_content(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8592,11 +8590,7 @@ func (ec *executionContext) fieldContext_MedicalRecordDetail_content(_ context.C
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "data":
-				return ec.fieldContext_RecordObject_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecordObject", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21906,16 +21900,6 @@ func (ec *executionContext) marshalNQuestion2ᚖmeditraxᚋgraphᚋmodelᚐQuest
 		return graphql.Null
 	}
 	return ec._Question(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx context.Context, sel ast.SelectionSet, v *model.RecordObject) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._RecordObject(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
