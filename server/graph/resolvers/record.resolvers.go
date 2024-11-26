@@ -180,11 +180,13 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 	// 插入新的医疗记录
 	result, err := database.DB.Query(
 		`CREATE ONLY medical_record:ulid() 
-        SET recordType=$recordType,
+        SET user_id=$user_id,
+			record_type=$recordType,
             content=$content,
             createdAt=time::now(),
             updatedAt=time::now();`,
 		map[string]interface{}{
+			"user_id":    user.ID,
 			"recordType": recordType,
 			"content":    content,
 		},
@@ -193,13 +195,13 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 		return nil, err
 	}
 
-	newRecord, err := surrealdb.SmartUnmarshal[model.MedicalRecordDetail](result, nil)
+	newRecord, err := surrealdb.SmartUnmarshal[model.MedicalRecord](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &model.AddMedicalRecordResponse{
-		RecordID: newRecord.RecordID,
+		RecordID: newRecord.ID,
 		Message:  "Medical record added successfully",
 	}
 
