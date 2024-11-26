@@ -128,7 +128,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
     );
   }
 
-  Widget _buildFoodSafetyTab() {
+Widget _buildFoodSafetyTab() {
     final foodSpecsState = ref.watch(foodSpecsProvider);
 
     return SingleChildScrollView(
@@ -241,22 +241,6 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                     children: [
                       Row(
                         children: const [
-                          Icon(Icons.restaurant_menu, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text(
-                            '营养成分',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      ...foodSpecs.specs.map((spec) => _buildNutritionRow(spec)),
-                      const Divider(height: 32),
-                      Row(
-                        children: const [
                           Icon(Icons.recommend, color: Colors.blue),
                           SizedBox(width: 8),
                           Text(
@@ -273,6 +257,22 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                         padding: const EdgeInsets.only(left: 32),
                         child: Text(foodSpecs.howRecommend),
                       ),
+                      const Divider(height: 32),
+                      Row(
+                        children: const [
+                          Icon(Icons.restaurant_menu, color: Colors.green),
+                          SizedBox(width: 8),
+                          Text(
+                            '营养成分',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ...foodSpecs.specs.map((spec) => _buildNutritionRow(spec)),
                     ],
                   ),
                 ),
