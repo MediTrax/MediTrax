@@ -19,36 +19,27 @@ class TreatmentScheduleImplAdapter
     };
     return _$TreatmentScheduleImpl(
       id: fields[0] as String,
-      userId: fields[1] as String,
-      treatmentType: fields[2] as String,
-      scheduledTime: fields[3] as DateTime,
-      location: fields[4] as String,
-      notes: fields[5] as String,
-      createdAt: fields[6] as DateTime,
-      updatedAt: fields[7] as DateTime,
+      treatmentType: fields[1] as String,
+      scheduledTime: fields[2] as DateTime,
+      location: fields[3] as String,
+      notes: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$TreatmentScheduleImpl obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.userId)
-      ..writeByte(2)
       ..write(obj.treatmentType)
-      ..writeByte(3)
+      ..writeByte(2)
       ..write(obj.scheduledTime)
-      ..writeByte(4)
+      ..writeByte(3)
       ..write(obj.location)
-      ..writeByte(5)
-      ..write(obj.notes)
-      ..writeByte(6)
-      ..write(obj.createdAt)
-      ..writeByte(7)
-      ..write(obj.updatedAt);
+      ..writeByte(4)
+      ..write(obj.notes);
   }
 
   @override

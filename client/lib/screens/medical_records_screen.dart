@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/models/medical_record.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:meditrax/providers/medical_records_provider.dart';
+import 'package:meditrax/utils/error_handler.dart';
 
 class MedicalRecordsScreen extends StatelessWidget {
   const MedicalRecordsScreen({super.key});
@@ -29,9 +35,11 @@ class MedicalRecordsScreen extends StatelessWidget {
   }
 }
 
-class _VisitHistoryTab extends StatelessWidget {
+class _VisitHistoryTab extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recordsAsync = ref.watch(medicalRecordsProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -39,42 +47,56 @@ class _VisitHistoryTab extends StatelessWidget {
         children: [
           const Text(
             '就诊历史',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const Text(
             '查看您的就诊记录和诊断结果',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
+            style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: ListView(
-              children: [
-                _buildVisitCard(
-                  date: '2023-09-15',
-                  type: '门诊',
-                  diagnosis: '高血压',
-                  prescription: '降压药 10mg 每日一次',
+            child: recordsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('加载失败'),
+                    TextButton(
+                      onPressed: () => ref.refresh(medicalRecordsProvider),
+                      child: const Text('重试'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildVisitCard(
-                  date: '2023-08-20',
-                  type: '住院',
-                  diagnosis: '肾功能检查',
-                  prescription: '无',
-                ),
-              ],
+              ),
+              data: (records) {
+                final visitRecords = ref
+                    .read(medicalRecordsProvider.notifier)
+                    .getRecordsByType('visit');
+                return visitRecords.isEmpty
+                    ? const Center(child: Text('暂无就诊记录'))
+                    : ListView.builder(
+                        itemCount: visitRecords.length,
+                        itemBuilder: (context, index) {
+                          final record = visitRecords[index];
+                          final content = jsonDecode(record.content.toString())
+                              as Map<String, dynamic>;
+                          return _buildVisitCard(
+                            date: record.createdAt.toString().split(' ')[0],
+                            type: content['type'] as String,
+                            diagnosis: content['diagnosis'] as String,
+                            prescription: content['prescription'] as String,
+                          );
+                        },
+                      );
+              },
             ),
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => _showAddVisitDialog(context),
+              onPressed: () => _showAddVisitDialog(context, ref),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -87,7 +109,7 @@ class _VisitHistoryTab extends StatelessWidget {
     );
   }
 
-  void _showAddVisitDialog(BuildContext context) {
+  void _showAddVisitDialog(BuildContext context, WidgetRef ref) {
     final dateController = TextEditingController();
     final diagnosisController = TextEditingController();
     final prescriptionController = TextEditingController();
@@ -147,9 +169,24 @@ class _VisitHistoryTab extends StatelessWidget {
             child: const Text('取消'),
           ),
           FilledButton(
-            onPressed: () {
-              // TODO: Implement actual record creation
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                await ref.read(medicalRecordsProvider.notifier).addRecord(
+                  recordType: 'visit',
+                  content: {
+                    'type': visitType,
+                    'diagnosis': diagnosisController.text,
+                    'prescription': prescriptionController.text,
+                  },
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
             },
             child: const Text('保存'),
           ),
@@ -237,9 +274,11 @@ class _VisitHistoryTab extends StatelessWidget {
   }
 }
 
-class _MedicationHistoryTab extends StatelessWidget {
+class _MedicationHistoryTab extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recordsAsync = ref.watch(medicalRecordsProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -247,42 +286,57 @@ class _MedicationHistoryTab extends StatelessWidget {
         children: [
           const Text(
             '用药历史',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const Text(
             '查看您的用药记录和当前用药情况',
-            style: TextStyle(
-              color: Colors.grey,
-            ),
+            style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: ListView(
-              children: [
-                _buildMedicationCard(
-                  name: '降压药',
-                  dosage: '10mg',
-                  frequency: '每日一次',
-                  startDate: '2023-09-15',
+            child: recordsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('加载失败'),
+                    TextButton(
+                      onPressed: () => ref.refresh(medicalRecordsProvider),
+                      child: const Text('重试'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildMedicationCard(
-                  name: '钙片',
-                  dosage: '500mg',
-                  frequency: '每日两次',
-                  startDate: '2023-07-01',
-                ),
-              ],
+              ),
+              data: (records) {
+                final medicationRecords = ref
+                    .read(medicalRecordsProvider.notifier)
+                    .getRecordsByType('medication');
+                return medicationRecords.isEmpty
+                    ? const Center(child: Text('暂无用药记录'))
+                    : ListView.builder(
+                        itemCount: medicationRecords.length,
+                        itemBuilder: (context, index) {
+                          final record = medicationRecords[index];
+                          final content = jsonDecode(record.content.toString())
+                              as Map<String, dynamic>;
+                          return _buildMedicationCard(
+                            name: content['name'] as String,
+                            dosage: content['dosage'] as String,
+                            frequency: content['frequency'] as String,
+                            startDate:
+                                record.createdAt.toString().split(' ')[0],
+                          );
+                        },
+                      );
+              },
             ),
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => _showAddMedicationDialog(context),
+              onPressed: () => _showAddMedicationDialog(context, ref),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -295,7 +349,7 @@ class _MedicationHistoryTab extends StatelessWidget {
     );
   }
 
-  void _showAddMedicationDialog(BuildContext context) {
+  void _showAddMedicationDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
     final dosageController = TextEditingController();
     final frequencyController = TextEditingController();
@@ -348,9 +402,24 @@ class _MedicationHistoryTab extends StatelessWidget {
             child: const Text('取消'),
           ),
           FilledButton(
-            onPressed: () {
-              // TODO: Implement actual medication record creation
-              Navigator.pop(context);
+            onPressed: () async {
+              try {
+                await ref.read(medicalRecordsProvider.notifier).addRecord(
+                  recordType: 'medication',
+                  content: {
+                    'name': nameController.text,
+                    'dosage': dosageController.text,
+                    'frequency': frequencyController.text,
+                  },
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
             },
             child: const Text('保存'),
           ),
