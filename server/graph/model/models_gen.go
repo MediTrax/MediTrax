@@ -272,6 +272,7 @@ type Token struct {
 
 type TreatmentSchedule struct {
 	ID            string  `json:"id"`
+	UserID        string  `json:"user_id"`
 	TreatmentType string  `json:"treatmentType"`
 	ScheduledTime string  `json:"scheduledTime"`
 	Location      string  `json:"location"`
