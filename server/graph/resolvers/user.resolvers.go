@@ -83,6 +83,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 		phoneNumber=$phoneNumber,
 		password=crypto::argon2::generate($password),
 		role=$role,
+		points=0.0,
 		createdAt=time::now(),
 		updatedAt=time::now();`, map[string]interface{}{
 			"username":    username,
@@ -243,6 +244,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 	if len(results) == 0 {
 		return nil, fmt.Errorf("user not found")
 	}
+
+	// TODO: Remove all objects associated to the user
 
 	// 创建响应
 	response := &model.DeleteUserResponse{
@@ -500,6 +503,7 @@ func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse,
 		PhoneNumber: user.PhoneNumber,
 		Name:        user.Name,
 		Role:        user.Role,
+		Points:      user.Points,
 		CreatedAt:   user.CreatedAt,
 		LastLogin:   &user.LastLogin,
 	}
