@@ -19,19 +19,13 @@ mixin _$TreatmentSchedule {
   @HiveField(0)
   String get id => throw _privateConstructorUsedError;
   @HiveField(1)
-  String get userId => throw _privateConstructorUsedError;
-  @HiveField(2)
   String get treatmentType => throw _privateConstructorUsedError;
-  @HiveField(3)
+  @HiveField(2)
   DateTime get scheduledTime => throw _privateConstructorUsedError;
-  @HiveField(4)
+  @HiveField(3)
   String get location => throw _privateConstructorUsedError;
-  @HiveField(5)
-  String get notes => throw _privateConstructorUsedError;
-  @HiveField(6)
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  @HiveField(7)
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  @HiveField(4)
+  String? get notes => throw _privateConstructorUsedError;
 
   /// Create a copy of TreatmentSchedule
   /// with the given fields replaced by the non-null parameter values.
@@ -48,13 +42,10 @@ abstract class $TreatmentScheduleCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String treatmentType,
-      @HiveField(3) DateTime scheduledTime,
-      @HiveField(4) String location,
-      @HiveField(5) String notes,
-      @HiveField(6) DateTime createdAt,
-      @HiveField(7) DateTime updatedAt});
+      @HiveField(1) String treatmentType,
+      @HiveField(2) DateTime scheduledTime,
+      @HiveField(3) String location,
+      @HiveField(4) String? notes});
 }
 
 /// @nodoc
@@ -73,22 +64,15 @@ class _$TreatmentScheduleCopyWithImpl<$Res, $Val extends TreatmentSchedule>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? treatmentType = null,
     Object? scheduledTime = null,
     Object? location = null,
-    Object? notes = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? notes = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       treatmentType: null == treatmentType
           ? _value.treatmentType
@@ -102,18 +86,10 @@ class _$TreatmentScheduleCopyWithImpl<$Res, $Val extends TreatmentSchedule>
           ? _value.location
           : location // ignore: cast_nullable_to_non_nullable
               as String,
-      notes: null == notes
+      notes: freezed == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as String?,
     ) as $Val);
   }
 }
@@ -128,13 +104,10 @@ abstract class _$$TreatmentScheduleImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String treatmentType,
-      @HiveField(3) DateTime scheduledTime,
-      @HiveField(4) String location,
-      @HiveField(5) String notes,
-      @HiveField(6) DateTime createdAt,
-      @HiveField(7) DateTime updatedAt});
+      @HiveField(1) String treatmentType,
+      @HiveField(2) DateTime scheduledTime,
+      @HiveField(3) String location,
+      @HiveField(4) String? notes});
 }
 
 /// @nodoc
@@ -151,22 +124,15 @@ class __$$TreatmentScheduleImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? treatmentType = null,
     Object? scheduledTime = null,
     Object? location = null,
-    Object? notes = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? notes = freezed,
   }) {
     return _then(_$TreatmentScheduleImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       treatmentType: null == treatmentType
           ? _value.treatmentType
@@ -180,18 +146,10 @@ class __$$TreatmentScheduleImplCopyWithImpl<$Res>
           ? _value.location
           : location // ignore: cast_nullable_to_non_nullable
               as String,
-      notes: null == notes
+      notes: freezed == notes
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as String?,
     ));
   }
 }
@@ -202,13 +160,10 @@ class __$$TreatmentScheduleImplCopyWithImpl<$Res>
 class _$TreatmentScheduleImpl extends _TreatmentSchedule {
   _$TreatmentScheduleImpl(
       {@HiveField(0) required this.id,
-      @HiveField(1) required this.userId,
-      @HiveField(2) required this.treatmentType,
-      @HiveField(3) required this.scheduledTime,
-      @HiveField(4) required this.location,
-      @HiveField(5) required this.notes,
-      @HiveField(6) required this.createdAt,
-      @HiveField(7) required this.updatedAt})
+      @HiveField(1) required this.treatmentType,
+      @HiveField(2) required this.scheduledTime,
+      @HiveField(3) required this.location,
+      @HiveField(4) this.notes})
       : super._();
 
   @override
@@ -216,29 +171,20 @@ class _$TreatmentScheduleImpl extends _TreatmentSchedule {
   final String id;
   @override
   @HiveField(1)
-  final String userId;
-  @override
-  @HiveField(2)
   final String treatmentType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   final DateTime scheduledTime;
   @override
-  @HiveField(4)
+  @HiveField(3)
   final String location;
   @override
-  @HiveField(5)
-  final String notes;
-  @override
-  @HiveField(6)
-  final DateTime createdAt;
-  @override
-  @HiveField(7)
-  final DateTime updatedAt;
+  @HiveField(4)
+  final String? notes;
 
   @override
   String toString() {
-    return 'TreatmentSchedule(id: $id, userId: $userId, treatmentType: $treatmentType, scheduledTime: $scheduledTime, location: $location, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'TreatmentSchedule(id: $id, treatmentType: $treatmentType, scheduledTime: $scheduledTime, location: $location, notes: $notes)';
   }
 
   @override
@@ -247,23 +193,18 @@ class _$TreatmentScheduleImpl extends _TreatmentSchedule {
         (other.runtimeType == runtimeType &&
             other is _$TreatmentScheduleImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.treatmentType, treatmentType) ||
                 other.treatmentType == treatmentType) &&
             (identical(other.scheduledTime, scheduledTime) ||
                 other.scheduledTime == scheduledTime) &&
             (identical(other.location, location) ||
                 other.location == location) &&
-            (identical(other.notes, notes) || other.notes == notes) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+            (identical(other.notes, notes) || other.notes == notes));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, treatmentType,
-      scheduledTime, location, notes, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType, id, treatmentType, scheduledTime, location, notes);
 
   /// Create a copy of TreatmentSchedule
   /// with the given fields replaced by the non-null parameter values.
@@ -277,15 +218,11 @@ class _$TreatmentScheduleImpl extends _TreatmentSchedule {
 
 abstract class _TreatmentSchedule extends TreatmentSchedule {
   factory _TreatmentSchedule(
-          {@HiveField(0) required final String id,
-          @HiveField(1) required final String userId,
-          @HiveField(2) required final String treatmentType,
-          @HiveField(3) required final DateTime scheduledTime,
-          @HiveField(4) required final String location,
-          @HiveField(5) required final String notes,
-          @HiveField(6) required final DateTime createdAt,
-          @HiveField(7) required final DateTime updatedAt}) =
-      _$TreatmentScheduleImpl;
+      {@HiveField(0) required final String id,
+      @HiveField(1) required final String treatmentType,
+      @HiveField(2) required final DateTime scheduledTime,
+      @HiveField(3) required final String location,
+      @HiveField(4) final String? notes}) = _$TreatmentScheduleImpl;
   _TreatmentSchedule._() : super._();
 
   @override
@@ -293,25 +230,16 @@ abstract class _TreatmentSchedule extends TreatmentSchedule {
   String get id;
   @override
   @HiveField(1)
-  String get userId;
-  @override
-  @HiveField(2)
   String get treatmentType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   DateTime get scheduledTime;
   @override
-  @HiveField(4)
+  @HiveField(3)
   String get location;
   @override
-  @HiveField(5)
-  String get notes;
-  @override
-  @HiveField(6)
-  DateTime get createdAt;
-  @override
-  @HiveField(7)
-  DateTime get updatedAt;
+  @HiveField(4)
+  String? get notes;
 
   /// Create a copy of TreatmentSchedule
   /// with the given fields replaced by the non-null parameter values.
