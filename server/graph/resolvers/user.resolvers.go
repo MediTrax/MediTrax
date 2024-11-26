@@ -244,6 +244,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 		return nil, fmt.Errorf("user not found")
 	}
 
+	// TODO: Remove all objects associated to the user
+
 	// 创建响应
 	response := &model.DeleteUserResponse{
 		Message: fmt.Sprintf("User %s with name %s deleted successfully", results[0].ID, results[0].Name),
