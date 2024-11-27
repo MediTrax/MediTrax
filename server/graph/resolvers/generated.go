@@ -285,6 +285,7 @@ type ComplexityRoot struct {
 		DeleteMedicationReminder   func(childComplexity int, reminderID string) int
 		DeleteTreatmentSchedule    func(childComplexity int, scheduleID string) int
 		DeleteUser                 func(childComplexity int) int
+		EarnPoints                 func(childComplexity int, pointsEarned float64, reason string) int
 		LoginUser                  func(childComplexity int, phoneNumber string, password string) int
 		RefreshToken               func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset       func(childComplexity int, phoneNumber string) int
@@ -321,6 +322,7 @@ type ComplexityRoot struct {
 		GetTreatmentSchedules     func(childComplexity int) int
 		GetUser                   func(childComplexity int) int
 		GetUserAchievements       func(childComplexity int) int
+		GetUserPointRecords       func(childComplexity int) int
 	}
 
 	Question struct {
@@ -364,6 +366,7 @@ type ComplexityRoot struct {
 		Notes         func(childComplexity int) int
 		ScheduledTime func(childComplexity int) int
 		TreatmentType func(childComplexity int) int
+		UserID        func(childComplexity int) int
 	}
 
 	TreatmentScheduleDetail struct {
@@ -422,6 +425,7 @@ type ComplexityRoot struct {
 		Name        func(childComplexity int) int
 		Password    func(childComplexity int) int
 		PhoneNumber func(childComplexity int) int
+		Points      func(childComplexity int) int
 		Role        func(childComplexity int) int
 		Status      func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
@@ -446,14 +450,36 @@ type ComplexityRoot struct {
 		LastLogin   func(childComplexity int) int
 		Name        func(childComplexity int) int
 		PhoneNumber func(childComplexity int) int
+		Points      func(childComplexity int) int
 		Role        func(childComplexity int) int
 		UserID      func(childComplexity int) int
+	}
+
+	UserPointRecord struct {
+		EarnedAt     func(childComplexity int) int
+		ID           func(childComplexity int) int
+		PointsEarned func(childComplexity int) int
+		Reason       func(childComplexity int) int
+		UserID       func(childComplexity int) int
+	}
+
+	UserPointRecordDetail struct {
+		EarnedAt     func(childComplexity int) int
+		PointsEarned func(childComplexity int) int
+		Reason       func(childComplexity int) int
+		RecordID     func(childComplexity int) int
+	}
+
+	EarnPointsResponse struct {
+		Message       func(childComplexity int) int
+		UpdatedPoints func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
 	CreateAchievementBadge(ctx context.Context, name string, description string, iconURL string) (*model.CreateAchievementBadgeResponse, error)
 	AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error)
+	EarnPoints(ctx context.Context, pointsEarned float64, reason string) (*model.EarnPointsResponse, error)
 	CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error)
 	UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error)
 	AddMedication(ctx context.Context, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error)
@@ -485,6 +511,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error)
 	GetUserAchievements(ctx context.Context) ([]*model.UserAchievementDetail, error)
+	GetUserPointRecords(ctx context.Context) ([]*model.UserPointRecordDetail, error)
 	GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error)
 	GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
@@ -1529,6 +1556,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteUser(childComplexity), true
 
+	case "Mutation.earnPoints":
+		if e.complexity.Mutation.EarnPoints == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_earnPoints_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EarnPoints(childComplexity, args["pointsEarned"].(float64), args["reason"].(string)), true
+
 	case "Mutation.loginUser":
 		if e.complexity.Mutation.LoginUser == nil {
 			break
@@ -1814,6 +1853,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetUserAchievements(childComplexity), true
 
+	case "Query.getUserPointRecords":
+		if e.complexity.Query.GetUserPointRecords == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUserPointRecords(childComplexity), true
+
 	case "Question.answer":
 		if e.complexity.Question.Answer == nil {
 			break
@@ -1967,6 +2013,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TreatmentSchedule.TreatmentType(childComplexity), true
+
+	case "TreatmentSchedule.user_id":
+		if e.complexity.TreatmentSchedule.UserID == nil {
+			break
+		}
+
+		return e.complexity.TreatmentSchedule.UserID(childComplexity), true
 
 	case "TreatmentScheduleDetail.location":
 		if e.complexity.TreatmentScheduleDetail.Location == nil {
@@ -2164,6 +2217,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.PhoneNumber(childComplexity), true
 
+	case "User.points":
+		if e.complexity.User.Points == nil {
+			break
+		}
+
+		return e.complexity.User.Points(childComplexity), true
+
 	case "User.role":
 		if e.complexity.User.Role == nil {
 			break
@@ -2269,6 +2329,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserDetailResponse.PhoneNumber(childComplexity), true
 
+	case "UserDetailResponse.points":
+		if e.complexity.UserDetailResponse.Points == nil {
+			break
+		}
+
+		return e.complexity.UserDetailResponse.Points(childComplexity), true
+
 	case "UserDetailResponse.role":
 		if e.complexity.UserDetailResponse.Role == nil {
 			break
@@ -2282,6 +2349,83 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserDetailResponse.UserID(childComplexity), true
+
+	case "UserPointRecord.earnedAt":
+		if e.complexity.UserPointRecord.EarnedAt == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecord.EarnedAt(childComplexity), true
+
+	case "UserPointRecord.id":
+		if e.complexity.UserPointRecord.ID == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecord.ID(childComplexity), true
+
+	case "UserPointRecord.pointsEarned":
+		if e.complexity.UserPointRecord.PointsEarned == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecord.PointsEarned(childComplexity), true
+
+	case "UserPointRecord.reason":
+		if e.complexity.UserPointRecord.Reason == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecord.Reason(childComplexity), true
+
+	case "UserPointRecord.user_id":
+		if e.complexity.UserPointRecord.UserID == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecord.UserID(childComplexity), true
+
+	case "UserPointRecordDetail.earnedAt":
+		if e.complexity.UserPointRecordDetail.EarnedAt == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecordDetail.EarnedAt(childComplexity), true
+
+	case "UserPointRecordDetail.pointsEarned":
+		if e.complexity.UserPointRecordDetail.PointsEarned == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecordDetail.PointsEarned(childComplexity), true
+
+	case "UserPointRecordDetail.reason":
+		if e.complexity.UserPointRecordDetail.Reason == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecordDetail.Reason(childComplexity), true
+
+	case "UserPointRecordDetail.recordId":
+		if e.complexity.UserPointRecordDetail.RecordID == nil {
+			break
+		}
+
+		return e.complexity.UserPointRecordDetail.RecordID(childComplexity), true
+
+	case "earnPointsResponse.message":
+		if e.complexity.EarnPointsResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.EarnPointsResponse.Message(childComplexity), true
+
+	case "earnPointsResponse.updatedPoints":
+		if e.complexity.EarnPointsResponse.UpdatedPoints == nil {
+			break
+		}
+
+		return e.complexity.EarnPointsResponse.UpdatedPoints(childComplexity), true
 
 	}
 	return 0, false
@@ -2436,14 +2580,36 @@ type UserAchievementDetail {
   earnedAt: DateTime!
 }
 
+type UserPointRecord{
+  id: String!
+  user_id: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type UserPointRecordDetail{
+  recordId: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type earnPointsResponse{
+  updatedPoints: Float!
+  message: String!
+}
+
 extend type Query{
   getAchievementBadges: [AchievementBadgeDetail]
   getUserAchievements: [UserAchievementDetail]
+  getUserPointRecords: [UserPointRecordDetail]
 }
 
 extend type Mutation{
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
   awardAchievement(badgeId: String!): AwardAchievementResponse  
+  earnPoints(pointsEarned: Float!, reason:String!) : earnPointsResponse
 }`, BuiltIn: false},
 	{Name: "../schemas/assessment.graphqls", Input: `type Question{
   question: String!
@@ -2581,6 +2747,7 @@ type MedicationReminderDetail {
 
 type TreatmentSchedule{
   id: String!
+  user_id: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
@@ -2639,7 +2806,8 @@ extend type Mutation{
   id: String!
   user_id: String!
   record_type: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   created_at: DateTime!
   updated_at: DateTime!
 }
@@ -2688,7 +2856,8 @@ type AddMedicalRecordResponse {
 type MedicalRecordDetail {
   recordId: String!
   recordType: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   createdAt: DateTime!
 }
 
@@ -2739,6 +2908,7 @@ type User{
   phoneNumber: String!
   password: String!
   name: String!
+  points: Float!
   created_at: DateTime!
   updated_at: DateTime!
   last_login: DateTime!
@@ -2768,6 +2938,7 @@ type UserDetailResponse {
   userId: String!
   phoneNumber: String!
   name: String!
+  points: Float!
   role: String!
   createdAt: DateTime!
   lastLogin: DateTime
@@ -3550,6 +3721,47 @@ func (ec *executionContext) field_Mutation_deleteTreatmentSchedule_argsScheduleI
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduleId"))
 	if tmp, ok := rawArgs["scheduleId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_earnPoints_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_earnPoints_argsPointsEarned(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pointsEarned"] = arg0
+	arg1, err := ec.field_Mutation_earnPoints_argsReason(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_earnPoints_argsPointsEarned(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (float64, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pointsEarned"))
+	if tmp, ok := rawArgs["pointsEarned"]; ok {
+		return ec.unmarshalNFloat2float64(ctx, tmp)
+	}
+
+	var zeroVal float64
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_earnPoints_argsReason(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reason"))
+	if tmp, ok := rawArgs["reason"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -8199,9 +8411,9 @@ func (ec *executionContext) _MedicalRecord_content(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RecordObject)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecord_content(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8211,11 +8423,7 @@ func (ec *executionContext) fieldContext_MedicalRecord_content(_ context.Context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "data":
-				return ec.fieldContext_RecordObject_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecordObject", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8423,9 +8631,9 @@ func (ec *executionContext) _MedicalRecordDetail_content(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RecordObject)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecordDetail_content(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -8435,11 +8643,7 @@ func (ec *executionContext) fieldContext_MedicalRecordDetail_content(_ context.C
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "data":
-				return ec.fieldContext_RecordObject_data(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecordObject", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9699,6 +9903,64 @@ func (ec *executionContext) fieldContext_Mutation_awardAchievement(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_awardAchievement_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_earnPoints(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_earnPoints(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EarnPoints(rctx, fc.Args["pointsEarned"].(float64), fc.Args["reason"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EarnPointsResponse)
+	fc.Result = res
+	return ec.marshalOearnPointsResponse2ᚖmeditraxᚋgraphᚋmodelᚐEarnPointsResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_earnPoints(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "updatedPoints":
+				return ec.fieldContext_earnPointsResponse_updatedPoints(ctx, field)
+			case "message":
+				return ec.fieldContext_earnPointsResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type earnPointsResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_earnPoints_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -11540,6 +11802,57 @@ func (ec *executionContext) fieldContext_Query_getUserAchievements(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getUserPointRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getUserPointRecords(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserPointRecords(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UserPointRecordDetail)
+	fc.Result = res
+	return ec.marshalOUserPointRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐUserPointRecordDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getUserPointRecords(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "recordId":
+				return ec.fieldContext_UserPointRecordDetail_recordId(ctx, field)
+			case "pointsEarned":
+				return ec.fieldContext_UserPointRecordDetail_pointsEarned(ctx, field)
+			case "reason":
+				return ec.fieldContext_UserPointRecordDetail_reason(ctx, field)
+			case "earnedAt":
+				return ec.fieldContext_UserPointRecordDetail_earnedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserPointRecordDetail", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getHealthRiskAssessment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getHealthRiskAssessment(ctx, field)
 	if err != nil {
@@ -12115,6 +12428,8 @@ func (ec *executionContext) fieldContext_Query_getUser(_ context.Context, field 
 				return ec.fieldContext_UserDetailResponse_phoneNumber(ctx, field)
 			case "name":
 				return ec.fieldContext_UserDetailResponse_name(ctx, field)
+			case "points":
+				return ec.fieldContext_UserDetailResponse_points(ctx, field)
 			case "role":
 				return ec.fieldContext_UserDetailResponse_role(ctx, field)
 			case "createdAt":
@@ -13098,6 +13413,50 @@ func (ec *executionContext) _TreatmentSchedule_id(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext_TreatmentSchedule_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TreatmentSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TreatmentSchedule_user_id(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TreatmentSchedule_user_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TreatmentSchedule_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TreatmentSchedule",
 		Field:      field,
@@ -14424,6 +14783,50 @@ func (ec *executionContext) fieldContext_User_name(_ context.Context, field grap
 	return fc, nil
 }
 
+func (ec *executionContext) _User_points(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_points(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Points, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_points(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_created_at(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_created_at(ctx, field)
 	if err != nil {
@@ -15128,6 +15531,50 @@ func (ec *executionContext) fieldContext_UserDetailResponse_name(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _UserDetailResponse_points(ctx context.Context, field graphql.CollectedField, obj *model.UserDetailResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserDetailResponse_points(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Points, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserDetailResponse_points(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserDetailResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserDetailResponse_role(ctx context.Context, field graphql.CollectedField, obj *model.UserDetailResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserDetailResponse_role(ctx, field)
 	if err != nil {
@@ -15247,6 +15694,402 @@ func (ec *executionContext) _UserDetailResponse_lastLogin(ctx context.Context, f
 func (ec *executionContext) fieldContext_UserDetailResponse_lastLogin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserDetailResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecord_id(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecord_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecord",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecord_user_id(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_user_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecord_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecord",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecord_pointsEarned(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_pointsEarned(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PointsEarned, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecord_pointsEarned(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecord",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecord_reason(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_reason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecord_reason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecord",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecord_earnedAt(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_earnedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EarnedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecord_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecord",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecordDetail_recordId(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecordDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecordDetail_recordId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RecordID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecordDetail_recordId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecordDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecordDetail_pointsEarned(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecordDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecordDetail_pointsEarned(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PointsEarned, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecordDetail_pointsEarned(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecordDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecordDetail_reason(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecordDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecordDetail_reason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecordDetail_reason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecordDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserPointRecordDetail_earnedAt(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecordDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecordDetail_earnedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EarnedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserPointRecordDetail_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserPointRecordDetail",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -17018,6 +17861,94 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 		Object:     "__Type",
 		Field:      field,
 		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _earnPointsResponse_updatedPoints(ctx context.Context, field graphql.CollectedField, obj *model.EarnPointsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_earnPointsResponse_updatedPoints(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedPoints, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_earnPointsResponse_updatedPoints(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "earnPointsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _earnPointsResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.EarnPointsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_earnPointsResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_earnPointsResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "earnPointsResponse",
+		Field:      field,
+		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
@@ -18835,6 +19766,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_awardAchievement(ctx, field)
 			})
+		case "earnPoints":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_earnPoints(ctx, field)
+			})
 		case "createHealthRiskAssessment":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createHealthRiskAssessment(ctx, field)
@@ -19068,6 +20003,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getUserAchievements(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUserPointRecords":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserPointRecords(ctx, field)
 				return res
 			}
 
@@ -19641,6 +20595,11 @@ func (ec *executionContext) _TreatmentSchedule(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "user_id":
+			out.Values[i] = ec._TreatmentSchedule_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "treatmentType":
 			out.Values[i] = ec._TreatmentSchedule_treatmentType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -20125,6 +21084,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "points":
+			out.Values[i] = ec._User_points(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "created_at":
 			out.Values[i] = ec._User_created_at(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -20307,6 +21271,11 @@ func (ec *executionContext) _UserDetailResponse(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "points":
+			out.Values[i] = ec._UserDetailResponse_points(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "role":
 			out.Values[i] = ec._UserDetailResponse_role(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -20319,6 +21288,119 @@ func (ec *executionContext) _UserDetailResponse(ctx context.Context, sel ast.Sel
 			}
 		case "lastLogin":
 			out.Values[i] = ec._UserDetailResponse_lastLogin(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var userPointRecordImplementors = []string{"UserPointRecord"}
+
+func (ec *executionContext) _UserPointRecord(ctx context.Context, sel ast.SelectionSet, obj *model.UserPointRecord) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userPointRecordImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserPointRecord")
+		case "id":
+			out.Values[i] = ec._UserPointRecord_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._UserPointRecord_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pointsEarned":
+			out.Values[i] = ec._UserPointRecord_pointsEarned(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reason":
+			out.Values[i] = ec._UserPointRecord_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "earnedAt":
+			out.Values[i] = ec._UserPointRecord_earnedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var userPointRecordDetailImplementors = []string{"UserPointRecordDetail"}
+
+func (ec *executionContext) _UserPointRecordDetail(ctx context.Context, sel ast.SelectionSet, obj *model.UserPointRecordDetail) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userPointRecordDetailImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserPointRecordDetail")
+		case "recordId":
+			out.Values[i] = ec._UserPointRecordDetail_recordId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pointsEarned":
+			out.Values[i] = ec._UserPointRecordDetail_pointsEarned(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reason":
+			out.Values[i] = ec._UserPointRecordDetail_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "earnedAt":
+			out.Values[i] = ec._UserPointRecordDetail_earnedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20664,6 +21746,50 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var earnPointsResponseImplementors = []string{"earnPointsResponse"}
+
+func (ec *executionContext) _earnPointsResponse(ctx context.Context, sel ast.SelectionSet, obj *model.EarnPointsResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, earnPointsResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("earnPointsResponse")
+		case "updatedPoints":
+			out.Values[i] = ec._earnPointsResponse_updatedPoints(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._earnPointsResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -20834,16 +21960,6 @@ func (ec *executionContext) marshalNQuestion2ᚖmeditraxᚋgraphᚋmodelᚐQuest
 		return graphql.Null
 	}
 	return ec._Question(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNRecordObject2ᚖmeditraxᚋgraphᚋmodelᚐRecordObject(ctx context.Context, sel ast.SelectionSet, v *model.RecordObject) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._RecordObject(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -21845,6 +22961,54 @@ func (ec *executionContext) marshalOUserDetailResponse2ᚖmeditraxᚋgraphᚋmod
 	return ec._UserDetailResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOUserPointRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐUserPointRecordDetail(ctx context.Context, sel ast.SelectionSet, v []*model.UserPointRecordDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOUserPointRecordDetail2ᚖmeditraxᚋgraphᚋmodelᚐUserPointRecordDetail(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOUserPointRecordDetail2ᚖmeditraxᚋgraphᚋmodelᚐUserPointRecordDetail(ctx context.Context, sel ast.SelectionSet, v *model.UserPointRecordDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UserPointRecordDetail(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -22045,6 +23209,13 @@ func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOearnPointsResponse2ᚖmeditraxᚋgraphᚋmodelᚐEarnPointsResponse(ctx context.Context, sel ast.SelectionSet, v *model.EarnPointsResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._earnPointsResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************
