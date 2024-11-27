@@ -245,7 +245,30 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 		return nil, fmt.Errorf("user not found")
 	}
 
-	// TODO: Remove all objects associated to the user
+	// delete related data entries
+	for _, tableName := range utils.UserRelatedTables {
+		_, err = database.DB.Query(
+			`DELETE $table_name WHERE user_id = $id;`,
+			map[string]interface{}{
+				"table_name": tableName,
+				"id":         user.ID,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to delete related data from table %s: %w", tableName, err)
+		}
+	}
+	// detete family members that relate to this user
+	_, err = database.DB.Query(
+		`DELETE $table_name WHERE related_user_id = $id;`,
+		map[string]interface{}{
+			"table_name": "family_member",
+			"id":         user.ID,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete related data from table family member related to user: %w", err)
+	}
 
 	// 创建响应
 	response := &model.DeleteUserResponse{

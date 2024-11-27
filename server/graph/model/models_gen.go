@@ -15,6 +15,7 @@ type AchievementBadgeDetail struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	IconURL     string `json:"iconUrl"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type AddFamilyMemberResponse struct {
