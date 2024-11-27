@@ -10,8 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: write test for TreatmentSchedule
-
 func TestMedication(t *testing.T) {
 	c := client.New(NewServer())
 	user := CreateUserAndLogin(t, c)
@@ -564,6 +562,105 @@ func TestMedicationReminder(t *testing.T) {
 		}`, &response, client.Var("reminderId", "medication_reminder:8402HFKSEU"), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "invalid id, no associated medication reminder object found", err_msg[0].Message)
+	})
+
+	DeleteUser(t, c, user)
+}
+
+func TestTreatmentSchedule(t *testing.T) {
+	c := client.New(NewServer())
+	user := CreateUserAndLogin(t, c)
+
+	var scheduleId string
+
+	t.Run("Create treatment schedule", func(t *testing.T) {
+		var response struct {
+			CreateTreatmentSchedule struct {
+				ScheduleID string
+				Message    string
+			}
+		}
+
+		c.MustPost(`mutation create_schedule{
+				createTreatmentSchedule(
+					treatmentType: "test_type",
+					scheduledTime: "2024-12-03T15:04:05.000",
+					location: "hospital",
+					notes: "bring past records"
+				){
+					scheduleId
+					message
+				}
+			}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "Treatment schedule created successfully", response.CreateTreatmentSchedule.Message)
+		scheduleId = response.CreateTreatmentSchedule.ScheduleID
+	})
+
+	t.Run("Update and query treatment schedule", func(t *testing.T) {
+		var response struct {
+			UpdateTreatmentSchedule struct {
+				ScheduleID string
+				Message    string
+			}
+		}
+
+		c.MustPost(`mutation update_schedule ($scheduleId: String!){
+			updateTreatmentSchedule(
+				scheduleId:$scheduleId,
+				treatmentType: "test_update_type",
+				scheduledTime: "2024-12-13T12:00:00.000",
+				location: "new hospital",
+				notes: "don't bring anything"
+			){
+				scheduleId,
+				message
+			}
+		}`, &response, client.Var("scheduleId", scheduleId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "Treatment schedule updated successfully", response.UpdateTreatmentSchedule.Message)
+		require.Equal(t, scheduleId, response.UpdateTreatmentSchedule.ScheduleID)
+
+		var response_query struct {
+			GetTreatmentSchedules []struct {
+				ScheduleID    string
+				TreatmentType string
+				ScheduledTime string
+				Location      string
+				Notes         string
+			}
+		}
+		c.MustPost(`query get_schedules{
+			getTreatmentSchedules{
+				scheduleId,
+				treatmentType,
+				scheduledTime,
+				location,
+				notes
+			}
+		}`, &response_query, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, 1, len(response_query.GetTreatmentSchedules))
+		require.Equal(t, scheduleId, response_query.GetTreatmentSchedules[0].ScheduleID)
+		require.Equal(t, "test_update_type", response_query.GetTreatmentSchedules[0].TreatmentType)
+		require.Equal(t, "new hospital", response_query.GetTreatmentSchedules[0].Location)
+		require.Equal(t, "don't bring anything", response_query.GetTreatmentSchedules[0].Notes)
+		queried_time, _ := custom.UnmarshalDateTime(response_query.GetTreatmentSchedules[0].ScheduledTime)
+		updated_time, _ := custom.UnmarshalDateTime("2024-12-13T12:00:00.000")
+		require.Equal(t, updated_time, queried_time)
+	})
+
+	t.Run("Delete Treatment Schedule", func(t *testing.T) {
+		var response struct {
+			DeleteTreatmentSchedule struct {
+				Message string
+			}
+		}
+
+		c.MustPost(`mutation delete_schedule($scheduleId:String!){
+			deleteTreatmentSchedule(scheduleId: $scheduleId){
+				message
+			}
+		}`, &response, client.Var("scheduleId", scheduleId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, fmt.Sprintf("Treatment schedule %s deleted successfully", scheduleId),
+			response.DeleteTreatmentSchedule.Message)
 	})
 
 	DeleteUser(t, c, user)
