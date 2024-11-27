@@ -2,7 +2,8 @@ type MedicalRecord{
   id: String!
   user_id: String!
   record_type: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   created_at: DateTime!
   updated_at: DateTime!
 }
@@ -51,7 +52,8 @@ type AddMedicalRecordResponse {
 type MedicalRecordDetail {
   recordId: String!
   recordType: String!
-  content: RecordObject!
+  # content: RecordObject!
+  content: String!
   createdAt: DateTime!
 }
 

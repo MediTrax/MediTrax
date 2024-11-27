@@ -5,6 +5,10 @@ type FoodSpec{
   howHigh: Float!
 }
 
+type FoodRecommendation{
+  name: String!
+}
+
 type FoodSpecs{
   specs: [FoodSpec!]!
   howRecommend: Float!
@@ -15,4 +19,6 @@ extend type Query{
   getMockFoodSpecs(food: String!) : FoodSpecs  
 
   # add endpoint for recommending ONE food
+  getFoodRecommendation : FoodRecommendation
+  getMockFoodRecommendation : FoodRecommendation
 }
