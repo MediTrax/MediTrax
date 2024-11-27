@@ -59,6 +59,9 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
   Future<bool> addReminder({
     required String medicationId,
     required String reminderTime,
+    String? frequency,
+    int? intervalDays,
+    String? dayOfWeek,
   }) async {
     try {
       final result = await _client.mutate$CreateMedicationReminder(
@@ -78,6 +81,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       await fetchReminders();
       return true;
     } catch (e) {
+      print('Error adding reminder: $e');
       return false;
     }
   }
@@ -207,7 +211,9 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
         // Check if there's enough inventory
         if (currentInventory < dosage) {
-          throw Exception('库存不足，无法标记为已服用。请及时补充库存。');
+          // Notify user about low stock
+          print('库存不足，无法标记为已服用。请及时补充库存。');
+          return false; // Return false to indicate failure
         }
       }
 
@@ -264,7 +270,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         state = AsyncValue.data(updatedReminders);
       });
       
-      rethrow;  // Rethrow to show error message to user
+      return false;  // Return false to indicate failure
     }
   }
 }

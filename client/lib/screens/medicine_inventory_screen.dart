@@ -223,11 +223,18 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     required WidgetRef ref,
     required Medication medication,
   }) {
-    final isLowStock = medication.inventory < 10;
     final frequencyParts = medication.frequency.split('/');
-    final times = frequencyParts.isNotEmpty ? frequencyParts[0] : '1';
-    final days = frequencyParts.length > 1 ? frequencyParts[1] : '1';
-    
+    final times = frequencyParts.isNotEmpty ? int.parse(frequencyParts[0]) : 1;
+    final days = frequencyParts.length > 1 ? int.parse(frequencyParts[1]) : 1;
+    final dailyUsage = (times * medication.dosage) / days;
+    final remainingDays = medication.inventory / dailyUsage;
+
+    // Print debug information for remaining days
+    print('Medication: ${medication.name}, Remaining Days: $remainingDays');
+
+    // Determine if low stock warning should be triggered
+    final isLowStock = remainingDays < 3;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -239,19 +246,17 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       ),
       child: Container(
         constraints: const BoxConstraints(
-          minHeight: 100, // Minimum height to prevent jumping
+          minHeight: 100,
         ),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Top row with name and inventory
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Medicine name and icon
                   Expanded(
                     child: Row(
                       children: [
@@ -275,7 +280,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Current inventory display
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -320,12 +324,10 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
               ),
             ),
             const SizedBox(height: 12),
-            // Information row with fixed height
             SizedBox(
-              height: 32, // Fixed height for info row
+              height: 32,
               child: Row(
                 children: [
-                  // Dosage info
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -355,7 +357,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Frequency info
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -385,7 +386,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     ),
                   ),
                   const Spacer(),
-                  // Action buttons
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -450,8 +450,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final nameController = TextEditingController(text: medication.name);
     final dosageController = TextEditingController(text: medication.dosage.toString());
     final unitController = TextEditingController(text: medication.unit);
-    final frequencyController = TextEditingController(text: medication.frequency);
     final inventoryController = TextEditingController(text: medication.inventory.toString());
+
+    // Split frequency into times and days
+    final frequencyParts = medication.frequency.split('/');
+    final timesController = TextEditingController(text: frequencyParts.isNotEmpty ? frequencyParts[0] : '1');
+    final daysController = TextEditingController(text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
 
     bool isDisposed = false;
 
@@ -461,7 +465,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
         nameController.dispose();
         dosageController.dispose();
         unitController.dispose();
-        frequencyController.dispose();
+        timesController.dispose();
+        daysController.dispose();
         inventoryController.dispose();
         isDisposed = true;
       }
@@ -595,17 +600,48 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                               iconColor: Colors.purple.shade400,
                             ),
                             const SizedBox(height: 8),
-                            _buildFormField(
-                              controller: frequencyController,
-                              hintText: '格式：次数/天数，如 3/1',
-                              prefixIcon: Icons.schedule_rounded,
-                              iconColor: Colors.purple.shade300,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return '请输入服用频率';
-                                }
-                                return null;
-                              },
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildFormField(
+                                    controller: timesController,
+                                    hintText: '几次',
+                                    prefixIcon: Icons.repeat_rounded,
+                                    iconColor: Colors.purple.shade300,
+                                    keyboardType: TextInputType.number,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return '请输入次数';
+                                      }
+                                      final times = int.tryParse(value);
+                                      if (times == null || times <= 0) {
+                                        return '请输入有效的次数';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _buildFormField(
+                                    controller: daysController,
+                                    hintText: '几天',
+                                    prefixIcon: Icons.calendar_today_rounded,
+                                    iconColor: Colors.purple.shade300,
+                                    keyboardType: TextInputType.number,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return '请输入天数';
+                                      }
+                                      final days = int.tryParse(value);
+                                      if (days == null || days <= 0) {
+                                        return '请输入有效的天数';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 16),
 
@@ -661,7 +697,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     name: nameController.text,
                                     dosage: double.parse(dosageController.text),
                                     unit: unitController.text,
-                                    frequency: frequencyController.text,
+                                    frequency: '${timesController.text}/${daysController.text}', // Use split frequency
                                     inventory: double.parse(inventoryController.text),
                                   );
 
@@ -1194,7 +1230,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                       ),
                       const SizedBox(width: 8),
                       const Text(
-                        '用药剂量',
+                        '药剂量',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -1487,8 +1523,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isDisposed) return const SizedBox();
-    
     final remindersState = ref.watch(medicationReminderProvider);
     final medicationsState = ref.watch(medicationProvider);
 
@@ -1577,7 +1611,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                   child: ListView.builder(
                     itemCount: reminders.length,
                     itemBuilder: (context, index) {
-                      if (_isDisposed) return const SizedBox();
                       final reminder = reminders[index];
                       return medicationsState.when(
                         loading: () => const Center(child: CircularProgressIndicator()),
@@ -1597,20 +1630,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                               updatedAt: DateTime.now(),
                             ),
                           );
-
-                          // Automatically delete reminders for non-existent medications
-                          if (medication.name == '未知药��') {
-                            Future.microtask(() async {
-                              try {
-                                await ref.read(medicationReminderProvider.notifier)
-                                    .deleteReminder(reminder.id);
-                                await _fetchReminders();
-                              } catch (e) {
-                                print('Error deleting orphaned reminder: $e');
-                              }
-                            });
-                            return const SizedBox(); // Don't show the reminder while it's being deleted
-                          }
 
                           return Dismissible(
                             key: Key(reminder.id),
@@ -1667,13 +1686,15 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                             },
                             onDismissed: (_) async {
                               try {
-                                final deletedReminder = reminder;
-                                
                                 final success = await ref.read(medicationReminderProvider.notifier)
                                     .deleteReminder(reminder.id);
                                 
                                 if (success && mounted) {
-                                  _showUndoDeleteSnackBar(context, deletedReminder, medication.name);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('提醒已删除'),
+                                    ),
+                                  );
                                 } else if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -1691,14 +1712,27 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                       backgroundColor: Colors.red,
                                     ),
                                   );
+                                  await _fetchReminders();
                                 }
-                                await _fetchReminders();
                               }
                             },
                             child: _buildReminderCard(
                               context: context,
                               reminder: reminder,
                               medication: medication,
+                              onToggle: (newValue) async {
+                                final success = await ref.read(medicationReminderProvider.notifier)
+                                    .toggleReminderStatus(reminder.id, newValue);
+
+                                if (!success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('库存不足，无法标记为已服用。请及时补充库存。'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           );
                         },
@@ -1718,11 +1752,25 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     required BuildContext context,
     required MedicationReminder reminder,
     required Medication medication,
+    required Function(bool) onToggle,
   }) {
     final frequencyParts = medication.frequency.split('/');
     final times = frequencyParts.isNotEmpty ? frequencyParts[0] : '1';
     final days = frequencyParts.length > 1 ? frequencyParts[1] : '1';
     final isLowStock = medication.inventory < 10;
+
+    // Add this to format the reminder frequency text
+    String getReminderFrequencyText(String frequency) {
+      final parts = frequency.split('/');
+      final times = parts.isNotEmpty ? parts[0] : '1';
+      final days = parts.length > 1 ? parts[1] : '1';
+
+      if (days == '1') {
+        return '每天提醒${times}次';
+      } else {
+        return '每$days天提醒${times}次';
+      }
+    }
 
     return Card(
       elevation: 2,
@@ -1750,7 +1798,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
               children: [
                 // Time Column with fixed width
                 SizedBox(
-                  width: 90, // Reduced from 100
+                  width: 90,
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
@@ -1777,13 +1825,13 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                         const Icon(
                           Icons.access_alarm,
                           color: Colors.white,
-                          size: 24, // Reduced from 28
+                          size: 24,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _formatTime(reminder.reminderTime),
                           style: const TextStyle(
-                            fontSize: 20, // Reduced from 24
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 1,
@@ -1793,7 +1841,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8), // Reduced from 16
+                const SizedBox(width: 8),
                 // Content Column
                 Expanded(
                   child: Column(
@@ -1809,19 +1857,28 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                 Text(
                                   medication.name,
                                   style: const TextStyle(
-                                    fontSize: 16, // Reduced from 18
+                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
+                                // Add reminder frequency text here
+                                Text(
+                                  getReminderFrequencyText(medication.frequency),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
                                 Wrap(
-                                  spacing: 4, // Reduced from 8
-                                  runSpacing: 4, // Reduced from 8
+                                  spacing: 4,
+                                  runSpacing: 4,
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, // Reduced from 8
+                                        horizontal: 6,
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
@@ -1843,33 +1900,16 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: isLowStock 
-                                            ? Colors.orange.withOpacity(0.1)
-                                            : Colors.green.withOpacity(0.1),
+                                        color: Colors.purple.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.inventory_2_outlined,
-                                            size: 12,
-                                            color: isLowStock 
-                                                ? Colors.orange.shade700
-                                                : Colors.green.shade700,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            '${medication.inventory.toStringAsFixed(0)}',
-                                            style: TextStyle(
-                                              color: isLowStock 
-                                                  ? Colors.orange.shade700
-                                                  : Colors.green.shade700,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        '每$days天$times次',
+                                        style: TextStyle(
+                                          color: Colors.purple.shade700,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -1883,45 +1923,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                             children: [
                               Switch(
                                 value: reminder.isTaken,
-                                onChanged: (bool newValue) async {
-                                  // Get ScaffoldMessenger reference before async operation
-                                  final scaffoldMessenger = ScaffoldMessenger.of(context);
-                                  
-                                  try {
-                                    await ref.read(medicationReminderProvider.notifier)
-                                        .toggleReminderStatus(reminder.id, newValue);
-
-                                    if (!mounted) return;
-
-                                    // Refresh both reminders and medications
-                                    await _fetchReminders();
-                                    final userData = ref.read(userDataProvider).value;
-                                    if (userData != null) {
-                                      await ref.read(medicationProvider.notifier)
-                                          .fetchMedications(userData.id);
-                                    }
-
-                                    if (!mounted) return;
-                                    
-                                    // Use stored reference to show snackbar
-                                    scaffoldMessenger.showSnackBar(
-                                      SnackBar(
-                                        content: Text(newValue ? '已标记为已服用' : '已标记为未服用'),
-                                        backgroundColor: newValue ? Colors.green : Colors.orange,
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    if (!mounted) return;
-                                    
-                                    // Use stored reference to show error snackbar
-                                    scaffoldMessenger.showSnackBar(
-                                      const SnackBar(
-                                        content: Text('库存不足，无法标记为已服用。请及时补充库存。'),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                },
+                                onChanged: onToggle,
                               ),
                               Text(
                                 reminder.isTaken ? '已服用' : '未服用',
@@ -1934,73 +1936,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 12,
-                                  color: Colors.purple.shade700,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '每$days天 $times次',
-                                  style: TextStyle(
-                                    color: Colors.purple.shade700,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isLowStock)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.orange.shade200),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.warning_amber_rounded,
-                                    size: 12,
-                                    color: Colors.orange.shade700,
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '库存不足',
-                                    style: TextStyle(
-                                      color: Colors.orange.shade700,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                         ],
                       ),
                     ],
@@ -2041,75 +1976,5 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     
     // Format time as HH:mm
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _showUndoDeleteSnackBar(BuildContext context, MedicationReminder deletedReminder, String medicationName) {
-    if (!context.mounted) return;
-    
-    final messenger = ScaffoldMessenger.of(context);
-    
-    Future.microtask(() {
-      if (!context.mounted) return;
-      
-      messenger.clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('$medicationName 的提醒删除'),
-          action: SnackBarAction(
-            label: '撤销',
-            onPressed: () async {
-              try {
-                // Format the DateTime to ISO 8601 string
-                final reminderTimeString = deletedReminder.reminderTime.toIso8601String();
-                
-                final success = await ref.read(medicationReminderProvider.notifier)
-                  .addReminder(
-                    medicationId: deletedReminder.medicationId,
-                    reminderTime: reminderTimeString,  // Pass the formatted string
-                  );
-                  
-                if (success) {
-                  await _fetchReminders();
-                  
-                  if (context.mounted) {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('撤销成功'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                } else {
-                  if (context.mounted) {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('撤销失败，请重试'),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                  await _fetchReminders();
-                }
-              } catch (e) {
-                print('Error in undo operation: $e');
-                if (context.mounted) {
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: Text('撤销错误: $e'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-                await _fetchReminders();
-              }
-            },
-          ),
-          duration: const Duration(seconds: 5),
-          behavior: SnackBarBehavior.fixed,
-        ),
-      );
-    });
   }
 }

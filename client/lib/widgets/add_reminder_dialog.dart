@@ -2,111 +2,140 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/medication.dart';
 import '../providers/medication_reminder_provider.dart';
-import 'package:meditrax/providers/user_provider.dart';
 
 class AddReminderDialog extends ConsumerStatefulWidget {
   final List<Medication> medications;
 
-  const AddReminderDialog({
-    super.key,
-    required this.medications,
-  });
+  const AddReminderDialog({Key? key, required this.medications}) : super(key: key);
 
   @override
-  ConsumerState<AddReminderDialog> createState() => _AddReminderDialogState();
+  _AddReminderDialogState createState() => _AddReminderDialogState();
 }
 
 class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
-  late String selectedMedicationId;
-  late TimeOfDay selectedTime;
+  final _formKey = GlobalKey<FormState>();
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
+  String? _selectedMedicationId;
 
-  @override
-  void initState() {
-    super.initState();
-    selectedMedicationId = widget.medications.first.id;
-    final now = DateTime.now();
-    selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
+  // Get frequency text based on medication frequency
+  String _getFrequencyText(String frequency) {
+    final parts = frequency.split('/');
+    final times = parts.isNotEmpty ? parts[0] : '1';
+    final days = parts.length > 1 ? parts[1] : '1';
+    
+    if (days == '1') {
+      return '每天提醒${times}次';
+    } else {
+      return '每$days天提醒${times}次';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('添加提醒'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DropdownButtonFormField<String>(
-            value: selectedMedicationId,
-            items: widget.medications.map((medication) {
-              return DropdownMenuItem(
-                value: medication.id,
-                child: Text(medication.name),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  selectedMedicationId = value;
-                });
-              }
-            },
-            decoration: const InputDecoration(
-              labelText: '选择药品',
-              border: OutlineInputBorder(),
+      content: SingleChildScrollView(
+        child: Container(
+          width: double.maxFinite,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: _selectedMedicationId,
+                  isExpanded: true,
+                  items: widget.medications.map((medication) {
+                    return DropdownMenuItem<String>(
+                      value: medication.id,
+                      child: Tooltip(
+                        message: _getFrequencyText(medication.frequency),
+                        child: Text(
+                          medication.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedMedicationId = value;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: '选择药品',
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  validator: (value) => value == null ? '请选择药品' : null,
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('选择日期'),
+                  subtitle: Text('${_selectedDate.toLocal()}'.split(' ')[0]),
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2101),
+                    );
+                    if (picked != null && picked != _selectedDate) {
+                      setState(() {
+                        _selectedDate = picked;
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('选择时间'),
+                  subtitle: Text(_selectedTime.format(context)),
+                  onTap: () async {
+                    final TimeOfDay? picked = await showTimePicker(
+                      context: context,
+                      initialTime: _selectedTime,
+                    );
+                    if (picked != null && picked != _selectedTime) {
+                      setState(() {
+                        _selectedTime = picked;
+                      });
+                    }
+                  },
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          ListTile(
-            title: const Text('提醒时间'),
-            trailing: Text(selectedTime.format(context)),
-            onTap: () async {
-              final TimeOfDay? time = await showTimePicker(
-                context: context,
-                initialTime: selectedTime,
-              );
-              if (time != null) {
-                setState(() {
-                  selectedTime = time;
-                });
-              }
-            },
-          ),
-        ],
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
           child: const Text('取消'),
         ),
-        FilledButton(
+        ElevatedButton(
           onPressed: () async {
-            final now = DateTime.now();
-            var reminderTime = DateTime(
-              now.year,
-              now.month,
-              now.day,
-              selectedTime.hour,
-              selectedTime.minute,
-            );
-
-            if (reminderTime.isBefore(now)) {
-              reminderTime = reminderTime.add(const Duration(days: 1));
-            }
-
-            final utcReminderTime = reminderTime.toUtc();
-
-            final success = await ref.read(medicationReminderProvider.notifier)
-                .addReminder(
-                  medicationId: selectedMedicationId,
-                  reminderTime: utcReminderTime.toIso8601String(),
-                );
-
-            if (success && mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('提醒已添加')),
+            if (_formKey.currentState!.validate()) {
+              final success = await ref.read(medicationReminderProvider.notifier).addReminder(
+                medicationId: _selectedMedicationId!,
+                reminderTime: _selectedDate.add(Duration(
+                  hours: _selectedTime.hour,
+                  minutes: _selectedTime.minute,
+                )).toIso8601String(),
               );
-              await ref.read(medicationReminderProvider.notifier).fetchReminders();
+
+              if (success) {
+                await ref.read(medicationReminderProvider.notifier).fetchReminders();
+                Navigator.of(context).pop();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('添加提醒失败')),
+                );
+              }
             }
           },
           child: const Text('保存'),
