@@ -8,6 +8,11 @@ final foodSpecsProvider = StateNotifierProvider<FoodSpecsNotifier, AsyncValue<Fo
   return FoodSpecsNotifier(client);
 });
 
+final foodRecommendationProvider = StateNotifierProvider<FoodRecommendationNotifier, AsyncValue<FoodRecommendation?>>((ref) {
+  final client = ref.watch(graphQLServiceProvider);
+  return FoodRecommendationNotifier(client);
+});
+
 class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
   final GraphQLClient _client;
 
@@ -125,6 +130,72 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
   }
 }
 
+class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommendation?>> {
+  final GraphQLClient _client;
+
+  FoodRecommendationNotifier(this._client) : super(const AsyncValue.data(null));
+
+  Future<void> getMockFoodRecommendation() async {
+    try {
+      state = const AsyncValue.loading();
+      
+      final result = await _client.query$GetMockFoodRecommendation(
+        Options$Query$GetMockFoodRecommendation(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      if (result.data?['getMockFoodRecommendation'] == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final recommendation = FoodRecommendation(
+        name: result.data!['getMockFoodRecommendation']['name'].toString(),
+      );
+
+      state = AsyncValue.data(recommendation);
+    } catch (error, stackTrace) {
+      print('Error in getMockFoodRecommendation: $error');
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+
+  Future<void> getFoodRecommendation() async {
+    try {
+      state = const AsyncValue.loading();
+      
+      final result = await _client.query$GetFoodRecommendation(
+        Options$Query$GetFoodRecommendation(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      if (result.data?['getFoodRecommendation'] == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final recommendation = FoodRecommendation(
+        name: result.data!['getFoodRecommendation']['name'].toString(),
+      );
+
+      state = AsyncValue.data(recommendation);
+    } catch (error, stackTrace) {
+      print('Error in getFoodRecommendation: $error');
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
+
 // Models
 class FoodSpecs {
   final List<FoodSpec> specs;
@@ -147,5 +218,13 @@ class FoodSpec {
     required this.value,
     required this.unit,
     required this.howHigh,
+  });
+}
+
+class FoodRecommendation {
+  final String name;
+
+  FoodRecommendation({
+    required this.name,
   });
 }

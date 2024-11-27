@@ -345,7 +345,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${medication.dosage}${medication.unit}',
+                          '${medication.dosage}${medication.unit}/次',
                           style: const TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.w500,
@@ -770,10 +770,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final controller = TextEditingController();
     bool isDisposed = false;
     bool isClosing = false;
+    // Add state variable for error
+    final errorState = ValueNotifier<String?>(null);
 
     void disposeController() {
       if (!isDisposed) {
         controller.dispose();
+        errorState.dispose(); // Dispose the ValueNotifier
         isDisposed = true;
       }
     }
@@ -794,12 +797,24 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
         },
         child: AlertDialog(
           title: Text('补充${medication.name}的库存'),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: '补充量',
-              border: OutlineInputBorder(),
+          content: ValueListenableBuilder<String?>(
+            valueListenable: errorState,
+            builder: (context, error, _) => TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '补充量',
+                border: const OutlineInputBorder(),
+                errorText: error, // Show error message if any
+                errorStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                ),
+              ),
+              onChanged: (_) {
+                // Clear error when user types
+                errorState.value = null;
+              },
             ),
           ),
           actions: [
@@ -809,32 +824,35 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
             ),
             FilledButton(
               onPressed: () async {
+                if (controller.text.trim().isEmpty) {
+                  errorState.value = '请输入补充剂量';
+                  return;
+                }
+                
                 final amount = double.tryParse(controller.text);
-                if (amount != null) {
-                  try {
-                    final newInventory = medication.inventory + amount;
-                    final success = await ref.read(medicationProvider.notifier)
-                        .updateMedication(
-                          medicationId: medication.id,
-                          inventory: newInventory,
-                        );
-                    
-                    if (success && dialogContext.mounted && !isClosing) {
-                      closeDialog(dialogContext);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('库存更新')),
+                if (amount == null || amount <= 0) {
+                  errorState.value = '请输入有效的补充剂量';
+                  return;
+                }
+
+                try {
+                  final newInventory = medication.inventory + amount;
+                  final success = await ref.read(medicationProvider.notifier)
+                      .updateMedication(
+                        medicationId: medication.id,
+                        inventory: newInventory,
                       );
-                      await _fetchMedications();
-                    }
-                  } catch (e) {
-                    if (dialogContext.mounted && !isClosing) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('错误: $e'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
+                  
+                  if (success && dialogContext.mounted && !isClosing) {
+                    closeDialog(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('库存更新')),
+                    );
+                    await _fetchMedications();
+                  }
+                } catch (e) {
+                  if (dialogContext.mounted && !isClosing) {
+                    errorState.value = '更新失败: $e';
                   }
                 }
               },
@@ -844,7 +862,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
         ),
       ),
     ).whenComplete(() {
-      // Only dispose controller once when dialog is closed
       disposeController();
     });
   }
@@ -1221,7 +1238,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return '请输入剂';
+                                  return '请输入剂量';
                                 }
                                 if (double.tryParse(value) == null) {
                                   return '请输入有效的数字';
@@ -1381,7 +1398,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('错误: $e'),
+                            content: Text('错: $e'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -1505,7 +1522,23 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                 error: (_, __) => const SizedBox(),
                 data: (medications) {
                   if (medications.isEmpty) {
-                    return const SizedBox();
+                    return FilledButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('请先添加药品，然后再添加提醒。'),
+                            action: SnackBarAction(
+                              label: '关闭',
+                              onPressed: () {
+                                // Dismiss the snackbar
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.notification_important),
+                      label: const Text('添加提醒'),
+                    );
                   }
                   return FilledButton.icon(
                     onPressed: () => _showAddReminderDialog(context, medications),
@@ -1566,7 +1599,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                           );
 
                           // Automatically delete reminders for non-existent medications
-                          if (medication.name == '未知药品') {
+                          if (medication.name == '未知药��') {
                             Future.microtask(() async {
                               try {
                                 await ref.read(medicationReminderProvider.notifier)
@@ -1796,7 +1829,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        '${medication.dosage}${medication.unit}',
+                                        '${medication.dosage}${medication.unit}/次',
                                         style: TextStyle(
                                           color: Colors.blue.shade700,
                                           fontWeight: FontWeight.w500,

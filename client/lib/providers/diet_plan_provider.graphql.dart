@@ -1705,3 +1705,957 @@ class _CopyWithStubImpl$Query$GetMockFoodSpecs$getMockFoodSpecs$specs<TRes>
   }) =>
       _res;
 }
+
+class Query$GetFoodRecommendation {
+  Query$GetFoodRecommendation({
+    this.getFoodRecommendation,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetFoodRecommendation.fromJson(Map<String, dynamic> json) {
+    final l$getFoodRecommendation = json['getFoodRecommendation'];
+    final l$$__typename = json['__typename'];
+    return Query$GetFoodRecommendation(
+      getFoodRecommendation: l$getFoodRecommendation == null
+          ? null
+          : Query$GetFoodRecommendation$getFoodRecommendation.fromJson(
+              (l$getFoodRecommendation as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Query$GetFoodRecommendation$getFoodRecommendation?
+      getFoodRecommendation;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getFoodRecommendation = getFoodRecommendation;
+    _resultData['getFoodRecommendation'] = l$getFoodRecommendation?.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getFoodRecommendation = getFoodRecommendation;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getFoodRecommendation,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetFoodRecommendation) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getFoodRecommendation = getFoodRecommendation;
+    final lOther$getFoodRecommendation = other.getFoodRecommendation;
+    if (l$getFoodRecommendation != lOther$getFoodRecommendation) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetFoodRecommendation
+    on Query$GetFoodRecommendation {
+  CopyWith$Query$GetFoodRecommendation<Query$GetFoodRecommendation>
+      get copyWith => CopyWith$Query$GetFoodRecommendation(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetFoodRecommendation<TRes> {
+  factory CopyWith$Query$GetFoodRecommendation(
+    Query$GetFoodRecommendation instance,
+    TRes Function(Query$GetFoodRecommendation) then,
+  ) = _CopyWithImpl$Query$GetFoodRecommendation;
+
+  factory CopyWith$Query$GetFoodRecommendation.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetFoodRecommendation;
+
+  TRes call({
+    Query$GetFoodRecommendation$getFoodRecommendation? getFoodRecommendation,
+    String? $__typename,
+  });
+  CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<TRes>
+      get getFoodRecommendation;
+}
+
+class _CopyWithImpl$Query$GetFoodRecommendation<TRes>
+    implements CopyWith$Query$GetFoodRecommendation<TRes> {
+  _CopyWithImpl$Query$GetFoodRecommendation(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetFoodRecommendation _instance;
+
+  final TRes Function(Query$GetFoodRecommendation) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getFoodRecommendation = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetFoodRecommendation(
+        getFoodRecommendation: getFoodRecommendation == _undefined
+            ? _instance.getFoodRecommendation
+            : (getFoodRecommendation
+                as Query$GetFoodRecommendation$getFoodRecommendation?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<TRes>
+      get getFoodRecommendation {
+    final local$getFoodRecommendation = _instance.getFoodRecommendation;
+    return local$getFoodRecommendation == null
+        ? CopyWith$Query$GetFoodRecommendation$getFoodRecommendation.stub(
+            _then(_instance))
+        : CopyWith$Query$GetFoodRecommendation$getFoodRecommendation(
+            local$getFoodRecommendation, (e) => call(getFoodRecommendation: e));
+  }
+}
+
+class _CopyWithStubImpl$Query$GetFoodRecommendation<TRes>
+    implements CopyWith$Query$GetFoodRecommendation<TRes> {
+  _CopyWithStubImpl$Query$GetFoodRecommendation(this._res);
+
+  TRes _res;
+
+  call({
+    Query$GetFoodRecommendation$getFoodRecommendation? getFoodRecommendation,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<TRes>
+      get getFoodRecommendation =>
+          CopyWith$Query$GetFoodRecommendation$getFoodRecommendation.stub(_res);
+}
+
+const documentNodeQueryGetFoodRecommendation = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetFoodRecommendation'),
+    variableDefinitions: [],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getFoodRecommendation'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetFoodRecommendation _parserFn$Query$GetFoodRecommendation(
+        Map<String, dynamic> data) =>
+    Query$GetFoodRecommendation.fromJson(data);
+typedef OnQueryComplete$Query$GetFoodRecommendation = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetFoodRecommendation?,
+);
+
+class Options$Query$GetFoodRecommendation
+    extends graphql.QueryOptions<Query$GetFoodRecommendation> {
+  Options$Query$GetFoodRecommendation({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetFoodRecommendation? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetFoodRecommendation? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetFoodRecommendation(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetFoodRecommendation,
+          parserFn: _parserFn$Query$GetFoodRecommendation,
+        );
+
+  final OnQueryComplete$Query$GetFoodRecommendation? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetFoodRecommendation
+    extends graphql.WatchQueryOptions<Query$GetFoodRecommendation> {
+  WatchOptions$Query$GetFoodRecommendation({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetFoodRecommendation? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetFoodRecommendation,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetFoodRecommendation,
+        );
+}
+
+class FetchMoreOptions$Query$GetFoodRecommendation
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetFoodRecommendation(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
+          updateQuery: updateQuery,
+          document: documentNodeQueryGetFoodRecommendation,
+        );
+}
+
+extension ClientExtension$Query$GetFoodRecommendation on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetFoodRecommendation>>
+      query$GetFoodRecommendation(
+              [Options$Query$GetFoodRecommendation? options]) async =>
+          await this.query(options ?? Options$Query$GetFoodRecommendation());
+  graphql.ObservableQuery<
+      Query$GetFoodRecommendation> watchQuery$GetFoodRecommendation(
+          [WatchOptions$Query$GetFoodRecommendation? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetFoodRecommendation());
+  void writeQuery$GetFoodRecommendation({
+    required Query$GetFoodRecommendation data,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+            operation: graphql.Operation(
+                document: documentNodeQueryGetFoodRecommendation)),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetFoodRecommendation? readQuery$GetFoodRecommendation(
+      {bool optimistic = true}) {
+    final result = this.readQuery(
+      graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetFoodRecommendation)),
+      optimistic: optimistic,
+    );
+    return result == null ? null : Query$GetFoodRecommendation.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetFoodRecommendation>
+    useQuery$GetFoodRecommendation(
+            [Options$Query$GetFoodRecommendation? options]) =>
+        graphql_flutter
+            .useQuery(options ?? Options$Query$GetFoodRecommendation());
+graphql.ObservableQuery<Query$GetFoodRecommendation>
+    useWatchQuery$GetFoodRecommendation(
+            [WatchOptions$Query$GetFoodRecommendation? options]) =>
+        graphql_flutter.useWatchQuery(
+            options ?? WatchOptions$Query$GetFoodRecommendation());
+
+class Query$GetFoodRecommendation$Widget
+    extends graphql_flutter.Query<Query$GetFoodRecommendation> {
+  Query$GetFoodRecommendation$Widget({
+    widgets.Key? key,
+    Options$Query$GetFoodRecommendation? options,
+    required graphql_flutter.QueryBuilder<Query$GetFoodRecommendation> builder,
+  }) : super(
+          key: key,
+          options: options ?? Options$Query$GetFoodRecommendation(),
+          builder: builder,
+        );
+}
+
+class Query$GetFoodRecommendation$getFoodRecommendation {
+  Query$GetFoodRecommendation$getFoodRecommendation({
+    required this.name,
+    this.$__typename = 'FoodRecommendation',
+  });
+
+  factory Query$GetFoodRecommendation$getFoodRecommendation.fromJson(
+      Map<String, dynamic> json) {
+    final l$name = json['name'];
+    final l$$__typename = json['__typename'];
+    return Query$GetFoodRecommendation$getFoodRecommendation(
+      name: (l$name as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String name;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$name = name;
+    _resultData['name'] = l$name;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$name = name;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$name,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetFoodRecommendation$getFoodRecommendation) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$name = name;
+    final lOther$name = other.name;
+    if (l$name != lOther$name) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetFoodRecommendation$getFoodRecommendation
+    on Query$GetFoodRecommendation$getFoodRecommendation {
+  CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<
+          Query$GetFoodRecommendation$getFoodRecommendation>
+      get copyWith =>
+          CopyWith$Query$GetFoodRecommendation$getFoodRecommendation(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<
+    TRes> {
+  factory CopyWith$Query$GetFoodRecommendation$getFoodRecommendation(
+    Query$GetFoodRecommendation$getFoodRecommendation instance,
+    TRes Function(Query$GetFoodRecommendation$getFoodRecommendation) then,
+  ) = _CopyWithImpl$Query$GetFoodRecommendation$getFoodRecommendation;
+
+  factory CopyWith$Query$GetFoodRecommendation$getFoodRecommendation.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetFoodRecommendation$getFoodRecommendation;
+
+  TRes call({
+    String? name,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetFoodRecommendation$getFoodRecommendation<TRes>
+    implements
+        CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<TRes> {
+  _CopyWithImpl$Query$GetFoodRecommendation$getFoodRecommendation(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetFoodRecommendation$getFoodRecommendation _instance;
+
+  final TRes Function(Query$GetFoodRecommendation$getFoodRecommendation) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? name = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetFoodRecommendation$getFoodRecommendation(
+        name: name == _undefined || name == null
+            ? _instance.name
+            : (name as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetFoodRecommendation$getFoodRecommendation<TRes>
+    implements
+        CopyWith$Query$GetFoodRecommendation$getFoodRecommendation<TRes> {
+  _CopyWithStubImpl$Query$GetFoodRecommendation$getFoodRecommendation(
+      this._res);
+
+  TRes _res;
+
+  call({
+    String? name,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Query$GetMockFoodRecommendation {
+  Query$GetMockFoodRecommendation({
+    this.getMockFoodRecommendation,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetMockFoodRecommendation.fromJson(Map<String, dynamic> json) {
+    final l$getMockFoodRecommendation = json['getMockFoodRecommendation'];
+    final l$$__typename = json['__typename'];
+    return Query$GetMockFoodRecommendation(
+      getMockFoodRecommendation: l$getMockFoodRecommendation == null
+          ? null
+          : Query$GetMockFoodRecommendation$getMockFoodRecommendation.fromJson(
+              (l$getMockFoodRecommendation as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Query$GetMockFoodRecommendation$getMockFoodRecommendation?
+      getMockFoodRecommendation;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getMockFoodRecommendation = getMockFoodRecommendation;
+    _resultData['getMockFoodRecommendation'] =
+        l$getMockFoodRecommendation?.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getMockFoodRecommendation = getMockFoodRecommendation;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getMockFoodRecommendation,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetMockFoodRecommendation) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getMockFoodRecommendation = getMockFoodRecommendation;
+    final lOther$getMockFoodRecommendation = other.getMockFoodRecommendation;
+    if (l$getMockFoodRecommendation != lOther$getMockFoodRecommendation) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetMockFoodRecommendation
+    on Query$GetMockFoodRecommendation {
+  CopyWith$Query$GetMockFoodRecommendation<Query$GetMockFoodRecommendation>
+      get copyWith => CopyWith$Query$GetMockFoodRecommendation(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetMockFoodRecommendation<TRes> {
+  factory CopyWith$Query$GetMockFoodRecommendation(
+    Query$GetMockFoodRecommendation instance,
+    TRes Function(Query$GetMockFoodRecommendation) then,
+  ) = _CopyWithImpl$Query$GetMockFoodRecommendation;
+
+  factory CopyWith$Query$GetMockFoodRecommendation.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetMockFoodRecommendation;
+
+  TRes call({
+    Query$GetMockFoodRecommendation$getMockFoodRecommendation?
+        getMockFoodRecommendation,
+    String? $__typename,
+  });
+  CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<TRes>
+      get getMockFoodRecommendation;
+}
+
+class _CopyWithImpl$Query$GetMockFoodRecommendation<TRes>
+    implements CopyWith$Query$GetMockFoodRecommendation<TRes> {
+  _CopyWithImpl$Query$GetMockFoodRecommendation(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetMockFoodRecommendation _instance;
+
+  final TRes Function(Query$GetMockFoodRecommendation) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getMockFoodRecommendation = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetMockFoodRecommendation(
+        getMockFoodRecommendation: getMockFoodRecommendation == _undefined
+            ? _instance.getMockFoodRecommendation
+            : (getMockFoodRecommendation
+                as Query$GetMockFoodRecommendation$getMockFoodRecommendation?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<TRes>
+      get getMockFoodRecommendation {
+    final local$getMockFoodRecommendation = _instance.getMockFoodRecommendation;
+    return local$getMockFoodRecommendation == null
+        ? CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation
+            .stub(_then(_instance))
+        : CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+            local$getMockFoodRecommendation,
+            (e) => call(getMockFoodRecommendation: e));
+  }
+}
+
+class _CopyWithStubImpl$Query$GetMockFoodRecommendation<TRes>
+    implements CopyWith$Query$GetMockFoodRecommendation<TRes> {
+  _CopyWithStubImpl$Query$GetMockFoodRecommendation(this._res);
+
+  TRes _res;
+
+  call({
+    Query$GetMockFoodRecommendation$getMockFoodRecommendation?
+        getMockFoodRecommendation,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<TRes>
+      get getMockFoodRecommendation =>
+          CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation
+              .stub(_res);
+}
+
+const documentNodeQueryGetMockFoodRecommendation = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetMockFoodRecommendation'),
+    variableDefinitions: [],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getMockFoodRecommendation'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetMockFoodRecommendation _parserFn$Query$GetMockFoodRecommendation(
+        Map<String, dynamic> data) =>
+    Query$GetMockFoodRecommendation.fromJson(data);
+typedef OnQueryComplete$Query$GetMockFoodRecommendation = FutureOr<void>
+    Function(
+  Map<String, dynamic>?,
+  Query$GetMockFoodRecommendation?,
+);
+
+class Options$Query$GetMockFoodRecommendation
+    extends graphql.QueryOptions<Query$GetMockFoodRecommendation> {
+  Options$Query$GetMockFoodRecommendation({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetMockFoodRecommendation? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetMockFoodRecommendation? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetMockFoodRecommendation(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetMockFoodRecommendation,
+          parserFn: _parserFn$Query$GetMockFoodRecommendation,
+        );
+
+  final OnQueryComplete$Query$GetMockFoodRecommendation? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetMockFoodRecommendation
+    extends graphql.WatchQueryOptions<Query$GetMockFoodRecommendation> {
+  WatchOptions$Query$GetMockFoodRecommendation({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetMockFoodRecommendation? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetMockFoodRecommendation,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetMockFoodRecommendation,
+        );
+}
+
+class FetchMoreOptions$Query$GetMockFoodRecommendation
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetMockFoodRecommendation(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
+          updateQuery: updateQuery,
+          document: documentNodeQueryGetMockFoodRecommendation,
+        );
+}
+
+extension ClientExtension$Query$GetMockFoodRecommendation
+    on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetMockFoodRecommendation>>
+      query$GetMockFoodRecommendation(
+              [Options$Query$GetMockFoodRecommendation? options]) async =>
+          await this
+              .query(options ?? Options$Query$GetMockFoodRecommendation());
+  graphql.ObservableQuery<Query$GetMockFoodRecommendation>
+      watchQuery$GetMockFoodRecommendation(
+              [WatchOptions$Query$GetMockFoodRecommendation? options]) =>
+          this.watchQuery(
+              options ?? WatchOptions$Query$GetMockFoodRecommendation());
+  void writeQuery$GetMockFoodRecommendation({
+    required Query$GetMockFoodRecommendation data,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+            operation: graphql.Operation(
+                document: documentNodeQueryGetMockFoodRecommendation)),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetMockFoodRecommendation? readQuery$GetMockFoodRecommendation(
+      {bool optimistic = true}) {
+    final result = this.readQuery(
+      graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetMockFoodRecommendation)),
+      optimistic: optimistic,
+    );
+    return result == null
+        ? null
+        : Query$GetMockFoodRecommendation.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetMockFoodRecommendation>
+    useQuery$GetMockFoodRecommendation(
+            [Options$Query$GetMockFoodRecommendation? options]) =>
+        graphql_flutter
+            .useQuery(options ?? Options$Query$GetMockFoodRecommendation());
+graphql.ObservableQuery<Query$GetMockFoodRecommendation>
+    useWatchQuery$GetMockFoodRecommendation(
+            [WatchOptions$Query$GetMockFoodRecommendation? options]) =>
+        graphql_flutter.useWatchQuery(
+            options ?? WatchOptions$Query$GetMockFoodRecommendation());
+
+class Query$GetMockFoodRecommendation$Widget
+    extends graphql_flutter.Query<Query$GetMockFoodRecommendation> {
+  Query$GetMockFoodRecommendation$Widget({
+    widgets.Key? key,
+    Options$Query$GetMockFoodRecommendation? options,
+    required graphql_flutter.QueryBuilder<Query$GetMockFoodRecommendation>
+        builder,
+  }) : super(
+          key: key,
+          options: options ?? Options$Query$GetMockFoodRecommendation(),
+          builder: builder,
+        );
+}
+
+class Query$GetMockFoodRecommendation$getMockFoodRecommendation {
+  Query$GetMockFoodRecommendation$getMockFoodRecommendation({
+    required this.name,
+    this.$__typename = 'FoodRecommendation',
+  });
+
+  factory Query$GetMockFoodRecommendation$getMockFoodRecommendation.fromJson(
+      Map<String, dynamic> json) {
+    final l$name = json['name'];
+    final l$$__typename = json['__typename'];
+    return Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+      name: (l$name as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String name;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$name = name;
+    _resultData['name'] = l$name;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$name = name;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$name,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetMockFoodRecommendation$getMockFoodRecommendation) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$name = name;
+    final lOther$name = other.name;
+    if (l$name != lOther$name) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetMockFoodRecommendation$getMockFoodRecommendation
+    on Query$GetMockFoodRecommendation$getMockFoodRecommendation {
+  CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+          Query$GetMockFoodRecommendation$getMockFoodRecommendation>
+      get copyWith =>
+          CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+    TRes> {
+  factory CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+    Query$GetMockFoodRecommendation$getMockFoodRecommendation instance,
+    TRes Function(Query$GetMockFoodRecommendation$getMockFoodRecommendation)
+        then,
+  ) = _CopyWithImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation;
+
+  factory CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation;
+
+  TRes call({
+    String? name,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+        TRes>
+    implements
+        CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+            TRes> {
+  _CopyWithImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetMockFoodRecommendation$getMockFoodRecommendation _instance;
+
+  final TRes Function(Query$GetMockFoodRecommendation$getMockFoodRecommendation)
+      _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? name = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+        name: name == _undefined || name == null
+            ? _instance.name
+            : (name as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+        TRes>
+    implements
+        CopyWith$Query$GetMockFoodRecommendation$getMockFoodRecommendation<
+            TRes> {
+  _CopyWithStubImpl$Query$GetMockFoodRecommendation$getMockFoodRecommendation(
+      this._res);
+
+  TRes _res;
+
+  call({
+    String? name,
+    String? $__typename,
+  }) =>
+      _res;
+}

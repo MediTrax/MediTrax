@@ -379,6 +379,9 @@ type UserAchievementDetail {
   earnedAt: DateTime!
 }
 
+type FoodRecommendation{
+  name: String!
+}
 
 type Query{
   # finish unwritten get functions
@@ -396,6 +399,8 @@ type Query{
   # make mock endpoint: DONE
   getFoodSpecs(food: String!) : FoodSpecs
   getMockFoodSpecs(food: String!) : FoodSpecs
+  getFoodRecommendation : FoodRecommendation
+  getMockFoodRecommendation : FoodRecommendation
 }
 
 type Mutation {

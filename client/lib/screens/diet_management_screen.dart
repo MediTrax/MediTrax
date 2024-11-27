@@ -83,6 +83,8 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
   }
 
   Widget _buildDietRecommendationTab() {
+    final recommendationState = ref.watch(foodRecommendationProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -104,24 +106,156 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
             ),
           ),
           const SizedBox(height: 24),
-          _buildMealCard('早餐', '全麦面包, 鸡蛋, 牛奶'),
-          const SizedBox(height: 16),
-          _buildMealCard('午餐', '烤鸡胸肉, 蔬菜沙拉, 糙米'),
-          const SizedBox(height: 16),
-          _buildMealCard('晚餐', '清蒸鱼, 西兰花, 红薯'),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO: Implement meal plan update
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          Center(
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () {
+                  ref.read(foodRecommendationProvider.notifier)
+                      .getMockFoodRecommendation();
+                },
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.restaurant_menu),
+                label: const Text(
+                  '推荐膳食',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
-              child: const Text('更新膳食计划', style: TextStyle(color: Colors.white)),
             ),
+          ),
+          const SizedBox(height: 24),
+          recommendationState.when(
+            loading: () => const Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('正在生成推荐...'),
+                ],
+              ),
+            ),
+            error: (error, stack) => Center(
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '获取推荐失败: $error',
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      ref.read(foodRecommendationProvider.notifier)
+                          .getMockFoodRecommendation();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('重试'),
+                  ),
+                ],
+              ),
+            ),
+            data: (recommendation) {
+              if (recommendation == null) {
+                return const Center(
+                  child: Text(
+                    '点击上方按钮获取推荐膳食',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              }
+
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.1),
+                        Theme.of(context).primaryColor.withOpacity(0.05),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.recommend,
+                              color: Theme.of(context).primaryColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Text(
+                            '今日推荐',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        recommendation.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '更新时间: ${DateTime.now().toString().substring(0, 16)}',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

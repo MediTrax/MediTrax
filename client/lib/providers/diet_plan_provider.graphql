@@ -21,3 +21,15 @@ query GetMockFoodSpecs($food: String!) {
     howRecommend
   }
 }
+
+query GetFoodRecommendation {
+  getFoodRecommendation {
+    name
+  }
+}
+
+query GetMockFoodRecommendation {
+  getMockFoodRecommendation {
+    name
+  }
+}
