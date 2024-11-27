@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 
 	AchievementBadgeDetail struct {
 		BadgeID     func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
 		IconURL     func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -558,6 +559,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AchievementBadgeDetail.BadgeID(childComplexity), true
+
+	case "AchievementBadgeDetail.created_at":
+		if e.complexity.AchievementBadgeDetail.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.AchievementBadgeDetail.CreatedAt(childComplexity), true
 
 	case "AchievementBadgeDetail.description":
 		if e.complexity.AchievementBadgeDetail.Description == nil {
@@ -2414,6 +2422,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
+  created_at: DateTime!
 }
 
 type AwardAchievementResponse {
@@ -4829,6 +4838,50 @@ func (ec *executionContext) fieldContext_AchievementBadgeDetail_iconUrl(_ contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AchievementBadgeDetail_created_at(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadgeDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AchievementBadgeDetail_created_at(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AchievementBadgeDetail_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AchievementBadgeDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11429,6 +11482,8 @@ func (ec *executionContext) fieldContext_Query_getAchievementBadges(_ context.Co
 				return ec.fieldContext_AchievementBadgeDetail_description(ctx, field)
 			case "iconUrl":
 				return ec.fieldContext_AchievementBadgeDetail_iconUrl(ctx, field)
+			case "created_at":
+				return ec.fieldContext_AchievementBadgeDetail_created_at(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AchievementBadgeDetail", field.Name)
 		},
@@ -17070,6 +17125,11 @@ func (ec *executionContext) _AchievementBadgeDetail(ctx context.Context, sel ast
 			}
 		case "iconUrl":
 			out.Values[i] = ec._AchievementBadgeDetail_iconUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "created_at":
+			out.Values[i] = ec._AchievementBadgeDetail_created_at(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

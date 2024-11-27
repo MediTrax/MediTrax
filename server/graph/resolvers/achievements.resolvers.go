@@ -26,7 +26,7 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 		`CREATE ONLY achievement_badge:ulid() 
         SET name=$name,
             description=$description,
-            iconUrl=$iconUrl,
+            icon_url=$iconUrl,
             createdAt=time::now();`,
 		map[string]interface{}{
 			"name":        name,
@@ -53,33 +53,54 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 
 // AwardAchievement is the resolver for the awardAchievement field.
 func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error) {
-	//panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
+	// 检查用户是否已登录
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// 颁发成就徽章
-	result, err := database.DB.Query(
-		`CREATE ONLY user_achievement:ulid() 
-        SET 
-			user_id=$user_id,
-			badgeID=$badgeID,
-            earnedAt=time::now(),
-            createdAt=time::now();`,
-		map[string]interface{}{
-			"user_id": user.ID,
-			"badgeID": badgeID,
-		},
-	)
+
+	// 验证 badgeID 是否有效
+	checkBadgeQuery := `
+		SELECT * FROM achievement_badge
+		WHERE id = $badgeID;
+	`
+	checkResult, err := database.DB.Query(checkBadgeQuery, map[string]interface{}{
+		"badgeID": badgeID,
+	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to validate badge ID: %w", err)
 	}
 
-	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievement](result, nil)
-	if err != nil {
-		return nil, err
+	// 如果查询结果为空，说明 badgeID 无效
+	badges, err := surrealdb.SmartUnmarshal[[]model.AchievementBadge](checkResult, nil)
+	if err != nil || len(badges) == 0 {
+		return nil, fmt.Errorf("invalid badge ID")
 	}
 
+	// 如果 badgeID 有效，则颁发成就徽章
+	createAchievementQuery := `
+		CREATE ONLY user_achievement:ulid()
+		SET 
+			user_id = $user_id,
+			badgeID = $badgeID,
+			earnedAt = time::now(),
+			createdAt = time::now();
+	`
+	createResult, err := database.DB.Query(createAchievementQuery, map[string]interface{}{
+		"user_id": user.ID,
+		"badgeID": badgeID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user achievement: %w", err)
+	}
+
+	// 解析创建结果
+	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievement](createResult, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse new user achievement: %w", err)
+	}
+
+	// 构造响应
 	response := &model.AwardAchievementResponse{
 		UserAchievementID: newUserAchievement.ID,
 		Message:           "Achievement awarded successfully",
@@ -96,7 +117,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 	}
 
 	// TODO: could mofify this
-	result, err := database.DB.Query(`SELECT * FROM achievement_badge`, map[string]interface{}{})
+	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY created_at DESC`, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +134,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 			Name:        badge.Name,
 			Description: badge.Description,
 			IconURL:     badge.IconURL,
+			CreatedAt:   badge.CreatedAt,
 		}
 		badgeDetails = append(badgeDetails, badgeDetail)
 	}
@@ -128,7 +150,7 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID ORDER BY earned_at DESC;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
