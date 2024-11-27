@@ -33,6 +33,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
+  created_at: DateTime!
 }
 
 type AwardAchievementResponse {

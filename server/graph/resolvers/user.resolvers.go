@@ -244,6 +244,17 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 		return nil, fmt.Errorf("user not found")
 	}
 
+	// 删除与用户相关的所有信息
+	_, err = database.DB.Query(
+		`DELETE related_data WHERE userId = $id;`,
+		map[string]interface{}{
+			"id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete related data: %w", err)
+	}
+
 	// 创建响应
 	response := &model.DeleteUserResponse{
 		Message: fmt.Sprintf("User %s with name %s deleted successfully", results[0].ID, results[0].Name),
