@@ -23,7 +23,7 @@ class MedicalRecords extends _$MedicalRecords {
       throw result.exception!;
     }
 
-    return result.parsedData!.getMedicalRecords!
+    return (result.parsedData!.getMedicalRecords ?? [])
         .map((record) => MedicalRecord(
               id: record!.recordId,
               recordType: record.recordType,
