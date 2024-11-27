@@ -224,13 +224,19 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     required Medication medication,
   }) {
     final frequencyParts = medication.frequency.split('/');
-    final times = frequencyParts.isNotEmpty ? int.parse(frequencyParts[0]) : 1;
-    final days = frequencyParts.length > 1 ? int.parse(frequencyParts[1]) : 1;
-    final dailyUsage = (times * medication.dosage) / days;
-    final remainingDays = medication.inventory / dailyUsage;
+    // print('Frequency Parts: $frequencyParts'); // Debug info
 
-    // Print debug information for remaining days
-    print('Medication: ${medication.name}, Remaining Days: $remainingDays');
+    final times = frequencyParts.isNotEmpty ? int.tryParse(frequencyParts[0]) ?? 1 : 1;
+    // print('Times: $times'); // Debug info
+
+    final days = frequencyParts.length > 1 ? int.tryParse(frequencyParts[1]) ?? 1 : 1;
+    // print('Days: $days'); // Debug info
+
+    final dailyUsage = (times * medication.dosage) / days;
+    // print('Daily Usage: $dailyUsage'); // Debug info
+
+    final remainingDays = medication.inventory / dailyUsage;
+    // print('Remaining Days: $remainingDays'); // Debug info
 
     // Determine if low stock warning should be triggered
     final isLowStock = remainingDays < 3;
@@ -566,7 +572,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                         return '请输入剂量';
                                       }
                                       final number = double.tryParse(value);
-                                      if (number == null || number <= 0 || number > 9999) {
+                                      if (number == null || number <= 0) {
                                         return '请输入有效的剂量';
                                       }
                                       return null;
@@ -657,13 +663,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                               hintText: '输入库存数量',
                               prefixIcon: Icons.inventory_rounded,
                               iconColor: Colors.orange.shade300,
-                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return '请输入库存数量';
                                 }
                                 final number = double.tryParse(value);
-                                if (number == null || number < 0) {
+                                if (number == null || number <= 0) {
                                   return '请输入有效的库存数量';
                                 }
                                 return null;
@@ -1159,6 +1165,82 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
     );
   }
 
+  Future<void> _addMedication() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        // Watch the medication provider to get the current state
+        final medicationsState = ref.watch(medicationProvider);
+
+        // Check if the medication already exists
+        final medicationExists = medicationsState.maybeWhen(
+          data: (medications) => medications.any((medication) =>
+              medication.name.toLowerCase() == nameController.text.toLowerCase()),
+          orElse: () => false,
+        );
+
+        if (medicationExists) {
+          // Notify user that the medication already exists
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('药品已存在，请检查药品名称。'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          // Add the medication if it doesn't exist
+          final success = await ref.read(medicationProvider.notifier).addMedication(
+            name: nameController.text,
+            dosage: double.parse(dosageController.text),
+            unit: unitController.text,
+            frequency: formattedFrequency,
+            inventory: double.parse(inventoryController.text),
+          );
+
+          if (success && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('药品添加成功')),
+            );
+
+            // Clear the form
+            _formKey.currentState!.reset();
+            nameController.clear();
+            dosageController.clear();
+            unitController.clear();
+            inventoryController.clear();
+            setState(() {
+              _timesPerPeriod = 1;
+              _periodInDays = 1;
+            });
+
+            // Switch to inventory tab
+            if (mounted) {
+              DefaultTabController.of(context)?.animateTo(0);
+            }
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('错误: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -1276,8 +1358,9 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 if (value == null || value.isEmpty) {
                                   return '请输入剂量';
                                 }
-                                if (double.tryParse(value) == null) {
-                                  return '请输入有效的数字';
+                                final number = double.tryParse(value);
+                                if (number == null || number <= 0) {
+                                  return '请输入有效的剂量';
                                 }
                                 return null;
                               },
@@ -1376,11 +1459,9 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                       if (value == null || value.isEmpty) {
                         return '请输入库存数量';
                       }
-                      if (double.tryParse(value) == null) {
-                        return '请输入有效的数字';
-                      }
-                      if (double.parse(value) <= 0) {
-                        return '库存数必须大于0';
+                      final number = double.tryParse(value);
+                      if (number == null || number <= 0) {
+                        return '请输入有效的库存数量';
                       }
                       return null;
                     },
@@ -1393,61 +1474,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
             SizedBox(
               height: 48,
               child: FilledButton.icon(
-                onPressed: _isLoading ? null : () async {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      _isLoading = true;
-                    });
-
-                    try {
-                      final success = await ref.read(medicationProvider.notifier)
-                          .addMedication(
-                            name: nameController.text,
-                            dosage: double.parse(dosageController.text),
-                            unit: unitController.text,
-                            frequency: formattedFrequency,  // Use the formatted frequency
-                            inventory: double.parse(inventoryController.text),
-                          );
-
-                      if (success && mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('药品添加成功')),
-                        );
-                        
-                        // Clear the form
-                        _formKey.currentState!.reset();
-                        nameController.clear();
-                        dosageController.clear();
-                        unitController.clear();
-                        inventoryController.clear();
-                        setState(() {
-                          _timesPerPeriod = 1;
-                          _periodInDays = 1;
-                        });
-
-                        // Switch to inventory tab
-                        if (mounted) {
-                          DefaultTabController.of(context)?.animateTo(0);
-                        }
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('错: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _isLoading = false;
-                        });
-                      }
-                    }
-                  }
-                },
+                onPressed: _isLoading ? null : _addMedication,
                 icon: _isLoading
                     ? const SizedBox(
                         height: 20,
