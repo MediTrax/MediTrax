@@ -1,5 +1,5 @@
-query GetHealthRiskAssessment($userId: String!) {
-  getHealthRiskAssessment(userId: $userId) {
+query GetHealthRiskAssessment() {
+  getHealthRiskAssessment() {
     assessmentId
     questionnaireData
     riskLevel
@@ -8,8 +8,8 @@ query GetHealthRiskAssessment($userId: String!) {
   }
 }
 
-mutation CreateHealthRiskAssessment($userId: String!, $questionnaireData: String!) {
-  createHealthRiskAssessment(userId: $userId, questionnaireData: $questionnaireData) {
+mutation CreateHealthRiskAssessment($questionnaireData: String!) {
+  createHealthRiskAssessment(questionnaireData: $questionnaireData) {
     assessmentId
     riskLevel
     recommendations
