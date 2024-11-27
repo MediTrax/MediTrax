@@ -19,14 +19,12 @@ mixin _$MedicalRecord {
   @HiveField(0)
   String get id => throw _privateConstructorUsedError;
   @HiveField(1)
-  String get userId => throw _privateConstructorUsedError;
-  @HiveField(2)
   String get recordType => throw _privateConstructorUsedError;
-  @HiveField(3)
+  @HiveField(2)
   Object get content => throw _privateConstructorUsedError;
-  @HiveField(4)
+  @HiveField(3)
   DateTime get createdAt => throw _privateConstructorUsedError;
-  @HiveField(5)
+  @HiveField(4)
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
   /// Create a copy of MedicalRecord
@@ -44,11 +42,10 @@ abstract class $MedicalRecordCopyWith<$Res> {
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String recordType,
-      @HiveField(3) Object content,
-      @HiveField(4) DateTime createdAt,
-      @HiveField(5) DateTime updatedAt});
+      @HiveField(1) String recordType,
+      @HiveField(2) Object content,
+      @HiveField(3) DateTime createdAt,
+      @HiveField(4) DateTime updatedAt});
 }
 
 /// @nodoc
@@ -67,7 +64,6 @@ class _$MedicalRecordCopyWithImpl<$Res, $Val extends MedicalRecord>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? recordType = null,
     Object? content = null,
     Object? createdAt = null,
@@ -77,10 +73,6 @@ class _$MedicalRecordCopyWithImpl<$Res, $Val extends MedicalRecord>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       recordType: null == recordType
           ? _value.recordType
@@ -109,11 +101,10 @@ abstract class _$$MedicalRecordImplCopyWith<$Res>
   @useResult
   $Res call(
       {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) String recordType,
-      @HiveField(3) Object content,
-      @HiveField(4) DateTime createdAt,
-      @HiveField(5) DateTime updatedAt});
+      @HiveField(1) String recordType,
+      @HiveField(2) Object content,
+      @HiveField(3) DateTime createdAt,
+      @HiveField(4) DateTime updatedAt});
 }
 
 /// @nodoc
@@ -130,7 +121,6 @@ class __$$MedicalRecordImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? userId = null,
     Object? recordType = null,
     Object? content = null,
     Object? createdAt = null,
@@ -140,10 +130,6 @@ class __$$MedicalRecordImplCopyWithImpl<$Res>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
               as String,
       recordType: null == recordType
           ? _value.recordType
@@ -168,11 +154,10 @@ class __$$MedicalRecordImplCopyWithImpl<$Res>
 class _$MedicalRecordImpl extends _MedicalRecord {
   _$MedicalRecordImpl(
       {@HiveField(0) required this.id,
-      @HiveField(1) required this.userId,
-      @HiveField(2) required this.recordType,
-      @HiveField(3) required this.content,
-      @HiveField(4) required this.createdAt,
-      @HiveField(5) required this.updatedAt})
+      @HiveField(1) required this.recordType,
+      @HiveField(2) required this.content,
+      @HiveField(3) required this.createdAt,
+      @HiveField(4) required this.updatedAt})
       : super._();
 
   @override
@@ -180,23 +165,20 @@ class _$MedicalRecordImpl extends _MedicalRecord {
   final String id;
   @override
   @HiveField(1)
-  final String userId;
-  @override
-  @HiveField(2)
   final String recordType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   final Object content;
   @override
-  @HiveField(4)
+  @HiveField(3)
   final DateTime createdAt;
   @override
-  @HiveField(5)
+  @HiveField(4)
   final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'MedicalRecord(id: $id, userId: $userId, recordType: $recordType, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MedicalRecord(id: $id, recordType: $recordType, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -205,7 +187,6 @@ class _$MedicalRecordImpl extends _MedicalRecord {
         (other.runtimeType == runtimeType &&
             other is _$MedicalRecordImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.recordType, recordType) ||
                 other.recordType == recordType) &&
             const DeepCollectionEquality().equals(other.content, content) &&
@@ -216,7 +197,7 @@ class _$MedicalRecordImpl extends _MedicalRecord {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, recordType,
+  int get hashCode => Object.hash(runtimeType, id, recordType,
       const DeepCollectionEquality().hash(content), createdAt, updatedAt);
 
   /// Create a copy of MedicalRecord
@@ -231,11 +212,10 @@ class _$MedicalRecordImpl extends _MedicalRecord {
 abstract class _MedicalRecord extends MedicalRecord {
   factory _MedicalRecord(
       {@HiveField(0) required final String id,
-      @HiveField(1) required final String userId,
-      @HiveField(2) required final String recordType,
-      @HiveField(3) required final Object content,
-      @HiveField(4) required final DateTime createdAt,
-      @HiveField(5) required final DateTime updatedAt}) = _$MedicalRecordImpl;
+      @HiveField(1) required final String recordType,
+      @HiveField(2) required final Object content,
+      @HiveField(3) required final DateTime createdAt,
+      @HiveField(4) required final DateTime updatedAt}) = _$MedicalRecordImpl;
   _MedicalRecord._() : super._();
 
   @override
@@ -243,18 +223,15 @@ abstract class _MedicalRecord extends MedicalRecord {
   String get id;
   @override
   @HiveField(1)
-  String get userId;
-  @override
-  @HiveField(2)
   String get recordType;
   @override
-  @HiveField(3)
+  @HiveField(2)
   Object get content;
   @override
-  @HiveField(4)
+  @HiveField(3)
   DateTime get createdAt;
   @override
-  @HiveField(5)
+  @HiveField(4)
   DateTime get updatedAt;
 
   /// Create a copy of MedicalRecord

@@ -54,11 +54,11 @@ class PointsSystemTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pointsAsync = ref.watch(userPointsProvider);
+    final achievementsAsync = ref.watch(achievementsProvider);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: pointsAsync.when(
+      child: achievementsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
@@ -66,71 +66,88 @@ class PointsSystemTab extends ConsumerWidget {
             children: [
               const Text('加载失败'),
               TextButton(
-                onPressed: () => ref.refresh(userPointsProvider),
+                onPressed: () => ref.refresh(achievementsProvider),
                 child: const Text('重试'),
               ),
             ],
           ),
         ),
-        data: (pointsData) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '积分系统',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const Text(
-              '通过按时服药和完成健康任务获得积分',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    pointsData['currentPoints'].toString(),
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Text('当前积分', style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 16),
-                  LinearProgressIndicator(
-                    value: pointsData['currentPoints'] /
-                        pointsData['nextLevelPoints'],
-                    backgroundColor: Colors.grey[200],
-                    color: Colors.black,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('等级 ${pointsData['currentLevel']}'),
-                      Text('等级 ${pointsData['nextLevel']}'),
-                    ],
-                  ),
-                ],
+        data: (achievements) {
+          final currentPoints = achievements.length * 100;
+          final nextLevelPoints = ((currentPoints ~/ 1000) + 1) * 1000;
+          final currentLevel = currentPoints ~/ 1000;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '积分系统',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              '今日任务',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ...pointsData['dailyTasks'].map<Widget>((task) => _buildTaskItem(
-                  task['task'],
-                  '+${task['points']}分',
-                  completed: task['completed'],
-                )),
-          ],
-        ),
+              const Text(
+                '通过获得成就徽章来提升等级',
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      currentPoints.toString(),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Text('当前积分', style: TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 16),
+                    LinearProgressIndicator(
+                      value: currentPoints / nextLevelPoints,
+                      backgroundColor: Colors.grey[200],
+                      color: Colors.black,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('等级 $currentLevel'),
+                        Text('等级 ${currentLevel + 1}'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                '已获得成就',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: achievements.length,
+                  itemBuilder: (context, index) {
+                    final achievement = achievements[index];
+                    return _buildAchievementItem(
+                      achievement.name,
+                      '+100分',
+                      earnedAt: achievement.createdAt,
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildTaskItem(String task, String points, {bool completed = false}) {
+  Widget _buildAchievementItem(
+    String name,
+    String points, {
+    required DateTime earnedAt,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -138,26 +155,35 @@ class PointsSystemTab extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(
-                completed ? Icons.check_circle : Icons.radio_button_unchecked,
-                color: completed ? Colors.green : Colors.grey,
+              const Icon(
+                Icons.emoji_events,
+                color: Colors.amber,
                 size: 20,
               ),
               const SizedBox(width: 8),
-              Text(
-                task,
-                style: TextStyle(
-                  decoration: completed ? TextDecoration.lineThrough : null,
-                  color: completed ? Colors.grey : Colors.black,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '获得于 ${earnedAt.toString().split(' ')[0]}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           Text(
             points,
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: completed ? Colors.grey : Colors.black,
+              color: Colors.green,
             ),
           ),
         ],

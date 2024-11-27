@@ -109,6 +109,61 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 	return response, nil
 }
 
+// EarnPoints is the resolver for the earnPoints field.
+func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64, reason string) (*model.EarnPointsResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	if pointsEarned <= 0 {
+		return nil, fmt.Errorf("earned points must be positive number")
+	}
+
+	result, err := database.DB.Query(
+		`CREATE ONLY point_record:ulid() 
+        SET user_id=$user_id,
+		pointsEarned=$pointsEarned,
+		reason=$reason,
+		earnedAt=time::now();`,
+		map[string]interface{}{
+			"user_id":      user.ID,
+			"pointsEarned": pointsEarned,
+			"reason":       reason,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newRecord, err := surrealdb.SmartUnmarshal[model.UserPointRecord](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err = database.DB.Query(`UPDATE ONLY $id 
+		SET points+=$pointsEarned;`,
+		map[string]interface{}{
+			"id":           newRecord.ID,
+			"pointsEarned": pointsEarned,
+		})
+
+	if err != nil {
+		return nil, err
+	}
+	updatedUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.EarnPointsResponse{
+		UpdatedPoints: updatedUser.Points,
+		Message:       fmt.Sprintf("%f points successfully added to user", newRecord.PointsEarned),
+	}
+
+	return response, nil
+}
+
 // GetAchievementBadges is the resolver for the getAchievementBadges field.
 func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error) {
 	user := middlewares.ForContext(ctx)
@@ -173,4 +228,42 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	return achievementDetails, nil
+}
+
+// GetUserPointRecords is the resolver for the getUserPointRecords field.
+func (r *queryResolver) GetUserPointRecords(ctx context.Context) ([]*model.UserPointRecordDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// get all the medication reminders for the user
+	result, err := database.DB.Query(
+		`SELECT * FROM point_record WHERE user_id = $user_id;`,
+		map[string]interface{}{
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := surrealdb.SmartUnmarshal[[]model.UserPointRecord](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// loop through the reminders, convert them into MedicationReminderDetails, then return the converted list and nil
+	var recordDetails []*model.UserPointRecordDetail
+	for _, record := range records {
+		reminderDetail := &model.UserPointRecordDetail{
+			RecordID:     record.ID,
+			PointsEarned: record.PointsEarned,
+			Reason:       record.Reason,
+			EarnedAt:     record.EarnedAt,
+		}
+		recordDetails = append(recordDetails, reminderDetail)
+	}
+
+	return recordDetails, nil
 }
