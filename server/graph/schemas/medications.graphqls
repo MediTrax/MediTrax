@@ -61,6 +61,7 @@ type MedicationReminderDetail {
 
 type TreatmentSchedule{
   id: String!
+  user_id: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!

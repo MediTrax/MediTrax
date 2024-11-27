@@ -12,11 +12,12 @@ import (
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
+	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
-// // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
+// CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	user := middlewares.ForContext(ctx)
@@ -30,10 +31,10 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 		`CREATE ONLY health_risk_assessment:ulid()
 		    SET
 				user_id=$user_id,
-				questionnaireData=$questionnaireData,
-		        riskLevel=$riskLevel,
+				questionnaire_data=$questionnaireData,
+		        risk_level=$riskLevel,
 		        recommendations=$recommendations,
-		        createdAt=time::now();`,
+		        created_at=time::now();`,
 		map[string]interface{}{
 			"questionnaireData": questionnaireData,
 			"riskLevel":         riskLevel,
@@ -52,14 +53,14 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 
 	response := &model.HealthRiskAssessmentResponse{
 		AssessmentID:    newAssessment.ID,
-		RiskLevel:       riskLevel,
-		Recommendations: recommendations,
+		RiskLevel:       newAssessment.RiskLevel,
+		Recommendations: newAssessment.Recommendations,
 	}
 
 	return response, nil
 }
 
-// // UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
+// UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
 func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	//check if they are logged in correctly
@@ -83,24 +84,24 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 	// Add questionnaire data if provided
 	if questionnaireData != "" {
 		updateValues["questionnaireData"] = questionnaireData
-		updateFields = append(updateFields, "questionnaireData=$questionnaireData")
+		updateFields = append(updateFields, "questionnaire_data=$questionnaireData")
 
 		// Calculate new risk level and recommendations
 		riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
-		updateValues["risk_level"] = riskLevel
+		updateValues["riskLevel"] = riskLevel
+		updateFields = append(updateFields, "risk_level=$riskLevel")
 		updateValues["recommendations"] = recommendations
 		updateFields = append(updateFields,
-			"riskLevel=$riskLevel",
 			"recommendations = $recommendations",
 		)
+		// Add createdAt if needed
+		createdAt := time.Now().Format(time.RFC3339) // Use current time or your logic
+		updateValues["createdAt"] = createdAt
+		updateFields = append(updateFields, "created_at=$createdAt")
 	}
 
-	// Add timestamp
-	updateValues["updated_at"] = "time::now()"
-	updateFields = append(updateFields, "updated_at = $updated_at")
-
 	// Construct the final query
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;",
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id RETURN *;",
 		strings.Join(updateFields, ", "))
 
 	// Send the UPDATE query
@@ -135,15 +136,25 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 		return nil, fmt.Errorf("access denied")
 	}
 	// 查询最新的健康风险评估（假设根据创建时间或其他条件进行排序）
-	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY createdAt DESC LIMIT 1;`, nil)
+	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY created_at DESC LIMIT 1;`, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	assessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessmentDetailResponse](result, nil)
+	assessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
 	if err != nil {
 		return nil, err
 	}
+	if len(assessment) == 0 {
+		return nil, fmt.Errorf("invalid id. no associated assessment found")
+	}
+	detailResponse := &model.HealthRiskAssessmentDetailResponse{
+		AssessmentID:      assessment[0].ID,
+		QuestionnaireData: assessment[0].QuestionnaireData,
+		RiskLevel:         assessment[0].RiskLevel,
+		Recommendations:   assessment[0].Recommendations,
+		CreatedAt:         assessment[0].CreatedAt,
+	}
 
-	return &assessment, nil
+	return detailResponse, nil
 }

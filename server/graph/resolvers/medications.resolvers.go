@@ -164,6 +164,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 
 // DeleteMedication is the resolver for the deleteMedication field.
 func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error) {
+	//TODO: delete associated medication reminders
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -193,6 +194,16 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no associated medication object found")
+	}
+
+	_, err = database.DB.Query(
+		`DELETE medication_reminder WHERE medication_id=$medication_id;`,
+		map[string]interface{}{
+			"medication_id": medicationID,
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	// create response
@@ -338,6 +349,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 			}
 
 			// verify that there is a medication linked to this reminder
+			// NOTE: should NEVER happen since deleting a medication also deletes the reminder
 			medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 			if err != nil {
 				return nil, err
@@ -679,10 +691,22 @@ func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.Tre
 	}
 
 	// TODO: please modify this line as it may result in a bug
-	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentScheduleDetail](result, nil)
+	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentSchedule](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return schedules, nil
+	var scheduleDetails []*model.TreatmentScheduleDetail
+	for _, schedule := range schedules {
+		scheduleDetail := &model.TreatmentScheduleDetail{
+			ScheduleID:    schedule.ID,
+			TreatmentType: schedule.TreatmentType,
+			ScheduledTime: schedule.ScheduledTime,
+			Location:      schedule.Location,
+			Notes:         schedule.Notes,
+		}
+		scheduleDetails = append(scheduleDetails, scheduleDetail)
+	}
+
+	return scheduleDetails, nil
 }
