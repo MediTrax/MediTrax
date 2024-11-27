@@ -425,21 +425,13 @@ Widget _buildFoodSafetyTab() {
     print('Unit: ${spec.unit}');
     print('How High: ${spec.howHigh}');
 
-    // Parse value
-    final value = double.tryParse(spec.value) ?? 0;
+    // Parse howHigh value (ensure it's between 0 and 1)
     final howHigh = double.tryParse(spec.howHigh) ?? 0;
+    final normalizedHowHigh = howHigh.clamp(0.0, 1.0);
     
-    // Determine if this is a "how high" metric
-    final isHighScale = spec.name.toLowerCase().contains('high');
-    
-    // For progress bar display
-    final normalizedValue = isHighScale ? howHigh : value;
-    
-    // Status indicators
-    final isHigh = isHighScale ? howHigh > 7 : value > 0.7;
-    final isRecommended = isHighScale 
-        ? (howHigh >= 3 && howHigh <= 7)
-        : (value >= 0.3 && value <= 0.7);
+    // Status indicators based on howHigh value
+    final isHigh = normalizedHowHigh > 0.7;
+    final isRecommended = normalizedHowHigh >= 0.3 && normalizedHowHigh <= 0.7;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -469,27 +461,19 @@ Widget _buildFoodSafetyTab() {
                   ],
                 ),
               ),
+              // Display value and unit
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isHigh 
-                      ? Colors.orange.withOpacity(0.1)
-                      : isRecommended
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      isHighScale ? spec.howHigh : spec.value,  // Display howHigh for high metrics
-                      style: TextStyle(
-                        color: isHigh 
-                            ? Colors.orange
-                            : isRecommended
-                                ? Colors.green
-                                : Colors.grey,
+                      spec.value,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -507,6 +491,35 @@ Widget _buildFoodSafetyTab() {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              // Display howHigh value
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isHigh 
+                      ? Colors.orange.withOpacity(0.1)
+                      : isRecommended
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '指数: ${spec.howHigh}',
+                      style: TextStyle(
+                        color: isHigh 
+                            ? Colors.orange
+                            : isRecommended
+                                ? Colors.green
+                                : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -520,9 +533,9 @@ Widget _buildFoodSafetyTab() {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              // Foreground progress bar with corrected width factor
+              // Foreground progress bar with normalized howHigh value
               FractionallySizedBox(
-                widthFactor: normalizedValue,
+                widthFactor: normalizedHowHigh,
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
@@ -549,11 +562,28 @@ Widget _buildFoodSafetyTab() {
                   ),
                 ),
               ),
-              // Scale markers (0% to 100%)
+              // Current howHigh value indicator
+              Positioned(
+                left: MediaQuery.of(context).size.width * normalizedHowHigh - 48,
+                top: -15,
+                child: Text(
+                  spec.howHigh,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isHigh 
+                        ? Colors.orange
+                        : isRecommended
+                            ? Colors.green
+                            : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Scale markers (0 to 1)
               ...List.generate(
                 5,
                 (index) {
-                  final markerValue = '${index * 25}%';
+                  final markerValue = (index * 0.25).toStringAsFixed(2);
                   return Positioned(
                     left: MediaQuery.of(context).size.width * (index / 4) - 48,
                     child: Column(
@@ -576,7 +606,7 @@ Widget _buildFoodSafetyTab() {
                   );
                 },
               ),
-              // Recommended range indicators (30% - 70%)
+              // Recommended range indicators (0.3 - 0.7)
               Positioned(
                 left: MediaQuery.of(context).size.width * 0.3 - 48,
                 child: Container(

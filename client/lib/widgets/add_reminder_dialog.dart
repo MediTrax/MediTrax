@@ -15,7 +15,7 @@ class AddReminderDialog extends ConsumerStatefulWidget {
 class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
   final _formKey = GlobalKey<FormState>();
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  List<TimeOfDay> _selectedTimes = [TimeOfDay.now()];
   String? _selectedMedicationId;
 
   // Get frequency text based on medication frequency
@@ -29,6 +29,59 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
     } else {
       return '每$days天提醒${times}次';
     }
+  }
+
+  void _updateTimesBasedOnFrequency(String medicationId) {
+    final medication = widget.medications.firstWhere((m) => m.id == medicationId);
+    final frequency = parseFrequency(medication.frequency);
+    final times = frequency['times']!;
+    
+    setState(() {
+      // Initialize with current time for first reminder
+      final currentTime = TimeOfDay.now();
+      _selectedTimes = [currentTime];
+      // Add additional time slots if needed
+      for (int i = 1; i < times; i++) {
+        // Add time slots 4 hours apart as default
+        _selectedTimes.add(
+          TimeOfDay(
+            hour: (currentTime.hour + (i * 4)) % 24,
+            minute: currentTime.minute,
+          ),
+        );
+      }
+    });
+  }
+
+  Widget _buildTimePickerList() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(_selectedTimes.length, (index) {
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text('提醒时间 ${index + 1}'),
+          subtitle: Text(_selectedTimes[index].format(context)),
+          onTap: () async {
+            final TimeOfDay? picked = await showTimePicker(
+              context: context,
+              initialTime: _selectedTimes[index],
+            );
+            if (picked != null && picked != _selectedTimes[index]) {
+              setState(() {
+                _selectedTimes[index] = picked;
+              });
+            }
+          },
+        );
+      }),
+    );
+  }
+
+  Map<String, int> parseFrequency(String frequency) {
+    final parts = frequency.split('/');
+    final times = int.tryParse(parts[0]) ?? 1;
+    final days = parts.length > 1 ? int.tryParse(parts[1]) ?? 1 : 1;
+    return {'times': times, 'days': days};
   }
 
   @override
@@ -60,9 +113,12 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                     );
                   }).toList(),
                   onChanged: (value) {
-                    setState(() {
-                      _selectedMedicationId = value;
-                    });
+                    if (value != null) {
+                      setState(() {
+                        _selectedMedicationId = value;
+                        _updateTimesBasedOnFrequency(value);
+                      });
+                    }
                   },
                   decoration: const InputDecoration(
                     labelText: '选择药品',
@@ -73,7 +129,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('选择日期'),
+                  title: const Text('开始日期'),
                   subtitle: Text('${_selectedDate.toLocal()}'.split(' ')[0]),
                   onTap: () async {
                     final DateTime? picked = await showDatePicker(
@@ -89,22 +145,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                     }
                   },
                 ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('选择时间'),
-                  subtitle: Text(_selectedTime.format(context)),
-                  onTap: () async {
-                    final TimeOfDay? picked = await showTimePicker(
-                      context: context,
-                      initialTime: _selectedTime,
-                    );
-                    if (picked != null && picked != _selectedTime) {
-                      setState(() {
-                        _selectedTime = picked;
-                      });
-                    }
-                  },
-                ),
+                _buildTimePickerList(),
               ],
             ),
           ),
@@ -112,29 +153,39 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('取消'),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              final success = await ref.read(medicationReminderProvider.notifier).addReminder(
-                medicationId: _selectedMedicationId!,
-                reminderTime: _selectedDate.add(Duration(
-                  hours: _selectedTime.hour,
-                  minutes: _selectedTime.minute,
-                )).toIso8601String(),
-              );
-
-              if (success) {
-                await ref.read(medicationReminderProvider.notifier).fetchReminders();
-                Navigator.of(context).pop();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('添加提醒失败')),
+              bool allSuccess = true;
+              
+              // Add a reminder for each selected time
+              for (final time in _selectedTimes) {
+                final success = await ref.read(medicationReminderProvider.notifier).addReminder(
+                  medicationId: _selectedMedicationId!,
+                  reminderTime: _selectedDate.add(Duration(
+                    hours: time.hour,
+                    minutes: time.minute,
+                  )).toIso8601String(),
                 );
+                
+                if (!success) {
+                  allSuccess = false;
+                  break;
+                }
+              }
+
+              if (allSuccess) {
+                await ref.read(medicationReminderProvider.notifier).fetchReminders();
+                if (mounted) Navigator.of(context).pop();
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('添加提醒失败')),
+                  );
+                }
               }
             }
           },
