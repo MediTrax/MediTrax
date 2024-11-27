@@ -19,7 +19,7 @@ class MedicalRecordImplAdapter extends TypeAdapter<_$MedicalRecordImpl> {
     return _$MedicalRecordImpl(
       id: fields[0] as String,
       recordType: fields[1] as String,
-      content: fields[2] as Object,
+      content: fields[2] as String,
       createdAt: fields[3] as DateTime,
       updatedAt: fields[4] as DateTime,
     );

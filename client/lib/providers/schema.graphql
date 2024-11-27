@@ -4,7 +4,29 @@
 
 # go: go run github.com/99designs/gqlgen generate
 
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# go: go run github.com/99designs/gqlgen generate
+
 scalar DateTime
+
+
+type Question{
+  question: String!
+  questionType: Int!
+  choices: [String!]!
+  answer: String!
+}
+
+type QuestionnaireObject{
+  data: [Question!]!
+}
+
+type RecordObject{
+  data: String!
+}
 
 
 type Question{
@@ -50,8 +72,8 @@ type HealthRiskAssessment{
   id: String!
   user_id: String!
   questionnaire_data: String!
-  risk_level: Int!
-  recommendations: [String!]!
+  risk_level: String!
+  recommendations: String!
   created_at: DateTime!
 }
 
@@ -225,6 +247,10 @@ type UpdateMedicationReminderResponse {
   message: String!
 }
 
+type DeleteMedicationReminderResponse {
+  message: String!
+}
+
 type MedicationReminderDetail {
   reminderId: String!
   medicationId: String!
@@ -353,6 +379,9 @@ type UserAchievementDetail {
   earnedAt: DateTime!
 }
 
+type FoodRecommendation{
+  name: String!
+}
 
 type Query{
   # finish unwritten get functions
@@ -369,7 +398,9 @@ type Query{
 
   # make mock endpoint: DONE
   getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSepcs(food: String!) : FoodSpecs
+  getMockFoodSpecs(food: String!) : FoodSpecs
+  getFoodRecommendation : FoodRecommendation
+  getMockFoodRecommendation : FoodRecommendation
 }
 
 type Mutation {
@@ -392,6 +423,7 @@ type Mutation {
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  deleteMedicationReminder(reminderId: String!): DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
