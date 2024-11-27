@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
@@ -201,6 +202,9 @@ class _HealthMetricsTab extends ConsumerWidget {
               decoration: const InputDecoration(
                 labelText: '数值',
               ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
@@ -676,7 +680,9 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               try {
-                await ref.read(treatmentSchedulesProvider.notifier).updateSchedule(
+                await ref
+                    .read(treatmentSchedulesProvider.notifier)
+                    .updateSchedule(
                       scheduleId: id,
                       treatmentType: typeController.text,
                       scheduledTime: selectedTime,
