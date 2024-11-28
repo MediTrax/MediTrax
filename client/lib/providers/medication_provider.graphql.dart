@@ -612,7 +612,6 @@ class _CopyWithStubImpl$Query$GetMedications$getMedications<TRes>
 
 class Variables$Mutation$AddMedication {
   factory Variables$Mutation$AddMedication({
-    required String userId,
     required String name,
     required double dosage,
     required String unit,
@@ -620,7 +619,6 @@ class Variables$Mutation$AddMedication {
     required double inventory,
   }) =>
       Variables$Mutation$AddMedication._({
-        r'userId': userId,
         r'name': name,
         r'dosage': dosage,
         r'unit': unit,
@@ -632,8 +630,6 @@ class Variables$Mutation$AddMedication {
 
   factory Variables$Mutation$AddMedication.fromJson(Map<String, dynamic> data) {
     final result$data = <String, dynamic>{};
-    final l$userId = data['userId'];
-    result$data['userId'] = (l$userId as String);
     final l$name = data['name'];
     result$data['name'] = (l$name as String);
     final l$dosage = data['dosage'];
@@ -649,8 +645,6 @@ class Variables$Mutation$AddMedication {
 
   Map<String, dynamic> _$data;
 
-  String get userId => (_$data['userId'] as String);
-
   String get name => (_$data['name'] as String);
 
   double get dosage => (_$data['dosage'] as double);
@@ -663,8 +657,6 @@ class Variables$Mutation$AddMedication {
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
-    final l$userId = userId;
-    result$data['userId'] = l$userId;
     final l$name = name;
     result$data['name'] = l$name;
     final l$dosage = dosage;
@@ -691,11 +683,6 @@ class Variables$Mutation$AddMedication {
     }
     if (!(other is Variables$Mutation$AddMedication) ||
         runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$userId = userId;
-    final lOther$userId = other.userId;
-    if (l$userId != lOther$userId) {
       return false;
     }
     final l$name = name;
@@ -728,14 +715,12 @@ class Variables$Mutation$AddMedication {
 
   @override
   int get hashCode {
-    final l$userId = userId;
     final l$name = name;
     final l$dosage = dosage;
     final l$unit = unit;
     final l$frequency = frequency;
     final l$inventory = inventory;
     return Object.hashAll([
-      l$userId,
       l$name,
       l$dosage,
       l$unit,
@@ -755,7 +740,6 @@ abstract class CopyWith$Variables$Mutation$AddMedication<TRes> {
       _CopyWithStubImpl$Variables$Mutation$AddMedication;
 
   TRes call({
-    String? userId,
     String? name,
     double? dosage,
     String? unit,
@@ -778,7 +762,6 @@ class _CopyWithImpl$Variables$Mutation$AddMedication<TRes>
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
-    Object? userId = _undefined,
     Object? name = _undefined,
     Object? dosage = _undefined,
     Object? unit = _undefined,
@@ -787,8 +770,6 @@ class _CopyWithImpl$Variables$Mutation$AddMedication<TRes>
   }) =>
       _then(Variables$Mutation$AddMedication._({
         ..._instance._$data,
-        if (userId != _undefined && userId != null)
-          'userId': (userId as String),
         if (name != _undefined && name != null) 'name': (name as String),
         if (dosage != _undefined && dosage != null)
           'dosage': (dosage as double),
@@ -807,7 +788,6 @@ class _CopyWithStubImpl$Variables$Mutation$AddMedication<TRes>
   TRes _res;
 
   call({
-    String? userId,
     String? name,
     double? dosage,
     String? unit,
@@ -961,15 +941,6 @@ const documentNodeMutationAddMedication = DocumentNode(definitions: [
     type: OperationType.mutation,
     name: NameNode(value: 'AddMedication'),
     variableDefinitions: [
-      VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'userId')),
-        type: NamedTypeNode(
-          name: NameNode(value: 'String'),
-          isNonNull: true,
-        ),
-        defaultValue: DefaultValueNode(value: null),
-        directives: [],
-      ),
       VariableDefinitionNode(
         variable: VariableNode(name: NameNode(value: 'name')),
         type: NamedTypeNode(

@@ -1,4 +1,4 @@
-query GetMedications {
+query GetMedications() {
   getMedications {
     medicationId
     name
@@ -10,7 +10,6 @@ query GetMedications {
 }
 
 mutation AddMedication(
-  $userId: String!
   $name: String!
   $dosage: Float!
   $unit: String!

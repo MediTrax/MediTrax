@@ -1,5 +1,5 @@
-query GetHealthRiskAssessment {
-  getHealthRiskAssessment {
+query GetHealthRiskAssessment() {
+  getHealthRiskAssessment() {
     assessmentId
     questionnaireData
     riskLevel

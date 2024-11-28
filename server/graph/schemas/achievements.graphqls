@@ -33,6 +33,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
+  created_at: DateTime!
 }
 
 type AwardAchievementResponse {
@@ -46,12 +47,34 @@ type UserAchievementDetail {
   earnedAt: DateTime!
 }
 
+type UserPointRecord{
+  id: String!
+  user_id: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type UserPointRecordDetail{
+  recordId: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type earnPointsResponse{
+  updatedPoints: Float!
+  message: String!
+}
+
 extend type Query{
   getAchievementBadges: [AchievementBadgeDetail]
   getUserAchievements: [UserAchievementDetail]
+  getUserPointRecords: [UserPointRecordDetail]
 }
 
 extend type Mutation{
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
   awardAchievement(badgeId: String!): AwardAchievementResponse  
+  earnPoints(pointsEarned: Float!, reason:String!) : earnPointsResponse
 }
