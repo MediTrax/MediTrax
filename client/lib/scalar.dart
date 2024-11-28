@@ -9,7 +9,7 @@ dynamic multipartFileToJson(MultipartFile file) => file;
 DateTime dateTimeFromJson(String date) {
   if (date == "") return DateTime(0);
   // Handle any malformed dates by truncating extra precision
-  final regex = RegExp(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{0,6}).*Z');
+  final regex = RegExp(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{0,6}).*Z?');
   final match = regex.firstMatch(date);
   if (match != null) {
     return DateTime.parse('${match.group(1)}Z');
