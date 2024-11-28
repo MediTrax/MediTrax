@@ -464,22 +464,24 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 		return nil, fmt.Errorf("access denied")
 	}
 
+	// TODO: check for and reject duplicates
+
 	// 创建治疗计划记录
 	result, err := database.DB.Query(
 		`CREATE ONLY treatment_schedule:ulid()
-        SET treatment_type=$treatment_type,
-        scheduled_time=$scheduled_time,
+        SET treatmentType=$treatmentType,
+        scheduledTime=$scheduledTime,
         location=$location,
         notes=$notes,
         user_id=$user_id,
         created_at=time::now(),
         updated_at=time::now();`,
 		map[string]interface{}{
-			"treatment_type": treatmentType,
-			"scheduled_time": scheduledTime,
-			"location":       location,
-			"notes":          notes,
-			"user_id":        user.ID,
+			"treatmentType": treatmentType,
+			"scheduledTime": scheduledTime,
+			"location":      location,
+			"notes":         notes,
+			"user_id":       user.ID,
 		},
 	)
 	if err != nil {
@@ -518,12 +520,12 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	updateFields := []string{}
 
 	if treatmentType != nil {
-		updateValues["treatment_type"] = *treatmentType
-		updateFields = append(updateFields, "treatment_type = $treatment_type")
+		updateValues["treatmentType"] = *treatmentType
+		updateFields = append(updateFields, "treatmentType = $treatmentType")
 	}
 	if scheduledTime != nil {
-		updateValues["scheduled_time"] = *scheduledTime
-		updateFields = append(updateFields, "scheduled_time = $scheduled_time")
+		updateValues["scheduledTime"] = *scheduledTime
+		updateFields = append(updateFields, "scheduledTime = $scheduledTime")
 	}
 	if location != nil {
 		updateValues["location"] = *location
@@ -583,16 +585,16 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	// 验证删除结果
-	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentScheduleDetail](result, nil)
+	schedules, err := surrealdb.SmartUnmarshal[[]model.TreatmentSchedule](result, nil)
 	if err != nil {
 		return nil, err
 	}
 	if len(schedules) == 0 {
-		return nil, fmt.Errorf("schedule not found or delete failed")
+		return nil, fmt.Errorf("schedule not found")
 	}
 
 	response := &model.DeleteTreatmentScheduleResponse{
-		Message: fmt.Sprintf("Treatment schedule %s deleted successfully", scheduleID),
+		Message: fmt.Sprintf("Treatment schedule %s deleted successfully", schedules[0].ID),
 	}
 
 	return response, nil
