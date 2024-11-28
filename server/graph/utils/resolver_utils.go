@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
+	"medication", "medication_reminder", "treatment_schedule", "health_metric",
+	"medical_record", "family_member"}
+
 func FrequencyParser(frequency string) (int, int, error) {
 	// Compile the regex pattern to match the expected format
 	frequencyPattern := regexp.MustCompile(`^(\d+)/(\d+)$`)
