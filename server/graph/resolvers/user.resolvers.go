@@ -83,6 +83,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 		phoneNumber=$phoneNumber,
 		password=crypto::argon2::generate($password),
 		role=$role,
+		points=0.0,
 		createdAt=time::now(),
 		updatedAt=time::now();`, map[string]interface{}{
 			"username":    username,
@@ -242,6 +243,31 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("user not found")
+	}
+
+	// delete related data entries
+	for _, tableName := range utils.UserRelatedTables {
+		_, err = database.DB.Query(
+			`DELETE $table_name WHERE user_id = $id;`,
+			map[string]interface{}{
+				"table_name": tableName,
+				"id":         user.ID,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to delete related data from table %s: %w", tableName, err)
+		}
+	}
+	// detete family members that relate to this user
+	_, err = database.DB.Query(
+		`DELETE $table_name WHERE related_user_id = $id;`,
+		map[string]interface{}{
+			"table_name": "family_member",
+			"id":         user.ID,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete related data from table family member related to user: %w", err)
 	}
 
 	// 创建响应
@@ -500,6 +526,7 @@ func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse,
 		PhoneNumber: user.PhoneNumber,
 		Name:        user.Name,
 		Role:        user.Role,
+		Points:      user.Points,
 		CreatedAt:   user.CreatedAt,
 		LastLogin:   &user.LastLogin,
 	}

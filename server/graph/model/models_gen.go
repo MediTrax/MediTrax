@@ -15,6 +15,7 @@ type AchievementBadgeDetail struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	IconURL     string `json:"iconUrl"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type AddFamilyMemberResponse struct {
@@ -106,6 +107,10 @@ type FamilyMemberDetail struct {
 	AccessLevel   int    `json:"accessLevel"`
 }
 
+type FoodRecommendation struct {
+	Name string `json:"name"`
+}
+
 type FoodSpec struct {
 	Name    string  `json:"name"`
 	Value   float64 `json:"value"`
@@ -166,19 +171,19 @@ type LoginUserResponse struct {
 }
 
 type MedicalRecord struct {
-	ID         string        `json:"id"`
-	UserID     string        `json:"user_id"`
-	RecordType string        `json:"record_type"`
-	Content    *RecordObject `json:"content"`
-	CreatedAt  string        `json:"created_at"`
-	UpdatedAt  string        `json:"updated_at"`
+	ID         string `json:"id"`
+	UserID     string `json:"user_id"`
+	RecordType string `json:"record_type"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type MedicalRecordDetail struct {
-	RecordID   string        `json:"recordId"`
-	RecordType string        `json:"recordType"`
-	Content    *RecordObject `json:"content"`
-	CreatedAt  string        `json:"createdAt"`
+	RecordID   string `json:"recordId"`
+	RecordType string `json:"recordType"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"createdAt"`
 }
 
 type Medication struct {
@@ -268,6 +273,7 @@ type Token struct {
 
 type TreatmentSchedule struct {
 	ID            string  `json:"id"`
+	UserID        string  `json:"user_id"`
 	TreatmentType string  `json:"treatmentType"`
 	ScheduledTime string  `json:"scheduledTime"`
 	Location      string  `json:"location"`
@@ -324,15 +330,16 @@ type UpdateUserResponse struct {
 }
 
 type User struct {
-	ID          string `json:"id"`
-	PhoneNumber string `json:"phoneNumber"`
-	Password    string `json:"password"`
-	Name        string `json:"name"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	LastLogin   string `json:"last_login"`
-	Status      int    `json:"status"`
-	Role        string `json:"role"`
+	ID          string  `json:"id"`
+	PhoneNumber string  `json:"phoneNumber"`
+	Password    string  `json:"password"`
+	Name        string  `json:"name"`
+	Points      float64 `json:"points"`
+	CreatedAt   string  `json:"created_at"`
+	UpdatedAt   string  `json:"updated_at"`
+	LastLogin   string  `json:"last_login"`
+	Status      int     `json:"status"`
+	Role        string  `json:"role"`
 }
 
 type UserAchievement struct {
@@ -353,7 +360,28 @@ type UserDetailResponse struct {
 	UserID      string  `json:"userId"`
 	PhoneNumber string  `json:"phoneNumber"`
 	Name        string  `json:"name"`
+	Points      float64 `json:"points"`
 	Role        string  `json:"role"`
 	CreatedAt   string  `json:"createdAt"`
 	LastLogin   *string `json:"lastLogin,omitempty"`
+}
+
+type UserPointRecord struct {
+	ID           string  `json:"id"`
+	UserID       string  `json:"user_id"`
+	PointsEarned float64 `json:"pointsEarned"`
+	Reason       string  `json:"reason"`
+	EarnedAt     string  `json:"earnedAt"`
+}
+
+type UserPointRecordDetail struct {
+	RecordID     string  `json:"recordId"`
+	PointsEarned float64 `json:"pointsEarned"`
+	Reason       string  `json:"reason"`
+	EarnedAt     string  `json:"earnedAt"`
+}
+
+type EarnPointsResponse struct {
+	UpdatedPoints float64 `json:"updatedPoints"`
+	Message       string  `json:"message"`
 }

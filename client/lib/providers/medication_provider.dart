@@ -1,156 +1,61 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import '../models/medication.dart';
+import 'package:meditrax/providers/graphql.dart';
+import 'package:meditrax/providers/medication_provider.graphql.dart';
 
-class Medication {
-  final String medicationId;
-  final String name;
-  final double dosage;
-  final String unit;
-  final String frequency;
-  final double inventory;
+final medicationProvider = StateNotifierProvider<MedicationNotifier, AsyncValue<List<Medication>>>((ref) {
+  final client = ref.watch(graphQLServiceProvider);
+  return MedicationNotifier(client);
+});
 
-  Medication({
-    required this.medicationId,
-    required this.name,
-    required this.dosage,
-    required this.unit,
-    required this.frequency,
-    required this.inventory,
-  });
+class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
+  final GraphQLClient _client;
 
-  factory Medication.fromJson(Map<String, dynamic> json) {
-    return Medication(
-      medicationId: json['medicationId'],
-      name: json['name'],
-      dosage: json['dosage'].toDouble(),
-      unit: json['unit'],
-      frequency: json['frequency'],
-      inventory: json['inventory'].toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'medicationId': medicationId,
-      'name': name,
-      'dosage': dosage,
-      'unit': unit,
-      'frequency': frequency,
-      'inventory': inventory,
-    };
-  }
-}
-
-class MedicationProvider extends ChangeNotifier {
-  final GraphQLClient client;
-  List<Medication> _medications = [];
-  bool _loading = false;
-  String? _error;
-
-  MedicationProvider({required this.client});
-
-  List<Medication> get medications => _medications;
-  bool get loading => _loading;
-  String? get error => _error;
-
-
-  static const String getMedicationsQuery = '''
-    query GetMedications(\$userId: String!) {
-      getMedications(userId: \$userId) {
-        medicationId
-        name
-        dosage
-        unit
-        frequency
-        inventory
-      }
-    }
-  ''';
-
-  static const String addMedicationMutation = '''
-    mutation AddMedication(
-      \$userId: String!
-      \$name: String!
-      \$dosage: Float!
-      \$unit: String!
-      \$frequency: String!
-      \$inventory: Float!
-    ) {
-      addMedication(
-        userId: \$userId
-        name: \$name
-        dosage: \$dosage
-        unit: \$unit
-        frequency: \$frequency
-        inventory: \$inventory
-      ) {
-        medicationId
-        message
-      }
-    }
-  ''';
-
-  static const String updateMedicationMutation = '''
-    mutation UpdateMedication(
-      \$medicationId: String!
-      \$name: String
-      \$dosage: Float
-      \$unit: String
-      \$frequency: String
-      \$inventory: Float
-    ) {
-      updateMedication(
-        medicationId: \$medicationId
-        name: \$name
-        dosage: \$dosage
-        unit: \$unit
-        frequency: \$frequency
-        inventory: \$inventory
-      ) {
-        medicationId
-        message
-      }
-    }
-  ''';
-
-  static const String deleteMedicationMutation = '''
-    mutation DeleteMedication(\$medicationId: String!) {
-      deleteMedication(medicationId: \$medicationId) {
-        message
-      }
-    }
-  ''';
+  MedicationNotifier(this._client) : super(const AsyncValue.data([]));
 
   Future<void> fetchMedications(String userId) async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
-
     try {
-      final result = await client.query(
-        QueryOptions(
-          document: gql(getMedicationsQuery),
-          variables: {'userId': userId},
-        ),
-      );
+      print("Fetching medications for user: $userId");
+      state = const AsyncValue.loading();
+      final result = await _client.query$GetMedications(
+      Options$Query$GetMedications(
+        fetchPolicy: FetchPolicy.networkOnly, 
+      ),
+    );
+
+      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
       }
 
-      _medications = (result.data!['getMedications'] as List)
-          .map((json) => Medication.fromJson(json))
+      final medications = (result.data?['getMedications'] as List? ?? [])
+          .map((item) => Medication(
+                id: item['medicationId'] ?? '',  // Use medicationId instead of id
+                name: item['name'] ?? '',
+                dosage: (item['dosage'] as num?)?.toDouble() ?? 0.0,
+                unit: item['unit'] ?? '',
+                frequency: item['frequency'] ?? '',
+                inventory: (item['inventory'] as num?)?.toDouble() ?? 0.0,
+                userId: item['userId'] ?? userId,  // Use provided userId as fallback
+                createdAt: item['createdAt'] != null 
+                    ? DateTime.parse(item['createdAt']) 
+                    : DateTime.now(),
+                updatedAt: item['updatedAt'] != null 
+                    ? DateTime.parse(item['updatedAt']) 
+                    : DateTime.now(),
+              ))
           .toList();
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _loading = false;
-      notifyListeners();
+
+      // print("Parsed medications: ${medications.length}");
+      state = AsyncValue.data(medications);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
     }
   }
 
-  Future<String?> addMedication({
-    required String userId,
+  Future<bool> addMedication({
     required String name,
     required double dosage,
     required String unit,
@@ -158,34 +63,56 @@ class MedicationProvider extends ChangeNotifier {
     required double inventory,
   }) async {
     try {
-      final result = await client.mutate(
-        MutationOptions(
-          document: gql(addMedicationMutation),
-          variables: {
-            'userId': userId,
-            'name': name,
-            'dosage': dosage,
-            'unit': unit,
-            'frequency': frequency,
-            'inventory': inventory,
-          },
-        ),
+      // print("Adding medication with data:");
+      // print("Name: $name");
+      // print("Dosage: $dosage");
+      // print("Unit: $unit");
+      // print("Frequency: $frequency");
+      // print("Inventory: $inventory");
+
+      // Perform the mutation request
+      final result = await _client.mutate$AddMedication(
+        Options$Mutation$AddMedication(
+          variables: Variables$Mutation$AddMedication(
+            name: name, 
+            dosage: dosage,
+            unit: unit,
+            frequency: frequency, 
+            inventory: inventory
+            )
+          )
       );
+
+      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
       }
 
-      await fetchMedications(userId);
-      return result.data!['addMedication']['message'];
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return null;
+      // Update the state with the new medication
+      final newMedication = Medication(
+        id: result.data!['addMedication']['medicationId'] ?? '',
+        name: result.data!['addMedication']['name'] ?? '',
+        dosage: (result.data!['addMedication']['dosage'] as num?)?.toDouble() ?? 0.0,
+        unit: result.data!['addMedication']['unit'] ?? '',
+        frequency: result.data!['addMedication']['frequency'] ?? '',
+        inventory: (result.data!['addMedication']['inventory'] as num?)?.toDouble() ?? 0.0,
+        userId: result.data!['addMedication']['userId'] ?? '',
+        createdAt: DateTime.parse(result.data!['addMedication']['createdAt'] ?? DateTime.now().toIso8601String()),
+        updatedAt: DateTime.parse(result.data!['addMedication']['updatedAt'] ?? DateTime.now().toIso8601String()),
+      );
+
+      state.whenData((medications) {
+        state = AsyncValue.data([...medications, newMedication]);
+      });
+
+      return true;
+    } catch (e, stack) {
+      return false;
     }
   }
 
-  Future<String?> updateMedication({
+  Future<bool> updateMedication({
     required String medicationId,
     String? name,
     double? dosage,
@@ -194,72 +121,72 @@ class MedicationProvider extends ChangeNotifier {
     double? inventory,
   }) async {
     try {
-      final result = await client.mutate(
-        MutationOptions(
-          document: gql(updateMedicationMutation),
-          variables: {
-            'medicationId': medicationId,
-            if (name != null) 'name': name,
-            if (dosage != null) 'dosage': dosage,
-            if (unit != null) 'unit': unit,
-            if (frequency != null) 'frequency': frequency,
-            if (inventory != null) 'inventory': inventory,
-          },
-        ),
+      print("Attempting to update medication with the following parameters:");
+      print("ID: $medicationId");
+
+      final result = await _client.mutate$UpdateMedication(
+        Options$Mutation$UpdateMedication(
+          variables: Variables$Mutation$UpdateMedication(
+            medicationId: medicationId,
+            name: name,
+            dosage: dosage,
+            unit: unit,
+            frequency: frequency,
+            inventory: inventory,
+            )
+          )
       );
+
+    print("GraphQL result: ${result.data}");
+    print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
       }
 
-      final index = _medications.indexWhere((m) => m.medicationId == medicationId);
-      if (index != -1) {
-        final updatedMedication = Medication(
-          medicationId: medicationId,
-          name: name ?? _medications[index].name,
-          dosage: dosage ?? _medications[index].dosage,
-          unit: unit ?? _medications[index].unit,
-          frequency: frequency ?? _medications[index].frequency,
-          inventory: inventory ?? _medications[index].inventory,
-        );
-        _medications[index] = updatedMedication;
-        notifyListeners();
-      }
+      // Update the state with the updated medication
+      state.whenData((medications) {
+        final updatedMedication = Medication.fromJson(result.data!['updateMedication']);
+        final updatedList = medications.map((med) => 
+          med.id == medicationId ? updatedMedication : med
+        ).toList();
+        state = AsyncValue.data(updatedList);
+      });
 
-      return result.data!['updateMedication']['message'];
+      return true;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return null;
+      return false;
     }
   }
 
-  Future<String?> deleteMedication(String medicationId) async {
+  Future<bool> deleteMedication(String medicationId) async {
     try {
-      final result = await client.mutate(
-        MutationOptions(
-          document: gql(deleteMedicationMutation),
-          variables: {'medicationId': medicationId},
-        ),
+      print('Starting deletion of medication with ID: $medicationId');
+
+      final result = await _client.mutate$DeleteMedication(
+        Options$Mutation$DeleteMedication(
+          variables: Variables$Mutation$DeleteMedication(
+            medicationId: medicationId
+            )
+          )
       );
 
+      print('Mutation result: ${result.data}');
+
       if (result.hasException) {
+        print('Error executing mutation: ${result.exception.toString()}');
         throw result.exception!;
       }
 
-      _medications.removeWhere((m) => m.medicationId == medicationId);
-      notifyListeners();
+      // Update the state by removing the deleted medication
+      state.whenData((medications) {
+        final updatedList = medications.where((med) => med.id != medicationId).toList();
+        state = AsyncValue.data(updatedList);
+      });
 
-      return result.data!['deleteMedication']['message'];
+      return true;
     } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      return null;
+      return false;
     }
-  }
-
-  void clearError() {
-    _error = null;
-    notifyListeners();
   }
 }

@@ -6,7 +6,9 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"meditrax/graph/chat"
+	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"strconv"
 	"strings"
@@ -14,6 +16,11 @@ import (
 
 // GetFoodSpecs is the resolver for the getFoodSpecs field.
 func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	client := chat.GetClient()
 
 	result, err := chat.GetFoodSpec(food, client)
@@ -56,12 +63,6 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 				spec.HowHigh = min(1, value/spec_limit.UpperRange)
 				n_spec = n_spec + 1
 				s_total = s_total + value/spec_limit.UpperRange
-				// if value > spec_limit.UpperRange {
-				// 	spec.IsTooHigh = true
-				// 	recommend = false
-				// } else {
-				// 	spec.IsTooHigh = false
-				// }
 			}
 		}
 
@@ -80,9 +81,14 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 
 // GetMockFoodSpecs is the resolver for the getMockFoodSpecs field.
 func (r *queryResolver) GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
 	var specs []*model.FoodSpec
 	for _, spec_limit := range chat.SpecLimits {
-		specs = append(specs, &model.FoodSpec{Name: spec_limit.Name, Value: spec_limit.UpperRange / 2})
+		specs = append(specs, &model.FoodSpec{Name: spec_limit.Name, Value: spec_limit.UpperRange / 2, Unit: "mock unit", HowHigh: 0.5})
 	}
 
 	foodSpecs := &model.FoodSpecs{
@@ -91,4 +97,39 @@ func (r *queryResolver) GetMockFoodSpecs(ctx context.Context, food string) (*mod
 	}
 
 	return foodSpecs, nil
+}
+
+// GetFoodRecommendation is the resolver for the getFoodRecommendation field.
+func (r *queryResolver) GetFoodRecommendation(ctx context.Context) (*model.FoodRecommendation, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	client := chat.GetClient()
+
+	result, err := chat.GetFoodRecommend(client)
+	if err != nil {
+		return nil, err
+	}
+
+	recommendation := &model.FoodRecommendation{
+		Name: *result,
+	}
+
+	return recommendation, nil
+}
+
+// GetMockFoodRecommendation is the resolver for the getMockFoodRecommendation field.
+func (r *queryResolver) GetMockFoodRecommendation(ctx context.Context) (*model.FoodRecommendation, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	recommendation := &model.FoodRecommendation{
+		Name: "红薯",
+	}
+
+	return recommendation, nil
 }

@@ -26,7 +26,7 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 		`CREATE ONLY achievement_badge:ulid() 
         SET name=$name,
             description=$description,
-            iconUrl=$iconUrl,
+            icon_url=$iconUrl,
             createdAt=time::now();`,
 		map[string]interface{}{
 			"name":        name,
@@ -53,36 +53,112 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 
 // AwardAchievement is the resolver for the awardAchievement field.
 func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error) {
-	//panic(fmt.Errorf("not implemented: AwardAchievement - awardAchievement"))
+	// 检查用户是否已登录
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-	// 颁发成就徽章
+
+	// 验证 badgeID 是否有效
+	checkBadgeQuery := `
+		SELECT * FROM achievement_badge
+		WHERE id = $badgeID;
+	`
+	checkResult, err := database.DB.Query(checkBadgeQuery, map[string]interface{}{
+		"badgeID": badgeID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to validate badge ID: %w", err)
+	}
+
+	// 如果查询结果为空，说明 badgeID 无效
+	badges, err := surrealdb.SmartUnmarshal[[]model.AchievementBadge](checkResult, nil)
+	if err != nil || len(badges) == 0 {
+		return nil, fmt.Errorf("invalid badge ID")
+	}
+
+	// 如果 badgeID 有效，则颁发成就徽章
+	createAchievementQuery := `
+		CREATE ONLY user_achievement:ulid()
+		SET 
+			user_id = $user_id,
+			badgeID = $badgeID,
+			earnedAt = time::now(),
+			createdAt = time::now();
+	`
+	createResult, err := database.DB.Query(createAchievementQuery, map[string]interface{}{
+		"user_id": user.ID,
+		"badgeID": badgeID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user achievement: %w", err)
+	}
+
+	// 解析创建结果
+	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievement](createResult, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse new user achievement: %w", err)
+	}
+
+	// 构造响应
+	response := &model.AwardAchievementResponse{
+		UserAchievementID: newUserAchievement.ID,
+		Message:           "Achievement awarded successfully",
+	}
+
+	return response, nil
+}
+
+// EarnPoints is the resolver for the earnPoints field.
+func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64, reason string) (*model.EarnPointsResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	if pointsEarned <= 0 {
+		return nil, fmt.Errorf("earned points must be positive number")
+	}
+
 	result, err := database.DB.Query(
-		`CREATE ONLY user_achievement:ulid() 
-        SET 
-			user_id=$user_id,
-			badgeID=$badgeID,
-            earnedAt=time::now(),
-            createdAt=time::now();`,
+		`CREATE ONLY point_record:ulid() 
+        SET user_id=$user_id,
+		pointsEarned=$pointsEarned,
+		reason=$reason,
+		earnedAt=time::now();`,
 		map[string]interface{}{
-			"user_id": user.ID,
-			"badgeID": badgeID,
+			"user_id":      user.ID,
+			"pointsEarned": pointsEarned,
+			"reason":       reason,
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	newUserAchievement, err := surrealdb.SmartUnmarshal[model.UserAchievement](result, nil)
+	newRecord, err := surrealdb.SmartUnmarshal[model.UserPointRecord](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &model.AwardAchievementResponse{
-		UserAchievementID: newUserAchievement.ID,
-		Message:           "Achievement awarded successfully",
+	result, err = database.DB.Query(`UPDATE ONLY $id 
+		SET points+=$pointsEarned;`,
+		map[string]interface{}{
+			"id":           newRecord.ID,
+			"pointsEarned": pointsEarned,
+		})
+
+	if err != nil {
+		return nil, err
+	}
+	updatedUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.EarnPointsResponse{
+		UpdatedPoints: updatedUser.Points,
+		Message:       fmt.Sprintf("%f points successfully added to user", newRecord.PointsEarned),
 	}
 
 	return response, nil
@@ -96,7 +172,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 	}
 
 	// TODO: could mofify this
-	result, err := database.DB.Query(`SELECT * FROM achievement_badge`, map[string]interface{}{})
+	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY created_at DESC`, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +189,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 			Name:        badge.Name,
 			Description: badge.Description,
 			IconURL:     badge.IconURL,
+			CreatedAt:   badge.CreatedAt,
 		}
 		badgeDetails = append(badgeDetails, badgeDetail)
 	}
@@ -128,7 +205,7 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID ORDER BY earned_at DESC;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -151,4 +228,42 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	return achievementDetails, nil
+}
+
+// GetUserPointRecords is the resolver for the getUserPointRecords field.
+func (r *queryResolver) GetUserPointRecords(ctx context.Context) ([]*model.UserPointRecordDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// get all the medication reminders for the user
+	result, err := database.DB.Query(
+		`SELECT * FROM point_record WHERE user_id = $user_id;`,
+		map[string]interface{}{
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	records, err := surrealdb.SmartUnmarshal[[]model.UserPointRecord](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// loop through the reminders, convert them into MedicationReminderDetails, then return the converted list and nil
+	var recordDetails []*model.UserPointRecordDetail
+	for _, record := range records {
+		reminderDetail := &model.UserPointRecordDetail{
+			RecordID:     record.ID,
+			PointsEarned: record.PointsEarned,
+			Reason:       record.Reason,
+			EarnedAt:     record.EarnedAt,
+		}
+		recordDetails = append(recordDetails, reminderDetail)
+	}
+
+	return recordDetails, nil
 }

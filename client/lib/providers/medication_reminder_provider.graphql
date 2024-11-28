@@ -1,5 +1,5 @@
-query GetMedicationReminders {
-  getMedicationReminders {
+query GetMedicationReminders() {
+  getMedicationReminders() {
     reminderId
     medicationId
     reminderTime
@@ -31,6 +31,12 @@ mutation UpdateMedicationReminder(
     isTaken: $isTaken
   ) {
     reminderId
+    message
+  }
+}
+
+mutation DeleteMedicationReminder($reminderId: String!) {
+  deleteMedicationReminder(reminderId: $reminderId) {
     message
   }
 }
