@@ -183,8 +183,8 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
         SET user_id=$user_id,
 			record_type=$recordType,
             content=$content,
-            createdAt=time::now(),
-            updatedAt=time::now();`,
+            created_at=time::now(),
+            updated_at=time::now();`,
 		map[string]interface{}{
 			"user_id":    user.ID,
 			"recordType": recordType,
@@ -215,9 +215,13 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
+
+	if !utils.MatchID(recordID, "record") {
+		return nil, fmt.Errorf("illegal medication id")
+	}
 	// 构建更新查询
-	query := `UPDATE medical_record SET updatedAt=time::now()`
-	params := map[string]interface{}{}
+	query := `UPDATE medical_record SET updated_at=time::now()`
+	params := map[string]interface{}{"id": recordID, "user_id": user.ID}
 
 	if recordType != nil {
 		query += `, recordType=$recordType`

@@ -11,8 +11,6 @@ import (
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
-	"strings"
-	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
@@ -60,8 +58,54 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 	return response, nil
 }
 
-// UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
-func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
+// EvaluateHealthRiskAssessment is the resolver for the evaluateHealthRiskAssessment field.
+func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, filledQuestionnaire model.FilledQuestionnaire) (*model.EvaluateHealthRiskAssessmentResponse, error) {
+	panic(fmt.Errorf("not implemented: EvaluateHealthRiskAssessment - evaluateHealthRiskAssessment"))
+}
+
+// GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
+func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// 查询最新的健康风险评估（假设根据创建时间或其他条件进行排序）
+	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY created_at DESC LIMIT 1;`, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	assessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(assessment) == 0 {
+		return nil, fmt.Errorf("invalid id. no associated assessment found")
+	}
+	detailResponse := &model.HealthRiskAssessmentDetailResponse{
+		AssessmentID:      assessment[0].ID,
+		QuestionnaireData: assessment[0].QuestionnaireData,
+		RiskLevel:         assessment[0].RiskLevel,
+		Recommendations:   assessment[0].Recommendations,
+		CreatedAt:         assessment[0].CreatedAt,
+	}
+
+	return detailResponse, nil
+}
+
+// GetHealthRiskAssessmentQuestion is the resolver for the getHealthRiskAssessmentQuestion field.
+func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*model.QuestionnaireObject, error) {
+	panic(fmt.Errorf("not implemented: GetHealthRiskAssessmentQuestion - getHealthRiskAssessmentQuestion"))
+}
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	//check if they are logged in correctly
 	user := middlewares.ForContext(ctx)
@@ -128,33 +172,4 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 
 	return response, nil
 }
-
-// GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
-func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-	// 查询最新的健康风险评估（假设根据创建时间或其他条件进行排序）
-	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY created_at DESC LIMIT 1;`, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	assessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(assessment) == 0 {
-		return nil, fmt.Errorf("invalid id. no associated assessment found")
-	}
-	detailResponse := &model.HealthRiskAssessmentDetailResponse{
-		AssessmentID:      assessment[0].ID,
-		QuestionnaireData: assessment[0].QuestionnaireData,
-		RiskLevel:         assessment[0].RiskLevel,
-		Recommendations:   assessment[0].Recommendations,
-		CreatedAt:         assessment[0].CreatedAt,
-	}
-
-	return detailResponse, nil
-}
+*/
