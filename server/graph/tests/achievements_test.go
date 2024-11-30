@@ -3,6 +3,7 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -164,6 +165,124 @@ func TestAchievement(t *testing.T) {
 
 		// 验证错误信息
 		require.Equal(t, "invalid badge ID", errMsg[0].Message)
+	})
+
+	DeleteUser(t, c, user)
+}
+
+func TestPoints(t *testing.T) {
+	c := client.New(NewServer())
+	user := CreateUserAndLogin(t, c)
+
+	var points1, points2 float64
+
+	t.Run("Award points", func(t *testing.T) {
+		var response struct {
+			EarnPoints struct {
+				UpdatedPoints float64
+				Message       string
+			}
+		}
+
+		points1 = rand.Float64() * 100.0
+
+		c.MustPost(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"earned_reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", points1),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, fmt.Sprintf("%f points successfully added to user", points1), response.EarnPoints.Message)
+		require.Equal(t, points1, response.EarnPoints.UpdatedPoints)
+
+		points2 = rand.Float64() * 100.0
+
+		c.MustPost(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"another reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", points2),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, fmt.Sprintf("%f points successfully added to user", points2), response.EarnPoints.Message)
+		println(points1)
+		println(points2)
+		require.Equal(t, points1+points2, response.EarnPoints.UpdatedPoints)
+	})
+
+	t.Run("Query points history", func(t *testing.T) {
+		var response struct {
+			GetUserPointRecords []struct {
+				RecordID     string
+				PointsEarned float64
+				Reason       string
+				EarnedAt     string
+			}
+		}
+
+		c.MustPost(`query{
+			getUserPointRecords{
+				recordId,
+				pointsEarned,
+				reason,
+				earnedAt
+			}
+		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+
+		require.Equal(t, 2, len(response.GetUserPointRecords))
+	})
+
+	t.Run("Error responses", func(t *testing.T) {
+		var response struct {
+			EarnPoints struct {
+				UpdatedPoints float64
+				Message       string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		err := c.Post(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"earned_reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", 1.0))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+
+		err = c.Post(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"earned_reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", -0.5),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "earned points must be positive number", err_msg[0].Message)
+
+		var response_query struct {
+			GetUserPointRecords []struct {
+				RecordID     string
+				PointsEarned float64
+				Reason       string
+				EarnedAt     string
+			}
+		}
+
+		err = c.Post(`query{
+			getUserPointRecords{
+				recordId,
+				pointsEarned,
+				reason,
+				earnedAt
+			}
+		}`, &response_query)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	DeleteUser(t, c, user)
