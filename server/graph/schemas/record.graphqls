@@ -57,6 +57,15 @@ type MedicalRecordDetail {
   createdAt: DateTime!
 }
 
+type UpdateMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type DeleteMedicalRecordResponse {
+  message: String!
+}
+
 extend type Query{
   getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
   getMedicalRecords: [MedicalRecordDetail]

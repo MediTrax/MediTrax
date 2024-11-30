@@ -91,6 +91,12 @@ type DeleteUserResponse struct {
 	Message string `json:"message"`
 }
 
+type EvaluateHealthRiskAssessmentResponse struct {
+	AssessmentID    string `json:"assessmentId"`
+	RiskLevel       string `json:"riskLevel"`
+	Recommendations string `json:"recommendations"`
+}
+
 type FamilyMember struct {
 	ID            string `json:"id"`
 	UserID        string `json:"user_id"`
@@ -105,6 +111,11 @@ type FamilyMemberDetail struct {
 	RelatedUserID string `json:"relatedUserId"`
 	Relationship  string `json:"relationship"`
 	AccessLevel   int    `json:"accessLevel"`
+}
+
+type FilledQuestionnaire struct {
+	QuestionnaireID int         `json:"questionnaireId"`
+	Responses       []*Response `json:"responses"`
 }
 
 type FoodRecommendation struct {
@@ -237,14 +248,15 @@ type Query struct {
 }
 
 type Question struct {
+	QuestionID   int      `json:"questionId"`
 	Question     string   `json:"question"`
 	QuestionType int      `json:"questionType"`
-	Choices      []string `json:"choices"`
-	Answer       string   `json:"answer"`
+	Choices      []string `json:"choices,omitempty"`
 }
 
 type QuestionnaireObject struct {
-	Data []*Question `json:"data"`
+	QuestionnaireID int         `json:"questionnaireId"`
+	Data            []*Question `json:"data"`
 }
 
 type RecordObject struct {
@@ -257,6 +269,12 @@ type RequestPasswordResetResponse struct {
 
 type ResetPasswordResponse struct {
 	Message string `json:"message"`
+}
+
+type Response struct {
+	QuestionID int     `json:"questionId"`
+	Choice     string  `json:"choice"`
+	Answer     *string `json:"answer,omitempty"`
 }
 
 type Token struct {
@@ -296,12 +314,6 @@ type UpdateFamilyMemberResponse struct {
 type UpdateHealthMetricResponse struct {
 	MetricID string `json:"metricId"`
 	Message  string `json:"message"`
-}
-
-type UpdateHealthRiskAssessmentResponse struct {
-	AssessmentID    string `json:"assessmentId"`
-	RiskLevel       string `json:"riskLevel"`
-	Recommendations string `json:"recommendations"`
 }
 
 type UpdateMedicalRecordResponse struct {

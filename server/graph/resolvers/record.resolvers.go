@@ -215,9 +215,13 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
+
+	if !utils.MatchID(recordID, "record") {
+		return nil, fmt.Errorf("illegal medication id")
+	}
 	// 构建更新查询
-	query := `UPDATE medical_record SET updatedAt=time::now()`
-	params := map[string]interface{}{}
+	query := `UPDATE medical_record SET updated_at=time::now()`
+	params := map[string]interface{}{"id": recordID, "user_id": user.ID}
 
 	if recordType != nil {
 		query += `, record_type=$recordType`
