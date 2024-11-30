@@ -183,8 +183,8 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
         SET user_id=$user_id,
 			record_type=$recordType,
             content=$content,
-            createdAt=time::now(),
-            updatedAt=time::now();`,
+            created_at=time::now(),
+            updated_at=time::now();`,
 		map[string]interface{}{
 			"user_id":    user.ID,
 			"recordType": recordType,
@@ -220,7 +220,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	params := map[string]interface{}{}
 
 	if recordType != nil {
-		query += `, recordType=$recordType`
+		query += `, record_type=$recordType`
 		params["recordType"] = *recordType
 	}
 	if content != nil {
