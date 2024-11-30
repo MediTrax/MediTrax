@@ -144,7 +144,7 @@ func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64,
 	result, err = database.DB.Query(`UPDATE ONLY $id 
 		SET points+=$pointsEarned;`,
 		map[string]interface{}{
-			"id":           newRecord.ID,
+			"id":           user.ID,
 			"pointsEarned": pointsEarned,
 		})
 

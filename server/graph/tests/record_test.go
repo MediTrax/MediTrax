@@ -10,6 +10,102 @@ import (
 )
 
 // TODO: write test for MedicalRecord
+func TestMedicalRecord(t *testing.T) {
+	c := client.New(NewServer())
+	user := CreateUserAndLogin(t, c)
+
+	var recordId1, recordId2 string
+
+	t.Run("Create record", func(t *testing.T) {
+		var response struct {
+			Create1 struct {
+				RecordID string
+				Message  string
+			}
+			Create2 struct {
+				RecordID string
+				Message  string
+			}
+		}
+
+		c.MustPost(`mutation create_records{
+			create1: addMedicalRecord(recordType: "type1", content: "treatment successful"){
+				recordId,
+				message
+			}
+			create2: addMedicalRecord(recordType: "type2", content: "treatment unsuccessful"){
+				recordId,
+				message
+			}
+		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+
+		require.Equal(t, "Medical record added successfully", response.Create1.Message)
+		require.Equal(t, "Medical record added successfully", response.Create2.Message)
+		recordId1 = response.Create1.RecordID
+		recordId2 = response.Create2.RecordID
+	})
+
+	t.Run("Update and query", func(t *testing.T) {
+		var response struct {
+			UpdateMedicalRecord struct {
+				RecordID string
+				Message  string
+			}
+		}
+
+		c.MustPost(`mutation update_record ($recordId:String!){
+			updateMedicalRecord(
+				recordId:$recordId,
+				recordType: "updated type",
+				content: "updated content"
+			){
+				recordId,
+				message
+			}
+		}`, &response, client.Var("recordId", recordId1),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "Medical record updated successfully", response.UpdateMedicalRecord.Message)
+		require.Equal(t, recordId1, response.UpdateMedicalRecord.RecordID)
+
+		var response_query struct {
+			GetMedicalRecords []struct {
+				RecordID   string
+				RecordType string
+				Content    string
+				CreatedAt  string
+			}
+		}
+		c.MustPost(`query get_records{
+			getMedicalRecords{
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+		}`, &response_query, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, 2, len(response_query.GetMedicalRecords))
+
+		for _, record := range response_query.GetMedicalRecords {
+			if record.RecordID == recordId1 {
+				require.Equal(t, "updated type", record.RecordType)
+				require.Equal(t, "updated content", record.Content)
+				require.NotEmpty(t, record.CreatedAt)
+			} else if record.RecordID == recordId2 {
+				require.Equal(t, "type2", record.RecordType)
+				require.Equal(t, "treatment unsuccessful", record.Content)
+				require.NotEmpty(t, record.CreatedAt)
+			} else {
+				require.Empty(t, record.RecordID)
+			}
+		}
+	})
+
+	// t.Run("Delete record", func(t *testing.T) {
+
+	// })
+
+	DeleteUser(t, c, user)
+}
 
 func TestHealthMetric(t *testing.T) {
 	c := client.New(NewServer())
