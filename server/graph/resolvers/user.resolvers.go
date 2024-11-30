@@ -84,8 +84,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 		password=crypto::argon2::generate($password),
 		role=$role,
 		points=0.0,
-		createdAt=time::now(),
-		updatedAt=time::now();`, map[string]interface{}{
+		created_at=time::now(),
+		updated_at=time::now();`, map[string]interface{}{
 			"username":    username,
 			"phoneNumber": phoneNumber,
 			"password":    password,

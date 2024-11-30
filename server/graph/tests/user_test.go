@@ -72,6 +72,39 @@ func TestCreationAndDelete(t *testing.T) {
 	user.PhoneNumber = phoneNumber
 	user.Username = username
 
+	t.Run("Get User", func(t *testing.T) {
+		var response struct {
+			GetUser struct {
+				UserID      string
+				PhoneNumber string
+				Name        string
+				Role        string
+				Points      float64
+				CreatedAt   string
+				LastLogin   string
+			}
+		}
+
+		c.MustPost(`query {
+			getUser{
+				userId,
+				phoneNumber,
+				name,
+				role,
+				points,
+				createdAt,
+				lastLogin
+			}
+		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+
+		require.Equal(t, user.ID, response.GetUser.UserID)
+		require.Equal(t, user.PhoneNumber, response.GetUser.PhoneNumber)
+		require.Equal(t, "patient", response.GetUser.Role)
+		require.Equal(t, 0.0, response.GetUser.Points)
+		require.NotEmpty(t, response.GetUser.CreatedAt)
+		require.NotEmpty(t, response.GetUser.LastLogin)
+	})
+
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
 			DeleteUser struct {

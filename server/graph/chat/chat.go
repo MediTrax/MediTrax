@@ -13,19 +13,20 @@ import (
 )
 
 type FoodSpec struct {
-	Name       string
-	UpperRange float64
+	Name        string
+	ChineseName string
+	UpperRange  float64
 }
 type SpecUnit string
 
 // var gpt4o_mini chatgpt.ChatGPTModel = "gpt-4o-mini-2024-07-18"
 
 var SpecLimits = []FoodSpec{
-	{Name: "animal protein", UpperRange: 10.0},
-	{Name: "plant protein", UpperRange: 12.3},
-	{Name: "sodium", UpperRange: 10.0},
-	{Name: "potassium", UpperRange: 12.3},
-	{Name: "phosphorus", UpperRange: 12.3},
+	{Name: "animal protein", ChineseName: "动物蛋白", UpperRange: 10.0},
+	{Name: "plant protein", ChineseName: "植物蛋白", UpperRange: 12.3},
+	{Name: "sodium", ChineseName: "纳", UpperRange: 10.0},
+	{Name: "potassium", ChineseName: "钾", UpperRange: 12.3},
+	{Name: "phosphorus", ChineseName: "磷", UpperRange: 12.3},
 }
 
 var conv_food_info = []chatgpt.ChatMessage{
