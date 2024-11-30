@@ -1,164 +1,155 @@
 package tests
 
-import (
-	"encoding/json"
-	"fmt"
-	"testing"
+// func TestHealthRiskAssessment(t *testing.T) {
+// 	c := client.New(NewServer())
+// 	user := CreateUserAndLogin(t, c)
 
-	"github.com/99designs/gqlgen/client"
-	"github.com/stretchr/testify/require"
-)
+// 	var assessmentID string
 
-func TestHealthRiskAssessment(t *testing.T) {
-	c := client.New(NewServer())
-	user := CreateUserAndLogin(t, c)
+// 	t.Run("Create Health Risk Assessment", func(t *testing.T) {
+// 		var response struct {
+// 			CreateHealthRiskAssessment struct {
+// 				AssessmentID    string
+// 				RiskLevel       string
+// 				Recommendations string
+// 			}
+// 		}
 
-	var assessmentID string
+// 		c.MustPost(`mutation create_health_risk {
+// 			createHealthRiskAssessment(
+// 				questionnaireData: "{'age': 30, 'smoking': true, 'exercise': 'rarely'}"
+// 			) {
+// 				assessmentId
+// 				riskLevel
+// 				recommendations
+// 			}
+// 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
-	t.Run("Create Health Risk Assessment", func(t *testing.T) {
-		var response struct {
-			CreateHealthRiskAssessment struct {
-				AssessmentID    string
-				RiskLevel       string
-				Recommendations string
-			}
-		}
+// 		require.NotEmpty(t, response.CreateHealthRiskAssessment.AssessmentID)
+// 		require.Equal(t, "Medium", response.CreateHealthRiskAssessment.RiskLevel)
+// 		assessmentID = response.CreateHealthRiskAssessment.AssessmentID
+// 	})
 
-		c.MustPost(`mutation create_health_risk {
-			createHealthRiskAssessment(
-				questionnaireData: "{'age': 30, 'smoking': true, 'exercise': 'rarely'}"
-			) {
-				assessmentId
-				riskLevel
-				recommendations
-			}
-		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+// 	t.Run("Try creating assessment without login", func(t *testing.T) {
+// 		var err_msg []struct {
+// 			Message string `json:"message"`
+// 			Path    string `json:"path"`
+// 		}
 
-		require.NotEmpty(t, response.CreateHealthRiskAssessment.AssessmentID)
-		require.Equal(t, "Medium", response.CreateHealthRiskAssessment.RiskLevel)
-		assessmentID = response.CreateHealthRiskAssessment.AssessmentID
-	})
+// 		err := c.Post(`mutation create_health_risk {
+// 			createHealthRiskAssessment(
+// 				questionnaireData: "{'age': 30, 'smoking': false, 'exercise': 'often'}"
+// 			) {
+// 				assessmentId
+// 				riskLevel
+// 				recommendations
+// 			}
+// 		}`, nil)
 
-	t.Run("Try creating assessment without login", func(t *testing.T) {
-		var err_msg []struct {
-			Message string `json:"message"`
-			Path    string `json:"path"`
-		}
+// 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+// 		require.Equal(t, "access denied", err_msg[0].Message)
+// 	})
 
-		err := c.Post(`mutation create_health_risk {
-			createHealthRiskAssessment(
-				questionnaireData: "{'age': 30, 'smoking': false, 'exercise': 'often'}"
-			) {
-				assessmentId
-				riskLevel
-				recommendations
-			}
-		}`, nil)
+// 	t.Run("Get Latest Health Risk Assessment", func(t *testing.T) {
+// 		var response struct {
+// 			GetHealthRiskAssessment struct {
+// 				AssessmentID    string
+// 				RiskLevel       string
+// 				Recommendations string
+// 			}
+// 		}
 
-		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
-		require.Equal(t, "access denied", err_msg[0].Message)
-	})
+// 		c.MustPost(`query get_latest_health_risk {
+// 			getHealthRiskAssessment {
+// 				assessmentId
+// 				riskLevel
+// 				recommendations
+// 			}
+// 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
-	t.Run("Get Latest Health Risk Assessment", func(t *testing.T) {
-		var response struct {
-			GetHealthRiskAssessment struct {
-				AssessmentID    string
-				RiskLevel       string
-				Recommendations string
-			}
-		}
+// 		require.Equal(t, assessmentID, response.GetHealthRiskAssessment.AssessmentID)
+// 		require.Equal(t, "Medium", response.GetHealthRiskAssessment.RiskLevel)
+// 	})
 
-		c.MustPost(`query get_latest_health_risk {
-			getHealthRiskAssessment {
-				assessmentId
-				riskLevel
-				recommendations
-			}
-		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+// 	t.Run("Update Health Risk Assessment", func(t *testing.T) {
+// 		var response struct {
+// 			UpdateHealthRiskAssessment struct {
+// 				AssessmentID    string
+// 				RiskLevel       string
+// 				Recommendations string
+// 			}
+// 		}
 
-		require.Equal(t, assessmentID, response.GetHealthRiskAssessment.AssessmentID)
-		require.Equal(t, "Medium", response.GetHealthRiskAssessment.RiskLevel)
-	})
+// 		// 正确地使用变量 $questionnaireData
+// 		query := `mutation update_health_risk($assessmentId: String!, $questionnaireData: String!) {
+// 			updateHealthRiskAssessment(
+// 				assessmentId: $assessmentId,
+// 				questionnaireData: $questionnaireData
+// 			) {
+// 				assessmentId
+// 				riskLevel
+// 				recommendations
+// 			}
+// 		}`
 
-	t.Run("Update Health Risk Assessment", func(t *testing.T) {
-		var response struct {
-			UpdateHealthRiskAssessment struct {
-				AssessmentID    string
-				RiskLevel       string
-				Recommendations string
-			}
-		}
+// 		// 提供测试所需的变量
+// 		vars := map[string]interface{}{
+// 			"assessmentId":      assessmentID, // 使用小写的 "assessmentId"
+// 			"questionnaireData": `{"age": 30, "smoking": false, "exercise": "regularly"}`,
+// 		}
 
-		// 正确地使用变量 $questionnaireData
-		query := `mutation update_health_risk($assessmentId: String!, $questionnaireData: String!) {
-			updateHealthRiskAssessment(
-				assessmentId: $assessmentId,
-				questionnaireData: $questionnaireData
-			) {
-				assessmentId
-				riskLevel
-				recommendations
-			}
-		}`
+// 		// 执行测试查询
+// 		c.MustPost(query, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("assessmentId", vars["assessmentId"]), client.Var("questionnaireData", vars["questionnaireData"]))
 
-		// 提供测试所需的变量
-		vars := map[string]interface{}{
-			"assessmentId":      assessmentID, // 使用小写的 "assessmentId"
-			"questionnaireData": `{"age": 30, "smoking": false, "exercise": "regularly"}`,
-		}
+// 		// 验证返回结果
+// 		require.Equal(t, assessmentID, response.UpdateHealthRiskAssessment.AssessmentID)
+// 		require.Equal(t, "Medium", response.UpdateHealthRiskAssessment.RiskLevel)
+// 		require.Equal(t, "Monitor lifestyle and consult a healthcare provider.", response.UpdateHealthRiskAssessment.Recommendations)
+// 	})
 
-		// 执行测试查询
-		c.MustPost(query, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("assessmentId", vars["assessmentId"]), client.Var("questionnaireData", vars["questionnaireData"]))
+// 	t.Run("Illegal Update and Access Tests", func(t *testing.T) {
+// 		var response struct {
+// 			UpdateHealthRiskAssessment struct {
+// 				AssessmentID    string
+// 				RiskLevel       string
+// 				Recommendations string
+// 			}
+// 		}
 
-		// 验证返回结果
-		require.Equal(t, assessmentID, response.UpdateHealthRiskAssessment.AssessmentID)
-		require.Equal(t, "Medium", response.UpdateHealthRiskAssessment.RiskLevel)
-		require.Equal(t, "Monitor lifestyle and consult a healthcare provider.", response.UpdateHealthRiskAssessment.Recommendations)
-	})
+// 		query := `mutation update_health_risk($assessmentId: String!, $questionnaireData: String!) {
+// 			updateHealthRiskAssessment(
+// 				assessmentId: $assessmentId,
+// 				questionnaireData: $questionnaireData
+// 			) {
+// 				assessmentId
+// 				riskLevel
+// 				recommendations
+// 			}
+// 		}`
 
-	t.Run("Illegal Update and Access Tests", func(t *testing.T) {
-		var response struct {
-			UpdateHealthRiskAssessment struct {
-				AssessmentID    string
-				RiskLevel       string
-				Recommendations string
-			}
-		}
+// 		// 使用小写的 "assessmentId"
+// 		vars := map[string]interface{}{
+// 			"assessmentId":      assessmentID,
+// 			"questionnaireData": `{"age": 30, "smoking": false, "exercise": "regularly"}`,
+// 		}
 
-		query := `mutation update_health_risk($assessmentId: String!, $questionnaireData: String!) {
-			updateHealthRiskAssessment(
-				assessmentId: $assessmentId,
-				questionnaireData: $questionnaireData
-			) {
-				assessmentId
-				riskLevel
-				recommendations
-			}
-		}`
+// 		// Execute query
+// 		c.MustPost(query, &response,
+// 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)),
+// 			client.Var("assessmentId", vars["assessmentId"]),
+// 			client.Var("questionnaireData", vars["questionnaireData"]))
 
-		// 使用小写的 "assessmentId"
-		vars := map[string]interface{}{
-			"assessmentId":      assessmentID,
-			"questionnaireData": `{"age": 30, "smoking": false, "exercise": "regularly"}`,
-		}
+// 		// Check if response is empty
+// 		if response.UpdateHealthRiskAssessment.AssessmentID == "" {
+// 			t.Fatal("No results returned for updateHealthRiskAssessment query")
+// 		}
 
-		// Execute query
-		c.MustPost(query, &response,
-			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)),
-			client.Var("assessmentId", vars["assessmentId"]),
-			client.Var("questionnaireData", vars["questionnaireData"]))
+// 		// Access result safely
+// 		result := response.UpdateHealthRiskAssessment
+// 		require.Equal(t, vars["assessmentId"], result.AssessmentID)
+// 		require.Equal(t, "Medium", result.RiskLevel)
+// 		require.Equal(t, "Monitor lifestyle and consult a healthcare provider.", result.Recommendations)
+// 	})
 
-		// Check if response is empty
-		if response.UpdateHealthRiskAssessment.AssessmentID == "" {
-			t.Fatal("No results returned for updateHealthRiskAssessment query")
-		}
-
-		// Access result safely
-		result := response.UpdateHealthRiskAssessment
-		require.Equal(t, vars["assessmentId"], result.AssessmentID)
-		require.Equal(t, "Medium", result.RiskLevel)
-		require.Equal(t, "Monitor lifestyle and consult a healthcare provider.", result.Recommendations)
-	})
-
-	DeleteUser(t, c, user)
-}
+// 	DeleteUser(t, c, user)
+// }

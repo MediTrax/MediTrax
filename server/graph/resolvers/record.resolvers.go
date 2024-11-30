@@ -216,7 +216,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 		return nil, fmt.Errorf("access denied")
 	}
 
-	if !utils.MatchID(recordID, "record") {
+	if !utils.MatchID(recordID, "medical_record") {
 		return nil, fmt.Errorf("illegal medication id")
 	}
 	// 构建更新查询
