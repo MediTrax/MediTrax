@@ -7,6 +7,7 @@ import 'package:meditrax/providers/medication_reminder_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/widgets/add_reminder_dialog.dart';
 import 'package:meditrax/widgets/edit_reminder_dialog.dart';
+import 'package:flutter/services.dart';
 
 class MedicineInventoryScreen extends StatelessWidget {
   const MedicineInventoryScreen({super.key});
@@ -1250,77 +1251,40 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Medicine Name Section
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.medication_rounded,
-                        color: Colors.green.shade400,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '药品信息',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+            // Medicine Name Card
+            _buildSectionCard(
+              title: '药品信息',
+              icon: Icons.medication_rounded,
+              iconColor: Colors.green.shade400,
+              child: TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: '药品名称',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_liquid_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入药品名称';
-                      }
-                      return null;
-                    },
+                  prefixIcon: Icon(
+                    Icons.medication_liquid_rounded,
+                    color: Colors.green.shade300,
                   ),
-                ],
+                  hintText: '输入药品名称',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入药品名称';
+                  }
+                  return null;
+                },
               ),
             ),
+            const SizedBox(height: 12),
 
-            // Dosage and Unit Section
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
+            // Dosage and Unit Card
+            _buildSectionCard(
+              title: '用药剂量',
+              icon: Icons.scale_rounded,
+              iconColor: Colors.blue.shade400,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.scale_rounded,
-                        color: Colors.blue.shade400,
-                        size: 28,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '药剂量',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
@@ -1328,16 +1292,10 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.straighten_rounded,
-                                  color: Colors.blue.shade400,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('剂量'),
-                              ],
+                            _buildFieldLabel(
+                              icon: Icons.straighten_rounded,
+                              label: '剂量',
+                              color: Colors.blue.shade400,
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
@@ -1346,14 +1304,16 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 prefixIcon: Icon(
                                   Icons.scale_rounded,
                                   color: Colors.blue.shade300,
                                 ),
-                                hintText: '输入剂量数值',
+                                hintText: '输入剂量值',
                               ),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                              ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return '请输入剂量';
@@ -1374,16 +1334,10 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.straighten_rounded,
-                                  color: Colors.blue.shade400,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text('单位'),
-                              ],
+                            _buildFieldLabel(
+                              icon: Icons.straighten_rounded,
+                              label: '单位',
+                              color: Colors.blue.shade400,
                             ),
                             const SizedBox(height: 8),
                             TextFormField(
@@ -1392,7 +1346,6 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 prefixIcon: Icon(
                                   Icons.straighten_rounded,
                                   color: Colors.blue.shade300,
@@ -1414,61 +1367,191 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
 
-            // Frequency Selector (Already styled)
-            _buildFrequencySelector(),
-
-            // Inventory Section
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
+            // Frequency Card
+            _buildSectionCard(
+              title: '服用频率',
+              icon: Icons.calendar_month_rounded,
+              iconColor: Colors.purple.shade400,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.inventory_2_rounded,
-                        color: Colors.orange.shade400,
-                        size: 28,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.repeat_rounded,
+                                  color: Colors.blue.shade400,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('每隔几天'),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            DropdownButtonFormField<int>(
+                              value: _periodInDays,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                prefixIcon: Icon(
+                                  Icons.calendar_today_rounded,
+                                  color: Colors.blue.shade300,
+                                ),
+                              ),
+                              items: List.generate(7, (index) => index + 1)
+                                  .map((days) => DropdownMenuItem(
+                                        value: days,
+                                        child: Text('$days天'),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _periodInDays = value;
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        '库存信息',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.alarm_rounded,
+                                  color: Colors.orange.shade400,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('服用次数'),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              initialValue: _timesPerPeriod.toString(),
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                prefixIcon: Icon(
+                                  Icons.medication_rounded,
+                                  color: Colors.orange.shade300,
+                                ),
+                                suffixText: '次',
+                                hintText: '输入次数',
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return '请输入次数';
+                                }
+                                final times = int.tryParse(value);
+                                if (times == null) {
+                                  return '请输入有效数字';
+                                }
+                                if (times <= 0) {
+                                  return '次数必须大于0';
+                                }
+                                if (times > 24) {
+                                  return '次数不能超过24';
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                final times = int.tryParse(value);
+                                if (times != null && times > 0 && times <= 24) {
+                                  setState(() {
+                                    _timesPerPeriod = times;
+                                  });
+                                }
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: inventoryController,
-                    decoration: InputDecoration(
-                      labelText: '库存数量',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.inventory_rounded,
-                        color: Colors.orange.shade300,
-                      ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.purple.shade100),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入库存数量';
-                      }
-                      final number = double.tryParse(value);
-                      if (number == null || number <= 0) {
-                        return '请输入有效的库存数量';
-                      }
-                      return null;
-                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 20,
+                          color: Colors.purple.shade700,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '每$_periodInDays天服用$_timesPerPeriod次',
+                          style: TextStyle(
+                            color: Colors.purple.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+
+            // Inventory Card
+            _buildSectionCard(
+              title: '库存信息',
+              icon: Icons.inventory_2_rounded,
+              iconColor: Colors.orange.shade400,
+              child: TextFormField(
+                controller: inventoryController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.inventory_rounded,
+                    color: Colors.orange.shade300,
+                  ),
+                  hintText: '输入库存数量',
+                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入库存数量';
+                  }
+                  final number = double.tryParse(value);
+                  if (number == null || number <= 0) {
+                    return '请输入有效的库存数量';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // Submit Button
             SizedBox(
@@ -1491,6 +1574,69 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required Widget child,
+  }) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: iconColor,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: color,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Text(label),
+      ],
     );
   }
 }
@@ -1781,23 +1927,78 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     required Medication medication,
     required Function(bool) onToggle,
   }) {
-    final frequencyParts = medication.frequency.split('/');
-    final times = frequencyParts.isNotEmpty ? frequencyParts[0] : '1';
-    final days = frequencyParts.length > 1 ? frequencyParts[1] : '1';
-    final isLowStock = medication.inventory < 10;
+    // Add this function to calculate next reminder time
+    DateTime getNextReminderTime() {
+      final now = DateTime.now();
+      // Ensure we're working with local time
+      final reminderTime = reminder.reminderTime.toLocal();
+      
+      // Parse frequency to get days interval
+      final frequencyParts = medication.frequency.split('/');
+      final daysInterval = frequencyParts.length > 1 ? 
+          int.tryParse(frequencyParts[1]) ?? 1 : 1;
 
-    // Add this to format the reminder frequency text
-    String getReminderFrequencyText(String frequency) {
-      final parts = frequency.split('/');
-      final times = parts.isNotEmpty ? parts[0] : '1';
-      final days = parts.length > 1 ? parts[1] : '1';
+      // Create base next reminder time for today using local time
+      DateTime nextReminder = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        reminderTime.hour,
+        reminderTime.minute,
+      );
 
-      if (days == '1') {
-        return '每天提醒${times}次';
+      // If today's reminder time has passed
+      if (nextReminder.isBefore(now)) {
+        // For daily medications (interval = 1), just add one day
+        if (daysInterval == 1) {
+          nextReminder = nextReminder.add(const Duration(days: 1));
+        } else {
+          // For medications with longer intervals
+          // If reminder is not taken, keep today's time if it's in future
+          if (!reminder.isTaken && !nextReminder.isBefore(now)) {
+            return nextReminder;
+          }
+          
+          // If reminder is taken or time has passed, add interval days
+          nextReminder = nextReminder.add(Duration(days: daysInterval));
+          
+          // If the calculated next reminder is in the past, 
+          // keep adding interval until we get a future date
+          while (nextReminder.isBefore(now)) {
+            nextReminder = nextReminder.add(Duration(days: daysInterval));
+          }
+        }
+      }
+
+      return nextReminder;
+    }
+
+    // Update the formatNextReminder function to handle longer intervals better:
+    String formatNextReminder(DateTime nextReminder) {
+      final now = DateTime.now();
+      final difference = nextReminder.difference(now).inDays;
+
+      if (nextReminder.year == now.year && 
+          nextReminder.month == now.month && 
+          nextReminder.day == now.day) {
+        return '今天';
+      } else if (nextReminder.year == now.year && 
+                 nextReminder.month == now.month && 
+                 nextReminder.day == now.day + 1) {
+        return '明天';
+      } else if (difference < 7) {
+        // Show weekday for dates within a week
+        final weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        final weekday = weekdays[nextReminder.weekday - 1];
+        return weekday;
       } else {
-        return '每$days天提醒${times}次';
+        // Show full date for dates more than a week away
+        return '${nextReminder.month}月${nextReminder.day}日';
       }
     }
+
+    final nextReminder = getNextReminderTime();
+    final isLowStock = medication.inventory < 10;
 
     return Card(
       elevation: 2,
@@ -1819,154 +2020,215 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
               children: [
-                // Time Column with fixed width
-                SizedBox(
-                  width: 90,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.orange.shade300,
-                          Colors.orange.shade400,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orange.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.access_alarm,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatTime(reminder.reminderTime),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 1,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Time Column with fixed width
+                    SizedBox(
+                      width: 90,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.orange.shade300,
+                              Colors.orange.shade400,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orange.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.access_alarm,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatTime(reminder.reminderTime),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                formatNextReminder(nextReminder),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Content Column
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                    const SizedBox(width: 8),
+                    // Content Column
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  medication.name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                // Add reminder frequency text here
-                                Text(
-                                  getReminderFrequencyText(medication.frequency),
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Wrap(
-                                  spacing: 4,
-                                  runSpacing: 4,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
+                                    Text(
+                                      medication.name,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '${medication.dosage}${medication.unit}/次',
-                                        style: TextStyle(
-                                          color: Colors.blue.shade700,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12,
-                                        ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      getReminderFrequencyText(medication.frequency),
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 12,
                                       ),
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.purple.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '每$days天$times次',
-                                        style: TextStyle(
-                                          color: Colors.purple.shade700,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12,
+                                    const SizedBox(height: 4),
+                                    Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            '${medication.dosage}${medication.unit}/次',
+                                            style: TextStyle(
+                                              color: Colors.blue.shade700,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.purple.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            // Extract frequency parts here
+                                            (() {
+                                              final parts = medication.frequency.split('/');
+                                              final times = parts.isNotEmpty ? parts[0] : '1';
+                                              final days = parts.length > 1 ? parts[1] : '1';
+                                              return '每$days天$times次';
+                                            })(),
+                                            style: TextStyle(
+                                              color: Colors.purple.shade700,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          // Switch column
-                          Column(
-                            children: [
-                              Switch(
-                                value: reminder.isTaken,
-                                onChanged: onToggle,
                               ),
-                              Text(
-                                reminder.isTaken ? '已服用' : '未服用',
-                                style: TextStyle(
-                                  color: reminder.isTaken
-                                      ? Colors.green
-                                      : Colors.orange,
-                                  fontSize: 12,
-                                ),
+                              const SizedBox(width: 4),
+                              // Switch column
+                              Column(
+                                children: [
+                                  Switch(
+                                    value: reminder.isTaken,
+                                    onChanged: onToggle,
+                                  ),
+                                  Text(
+                                    reminder.isTaken ? '已服用' : '未服用',
+                                    style: TextStyle(
+                                      color: reminder.isTaken
+                                          ? Colors.green
+                                          : Colors.orange,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          if (!reminder.isTaken) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.blue.shade100),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.schedule,
+                                    size: 16,
+                                    color: Colors.blue.shade700,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '下次提醒: ${formatNextReminder(nextReminder)} ${_formatTime(reminder.reminderTime)}',
+                                    style: TextStyle(
+                                      color: Colors.blue.shade700,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1998,10 +2260,20 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
   }
 
   String _formatTime(DateTime time) {
-    // Convert UTC time to local time
+    // Ensure we're working with local time
     final localTime = time.toLocal();
-    
-    // Format time as HH:mm
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  String getReminderFrequencyText(String frequency) {
+    final parts = frequency.split('/');
+    final times = parts.isNotEmpty ? parts[0] : '1';
+    final days = parts.length > 1 ? parts[1] : '1';
+
+    if (days == '1') {
+      return '每天提醒${times}次';
+    } else {
+      return '每$days天提醒${times}次';
+    }
   }
 }
