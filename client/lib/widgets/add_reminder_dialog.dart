@@ -163,12 +163,21 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
               
               // Add a reminder for each selected time
               for (final time in _selectedTimes) {
+                // Create DateTime in local timezone
+                final reminderTime = DateTime(
+                  _selectedDate.year,
+                  _selectedDate.month,
+                  _selectedDate.day,
+                  time.hour,
+                  time.minute,
+                );
+
+                // Convert to UTC for storage
+                final utcReminderTime = reminderTime.toUtc();
+                
                 final success = await ref.read(medicationReminderProvider.notifier).addReminder(
                   medicationId: _selectedMedicationId!,
-                  reminderTime: _selectedDate.add(Duration(
-                    hours: time.hour,
-                    minutes: time.minute,
-                  )).toIso8601String(),
+                  reminderTime: utcReminderTime.toIso8601String(),
                 );
                 
                 if (!success) {

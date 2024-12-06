@@ -23,8 +23,11 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
+    final reminderLocalTime = widget.reminder.reminderTime.toLocal();
+    selectedTime = TimeOfDay(
+      hour: reminderLocalTime.hour,
+      minute: reminderLocalTime.minute,
+    );
   }
 
   @override
@@ -59,7 +62,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
         FilledButton(
           onPressed: () async {
             final now = DateTime.now();
-            var reminderTime = DateTime(
+            final reminderTime = DateTime(
               now.year,
               now.month,
               now.day,
@@ -67,11 +70,11 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               selectedTime.minute,
             );
 
-            if (reminderTime.isBefore(now)) {
-              reminderTime = reminderTime.add(const Duration(days: 1));
-            }
+            final adjustedReminderTime = reminderTime.isBefore(now) 
+                ? reminderTime.add(const Duration(days: 1))
+                : reminderTime;
 
-            final utcReminderTime = reminderTime.toUtc();
+            final utcReminderTime = adjustedReminderTime.toUtc();
 
             final success = await ref.read(medicationReminderProvider.notifier)
                 .updateReminder(
