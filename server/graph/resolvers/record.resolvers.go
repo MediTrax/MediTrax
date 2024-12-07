@@ -209,42 +209,49 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 }
 
 // UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
+// UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
 func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error) {
-	//panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
+	// Check if the user is logged in correctly
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
+	// Check if the record ID is valid
 	if !utils.MatchID(recordID, "medical_record") {
-		return nil, fmt.Errorf("illegal medication id")
+		return nil, fmt.Errorf("illegal record id")
 	}
-	// 构建更新查询
-	query := `UPDATE medical_record SET updated_at=time::now()`
-	params := map[string]interface{}{"id": recordID, "user_id": user.ID}
 
+	// Initialize the map to hold update values
+	updateValues := map[string]interface{}{"id": recordID, "user_id": user.ID}
+
+	// Prepare the fields to be updated
+	updateFields := []string{"updated_at = time::now()"} // Always update the updated_at field
 	if recordType != nil {
-		query += `, record_type=$recordType`
-		params["recordType"] = *recordType
+		updateValues["recordType"] = *recordType
+		updateFields = append(updateFields, "recordType = $recordType")
 	}
 	if content != nil {
-		query += `, content=$content`
-		params["content"] = *content
+		updateValues["content"] = *content
+		updateFields = append(updateFields, "content = $content")
 	}
-	query += ` WHERE id=$id;`
-	params["id"] = recordID
 
-	// 执行更新
-	_, err := database.DB.Query(query, params)
+	// Construct the final query
+	query := fmt.Sprintf("UPDATE medical_record SET %s WHERE id=$id AND user_id=$user_id;", strings.Join(updateFields, ", "))
+
+	// Execute the update query
+	_, err := database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
 
+	// Prepare the response
 	response := &model.UpdateMedicalRecordResponse{
 		RecordID: recordID,
 		Message:  "Medical record updated successfully",
 	}
 
+	// Return the response with the record ID and success message
 	return response, nil
 }
 
