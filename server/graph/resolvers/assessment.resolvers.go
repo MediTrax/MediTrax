@@ -58,9 +58,56 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 	return response, nil
 }
 
-// EvaluateHealthRiskAssessment is the resolver for the evaluateHealthRiskAssessment field.
+// 假设这是一个全局变量，用于生成递增的assessmentId
+var assessmentIdCounter int = 1
+
+// EvaluateHealthRiskAssessment 是处理填写问卷后健康评估的函数
 func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, filledQuestionnaire model.FilledQuestionnaire) (*model.EvaluateHealthRiskAssessmentResponse, error) {
-	panic(fmt.Errorf("not implemented: EvaluateHealthRiskAssessment - evaluateHealthRiskAssessment"))
+	// 生成assessmentId
+	assessmentId := fmt.Sprintf("assessment-%d", assessmentIdCounter)
+	assessmentIdCounter++ // 每次调用时递增ID
+
+	// 假设一个简单的评估逻辑：根据用户回答的关键问题评估风险
+	riskLevel := "低风险"
+	recommendations := "保持健康的生活方式，定期检查"
+
+	// 遍历用户的回答
+	for _, response := range filledQuestionnaire.Responses {
+		// 根据问题ID和答案进行简单的评估逻辑
+		switch response.QuestionID {
+		case 1: // 是否有高血压病史
+			if response.Choice == "是" {
+				riskLevel = "中风险"
+				recommendations = "建议控制血压，定期检查"
+			}
+		case 2: // 是否有糖尿病病史
+			if response.Choice == "是" {
+				riskLevel = "高风险"
+				recommendations = "建议控制血糖，定期进行肾功能检查"
+			}
+		case 3: // 是否有肾脏疾病相关症状（如水肿、尿频等）
+			if response.Choice == "水肿" || response.Choice == "尿频" {
+				riskLevel = "高风险"
+				recommendations = "建议尽快就医检查肾功能"
+			}
+			// case 4: // 填写肾功能检查结果
+			//     if response.Answer != "" {
+			//         // 根据用户填写的检查结果进一步评估
+			//         // 假设检查结果中，若肌酐超过一定值则提示高风险
+			//         if strings.Contains(response.Answer, "肌酐高") {
+			//             riskLevel = "高风险"
+			//             recommendations = "建议尽早治疗，控制肾功能"
+			//         }
+			//     }
+		}
+	}
+
+	// 返回评估结果
+	return &model.EvaluateHealthRiskAssessmentResponse{
+		AssessmentID:    assessmentId,
+		RiskLevel:       riskLevel,
+		Recommendations: recommendations,
+	}, nil
 }
 
 // GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
@@ -93,9 +140,45 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 	return detailResponse, nil
 }
 
+var questionnaireIdCounter int = 1
+
 // GetHealthRiskAssessmentQuestion is the resolver for the getHealthRiskAssessmentQuestion field.
 func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*model.QuestionnaireObject, error) {
-	panic(fmt.Errorf("not implemented: GetHealthRiskAssessmentQuestion - getHealthRiskAssessmentQuestion"))
+	questionnaireId := questionnaireIdCounter
+	questionnaireIdCounter++ // 每次调用时递增ID
+
+	questions := []*model.Question{
+		{
+			QuestionID:   1,
+			Question:     "你是否有高血压病史？",
+			QuestionType: 0, // 单选题
+			Choices:      []string{"是", "否"},
+		},
+		{
+			QuestionID:   2,
+			Question:     "你是否有糖尿病病史？",
+			QuestionType: 0, // 单选题
+			Choices:      []string{"是", "否"},
+		},
+		{
+			QuestionID:   3,
+			Question:     "你是否有肾脏疾病相关症状（如水肿、尿频等）？",
+			QuestionType: 1, // 多选题
+			Choices:      []string{"水肿", "尿频", "腰痛", "无症状"},
+		},
+		// {
+		// 	QuestionID:   4,
+		// 	Question:     "请填写你最近的肾功能检查结果（如肌酐、尿蛋白等）",
+		// 	QuestionType: 2,   // 填空题
+		// 	Choices:      nil, // 填空题没有选项
+		// },
+	}
+
+	// 返回QuestionnaireObject
+	return &model.QuestionnaireObject{
+		QuestionnaireID: questionnaireId, // 可以根据实际需要返回合适的ID
+		Data:            questions,
+	}, nil
 }
 
 // !!! WARNING !!!
