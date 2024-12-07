@@ -100,7 +100,42 @@ func TestMedicalRecord(t *testing.T) {
 		}
 	})
 
-	// t.Run("Delete record", func(t *testing.T) {
+	t.Run("Delete record", func(t *testing.T) {
+		var response struct {
+			DeleteMedicalRecord struct {
+				Message string
+			}
+		}
+		c.MustPost(`mutation ($recordId:String!){
+			deleteMedicalRecord(recordId:$recordId){
+				message
+			}
+		}`, &response, client.Var("recordId", recordId1),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "Medical record deleted successfully", response.DeleteMedicalRecord.Message)
+
+		var response_query struct {
+			GetMedicalRecords []struct {
+				RecordID   string
+				RecordType string
+				Content    string
+				CreatedAt  string
+			}
+		}
+		c.MustPost(`query get_records{
+			getMedicalRecords{
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+		}`, &response_query, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, 1, len(response_query.GetMedicalRecords))
+		require.Equal(t, recordId2, response_query.GetMedicalRecords[0].RecordID)
+	})
+
+	// TODO: add tests for error responses
+	// t.Run("Error responses", func(t *testing.T){
 
 	// })
 

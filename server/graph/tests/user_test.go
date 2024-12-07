@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreationAndDelete(t *testing.T) {
+func TestUserFunctions(t *testing.T) {
 	c := client.New(NewServer())
 	var user TestUser
 
