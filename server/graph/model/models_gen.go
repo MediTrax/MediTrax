@@ -152,27 +152,27 @@ type HealthMetricDetail struct {
 	RecordedAt string  `json:"recordedAt"`
 }
 
+type HealthResponse struct {
+	QuestionID int     `json:"questionId"`
+	Choice     string  `json:"choice"`
+	Answer     *string `json:"answer,omitempty"`
+}
+
 type HealthRiskAssessment struct {
-	ID                string `json:"id"`
-	UserID            string `json:"user_id"`
-	QuestionnaireData string `json:"questionnaire_data"`
-	RiskLevel         string `json:"risk_level"`
-	Recommendations   string `json:"recommendations"`
-	CreatedAt         string `json:"created_at"`
+	ID                string            `json:"id"`
+	UserID            string            `json:"user_id"`
+	QuestionnaireData []*HealthResponse `json:"questionnaire_data"`
+	RiskLevel         string            `json:"risk_level"`
+	Recommendations   string            `json:"recommendations"`
+	CreatedAt         string            `json:"created_at"`
 }
 
 type HealthRiskAssessmentDetailResponse struct {
-	AssessmentID      string `json:"assessmentId"`
-	QuestionnaireData string `json:"questionnaireData"`
-	RiskLevel         string `json:"riskLevel"`
-	Recommendations   string `json:"recommendations"`
-	CreatedAt         string `json:"createdAt"`
-}
-
-type HealthRiskAssessmentResponse struct {
-	AssessmentID    string `json:"assessmentId"`
-	RiskLevel       string `json:"riskLevel"`
-	Recommendations string `json:"recommendations"`
+	AssessmentID      string            `json:"assessmentId"`
+	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
+	RiskLevel         string            `json:"riskLevel"`
+	Recommendations   string            `json:"recommendations"`
+	CreatedAt         string            `json:"createdAt"`
 }
 
 type LoginUserResponse struct {

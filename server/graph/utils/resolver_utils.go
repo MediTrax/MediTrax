@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"meditrax/graph/model"
 	"regexp"
 	"strconv"
 )
@@ -44,16 +45,27 @@ func MatchID(id string, table string) bool {
 	}
 }
 
-func EvaluateHealthRisk(questionnaireData string) (string, string) {
-	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
-	var riskLevel, recommendations string
-	if questionnaireData == "" {
-		riskLevel = "Unknown"
-		recommendations = "Please complete the health questionnaire."
-	} else {
-		// 简单的例子，实际应根据数据分析
-		riskLevel = "Medium"
-		recommendations = "Monitor lifestyle and consult a healthcare provider."
+func EvaluateHealthRisk(responses []*model.Response) (string, string) {
+	// 假设我们根据响应的答案来进行风险评估
+	var riskLevel string
+	var recommendations string
+
+	// 基于一些问题回答进行简单评估
+	score := 0
+	for _, response := range responses {
+		if response.Choice == "是" {
+			score++
+		}
 	}
+
+	// 简单示例：如果选择了超过5个“是”，则认为风险较高
+	if score > 5 {
+		riskLevel = "高风险"
+		recommendations = "请尽早就医，做肾功能检查。"
+	} else {
+		riskLevel = "低风险"
+		recommendations = "保持健康饮食，定期体检。"
+	}
+
 	return riskLevel, recommendations
 }

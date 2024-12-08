@@ -16,6 +16,12 @@ input Response{
   answer: String
 }
 
+type HealthResponse{
+  questionId: Int!
+  choice: String!#数字序号用，隔开
+  answer: String
+}
+
 input FilledQuestionnaire{
   questionnaireId: Int!  # 第几套测试题
   responses: [Response!]!
@@ -24,21 +30,15 @@ input FilledQuestionnaire{
 type HealthRiskAssessment{
   id: String!
   user_id: String!
-  questionnaire_data: String!
+  questionnaire_data: [HealthResponse!]!
   risk_level: String!
   recommendations: String!
   created_at: DateTime!
 }
 
-type HealthRiskAssessmentResponse {
-  assessmentId: String!
-  riskLevel: String!
-  recommendations: String!
-}
-
 type HealthRiskAssessmentDetailResponse {
   assessmentId: String!
-  questionnaireData: String!
+  questionnaireData: [HealthResponse!]!
   riskLevel: String!
   recommendations: String!
   createdAt: DateTime!
@@ -51,11 +51,10 @@ type EvaluateHealthRiskAssessmentResponse {
 }
 
 extend type Query{
-  getHealthRiskAssessment: HealthRiskAssessmentDetailResponse # 不做题目能拿到之前的结果
+  getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
   getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
 }
 
 extend type Mutation{
-  createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse
   evaluateHealthRiskAssessment(filledQuestionnaire: FilledQuestionnaire!): EvaluateHealthRiskAssessmentResponse #拿结果
 }
