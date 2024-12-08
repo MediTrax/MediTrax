@@ -1,162 +1,230 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:flutter/material.dart';
+import 'package:meditrax/providers/graphql.dart';
+import 'package:meditrax/providers/diet_plan_provider.graphql.dart';
 
-class DietPlanProvider with ChangeNotifier {
+final foodSpecsProvider = StateNotifierProvider<FoodSpecsNotifier, AsyncValue<FoodSpecs?>>((ref) {
+  final client = ref.watch(graphQLServiceProvider);
+  return FoodSpecsNotifier(client);
+});
+
+final foodRecommendationProvider = StateNotifierProvider<FoodRecommendationNotifier, AsyncValue<FoodRecommendation?>>((ref) {
+  final client = ref.watch(graphQLServiceProvider);
+  return FoodRecommendationNotifier(client);
+});
+
+class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
   final GraphQLClient _client;
-  List<DietPlan> _dietPlans = [];
-  bool _loading = false;
-  String? _error;
 
-  DietPlanProvider(this._client);
+  FoodSpecsNotifier(this._client) : super(const AsyncValue.data(null));
 
-  List<DietPlan> get dietPlans => _dietPlans;
-  bool get loading => _loading;
-  String? get error => _error;
-
-  Future<void> getDietPlans(String userId) async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
-
+  Future<void> getMockFoodSpecs(String food) async {
     try {
-      final result = await _client.query(
-        QueryOptions(
-          document: gql(getDietPlansQuery),
-          variables: {'userId': userId},
+      print('\n=== getMockFoodSpecs Debug Info ===');
+      print('Searching for food: $food');
+      
+      state = const AsyncValue.loading();
+      
+      final result = await _client.query$GetMockFoodSpecs(
+        Options$Query$GetMockFoodSpecs(
+          variables: Variables$Query$GetMockFoodSpecs(
+            food: food,
+          ),
+          fetchPolicy: FetchPolicy.networkOnly,
         ),
       );
 
+      print('\nGraphQL Response:');
+      print('Has Exception: ${result.hasException}');
+      
       if (result.hasException) {
-        _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-      } else {
-        final List<dynamic> plansData = result.data?['getDietPlans'] ?? [];
-        _dietPlans = plansData.map((plan) => DietPlan.fromJson(plan)).toList();
+        print('Exception: ${result.exception}');
+        throw result.exception!;
       }
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _loading = false;
-      notifyListeners();
+
+      print('\nRaw Data:');
+      print('getMockFoodSpecs: ${result.data}');
+
+      if (result.data?['getMockFoodSpecs'] == null) {
+        print('No data returned from getMockFoodSpecs');
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final specs = (result.data!['getMockFoodSpecs']['specs'] as List)
+          .map((spec) {
+            print('\nProcessing Spec:');
+            print('  name: ${spec['name']}');
+            print('  value: ${spec['value']}');
+            print('  unit: ${spec['unit']}');
+            print('  howHigh: ${spec['howHigh']}');
+            return FoodSpec(
+              name: spec['name'].toString(),
+              value: spec['value'].toString(),
+              unit: spec['unit']?.toString() ?? '',
+              howHigh: spec['howHigh']?.toString() ?? '',
+            );
+          })
+          .toList();
+
+      final foodSpecs = FoodSpecs(
+        specs: specs,
+        howRecommend: result.data!['getMockFoodSpecs']['howRecommend'].toString(),
+      );
+
+      print('\nProcessed FoodSpecs:');
+      print('Number of specs: ${foodSpecs.specs.length}');
+      print('How Recommend: ${foodSpecs.howRecommend}');
+      print('================================\n');
+
+      state = AsyncValue.data(foodSpecs);
+    } catch (error, stackTrace) {
+      print('\nError in getMockFoodSpecs:');
+      print('Error: $error');
+      print('Stack Trace: $stackTrace');
+      print('================================\n');
+      state = AsyncValue.error(error, stackTrace);
     }
   }
 
-  Future<String?> createDietPlan({
-    required String userId,
-    required String mealType,
-    required String foodItems,
-    required double calories,
-  }) async {
+  Future<void> getFoodSpecs(String food) async {
     try {
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql(createDietPlanMutation),
-          variables: {
-            'userId': userId,
-            'mealType': mealType,
-            'foodItems': foodItems,
-            'calories': calories,
-          },
+      state = const AsyncValue.loading();
+      final result = await _client.query$GetFoodSpecs(
+        Options$Query$GetFoodSpecs(
+          variables: Variables$Query$GetFoodSpecs(
+            food: food,
+          ),
+          fetchPolicy: FetchPolicy.networkOnly,
         ),
       );
 
       if (result.hasException) {
-        _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-        return null;
+        throw result.exception!;
       }
 
-      await getDietPlans(userId);
-      return result.data?['createDietPlan']['planId'];
-    } catch (e) {
-      _error = e.toString();
-      return null;
-    }
-  }
+      if (result.data?['getFoodSpecs'] == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
 
-  Future<bool> updateDietPlan({
-    required String planId,
-    String? mealType,
-    String? foodItems,
-    double? calories,
-  }) async {
-    try {
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql(updateDietPlanMutation),
-          variables: {
-            'planId': planId,
-            if (mealType != null) 'mealType': mealType,
-            if (foodItems != null) 'foodItems': foodItems,
-            if (calories != null) 'calories': calories,
-          },
-        ),
+      final specs = (result.data!['getFoodSpecs']['specs'] as List)
+          .map((spec) => FoodSpec(
+                name: spec['name'].toString(),
+                value: spec['value'].toString(),
+                unit: spec['unit']?.toString() ?? '',
+                howHigh: spec['howHigh']?.toString() ?? '',
+              ))
+          .toList();
+
+      final foodSpecs = FoodSpecs(
+        specs: specs,
+        howRecommend: result.data!['getFoodSpecs']['howRecommend'].toString(),
       );
 
-      if (result.hasException) {
-        _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-        return false;
-      }
-
-      // Refresh the diet plans list
-      final userId = _dietPlans.firstWhere((plan) => plan.planId == planId).userId;
-      await getDietPlans(userId);
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      return false;
-    }
-  }
-
-  Future<bool> deleteDietPlan(String planId) async {
-    try {
-      final result = await _client.mutate(
-        MutationOptions(
-          document: gql(deleteDietPlanMutation),
-          variables: {
-            'planId': planId,
-          },
-        ),
-      );
-
-      if (result.hasException) {
-        _error = result.exception?.graphqlErrors.first.message ?? 'An error occurred';
-        return false;
-      }
-
-      _dietPlans.removeWhere((plan) => plan.planId == planId);
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      return false;
+      state = AsyncValue.data(foodSpecs);
+    } catch (error, stackTrace) {
+      print('Error in getFoodSpecs: $error');
+      state = AsyncValue.error(error, stackTrace);
     }
   }
 }
 
-class DietPlan {
-  final String planId;
-  final String userId;
-  final String mealType;
-  final String foodItems;
-  final double calories;
-  final DateTime createdAt;
+class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommendation?>> {
+  final GraphQLClient _client;
 
-  DietPlan({
-    required this.planId,
-    required this.userId,
-    required this.mealType,
-    required this.foodItems,
-    required this.calories,
-    required this.createdAt,
-  });
+  FoodRecommendationNotifier(this._client) : super(const AsyncValue.data(null));
 
-  factory DietPlan.fromJson(Map<String, dynamic> json) {
-    return DietPlan(
-      planId: json['planId'],
-      userId: json['userId'],
-      mealType: json['mealType'],
-      foodItems: json['foodItems'],
-      calories: json['calories'].toDouble(),
-      createdAt: DateTime.parse(json['createdAt']),
-    );
+  Future<void> getMockFoodRecommendation() async {
+    try {
+      state = const AsyncValue.loading();
+      
+      final result = await _client.query$GetMockFoodRecommendation(
+        Options$Query$GetMockFoodRecommendation(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      if (result.data?['getMockFoodRecommendation'] == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final recommendation = FoodRecommendation(
+        name: result.data!['getMockFoodRecommendation']['name'].toString(),
+      );
+
+      state = AsyncValue.data(recommendation);
+    } catch (error, stackTrace) {
+      print('Error in getMockFoodRecommendation: $error');
+      state = AsyncValue.error(error, stackTrace);
+    }
   }
+
+  Future<void> getFoodRecommendation() async {
+    try {
+      state = const AsyncValue.loading();
+      
+      final result = await _client.query$GetFoodRecommendation(
+        Options$Query$GetFoodRecommendation(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      if (result.data?['getFoodRecommendation'] == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final recommendation = FoodRecommendation(
+        name: result.data!['getFoodRecommendation']['name'].toString(),
+      );
+
+      state = AsyncValue.data(recommendation);
+    } catch (error, stackTrace) {
+      print('Error in getFoodRecommendation: $error');
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
+
+// Models
+class FoodSpecs {
+  final List<FoodSpec> specs;
+  final String howRecommend;
+
+  FoodSpecs({
+    required this.specs,
+    required this.howRecommend,
+  });
+}
+
+class FoodSpec {
+  final String name;
+  final String value;
+  final String unit;
+  final String howHigh;
+
+  FoodSpec({
+    required this.name,
+    required this.value,
+    required this.unit,
+    required this.howHigh,
+  });
+}
+
+class FoodRecommendation {
+  final String name;
+
+  FoodRecommendation({
+    required this.name,
+  });
 }

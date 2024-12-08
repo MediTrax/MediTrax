@@ -1,49 +1,35 @@
-query getDietPlans($userId: String!) {
-  getDietPlans(userId: $userId) {
-    planId
-    mealType
-    foodItems
-    calories
-    createdAt
+query GetFoodSpecs($food: String!) {
+  getFoodSpecs(food: $food) {
+    specs {
+      name
+      value
+      unit
+      howHigh
+    }
+    howRecommend
   }
 }
 
-mutation createDietPlan(
-  $userId: String!
-  $mealType: String!
-  $foodItems: String!
-  $calories: Float!
-) {
-  createDietPlan(
-    userId: $userId
-    mealType: $mealType
-    foodItems: $foodItems
-    calories: $calories
-  ) {
-    planId
-    message
+query GetMockFoodSpecs($food: String!) {
+  getMockFoodSpecs(food: $food) {
+    specs {
+      name
+      value
+      unit
+      howHigh
+    }
+    howRecommend
   }
 }
 
-mutation updateDietPlan(
-  $planId: String!
-  $mealType: String
-  $foodItems: String
-  $calories: Float
-) {
-  updateDietPlan(
-    planId: $planId
-    mealType: $mealType
-    foodItems: $foodItems
-    calories: $calories
-  ) {
-    planId
-    message
+query GetFoodRecommendation {
+  getFoodRecommendation {
+    name
   }
 }
 
-mutation deleteDietPlan($planId: String!) {
-  deleteDietPlan(planId: $planId) {
-    message
+query GetMockFoodRecommendation {
+  getMockFoodRecommendation {
+    name
   }
 }
