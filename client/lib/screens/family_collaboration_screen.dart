@@ -94,37 +94,12 @@ class FamilyMembersTab extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final member = members[index];
                         return _buildMemberCard(
-                          name: member
-                              .relatedUserId, // You might want to fetch user details
-                          relation: member.relationship,
-                          hasAccess: member.accessLevel > 0,
-                          onAccessChanged: (value) async {
-                            try {
-                              await ref
-                                  .read(familyMembersProvider.notifier)
-                                  .updateMember(
-                                    memberId: member.id,
-                                    accessLevel: value ? '1' : '0',
-                                  );
-                              ref.refresh(familyMembersProvider);
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
-                            }
-                          },
-                          onDelete: () async {
-                            try {
-                              await ref
-                                  .read(familyMembersProvider.notifier)
-                                  .deleteMember(member.id);
-                              ref.refresh(familyMembersProvider);
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
-                            }
-                          },
+                          context,
+                          ref,
+                          member.id,
+                          member.relatedUserId,
+                          member.relationship,
+                          member.accessLevel,
                         );
                       },
                     ),
@@ -133,13 +108,10 @@ class FamilyMembersTab extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                // TODO: Show add family member dialog
-              },
-              style: ElevatedButton.styleFrom(
+            child: FilledButton(
+              onPressed: () => _showAddMemberDialog(context, ref),
+              style: FilledButton.styleFrom(
                 backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: const Text('添加家庭成员'),
@@ -150,14 +122,20 @@ class FamilyMembersTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildMemberCard({
-    required String name,
-    required String relation,
-    required bool hasAccess,
-    required Function(bool) onAccessChanged,
-    required VoidCallback onDelete,
-  }) {
+  Widget _buildMemberCard(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+    String relatedUserId,
+    String relationship,
+    int accessLevel,
+  ) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -167,14 +145,14 @@ class FamilyMembersTab extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    relatedUserId,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    relation,
+                    relationship,
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -182,21 +160,146 @@ class FamilyMembersTab extends ConsumerWidget {
             ),
             Row(
               children: [
-                const Text('访问权限'),
-                const SizedBox(width: 8),
-                Switch(
-                  value: hasAccess,
-                  onChanged: onAccessChanged,
+                DropdownButton<String>(
+                  value: accessLevel.toString(),
+                  items: const [
+                    DropdownMenuItem(value: '0', child: Text('无权限')),
+                    DropdownMenuItem(value: '1', child: Text('只读')),
+                    DropdownMenuItem(value: '2', child: Text('读写')),
+                  ],
+                  onChanged: (value) async {
+                    if (value != null) {
+                      try {
+                        await ref.read(familyMembersProvider.notifier).updateMember(
+                              memberId: id,
+                              accessLevel: value,
+                            );
+                      } catch (e) {
+                        if (context.mounted) {
+                          ErrorHandler.showErrorSnackBar(context, e);
+                        }
+                      }
+                    }
+                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: onDelete,
+                  onPressed: () => _showDeleteConfirmation(context, ref, id),
                   color: Colors.red,
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showAddMemberDialog(BuildContext context, WidgetRef ref) {
+    final userIdController = TextEditingController();
+    final relationshipController = TextEditingController();
+    String accessLevel = '1'; // Default to read-only
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('添加家庭成员'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: userIdController,
+              decoration: const InputDecoration(
+                labelText: '用户ID',
+                hintText: '请输入家庭成员的用户ID',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: relationshipController,
+              decoration: const InputDecoration(
+                labelText: '关系',
+                hintText: '例如：父母、子女等',
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: accessLevel,
+              decoration: const InputDecoration(
+                labelText: '访问权限',
+              ),
+              items: const [
+                DropdownMenuItem(value: '0', child: Text('无权限')),
+                DropdownMenuItem(value: '1', child: Text('只读')),
+                DropdownMenuItem(value: '2', child: Text('读写')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  accessLevel = value;
+                }
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(familyMembersProvider.notifier).addMember(
+                      relatedUserId: userIdController.text,
+                      relationship: relationshipController.text,
+                      accessLevel: accessLevel,
+                    );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
+            },
+            child: const Text('添加'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, String id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: const Text('确定要删除这位家庭成员吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(familyMembersProvider.notifier).deleteMember(id);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('删除'),
+          ),
+        ],
       ),
     );
   }
