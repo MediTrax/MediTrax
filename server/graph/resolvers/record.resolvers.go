@@ -209,162 +209,21 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 }
 
 // UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
-// UpdateMedicalRecord is the resolver for the updateMedicalRecord field.
 func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error) {
-	// Check if the user is logged in correctly
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// Check if the record ID is valid
-	if !utils.MatchID(recordID, "medical_record") {
-		return nil, fmt.Errorf("illegal record id")
-	}
-
-	// Initialize the map to hold update values
-	updateValues := map[string]interface{}{"id": recordID, "user_id": user.ID}
-
-	// Prepare the fields to be updated
-	updateFields := []string{"updated_at = time::now()"} // Always update the updated_at field
-	if recordType != nil {
-		updateValues["recordType"] = *recordType
-		updateFields = append(updateFields, "recordType = $recordType")
-	}
-	if content != nil {
-		updateValues["content"] = *content
-		updateFields = append(updateFields, "content = $content")
-	}
-
-	// Construct the final query
-	query := fmt.Sprintf("UPDATE medical_record SET %s WHERE id=$id AND user_id=$user_id;", strings.Join(updateFields, ", "))
-
-	// Execute the update query
-	_, err := database.DB.Query(query, updateValues)
-	if err != nil {
-		return nil, err
-	}
-
-	// Prepare the response
-	response := &model.UpdateMedicalRecordResponse{
-		RecordID: recordID,
-		Message:  "Medical record updated successfully",
-	}
-
-	// Return the response with the record ID and success message
-	return response, nil
+	panic(fmt.Errorf("not implemented: UpdateMedicalRecord - updateMedicalRecord"))
 }
 
 // DeleteMedicalRecord is the resolver for the deleteMedicalRecord field.
 func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID string) (*model.DeleteMedicalRecordResponse, error) {
-	//panic(fmt.Errorf("not implemented: DeleteMedicalRecord - deleteMedicalRecord"))
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-	// 执行删除
-	_, err := database.DB.Query(`DELETE FROM medical_record WHERE id=$id;`, map[string]interface{}{
-		"id": recordID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	response := &model.DeleteMedicalRecordResponse{
-		Message: "Medical record deleted successfully",
-	}
-
-	return response, nil
+	panic(fmt.Errorf("not implemented: DeleteMedicalRecord - deleteMedicalRecord"))
 }
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
 func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	var result interface{}
-	var err error
-
-	// get all the health metric entries that is associated with the user
-	if metricType == nil {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
-			map[string]interface{}{
-				"user_id": user.ID,
-			},
-		)
-	} else {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
-			map[string]interface{}{
-				"user_id":     user.ID,
-				"metric_type": *metricType,
-			},
-		)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	// unmarshal results into Go objects
-	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// loop through the metrics, convert them into HealthMetricDetail, then return the converted list and nil
-	var metricDetails []*model.HealthMetricDetail
-	for _, metric := range metrics {
-		// check that the metric is within the record time constraints
-		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
-			metricDetail := &model.HealthMetricDetail{
-				MetricID:   metric.ID,
-				MetricType: metric.MetricType,
-				Value:      metric.Value,
-				RecordedAt: metric.RecordedAt,
-				Unit:       metric.Unit,
-			}
-			metricDetails = append(metricDetails, metricDetail)
-		}
-	}
-
-	return metricDetails, nil
+	panic(fmt.Errorf("not implemented: GetHealthMetrics - getHealthMetrics"))
 }
 
 // GetMedicalRecords is the resolver for the getMedicalRecords field.
 func (r *queryResolver) GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: please modify this line as it may result in a bug
-	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecord](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var record_details []*model.MedicalRecordDetail
-	for _, record := range records {
-		recordDetail := &model.MedicalRecordDetail{
-			RecordID:   record.ID,
-			RecordType: record.RecordType,
-			Content:    record.Content,
-			CreatedAt:  record.CreatedAt,
-		}
-		record_details = append(record_details, recordDetail)
-	}
-
-	return record_details, nil
+	panic(fmt.Errorf("not implemented: GetMedicalRecords - getMedicalRecords"))
 }
