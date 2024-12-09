@@ -152,7 +152,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateHealthMetric", "updated specs of a health metric", metricID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "updateHealthMetric", "user updated specs of a health metric", metricID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +316,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateMedicalRecord", "updated specs of a medical record", recordID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "updateMedicalRecord", "user updated specs of a medical record", recordID, changeLog)
 	if err != nil {
 		return nil, err
 	}

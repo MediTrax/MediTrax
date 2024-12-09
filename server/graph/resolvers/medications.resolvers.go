@@ -199,7 +199,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateMedication", "updated specs of a medicaion", medicationID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "updateMedication", "user updated specs of a medicaion", medicationID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -389,6 +389,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	// logic for when the reminder changes from not taken to taken, subtract the medication's remaining by its dosage
 	if isTaken != nil {
 		if !remBefore.IsTaken && *isTaken {
+			// deprecated
 			result, err = database.DB.Query(
 				`SELECT * FROM medication WHERE id=$med_id;`,
 				map[string]interface{}{
@@ -429,9 +430,9 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 				return nil, err
 			}
 
-			err = utils.AddActivityLogs(user.ID, "update medication inventory", "decrease medication inventory after medicaion is taken",
+			err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "decrease medication inventory after medicaion is taken",
 				remBefore.MedicationID, []utils.ChangeLog{
-					utils.ChangeLog{
+					{
 						Field: "inventory",
 						From:  fmt.Sprintf("%f", medications[0].Inventory),
 						To:    fmt.Sprintf("%f", new_inventory),
@@ -479,7 +480,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, err
 	}
 
-	err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "updated specs of a medicaion reminder", reminderID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "user updated specs of a medicaion reminder", reminderID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -492,6 +493,129 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	response := &model.UpdateMedicationReminderResponse{
 		ReminderID: results[0].ID,
 		Message:    "Medication reminder updated successfully",
+	}
+
+	return response, nil
+}
+
+// TakeMedication is the resolver for the takeMedication field.
+func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	if reminderID == nil {
+		return nil, fmt.Errorf("no medication id given")
+	}
+
+	// check legality of the reminder id
+	if !utils.MatchID(*reminderID, "medication_reminder") {
+		return nil, fmt.Errorf("illegal reminder id")
+	}
+
+	// query database to see if the reminder exists
+	result, err := database.DB.Query(
+		`SELECT * FROM $reminder_id WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"reminder_id": reminderID,
+			"user_id":     user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(reminders) < 1 {
+		return nil, fmt.Errorf("wrong medication reminder id, no reminder associated with userfound")
+	}
+
+	reminder := reminders[0]
+	if reminder.IsTaken {
+		return nil, fmt.Errorf("reminder already taken, cannot take again")
+	}
+
+	/* Decrease inventory of linked medication */
+	result, err = database.DB.Query(
+		`SELECT * FROM medication WHERE id=$med_id;`,
+		map[string]interface{}{
+			"med_id": reminder.MedicationID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// verify that there is a medication linked to this reminder
+	// NOTE: should NEVER happen since deleting a medication also deletes the reminder
+	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(medications) == 0 {
+		return nil, fmt.Errorf("no medication linked to reminder found")
+	}
+
+	// calculate the new inventory
+	new_inventory := medications[0].Inventory - medications[0].Dosage
+	// if the inventory becomes negative, throw an error
+	if new_inventory < 0 {
+		return nil, fmt.Errorf("negative inventory")
+	}
+
+	// update the inventory
+	_, err = database.DB.Query(
+		`UPDATE ONLY $id SET inventory=$inventory`,
+		map[string]interface{}{
+			"id":        reminder.MedicationID,
+			"inventory": new_inventory,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "decrease medication inventory after user takes medication",
+		reminder.MedicationID, []utils.ChangeLog{
+			{
+				Field: "inventory",
+				From:  fmt.Sprintf("%f", medications[0].Inventory),
+				To:    fmt.Sprintf("%f", new_inventory),
+			},
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	/* Update the reminder itself */
+	_, err = database.DB.Query(`
+		UPDATE $id SET istaken=$is_taken;`,
+		map[string]interface{}{
+			"id":       *reminderID,
+			"is_taken": true,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// add to change log
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication", *reminderID,
+		[]utils.ChangeLog{
+			{
+				Field: "is_taken",
+				From:  "false",
+				To:    "true",
+			},
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.TakeMedicationResponse{
+		Message: "medication taken successfully",
 	}
 
 	return response, nil
@@ -681,7 +805,7 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateTreatmentSchedule", "updated specs of a treatment schedule", scheduleID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "updateTreatmentSchedule", "user updated specs of a treatment schedule", scheduleID, changeLog)
 	if err != nil {
 		return nil, err
 	}
