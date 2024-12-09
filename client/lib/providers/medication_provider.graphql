@@ -1,5 +1,5 @@
-query GetMedications($userId: String!) {
-  getMedications(userId: $userId) {
+query GetMedications() {
+  getMedications {
     medicationId
     name
     dosage
@@ -10,7 +10,6 @@ query GetMedications($userId: String!) {
 }
 
 mutation AddMedication(
-  $userId: String!
   $name: String!
   $dosage: Float!
   $unit: String!
@@ -18,7 +17,6 @@ mutation AddMedication(
   $inventory: Float!
 ) {
   addMedication(
-    userId: $userId
     name: $name
     dosage: $dosage
     unit: $unit
