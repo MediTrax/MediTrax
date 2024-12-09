@@ -1,0 +1,26 @@
+type ActivityLog {
+    id: String!
+    user_id: String!
+    activityType: String!
+    description: String!
+    changedObject: String!
+    changedField: String!
+    from: String!
+    to: String!
+    timestamp: DateTime!
+}
+
+type ActivityLogDetail{
+    logId: String!
+    activityType: String!
+    description: String!
+    changedObject: String!
+    changedField: String!
+    from: String!
+    to: String!
+    timestamp: DateTime!
+}
+
+extend type Query{
+    getActivityLog: [ActivityLogDetail]
+}
