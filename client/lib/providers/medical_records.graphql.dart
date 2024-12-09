@@ -204,22 +204,7 @@ const documentNodeQueryGetMedicalRecords = DocumentNode(definitions: [
             alias: null,
             arguments: [],
             directives: [],
-            selectionSet: SelectionSetNode(selections: [
-              FieldNode(
-                name: NameNode(value: 'data'),
-                alias: null,
-                arguments: [],
-                directives: [],
-                selectionSet: null,
-              ),
-              FieldNode(
-                name: NameNode(value: '__typename'),
-                alias: null,
-                arguments: [],
-                directives: [],
-                selectionSet: null,
-              ),
-            ]),
+            selectionSet: null,
           ),
           FieldNode(
             name: NameNode(value: 'createdAt'),
@@ -412,8 +397,7 @@ class Query$GetMedicalRecords$getMedicalRecords {
     return Query$GetMedicalRecords$getMedicalRecords(
       recordId: (l$recordId as String),
       recordType: (l$recordType as String),
-      content: Query$GetMedicalRecords$getMedicalRecords$content.fromJson(
-          (l$content as Map<String, dynamic>)),
+      content: (l$content as String),
       createdAt: dateTimeFromJson(l$createdAt),
       $__typename: (l$$__typename as String),
     );
@@ -423,7 +407,7 @@ class Query$GetMedicalRecords$getMedicalRecords {
 
   final String recordType;
 
-  final Query$GetMedicalRecords$getMedicalRecords$content content;
+  final String content;
 
   final DateTime createdAt;
 
@@ -436,7 +420,7 @@ class Query$GetMedicalRecords$getMedicalRecords {
     final l$recordType = recordType;
     _resultData['recordType'] = l$recordType;
     final l$content = content;
-    _resultData['content'] = l$content.toJson();
+    _resultData['content'] = l$content;
     final l$createdAt = createdAt;
     _resultData['createdAt'] = dateTimeToJson(l$createdAt);
     final l$$__typename = $__typename;
@@ -520,11 +504,10 @@ abstract class CopyWith$Query$GetMedicalRecords$getMedicalRecords<TRes> {
   TRes call({
     String? recordId,
     String? recordType,
-    Query$GetMedicalRecords$getMedicalRecords$content? content,
+    String? content,
     DateTime? createdAt,
     String? $__typename,
   });
-  CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<TRes> get content;
 }
 
 class _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
@@ -556,7 +539,7 @@ class _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
             : (recordType as String),
         content: content == _undefined || content == null
             ? _instance.content
-            : (content as Query$GetMedicalRecords$getMedicalRecords$content),
+            : (content as String),
         createdAt: createdAt == _undefined || createdAt == null
             ? _instance.createdAt
             : (createdAt as DateTime),
@@ -564,12 +547,6 @@ class _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
             ? _instance.$__typename
             : ($__typename as String),
       ));
-
-  CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<TRes> get content {
-    final local$content = _instance.content;
-    return CopyWith$Query$GetMedicalRecords$getMedicalRecords$content(
-        local$content, (e) => call(content: e));
-  }
 }
 
 class _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
@@ -581,145 +558,8 @@ class _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
   call({
     String? recordId,
     String? recordType,
-    Query$GetMedicalRecords$getMedicalRecords$content? content,
+    String? content,
     DateTime? createdAt,
-    String? $__typename,
-  }) =>
-      _res;
-
-  CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<TRes>
-      get content =>
-          CopyWith$Query$GetMedicalRecords$getMedicalRecords$content.stub(_res);
-}
-
-class Query$GetMedicalRecords$getMedicalRecords$content {
-  Query$GetMedicalRecords$getMedicalRecords$content({
-    required this.data,
-    this.$__typename = 'RecordObject',
-  });
-
-  factory Query$GetMedicalRecords$getMedicalRecords$content.fromJson(
-      Map<String, dynamic> json) {
-    final l$data = json['data'];
-    final l$$__typename = json['__typename'];
-    return Query$GetMedicalRecords$getMedicalRecords$content(
-      data: (l$data as String),
-      $__typename: (l$$__typename as String),
-    );
-  }
-
-  final String data;
-
-  final String $__typename;
-
-  Map<String, dynamic> toJson() {
-    final _resultData = <String, dynamic>{};
-    final l$data = data;
-    _resultData['data'] = l$data;
-    final l$$__typename = $__typename;
-    _resultData['__typename'] = l$$__typename;
-    return _resultData;
-  }
-
-  @override
-  int get hashCode {
-    final l$data = data;
-    final l$$__typename = $__typename;
-    return Object.hashAll([
-      l$data,
-      l$$__typename,
-    ]);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (!(other is Query$GetMedicalRecords$getMedicalRecords$content) ||
-        runtimeType != other.runtimeType) {
-      return false;
-    }
-    final l$data = data;
-    final lOther$data = other.data;
-    if (l$data != lOther$data) {
-      return false;
-    }
-    final l$$__typename = $__typename;
-    final lOther$$__typename = other.$__typename;
-    if (l$$__typename != lOther$$__typename) {
-      return false;
-    }
-    return true;
-  }
-}
-
-extension UtilityExtension$Query$GetMedicalRecords$getMedicalRecords$content
-    on Query$GetMedicalRecords$getMedicalRecords$content {
-  CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<
-          Query$GetMedicalRecords$getMedicalRecords$content>
-      get copyWith =>
-          CopyWith$Query$GetMedicalRecords$getMedicalRecords$content(
-            this,
-            (i) => i,
-          );
-}
-
-abstract class CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<
-    TRes> {
-  factory CopyWith$Query$GetMedicalRecords$getMedicalRecords$content(
-    Query$GetMedicalRecords$getMedicalRecords$content instance,
-    TRes Function(Query$GetMedicalRecords$getMedicalRecords$content) then,
-  ) = _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords$content;
-
-  factory CopyWith$Query$GetMedicalRecords$getMedicalRecords$content.stub(
-          TRes res) =
-      _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords$content;
-
-  TRes call({
-    String? data,
-    String? $__typename,
-  });
-}
-
-class _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords$content<TRes>
-    implements
-        CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<TRes> {
-  _CopyWithImpl$Query$GetMedicalRecords$getMedicalRecords$content(
-    this._instance,
-    this._then,
-  );
-
-  final Query$GetMedicalRecords$getMedicalRecords$content _instance;
-
-  final TRes Function(Query$GetMedicalRecords$getMedicalRecords$content) _then;
-
-  static const _undefined = <dynamic, dynamic>{};
-
-  TRes call({
-    Object? data = _undefined,
-    Object? $__typename = _undefined,
-  }) =>
-      _then(Query$GetMedicalRecords$getMedicalRecords$content(
-        data: data == _undefined || data == null
-            ? _instance.data
-            : (data as String),
-        $__typename: $__typename == _undefined || $__typename == null
-            ? _instance.$__typename
-            : ($__typename as String),
-      ));
-}
-
-class _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords$content<TRes>
-    implements
-        CopyWith$Query$GetMedicalRecords$getMedicalRecords$content<TRes> {
-  _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords$content(
-      this._res);
-
-  TRes _res;
-
-  call({
-    String? data,
     String? $__typename,
   }) =>
       _res;
