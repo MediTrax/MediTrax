@@ -300,6 +300,10 @@ type Response struct {
 	Answer     *string `json:"answer,omitempty"`
 }
 
+type TakeMedicationResponse struct {
+	Message string `json:"message"`
+}
+
 type Token struct {
 	ID                 string `json:"id"`
 	User               string `json:"user"`

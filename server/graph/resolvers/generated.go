@@ -319,6 +319,7 @@ type ComplexityRoot struct {
 		RefreshToken                 func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
 		ResetPassword                func(childComplexity int, token string, newPassword string) int
+		TakeMedication               func(childComplexity int, reminderID *string) int
 		UpdateFamilyMember           func(childComplexity int, memberID string, relationship *string, accessLevel *string) int
 		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string) int
 		UpdateMedicalRecord          func(childComplexity int, recordID string, recordType *string, content *string) int
@@ -376,6 +377,10 @@ type ComplexityRoot struct {
 	}
 
 	ResetPasswordResponse struct {
+		Message func(childComplexity int) int
+	}
+
+	TakeMedicationResponse struct {
 		Message func(childComplexity int) int
 	}
 
@@ -511,6 +516,7 @@ type MutationResolver interface {
 	DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error)
 	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error)
 	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
+	TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error)
 	DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error)
 	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
 	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
@@ -1782,6 +1788,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["token"].(string), args["newPassword"].(string)), true
 
+	case "Mutation.takeMedication":
+		if e.complexity.Mutation.TakeMedication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_takeMedication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.TakeMedication(childComplexity, args["reminderId"].(*string)), true
+
 	case "Mutation.updateFamilyMember":
 		if e.complexity.Mutation.UpdateFamilyMember == nil {
 			break
@@ -2090,6 +2108,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResetPasswordResponse.Message(childComplexity), true
+
+	case "TakeMedicationResponse.message":
+		if e.complexity.TakeMedicationResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.TakeMedicationResponse.Message(childComplexity), true
 
 	case "Token.accessToken":
 		if e.complexity.Token.AccessToken == nil {
@@ -2965,6 +2990,9 @@ type DeleteTreatmentScheduleResponse {
   message: String!
 }
 
+type TakeMedicationResponse{
+  message: String!
+}
 
 extend type Query{
   getMedications: [MedicationDetail]
@@ -2979,12 +3007,12 @@ extend type Mutation{
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  takeMedication(reminderId: String) : TakeMedicationResponse!
   deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
-
 }
 `, BuiltIn: false},
 	{Name: "../schemas/record.graphqls", Input: `type MedicalRecord{
@@ -4124,6 +4152,29 @@ func (ec *executionContext) field_Mutation_resetPassword_argsNewPassword(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_takeMedication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_takeMedication_argsReminderID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["reminderId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_takeMedication_argsReminderID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderId"))
+	if tmp, ok := rawArgs["reminderId"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -11361,6 +11412,65 @@ func (ec *executionContext) fieldContext_Mutation_updateMedicationReminder(ctx c
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_takeMedication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_takeMedication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().TakeMedication(rctx, fc.Args["reminderId"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.TakeMedicationResponse)
+	fc.Result = res
+	return ec.marshalNTakeMedicationResponse2ᚖmeditraxᚋgraphᚋmodelᚐTakeMedicationResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_takeMedication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_TakeMedicationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TakeMedicationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_takeMedication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_deleteMedicationReminder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_deleteMedicationReminder(ctx, field)
 	if err != nil {
@@ -14108,6 +14218,50 @@ func (ec *executionContext) _ResetPasswordResponse_message(ctx context.Context, 
 func (ec *executionContext) fieldContext_ResetPasswordResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ResetPasswordResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TakeMedicationResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.TakeMedicationResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TakeMedicationResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TakeMedicationResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TakeMedicationResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -21069,6 +21223,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateMedicationReminder(ctx, field)
 			})
+		case "takeMedication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_takeMedication(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "deleteMedicationReminder":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteMedicationReminder(ctx, field)
@@ -21785,6 +21946,45 @@ func (ec *executionContext) _ResetPasswordResponse(ctx context.Context, sel ast.
 			out.Values[i] = graphql.MarshalString("ResetPasswordResponse")
 		case "message":
 			out.Values[i] = ec._ResetPasswordResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var takeMedicationResponseImplementors = []string{"TakeMedicationResponse"}
+
+func (ec *executionContext) _TakeMedicationResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TakeMedicationResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, takeMedicationResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TakeMedicationResponse")
+		case "message":
+			out.Values[i] = ec._TakeMedicationResponse_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23318,6 +23518,20 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNTakeMedicationResponse2meditraxᚋgraphᚋmodelᚐTakeMedicationResponse(ctx context.Context, sel ast.SelectionSet, v model.TakeMedicationResponse) graphql.Marshaler {
+	return ec._TakeMedicationResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTakeMedicationResponse2ᚖmeditraxᚋgraphᚋmodelᚐTakeMedicationResponse(ctx context.Context, sel ast.SelectionSet, v *model.TakeMedicationResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TakeMedicationResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v *model.Token) graphql.Marshaler {
