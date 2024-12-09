@@ -18,6 +18,29 @@ type AchievementBadgeDetail struct {
 	CreatedAt   string `json:"created_at"`
 }
 
+type ActivityLog struct {
+	ID            string `json:"id"`
+	UserID        string `json:"user_id"`
+	ActivityType  string `json:"activityType"`
+	Description   string `json:"description"`
+	ChangedObject string `json:"changedObject"`
+	ChangedField  string `json:"changedField"`
+	From          string `json:"from"`
+	To            string `json:"to"`
+	Timestamp     string `json:"timestamp"`
+}
+
+type ActivityLogDetail struct {
+	LogID         string `json:"logId"`
+	ActivityType  string `json:"activityType"`
+	Description   string `json:"description"`
+	ChangedObject string `json:"changedObject"`
+	ChangedField  string `json:"changedField"`
+	From          string `json:"from"`
+	To            string `json:"to"`
+	Timestamp     string `json:"timestamp"`
+}
+
 type AddFamilyMemberResponse struct {
 	MemberID string `json:"memberId"`
 	Message  string `json:"message"`
@@ -275,6 +298,10 @@ type Response struct {
 	QuestionID int     `json:"questionId"`
 	Choice     string  `json:"choice"`
 	Answer     *string `json:"answer,omitempty"`
+}
+
+type TakeMedicationResponse struct {
+	Message string `json:"message"`
 }
 
 type Token struct {
