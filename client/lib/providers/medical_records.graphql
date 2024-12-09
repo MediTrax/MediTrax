@@ -2,9 +2,7 @@ query GetMedicalRecords {
   getMedicalRecords {
     recordId
     recordType
-    content {
-      data
-    }
+    content
     createdAt
   }
 }

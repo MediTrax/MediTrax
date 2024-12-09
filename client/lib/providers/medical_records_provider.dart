@@ -27,7 +27,7 @@ class MedicalRecords extends _$MedicalRecords {
         .map((record) => MedicalRecord(
               id: record!.recordId,
               recordType: record.recordType,
-              content: record.content.data,
+              content: record.content,
               createdAt: record.createdAt,
               updatedAt: record.createdAt,
             ))
