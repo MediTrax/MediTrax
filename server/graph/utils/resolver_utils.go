@@ -2,14 +2,22 @@ package utils
 
 import (
 	"fmt"
+	"meditrax/graph/database"
 	"meditrax/graph/model"
 	"regexp"
 	"strconv"
+	"time"
 )
 
 var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
 	"medication", "medication_reminder", "treatment_schedule", "health_metric",
-	"medical_record", "family_member"}
+	"medical_record", "family_member", "activity_log"}
+
+type ChangeLog struct {
+	Field string
+	From  string
+	To    string
+}
 
 func FrequencyParser(frequency string) (int, int, error) {
 	// Compile the regex pattern to match the expected format
@@ -68,4 +76,49 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 	}
 
 	return riskLevel, recommendations
+}
+
+// /**
+// Add activity logs for the object with id objId, returns error is not successful
+//   - userId: id of user
+//   - actType: name of mutation that made the change (ex. takeMedication)
+//   - description: more detailed description of the activity
+//   - objId: id of object being modified
+//   - changes: list of ChangLog of what fields are modified
+//     */
+func AddActivityLogs(userId string, actType string, description string, objId string, changes []ChangeLog) error {
+	// get current time and convert to string
+	timestamp := time.Now().Format("2006-01-02T15:04:05.000")
+
+	// go through changes and add them one by one to the database
+	for _, change := range changes {
+		_, err := database.DB.Query(
+			`CREATE ONLY activity_log:ulid()
+			SET user_id=$user_id,
+			activityType=$activityType,
+			description=$description,
+			changedObject=$changedObject,
+			changedField=$changedField,
+			from=$from,
+			to=$to,
+			timestamp=$timestamp;
+			`,
+			map[string]interface{}{
+				"user_id":       userId,
+				"activityType":  actType,
+				"description":   description,
+				"changedObject": objId,
+				"changedField":  change.Field,
+				"from":          change.From,
+				"to":            change.To,
+				"timestamp":     timestamp,
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// added succcesfully without errors
+	return nil
 }
