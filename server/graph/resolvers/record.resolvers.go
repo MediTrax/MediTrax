@@ -91,24 +91,53 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 		return nil, fmt.Errorf("illegal health metric id")
 	}
 
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $metricId WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"metricId": metricID,
+			"user_id":  user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.HealthMetric](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": metricID, "user_id": user.ID}
+
+	var changeLog []utils.ChangeLog
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if value != nil {
 		updateValues["value"] = *value
 		updateFields = append(updateFields, "value = $value")
+		change := utils.ChangeLog{
+			Field: "value",
+			From:  fmt.Sprintf("%f", original.Value),
+			To:    fmt.Sprintf("%f", *value),
+		}
+		changeLog = append(changeLog, change)
 	}
 	if unit != nil {
 		updateValues["unit"] = *unit
 		updateFields = append(updateFields, "unit = $unit")
+		change := utils.ChangeLog{
+			Field: "unit",
+			From:  original.Unit,
+			To:    *unit,
+		}
+		changeLog = append(changeLog, change)
 	}
 
 	// write to the query
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
+	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +149,12 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no user associated heath metric object found")
+	}
+
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateHealthMetric", "updated specs of a health metric", metricID, changeLog)
+	if err != nil {
+		return nil, err
 	}
 
 	response := &model.UpdateHealthMetricResponse{
@@ -220,24 +255,53 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 		return nil, fmt.Errorf("illegal medical record id")
 	}
 
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $recordId WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"recordId": recordID,
+			"user_id":  user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.MedicalRecord](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": recordID, "user_id": user.ID}
+
+	var changeLog []utils.ChangeLog
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if recordType != nil {
 		updateValues["recordType"] = *recordType
 		updateFields = append(updateFields, "record_type = $recordType")
+		change := utils.ChangeLog{
+			Field: "record_type",
+			From:  original.RecordType,
+			To:    *recordType,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if content != nil {
 		updateValues["content"] = *content
 		updateFields = append(updateFields, "content = $content")
+		change := utils.ChangeLog{
+			Field: "content",
+			From:  original.Content,
+			To:    *content,
+		}
+		changeLog = append(changeLog, change)
 	}
 
 	// write to the query
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
+	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
@@ -249,6 +313,12 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no user associated medical record object found")
+	}
+
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateMedicalRecord", "updated specs of a medical record", recordID, changeLog)
+	if err != nil {
+		return nil, err
 	}
 
 	response := &model.UpdateMedicalRecordResponse{
