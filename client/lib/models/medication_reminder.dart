@@ -17,4 +17,15 @@ class MedicationReminder extends HiveObject with _$MedicationReminder {
     @HiveField(4) required bool isTaken,
     @HiveField(5) required DateTime createdAt,
   }) = _MedicationReminder;
+
+  factory MedicationReminder.fromJson(Map<String, dynamic> json) {
+    return MedicationReminder(
+      id: json['reminderId'] as String,
+      medicationId: json['medicationId'] as String,
+      userId: json['userId'] as String,
+      reminderTime: DateTime.parse(json['reminderTime']),
+      isTaken: json['isTaken'] as bool,
+      createdAt: DateTime.parse(json['createdAt']),
+    );
+  }
 }

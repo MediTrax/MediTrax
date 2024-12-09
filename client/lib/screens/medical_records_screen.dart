@@ -110,7 +110,7 @@ class _VisitHistoryTab extends ConsumerWidget {
   }
 
   void _showAddVisitDialog(BuildContext context, WidgetRef ref) {
-    final dateController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
     final diagnosisController = TextEditingController();
     final prescriptionController = TextEditingController();
     String visitType = '门诊'; // Default value
@@ -123,12 +123,21 @@ class _VisitHistoryTab extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: dateController,
-                decoration: const InputDecoration(
-                  labelText: '就诊日期',
-                  hintText: 'YYYY-MM-DD',
-                ),
+              ListTile(
+                title: const Text('就诊日期'),
+                subtitle: Text(selectedDate.toString().split(' ')[0]),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    selectedDate = date;
+                  }
+                },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -177,6 +186,7 @@ class _VisitHistoryTab extends ConsumerWidget {
                     'type': visitType,
                     'diagnosis': diagnosisController.text,
                     'prescription': prescriptionController.text,
+                    'date': selectedDate.toIso8601String(),
                   },
                 );
                 if (context.mounted) {
@@ -353,7 +363,7 @@ class _MedicationHistoryTab extends ConsumerWidget {
     final nameController = TextEditingController();
     final dosageController = TextEditingController();
     final frequencyController = TextEditingController();
-    final startDateController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
 
     showDialog(
       context: context,
@@ -386,12 +396,21 @@ class _MedicationHistoryTab extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: startDateController,
-                decoration: const InputDecoration(
-                  labelText: '开始日期',
-                  hintText: 'YYYY-MM-DD',
-                ),
+              ListTile(
+                title: const Text('开始日期'),
+                subtitle: Text(selectedDate.toString().split(' ')[0]),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (date != null) {
+                    selectedDate = date;
+                  }
+                },
               ),
             ],
           ),
@@ -410,6 +429,7 @@ class _MedicationHistoryTab extends ConsumerWidget {
                     'name': nameController.text,
                     'dosage': dosageController.text,
                     'frequency': frequencyController.text,
+                    'startDate': selectedDate.toIso8601String(),
                   },
                 );
                 if (context.mounted) {
