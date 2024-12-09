@@ -5,3 +5,4 @@ server/coverage.out
 
 
 .private
+*.tmp
