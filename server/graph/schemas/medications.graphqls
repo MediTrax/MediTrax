@@ -94,6 +94,9 @@ type DeleteTreatmentScheduleResponse {
   message: String!
 }
 
+type TakeMedicationResponse{
+  message: String!
+}
 
 extend type Query{
   getMedications: [MedicationDetail]
@@ -108,10 +111,10 @@ extend type Mutation{
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  takeMedication(reminderId: String) : TakeMedicationResponse!
   deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
-
 }
