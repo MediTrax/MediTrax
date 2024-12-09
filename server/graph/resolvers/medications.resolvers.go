@@ -104,22 +104,56 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("illegal medication id")
 	}
 
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $medicationId WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+			"user_id":      user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": medicationID, "user_id": user.ID}
+	var changeLog []utils.ChangeLog
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if name != nil {
 		updateValues["name"] = *name
 		updateFields = append(updateFields, "name = $name")
+		change := utils.ChangeLog{
+			Field: "name",
+			From:  original.Name,
+			To:    *name,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if dosage != nil {
 		updateValues["dosage"] = *dosage
 		updateFields = append(updateFields, "dosage = $dosage")
+		change := utils.ChangeLog{
+			Field: "dosage",
+			From:  fmt.Sprintf("%f", original.Dosage),
+			To:    fmt.Sprintf("%f", *dosage),
+		}
+		changeLog = append(changeLog, change)
 	}
 	if unit != nil {
 		updateValues["unit"] = *unit
 		updateFields = append(updateFields, "unit = $unit")
+		change := utils.ChangeLog{
+			Field: "unit",
+			From:  original.Unit,
+			To:    *unit,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if frequency != nil {
 		// Validate the frequency format
@@ -128,17 +162,29 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		}
 		updateValues["frequency"] = *frequency
 		updateFields = append(updateFields, "frequency = $frequency")
+		change := utils.ChangeLog{
+			Field: "frequency",
+			From:  original.Frequency,
+			To:    *frequency,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if inventory != nil {
 		updateValues["inventory"] = *inventory
 		updateFields = append(updateFields, "inventory = $inventory")
+		change := utils.ChangeLog{
+			Field: "inventory",
+			From:  fmt.Sprintf("%f", original.Inventory),
+			To:    fmt.Sprintf("%f", *inventory),
+		}
+		changeLog = append(changeLog, change)
 	}
 
 	// Construct the final query with the medicationID in quotes
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
 
 	// send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
+	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +196,12 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id. no associated medication object found")
+	}
+
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateMedication", "updated specs of a medicaion", medicationID, changeLog)
+	if err != nil {
+		return nil, err
 	}
 
 	// create response
@@ -376,27 +428,58 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 			if err != nil {
 				return nil, err
 			}
+
+			err = utils.AddActivityLogs(user.ID, "update medication inventory", "decrease medication inventory after medicaion is taken",
+				remBefore.MedicationID, []utils.ChangeLog{
+					utils.ChangeLog{
+						Field: "inventory",
+						From:  fmt.Sprintf("%f", medications[0].Inventory),
+						To:    fmt.Sprintf("%f", new_inventory),
+					},
+				})
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": reminderID}
 
+	var changeLog []utils.ChangeLog
+
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if reminderTime != nil {
 		updateValues["reminder_time"] = *reminderTime
 		updateFields = append(updateFields, "reminder_time = $reminder_time")
+		change := utils.ChangeLog{
+			Field: "reminder_time",
+			From:  remBefore.ReminderTime,
+			To:    *reminderTime,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if isTaken != nil {
 		updateValues["is_taken"] = *isTaken
 		updateFields = append(updateFields, "is_taken = $is_taken")
+		change := utils.ChangeLog{
+			Field: "is_taken",
+			From:  fmt.Sprintf("%t", remBefore.IsTaken),
+			To:    fmt.Sprintf("%t", *isTaken),
+		}
+		changeLog = append(changeLog, change)
 	}
 
 	// Construct the final query
 	query := fmt.Sprintf("UPDATE $id SET %s;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
+	if err != nil {
+		return nil, err
+	}
+
+	err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "updated specs of a medicaion reminder", reminderID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -512,34 +595,78 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		return nil, fmt.Errorf("illegal schedule id")
 	}
 
+	// get the original entry before updating
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $scheduleId WHERE user_id=$user_id;`,
+		map[string]interface{}{
+			"scheduleId": scheduleID,
+			"user_id":    user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.TreatmentSchedule](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	// 准备更新字段
 	updateValues := map[string]interface{}{
 		"id":      scheduleID,
 		"user_id": user.ID,
 	}
 	updateFields := []string{}
+	var changeLog []utils.ChangeLog
 
 	if treatmentType != nil {
 		updateValues["treatmentType"] = *treatmentType
 		updateFields = append(updateFields, "treatmentType = $treatmentType")
+		change := utils.ChangeLog{
+			Field: "treatmentType",
+			From:  original.TreatmentType,
+			To:    *treatmentType,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if scheduledTime != nil {
 		updateValues["scheduledTime"] = *scheduledTime
 		updateFields = append(updateFields, "scheduledTime = $scheduledTime")
+		change := utils.ChangeLog{
+			Field: "scheduledTime",
+			From:  original.ScheduledTime,
+			To:    *scheduledTime,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if location != nil {
 		updateValues["location"] = *location
 		updateFields = append(updateFields, "location = $location")
+		change := utils.ChangeLog{
+			Field: "location",
+			From:  original.Location,
+			To:    *location,
+		}
+		changeLog = append(changeLog, change)
 	}
 	if notes != nil {
 		updateValues["notes"] = *notes
 		updateFields = append(updateFields, "notes = $notes")
+		change := utils.ChangeLog{
+			Field: "notes",
+			From:  *original.Notes,
+			To:    *notes,
+		}
+		if original.Notes == nil {
+			change.From = "Null"
+		}
+		changeLog = append(changeLog, change)
 	}
 	updateFields = append(updateFields, "updated_at = time::now()")
 
 	// 构建并执行更新查询
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id = $user_id;", strings.Join(updateFields, ", "))
-	result, err := database.DB.Query(query, updateValues)
+	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
 	}
@@ -551,6 +678,12 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 	if len(schedules) == 0 {
 		return nil, fmt.Errorf("invalid id. no associated treatment schedule found")
+	}
+
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateTreatmentSchedule", "updated specs of a treatment schedule", scheduleID, changeLog)
+	if err != nil {
+		return nil, err
 	}
 
 	response := &model.UpdateTreatmentScheduleResponse{
