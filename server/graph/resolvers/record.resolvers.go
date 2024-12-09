@@ -227,7 +227,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	updateFields := []string{}
 	if recordType != nil {
 		updateValues["recordType"] = *recordType
-		updateFields = append(updateFields, "recordType = $recordType")
+		updateFields = append(updateFields, "record_type = $recordType")
 	}
 	if content != nil {
 		updateValues["content"] = *content
