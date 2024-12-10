@@ -70,3 +70,35 @@ mutation DeleteFamilyMember($memberId: String!) {
     message
   }
 } 
+
+query GetProfiles {
+  getProfiles {
+    id
+    name
+    phoneNumber
+    role
+    createdAt
+  }
+}
+
+query GetSharedProfiles {
+  getSharedProfiles {
+    id
+    name
+    phoneNumber
+    role
+    createdAt
+  }
+}
+
+mutation ShareProfile($phoneNumber: String!, $accessLevel: String!) {
+  shareProfile(phoneNumber: $phoneNumber, accessLevel: $accessLevel) {
+    message
+  }
+}
+
+mutation UnshareProfile($targetUserId: String!) {
+  unshareProfile(targetUserId: $targetUserId) {
+    message
+  }
+}

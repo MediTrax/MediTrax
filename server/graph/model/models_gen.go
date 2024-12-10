@@ -267,6 +267,14 @@ type PasswordChange struct {
 	CreatedAt string `json:"createdAt"`
 }
 
+type ProfileDetail struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phoneNumber"`
+	Role        string `json:"role"`
+	CreatedAt   string `json:"createdAt"`
+}
+
 type Query struct {
 }
 
@@ -300,6 +308,10 @@ type Response struct {
 	Answer     *string `json:"answer,omitempty"`
 }
 
+type ShareProfileResponse struct {
+	Message string `json:"message"`
+}
+
 type TakeMedicationResponse struct {
 	Message string `json:"message"`
 }
@@ -331,6 +343,10 @@ type TreatmentScheduleDetail struct {
 	ScheduledTime string  `json:"scheduledTime"`
 	Location      string  `json:"location"`
 	Notes         *string `json:"notes,omitempty"`
+}
+
+type UnshareProfileResponse struct {
+	Message string `json:"message"`
 }
 
 type UpdateFamilyMemberResponse struct {

@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/user.graphql.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
+import 'package:meditrax/providers/schema.graphql.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -97,6 +99,119 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
               const Divider(height: 32),
+              // Profile Switcher Section
+              Consumer(
+                builder: (context, ref, child) {
+                  final profilesFuture =
+                      ref.watch(userDataProvider.notifier).getProfiles();
+                  return FutureBuilder(
+                    future: profilesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink();
+                      }
+
+                      if (snapshot.hasError) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final profiles = snapshot.data ?? [];
+                      if (profiles.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return InkWell(
+                        onTap: () => _showProfileSwitcher(
+                            context, ref, profiles, user.id),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('切换档案',
+                                    style: TextStyle(color: Colors.grey)),
+                                Text(
+                                  '${profiles.length}个可访问档案',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Icon(Icons.arrow_forward_ios,
+                                color: Colors.grey[400], size: 20),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              const Divider(height: 32),
+              // Profile Sharing Section (replacing Family Section)
+              Consumer(
+                builder: (context, ref, child) {
+                  final profilesFuture =
+                      ref.watch(userDataProvider.notifier).getProfiles();
+
+                  return FutureBuilder(
+                    future: profilesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox.shrink();
+                      }
+
+                      if (snapshot.hasError) {
+                        return InkWell(
+                          onTap: () => context.push('/profile-sharing'),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('档案共享', style: TextStyle(fontSize: 16)),
+                                  Text('加载失败',
+                                      style: TextStyle(
+                                          color: Colors.red, fontSize: 14)),
+                                ],
+                              ),
+                              Icon(Icons.arrow_forward_ios,
+                                  color: Colors.grey[400], size: 20),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final profiles = snapshot.data ?? [];
+                      return InkWell(
+                        onTap: () => context.push('/profile-sharing'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('档案共享',
+                                    style: TextStyle(fontSize: 16)),
+                                Text('${profiles.length}个共享档案',
+                                    style: const TextStyle(
+                                        color: Colors.grey, fontSize: 14)),
+                              ],
+                            ),
+                            Icon(Icons.arrow_forward_ios,
+                                color: Colors.grey[400], size: 20),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+
+              const Divider(height: 32),
               // Health Points
               InkWell(
                 onTap: () => context.push('/rewards'),
@@ -132,57 +247,57 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              // Family Section
-              Consumer(
-                builder: (context, ref, child) {
-                  final familyMembersAsync = ref.watch(familyMembersProvider);
-
-                  return familyMembersAsync.when(
-                    loading: () => const CircularProgressIndicator(),
-                    error: (error, stack) => InkWell(
-                      onTap: () => context.push('/family-collaboration'),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('家庭协作', style: TextStyle(fontSize: 16)),
-                              Text('加载失败',
-                                  style: TextStyle(
-                                      color: Colors.red, fontSize: 14)),
-                            ],
-                          ),
-                          Icon(Icons.arrow_forward_ios,
-                              color: Colors.grey[400], size: 20),
-                        ],
-                      ),
-                    ),
-                    data: (members) => InkWell(
-                      onTap: () => context.push('/family-collaboration'),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('家庭协作',
-                                  style: TextStyle(fontSize: 16)),
-                              Text('${members.length}位家庭成员',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 14)),
-                            ],
-                          ),
-                          Icon(Icons.arrow_forward_ios,
-                              color: Colors.grey[400], size: 20),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showProfileSwitcher(BuildContext context, WidgetRef ref,
+      List<Query$GetProfiles$getProfiles> profiles, String currentUserId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '切换档案',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...profiles.map((profile) {
+              final isCurrentProfile = profile.id == currentUserId;
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.grey[200],
+                  child: Text(
+                    profile.name,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ),
+                title: Text(profile.name),
+                subtitle: Text(profile.phoneNumber),
+                trailing: isCurrentProfile
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : null,
+                onTap: isCurrentProfile
+                    ? null
+                    : () {
+                        ref
+                            .read(appStateProvider.notifier)
+                            .changeSelectedProfile(profile.id);
+                        Navigator.pop(context);
+                      },
+              );
+            }).toList(),
+          ],
         ),
       ),
     );
@@ -218,10 +333,9 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildSettingButton('通知设置', () => context.push('/notifications')),
-              _buildSettingButton('隐私与安全', () => context.push('/privacy')),
-              _buildSettingButton('帮助与支持', () => context.push('/support')),
-              _buildSettingButton('应用设置', () => context.push('/settings')),
+              // _buildSettingButton('通知设置', () => context.push('/notifications')),
+              // _buildSettingButton('隐私与安全', () => context.push('/privacy')),
+              // _buildSettingButton('帮助与支持', () => context.push('/support')),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,

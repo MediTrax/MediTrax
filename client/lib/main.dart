@@ -16,6 +16,7 @@ import 'package:meditrax/models/treatment_schedule.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/models/user_achievement.dart';
 import 'package:meditrax/screens/profile.dart';
+import 'package:meditrax/screens/profile_sharing_screen.dart';
 import 'package:meditrax/screens/splash_screen.dart';
 
 // Import all screens
@@ -114,7 +115,8 @@ class RouterNotifier extends ChangeNotifier {
       return 2;
     } else if (location.startsWith('/medical-records')) {
       return 3;
-    } else if (location.startsWith('/profile')) {
+    } else if (location.startsWith('/profile') ||
+        location.startsWith('/profile-sharing')) {
       return 4;
     }
     // Check if the route is a sub-route of any main routes
@@ -179,6 +181,10 @@ class RouterNotifier extends ChangeNotifier {
             GoRoute(
               path: '/diet-management',
               builder: (context, state) => const DietManagementScreen(),
+            ),
+            GoRoute(
+              path: '/profile-sharing',
+              builder: (context, state) => const ProfileSharingScreen(),
             ),
             GoRoute(
               path: '/family-collaboration',

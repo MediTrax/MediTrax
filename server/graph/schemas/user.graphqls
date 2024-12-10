@@ -98,10 +98,27 @@ type DeleteFamilyMemberResponse {
   message: String!
 }
 
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+    message: String!
+}
+
+type UnshareProfileResponse {
+    message: String!
+}
+
 extend type Query{
   getUser: UserDetailResponse
   getFamilyMembers: [FamilyMemberDetail]
-
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
 }
 
 extend type Mutation{
@@ -117,4 +134,7 @@ extend type Mutation{
   addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
   updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
   deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+  
+  shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }
