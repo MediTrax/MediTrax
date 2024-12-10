@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/providers/app_state.dart';
 import 'package:meditrax/providers/health_metrics_provider.dart';
+import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
 
 class TreatmentMonitoringScreen extends StatelessWidget {
@@ -38,6 +40,11 @@ class _HealthMetricsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final metricsAsync = ref.watch(healthMetricsProvider);
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -82,23 +89,26 @@ class _HealthMetricsTab extends ConsumerWidget {
                           metric.value,
                           metric.unit,
                           metric.recordedAt,
+                          canEdit,
                         );
                       },
                     ),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _showAddMetricDialog(context, ref),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          if (canEdit) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => _showAddMetricDialog(context, ref),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('添加新指标'),
               ),
-              child: const Text('添加新指标'),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -112,6 +122,7 @@ class _HealthMetricsTab extends ConsumerWidget {
     double value,
     String unit,
     DateTime recordedAt,
+    bool canEdit,
   ) {
     return Card(
       elevation: 0,
@@ -149,28 +160,29 @@ class _HealthMetricsTab extends ConsumerWidget {
                 ],
               ),
             ),
-            PopupMenuButton<String>(
-              onSelected: (action) {
-                if (action == 'edit') {
-                  _showEditMetricDialog(context, ref, id, type, value, unit);
-                } else if (action == 'delete') {
-                  _showDeleteConfirmation(context, ref, id);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Text('编辑'),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text(
-                    '删除',
-                    style: TextStyle(color: Colors.red),
+            if (canEdit)
+              PopupMenuButton<String>(
+                onSelected: (action) {
+                  if (action == 'edit') {
+                    _showEditMetricDialog(context, ref, id, type, value, unit);
+                  } else if (action == 'delete') {
+                    _showDeleteConfirmation(context, ref, id);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Text('编辑'),
                   ),
-                ),
-              ],
-            ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      '删除',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

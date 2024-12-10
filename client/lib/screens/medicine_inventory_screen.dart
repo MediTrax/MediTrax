@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meditrax/models/medication.dart';
 import 'package:meditrax/models/medication_reminder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/providers/app_state.dart';
 import 'package:meditrax/providers/medication_provider.dart';
 import 'package:meditrax/providers/medication_reminder_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
@@ -69,6 +70,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
   @override
   Widget build(BuildContext context) {
     final medicationsState = ref.watch(medicationNotifierProvider);
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -95,13 +101,14 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   ),
                 ],
               ),
-              FilledButton.icon(
-                onPressed: () {
-                  DefaultTabController.of(context)?.animateTo(1);
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('添加药品'),
-              ),
+              if (canEdit)
+                FilledButton.icon(
+                  onPressed: () {
+                    DefaultTabController.of(context).animateTo(1);
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('添加药品'),
+                ),
             ],
           ),
           const SizedBox(height: 24),
@@ -141,34 +148,37 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         direction: DismissDirection.endToStart,
                         confirmDismiss: (direction) async {
                           // Show confirmation dialog before deleting
-                          return await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('确认删除'),
-                                content: Text('确定要删除 ${medication.name} 吗？'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(false); // Don't delete
-                                    },
-                                    child: const Text('取消'),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(true); // Confirm delete
-                                    },
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: Colors.red,
+                          if (canEdit) {
+                            return await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('确认删除'),
+                                  content: Text('确定要删除 ${medication.name} 吗？'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(false); // Don't delete
+                                      },
+                                      child: const Text('取消'),
                                     ),
-                                    child: const Text('删除'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
+                                    FilledButton(
+                                      onPressed: () {
+                                        Navigator.of(context)
+                                            .pop(true); // Confirm delete
+                                      },
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                      ),
+                                      child: const Text('删除'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          return false;
                         },
                         onDismissed: (_) async {
                           try {
