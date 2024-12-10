@@ -245,7 +245,8 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 		return nil, fmt.Errorf("user not found")
 	}
 
-	// delete related data entries
+	/* delete related data entries */
+	// delete all objects with user_id=user.ID
 	for _, tableName := range utils.UserRelatedTables {
 		_, err = database.DB.Query(
 			`DELETE $table_name WHERE user_id = $id;`,
@@ -258,6 +259,17 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 			return nil, fmt.Errorf("failed to delete related data from table %s: %w", tableName, err)
 		}
 	}
+	// delete family member entries where user is the patient.
+	_, err = database.DB.Query(
+		`DELETE family_member WHERE patient_user_id = $id;`,
+		map[string]interface{}{
+			"id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete from table family_member where user is patient")
+	}
+
 	// detete family members that relate to this user
 	_, err = database.DB.Query(
 		`DELETE $table_name WHERE related_user_id = $id;`,
@@ -354,163 +366,6 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newP
 	return &model.ResetPasswordResponse{
 		Message: "Password reset successfully",
 	}, nil
-}
-
-// AddFamilyMember is the resolver for the addFamilyMember field.
-func (r *mutationResolver) AddFamilyMember(ctx context.Context, relatedUserID string, relationship string, accessLevel string) (*model.AddFamilyMemberResponse, error) {
-	// TODO
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	result, err := database.DB.Query(
-		`SELECT * FROM user:$related_id LIMIT 1;`,
-		map[string]interface{}{
-			"related_id": relatedUserID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	related_users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(related_users) < 1 {
-		return nil, fmt.Errorf("error, can not find user with given related user id")
-	}
-
-	related := related_users[0]
-
-	// finally, send the create reminder query
-	result, err = database.DB.Query(
-		`CREATE ONLY family_member:ulid()
-		SET user_id: $user_id,
-		related_user_id: $related_id,
-		relationship: $relationship,
-		access_level: $access_level,
-		created_at: time::now()
-		`,
-		map[string]interface{}{
-			"user_id":      user.ID,
-			"related_id":   related.ID,
-			"relationship": relationship,
-			"access_level": accessLevel,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// unmarshal the results of the CREATE query
-	member, err := surrealdb.SmartUnmarshal[model.FamilyMember](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// create response
-	response := &model.AddFamilyMemberResponse{
-		MemberID: member.ID,
-		Message:  "new family member added successfully",
-	}
-	return response, nil
-}
-
-// UpdateFamilyMember is the resolver for the updateFamilyMember field.
-func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID string, relationship *string, accessLevel *string) (*model.UpdateFamilyMemberResponse, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// check legality of the member id
-	if !utils.MatchID(memberID, "family_member") {
-		return nil, fmt.Errorf("illegal member id")
-	}
-
-	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": memberID, "user_id": user.ID}
-
-	// Prepare the fields to be updated
-	updateFields := []string{}
-	if relationship != nil {
-		updateValues["relationship"] = *relationship
-		updateFields = append(updateFields, "relationship = $relationship")
-	}
-	if accessLevel != nil {
-		updateValues["access_level"] = *accessLevel
-		updateFields = append(updateFields, "access_level = $access_level")
-	}
-
-	// Construct the final query with the medicationID in quotes
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
-
-	// send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
-	if err != nil {
-		return nil, err
-	}
-
-	// unmarshal the results and check for errors
-	results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id. no associated family member object found")
-	}
-
-	// create response
-	response := &model.UpdateFamilyMemberResponse{
-		MemberID: results[0].ID,
-		Message:  "Family member updated successfully",
-	}
-
-	// Return the response with the medication ID and a success message
-	return response, nil
-}
-
-// DeleteFamilyMember is the resolver for the deleteFamilyMember field.
-func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID string) (*model.DeleteFamilyMemberResponse, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// check legality of the provided id
-	if !utils.MatchID(memberID, "family_member") {
-		return nil, fmt.Errorf("illegal family member id")
-	}
-
-	// Execute the query
-	result, err := database.DB.Query(
-		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
-		map[string]interface{}{
-			"id":      memberID,
-			"user_id": user.ID,
-		},
-	)
-	if err != nil {
-		return nil, err // Return the error if the query fails
-	}
-
-	// unmarshal results and check for errors
-	results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id, no associated family member object found")
-	}
-
-	// create response
-	response := &model.DeleteFamilyMemberResponse{
-		Message: fmt.Sprintf("Family member %s with related member id %s deleted successfully", results[0].ID, results[0].RelatedUserID),
-	}
-
-	// Return the response with the medication ID and a success message
-	return response, nil
 }
 
 // ShareProfile is the resolver for the shareProfile field.
@@ -635,40 +490,6 @@ func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse,
 		LastLogin:   &user.LastLogin,
 	}
 	return response, nil
-}
-
-// GetFamilyMembers is the resolver for the getFamilyMembers field.
-func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMemberDetail, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM family_member WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var record_details []*model.FamilyMemberDetail
-	for _, member := range members {
-		recordDetail := &model.FamilyMemberDetail{
-			MemberID:      member.ID,
-			RelatedUserID: member.RelatedUserID,
-			Relationship:  member.Relationship,
-			AccessLevel:   member.AccessLevel,
-		}
-		record_details = append(record_details, recordDetail)
-	}
-
-	return record_details, nil
 }
 
 // GetProfiles is the resolver for the getProfiles field.

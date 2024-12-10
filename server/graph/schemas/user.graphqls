@@ -68,36 +68,6 @@ type ResetPasswordResponse {
   message: String!
 }
 
-type FamilyMember{
-  id: String!
-  user_id: String!
-  related_user_id: String!
-  relationship: String!
-  access_level: Int!
-  created_at: DateTime!
-}
-
-type AddFamilyMemberResponse {
-  memberId: String!
-  message: String!
-}
-
-type FamilyMemberDetail {
-  memberId: String!
-  relatedUserId: String!
-  relationship: String!
-  accessLevel: Int!
-}
-
-type UpdateFamilyMemberResponse {
-  memberId: String!
-  message: String!
-}
-
-type DeleteFamilyMemberResponse {
-  message: String!
-}
-
 type ProfileDetail {
   id: String!
   name: String!
@@ -130,10 +100,6 @@ extend type Mutation{
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
-  
-  addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
-  updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
-  deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
   
   shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
   unshareProfile(targetUserId: String!): UnshareProfileResponse!
