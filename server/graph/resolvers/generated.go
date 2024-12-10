@@ -175,6 +175,7 @@ type ComplexityRoot struct {
 
 	FamilyMemberDetail struct {
 		AccessLevel  func(childComplexity int) int
+		FamilyID     func(childComplexity int) int
 		MemberID     func(childComplexity int) int
 		Name         func(childComplexity int) int
 		PhoneNumber  func(childComplexity int) int
@@ -1029,6 +1030,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FamilyMemberDetail.AccessLevel(childComplexity), true
+
+	case "FamilyMemberDetail.familyId":
+		if e.complexity.FamilyMemberDetail.FamilyID == nil {
+			break
+		}
+
+		return e.complexity.FamilyMemberDetail.FamilyID(childComplexity), true
 
 	case "FamilyMemberDetail.memberId":
 		if e.complexity.FamilyMemberDetail.MemberID == nil {
@@ -3001,7 +3009,8 @@ type AddFamilyMemberResponse {
 }
 
 type FamilyMemberDetail {
-  memberId: String!
+  memberId: String!   # id of the family member entry
+  familyId: String!   # user id of the related family member
   name: String!
   phoneNumber: String!
   relationship: String!
@@ -7861,6 +7870,50 @@ func (ec *executionContext) _FamilyMemberDetail_memberId(ctx context.Context, fi
 }
 
 func (ec *executionContext) fieldContext_FamilyMemberDetail_memberId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FamilyMemberDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FamilyMemberDetail_familyId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FamilyMemberDetail_familyId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FamilyID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_FamilyMemberDetail_familyId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FamilyMemberDetail",
 		Field:      field,
@@ -13692,6 +13745,8 @@ func (ec *executionContext) fieldContext_Query_getFamilyMembers(_ context.Contex
 			switch field.Name {
 			case "memberId":
 				return ec.fieldContext_FamilyMemberDetail_memberId(ctx, field)
+			case "familyId":
+				return ec.fieldContext_FamilyMemberDetail_familyId(ctx, field)
 			case "name":
 				return ec.fieldContext_FamilyMemberDetail_name(ctx, field)
 			case "phoneNumber":
@@ -21122,6 +21177,11 @@ func (ec *executionContext) _FamilyMemberDetail(ctx context.Context, sel ast.Sel
 			out.Values[i] = graphql.MarshalString("FamilyMemberDetail")
 		case "memberId":
 			out.Values[i] = ec._FamilyMemberDetail_memberId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "familyId":
+			out.Values[i] = ec._FamilyMemberDetail_familyId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

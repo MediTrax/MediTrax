@@ -13,7 +13,8 @@ type AddFamilyMemberResponse {
 }
 
 type FamilyMemberDetail {
-  memberId: String!
+  memberId: String!   # id of the family member entry
+  familyId: String!   # user id of the related family member
   name: String!
   phoneNumber: String!
   relationship: String!
