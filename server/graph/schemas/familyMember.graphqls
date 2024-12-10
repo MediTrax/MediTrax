@@ -1,0 +1,57 @@
+type FamilyMember{
+  id: String!
+  user_id: String!
+  patient_user_id: String!
+  relationship: String! # deprecated
+  access_level: Int!    # deprecated
+  created_at: DateTime!
+}
+
+type AddFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type FamilyMemberDetail {
+  memberId: String!   # id of the family member entry
+  familyId: String!   # user id of the related family member
+  name: String!
+  phoneNumber: String!
+  relationship: String!
+  accessLevel: Int!
+}
+
+type PatientDetail{
+    patientId: String!
+    name: String!
+    phoneNumber: String!
+    relationship: String!
+    accessLevel: Int!
+}
+
+type UpdateFamilyMemberResponse {
+  memberId: String!
+  message: String!
+}
+
+type DeleteFamilyMemberResponse {
+  message: String!
+}
+
+extend type Query{
+    getFamilyMembers: [FamilyMemberDetail]
+    getRelatedPatients: [PatientDetail]
+
+    getPatientMedicalRecords(patientId: String!): [MedicalRecordDetail]
+    getPatientTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+    getPatientMedications(patientId: String!): [MedicationDetail]
+    getPatientHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+}
+
+extend type Mutation{
+    addFamilyMember(memberPhoneNumber: String!, relationship: String!, accessLevel: Int!): AddFamilyMemberResponse
+    deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+
+    # deprecated
+    updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+}
