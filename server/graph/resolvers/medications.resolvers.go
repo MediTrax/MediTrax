@@ -604,7 +604,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 
 	// update reminder
 	_, err = database.DB.Query(`
-		UPDATE $id SET istaken=$is_taken;`,
+		UPDATE $id SET reminderTime=$reminderTime;`,
 		map[string]interface{}{
 			"id":           *reminderID,
 			"reminderTime": next_reminder_time,
