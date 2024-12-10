@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/surrealdb/surrealdb.go"
 )
 
 var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
@@ -121,4 +123,46 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 
 	// added succcesfully without errors
 	return nil
+}
+
+func IsFamilyMember(memberId string, patientId string) bool {
+	result, err := database.DB.Query(`SELECT * FROM family_member 
+	WHERE user_id=$userID AND patient_user_id=$patientId;`,
+		map[string]interface{}{
+			"userID":    memberId,
+			"patientId": patientId,
+		})
+	if err != nil {
+		return false
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
+	if err != nil {
+		return false
+	}
+	if len(members) < 1 {
+		return false
+	}
+
+	if members[0].UserID == memberId && members[0].PatientUserID == patientId {
+		return true
+	}
+	return false
+}
+
+func GetUserByID(userID string) (*model.User, error) {
+	result, err := database.DB.Query(`SELECT * FROM ONLY $user_id`,
+		map[string]interface{}{
+			"user_id": userID,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
