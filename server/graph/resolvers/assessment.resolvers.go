@@ -90,6 +90,7 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) ([]*model.H
 			QuestionnaireData: ass.QuestionnaireData,
 			RiskLevel:         ass.RiskLevel,
 			Recommendations:   ass.Recommendations,
+			CreatedAt:         ass.CreatedAt,
 		}
 		AssessmentDetails = append(AssessmentDetails, AssessmentDetail)
 	}
@@ -110,7 +111,7 @@ func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*m
 		{QuestionID: 1, Question: "您是否有高血压病史？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 2, Question: "您是否有糖尿病病史？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 3, Question: "您是否有家族肾病史？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 4, Question: "您的年龄是多少？", QuestionType: 2, Choices: nil},
+		{QuestionID: 4, Question: "您的年龄是多少？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 5, Question: "您是否有水肿、尿频、尿急等排尿异常症状？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 6, Question: "您的体重是否过重（BMI大于25）？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 7, Question: "您是否有长期使用肾毒性药物的历史？", QuestionType: 0, Choices: []string{"是", "否"}},
