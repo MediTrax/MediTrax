@@ -188,7 +188,7 @@ class TreatmentSchedules extends _$TreatmentSchedules {
         throw result.exception!;
       }
 
-      return result.parsedData!.getSharedTreatmentSchedule!
+      return (result.parsedData!.getSharedTreatmentSchedule ?? [])
           .map((schedule) => TreatmentSchedule(
                 id: schedule!.scheduleId,
                 treatmentType: schedule.treatmentType,
