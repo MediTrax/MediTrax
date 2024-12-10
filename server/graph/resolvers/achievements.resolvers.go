@@ -26,7 +26,7 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 		`CREATE ONLY achievement_badge:ulid() 
         SET name=$name,
             description=$description,
-            icon_url=$iconUrl,
+            iconUrl=$iconUrl,
             createdAt=time::now();`,
 		map[string]interface{}{
 			"name":        name,
@@ -81,13 +81,13 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 	createAchievementQuery := `
 		CREATE ONLY user_achievement:ulid()
 		SET 
-			user_id = $user_id,
+			userId = $userId,
 			badgeID = $badgeID,
 			earnedAt = time::now(),
 			createdAt = time::now();
 	`
 	createResult, err := database.DB.Query(createAchievementQuery, map[string]interface{}{
-		"user_id": user.ID,
+		"userId":  user.ID,
 		"badgeID": badgeID,
 	})
 	if err != nil {
@@ -122,12 +122,12 @@ func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64,
 
 	result, err := database.DB.Query(
 		`CREATE ONLY point_record:ulid() 
-        SET user_id=$user_id,
+        SET userId=$userId,
 		pointsEarned=$pointsEarned,
 		reason=$reason,
 		earnedAt=time::now();`,
 		map[string]interface{}{
-			"user_id":      user.ID,
+			"userId":       user.ID,
 			"pointsEarned": pointsEarned,
 			"reason":       reason,
 		},
@@ -172,7 +172,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 	}
 
 	// TODO: could mofify this
-	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY created_at DESC`, nil)
+	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY createdAt DESC`, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID ORDER BY earned_at DESC;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE userId=$userID ORDER BY earnedAt DESC;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -239,9 +239,9 @@ func (r *queryResolver) GetUserPointRecords(ctx context.Context) ([]*model.UserP
 
 	// get all the medication reminders for the user
 	result, err := database.DB.Query(
-		`SELECT * FROM point_record WHERE user_id = $user_id;`,
+		`SELECT * FROM point_record WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {

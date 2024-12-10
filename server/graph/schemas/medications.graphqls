@@ -5,18 +5,18 @@ type Medication{
   unit: String!
   frequency: String!
   inventory: Float!
-  user_id: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  userId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type MedicationReminder{
   id: String!
-  medication_id: String!
-  user_id: String!
-  reminder_time: DateTime!
-  is_taken: Boolean!
-  created_at: DateTime!
+  medicationId: String!
+  userId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+  createdAt: DateTime!
 }
 
 type AddMedicationResponse {
@@ -61,7 +61,7 @@ type MedicationReminderDetail {
 
 type TreatmentSchedule{
   id: String!
-  user_id: String!
+  userId: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!

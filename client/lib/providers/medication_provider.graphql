@@ -9,6 +9,17 @@ query GetMedications() {
   }
 }
 
+query GetSharedMedications($patientId: String!) {
+  getSharedMedications(patientId: $patientId) {
+    medicationId
+    name
+    dosage
+    unit
+    frequency
+    inventory
+  }
+}
+
 mutation AddMedication(
   $name: String!
   $dosage: Float!

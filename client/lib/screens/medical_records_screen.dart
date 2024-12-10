@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meditrax/models/medical_record.dart';
+import 'package:meditrax/providers/user_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:meditrax/providers/medical_records_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
+import 'package:meditrax/providers/app_state.dart';
 
 class MedicalRecordsScreen extends StatelessWidget {
   const MedicalRecordsScreen({super.key});
@@ -39,6 +40,11 @@ class _VisitHistoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recordsAsync = ref.watch(medicalRecordsProvider);
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -92,18 +98,20 @@ class _VisitHistoryTab extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _showAddVisitDialog(context, ref),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          if (canEdit) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => _showAddVisitDialog(context, ref),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('添加新记录'),
               ),
-              child: const Text('添加新记录'),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -288,6 +296,11 @@ class _MedicationHistoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recordsAsync = ref.watch(medicalRecordsProvider);
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -342,18 +355,20 @@ class _MedicationHistoryTab extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _showAddMedicationDialog(context, ref),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          if (canEdit) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => _showAddMedicationDialog(context, ref),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('添加新用药'),
               ),
-              child: const Text('添加新用药'),
             ),
-          ),
+          ],
         ],
       ),
     );

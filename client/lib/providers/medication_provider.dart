@@ -1,57 +1,77 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/user_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/medication.dart';
 import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/medication_provider.graphql.dart';
 
-final medicationProvider = StateNotifierProvider<MedicationNotifier, AsyncValue<List<Medication>>>((ref) {
-  final client = ref.watch(graphQLServiceProvider);
-  return MedicationNotifier(client);
-});
+part 'medication_provider.g.dart';
 
-class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
-  final GraphQLClient _client;
+@riverpod
+class MedicationNotifier extends _$MedicationNotifier {
+  @override
+  Future<List<Medication>> build() {
+    return fetchMedications();
+  }
 
-  MedicationNotifier(this._client) : super(const AsyncValue.data([]));
-
-  Future<void> fetchMedications(String userId) async {
-    try {
-      print("Fetching medications for user: $userId");
-      state = const AsyncValue.loading();
-      final result = await _client.query$GetMedications(
-      Options$Query$GetMedications(
-        fetchPolicy: FetchPolicy.networkOnly, 
-      ),
-    );
-
-      print("GraphQL exception: ${result.exception}");
+  Future<List<Medication>> fetchMedications() async {
+    final patientId = ref.read(appStateProvider).selectedProfile;
+    final user = ref.read(userDataProvider).valueOrNull;
+    if (patientId == user?.id || patientId == null) {
+      final result =
+          await ref.read(graphQLServiceProvider).query$GetMedications(
+                Options$Query$GetMedications(
+                  fetchPolicy: FetchPolicy.networkOnly,
+                ),
+              );
 
       if (result.hasException) {
         throw result.exception!;
       }
 
-      final medications = (result.data?['getMedications'] as List? ?? [])
+      final medications = (result.parsedData!.getMedications ?? [])
           .map((item) => Medication(
-                id: item['medicationId'] ?? '',  // Use medicationId instead of id
-                name: item['name'] ?? '',
-                dosage: (item['dosage'] as num?)?.toDouble() ?? 0.0,
-                unit: item['unit'] ?? '',
-                frequency: item['frequency'] ?? '',
-                inventory: (item['inventory'] as num?)?.toDouble() ?? 0.0,
-                userId: item['userId'] ?? userId,  // Use provided userId as fallback
-                createdAt: item['createdAt'] != null 
-                    ? DateTime.parse(item['createdAt']) 
-                    : DateTime.now(),
-                updatedAt: item['updatedAt'] != null 
-                    ? DateTime.parse(item['updatedAt']) 
-                    : DateTime.now(),
+                id: item!.medicationId, // Use medicationId instead of id
+                name: item.name,
+                dosage: item.dosage,
+                unit: item.unit,
+                frequency: item.frequency,
+                inventory: item.inventory,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
               ))
           .toList();
 
-      // print("Parsed medications: ${medications.length}");
-      state = AsyncValue.data(medications);
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      return medications;
+    } else {
+      final result =
+          await ref.read(graphQLServiceProvider).query$GetSharedMedications(
+                Options$Query$GetSharedMedications(
+                  variables: Variables$Query$GetSharedMedications(
+                    patientId: patientId,
+                  ),
+                ),
+              );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+      final medications = (result.parsedData!.getSharedMedications ?? [])
+          .map((item) => Medication(
+                id: item!.medicationId, // Use medicationId instead of id
+                name: item.name,
+                dosage: item.dosage,
+                unit: item.unit,
+                frequency: item.frequency,
+                inventory: item.inventory,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ))
+          .toList();
+
+      return medications;
     }
   }
 
@@ -71,17 +91,15 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       // print("Inventory: $inventory");
 
       // Perform the mutation request
-      final result = await _client.mutate$AddMedication(
-        Options$Mutation$AddMedication(
-          variables: Variables$Mutation$AddMedication(
-            name: name, 
-            dosage: dosage,
-            unit: unit,
-            frequency: frequency, 
-            inventory: inventory
-            )
-          )
-      );
+      final result = await ref
+          .read(graphQLServiceProvider)
+          .mutate$AddMedication(Options$Mutation$AddMedication(
+              variables: Variables$Mutation$AddMedication(
+                  name: name,
+                  dosage: dosage,
+                  unit: unit,
+                  frequency: frequency,
+                  inventory: inventory)));
 
       print("GraphQL exception: ${result.exception}");
 
@@ -93,13 +111,17 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       final newMedication = Medication(
         id: result.data!['addMedication']['medicationId'] ?? '',
         name: result.data!['addMedication']['name'] ?? '',
-        dosage: (result.data!['addMedication']['dosage'] as num?)?.toDouble() ?? 0.0,
+        dosage: (result.data!['addMedication']['dosage'] as num?)?.toDouble() ??
+            0.0,
         unit: result.data!['addMedication']['unit'] ?? '',
         frequency: result.data!['addMedication']['frequency'] ?? '',
-        inventory: (result.data!['addMedication']['inventory'] as num?)?.toDouble() ?? 0.0,
-        userId: result.data!['addMedication']['userId'] ?? '',
-        createdAt: DateTime.parse(result.data!['addMedication']['createdAt'] ?? DateTime.now().toIso8601String()),
-        updatedAt: DateTime.parse(result.data!['addMedication']['updatedAt'] ?? DateTime.now().toIso8601String()),
+        inventory:
+            (result.data!['addMedication']['inventory'] as num?)?.toDouble() ??
+                0.0,
+        createdAt: DateTime.parse(result.data!['addMedication']['createdAt'] ??
+            DateTime.now().toIso8601String()),
+        updatedAt: DateTime.parse(result.data!['addMedication']['updatedAt'] ??
+            DateTime.now().toIso8601String()),
       );
 
       state.whenData((medications) {
@@ -124,21 +146,20 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       print("Attempting to update medication with the following parameters:");
       print("ID: $medicationId");
 
-      final result = await _client.mutate$UpdateMedication(
-        Options$Mutation$UpdateMedication(
-          variables: Variables$Mutation$UpdateMedication(
+      final result = await ref
+          .read(graphQLServiceProvider)
+          .mutate$UpdateMedication(Options$Mutation$UpdateMedication(
+              variables: Variables$Mutation$UpdateMedication(
             medicationId: medicationId,
             name: name,
             dosage: dosage,
             unit: unit,
             frequency: frequency,
             inventory: inventory,
-            )
-          )
-      );
+          )));
 
-    print("GraphQL result: ${result.data}");
-    print("GraphQL exception: ${result.exception}");
+      print("GraphQL result: ${result.data}");
+      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
@@ -146,10 +167,20 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
 
       // Update the state with the updated medication
       state.whenData((medications) {
-        final updatedMedication = Medication.fromJson(result.data!['updateMedication']);
-        final updatedList = medications.map((med) => 
-          med.id == medicationId ? updatedMedication : med
-        ).toList();
+        final originalMedication =
+            medications.firstWhere((med) => med.id == medicationId);
+        final updatedMedication = Medication(
+            id: medicationId,
+            name: name ?? originalMedication.name,
+            dosage: dosage ?? originalMedication.dosage,
+            unit: unit ?? originalMedication.unit,
+            frequency: frequency ?? originalMedication.frequency,
+            inventory: inventory ?? originalMedication.inventory,
+            createdAt: originalMedication.createdAt,
+            updatedAt: DateTime.now());
+        final updatedList = medications
+            .map((med) => med.id == medicationId ? updatedMedication : med)
+            .toList();
         state = AsyncValue.data(updatedList);
       });
 
@@ -163,13 +194,11 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
     try {
       print('Starting deletion of medication with ID: $medicationId');
 
-      final result = await _client.mutate$DeleteMedication(
-        Options$Mutation$DeleteMedication(
-          variables: Variables$Mutation$DeleteMedication(
-            medicationId: medicationId
-            )
-          )
-      );
+      final result = await ref
+          .read(graphQLServiceProvider)
+          .mutate$DeleteMedication(Options$Mutation$DeleteMedication(
+              variables: Variables$Mutation$DeleteMedication(
+                  medicationId: medicationId)));
 
       print('Mutation result: ${result.data}');
 
@@ -180,7 +209,8 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
 
       // Update the state by removing the deleted medication
       state.whenData((medications) {
-        final updatedList = medications.where((med) => med.id != medicationId).toList();
+        final updatedList =
+            medications.where((med) => med.id != medicationId).toList();
         state = AsyncValue.data(updatedList);
       });
 
