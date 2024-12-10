@@ -1,82 +1,232 @@
-type MedicalRecord{
+"""
+Represents a medical record for a user.
+"""
+type MedicalRecord {
+  # The unique identifier of the medical record.
   id: String!
+
+  # The ID of the user associated with the medical record.
   userId: String!
+
+  # The type of the medical record.
   recordType: String!
-  # content: RecordObject!
+
+  # The content of the medical record.
   content: String!
+
+  # The date and time when the medical record was created.
   createdAt: DateTime!
+
+  # The date and time when the medical record was last updated.
   updatedAt: DateTime!
 }
 
-type HealthMetric{
+"""
+Represents a health metric recorded for a user.
+"""
+type HealthMetric {
+  # The unique identifier of the health metric.
   id: String!
+
+  # The ID of the user associated with the health metric.
   userId: String!
+
+  # The type of the health metric.
   metricType: String!
+
+  # The value of the health metric.
   value: Float!
+
+  # The unit of measurement for the health metric.
   unit: String!
+
+  # The date and time when the health metric was recorded.
   recordedAt: DateTime!
+
+  # The date and time when the health metric was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for adding a health metric.
+"""
 type AddHealthMetricResponse {
+  # The ID of the newly added health metric.
   metricId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a health metric.
+"""
 type HealthMetricDetail {
+  # The ID of the health metric.
   metricId: String!
+
+  # The type of the health metric.
   metricType: String!
+
+  # The value of the health metric.
   value: Float!
+
+  # The unit of measurement for the health metric.
   unit: String!
+
+  # The date and time when the health metric was recorded.
   recordedAt: DateTime!
 }
 
+"""
+Response type for updating a health metric.
+"""
 type UpdateHealthMetricResponse {
+  # The ID of the updated health metric.
   metricId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a health metric.
+"""
 type DeleteHealthMetricResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
-type RecordObject{
+"""
+Represents a record object containing data.
+"""
+type RecordObject {
+  # The data contained in the record object.
   data: String!
 }
 
+"""
+Response type for adding a medical record.
+"""
 type AddMedicalRecordResponse {
+  # The ID of the newly added medical record.
   recordId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a medical record.
+"""
 type MedicalRecordDetail {
+  # The ID of the medical record.
   recordId: String!
+
+  # The type of the medical record.
   recordType: String!
-  # content: RecordObject!
+
+  # The content of the medical record.
   content: String!
+
+  # The date and time when the medical record was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for updating a medical record.
+"""
 type UpdateMedicalRecordResponse {
+  # The ID of the updated medical record.
   recordId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a medical record.
+"""
 type DeleteMedicalRecordResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
-extend type Query{
-  getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+extend type Query {
+  # Retrieves a list of health metrics for the user.
+  getHealthMetrics(
+    # The start date for filtering health metrics.
+    startDate: DateTime
+
+    # The end date for filtering health metrics.
+    endDate: DateTime
+
+    # The type of health metric to filter by.
+    metricType: String
+  ): [HealthMetricDetail]
+
+  # Retrieves a list of medical records for the user.
   getMedicalRecords: [MedicalRecordDetail]
 }
 
-extend type Mutation{
-  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
-  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
-  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
-   
-  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
-  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
-  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
+extend type Mutation {
+  # Adds a new health metric.
+  addHealthMetric(
+    # The type of the health metric.
+    metricType: String!
+
+    # The value of the health metric.
+    value: Float!
+
+    # The unit of measurement for the health metric.
+    unit: String!
+
+    # The date and time when the health metric was recorded.
+    recordedAt: String!
+  ): AddHealthMetricResponse
+
+  # Updates an existing health metric.
+  updateHealthMetric(
+    # The ID of the health metric to be updated.
+    metricId: String!
+
+    # The new value of the health metric.
+    value: Float
+
+    # The new unit of measurement for the health metric.
+    unit: String
+  ): UpdateHealthMetricResponse
+
+  # Deletes a health metric.
+  deleteHealthMetric(
+    # The ID of the health metric to be deleted.
+    metricId: String!
+  ): DeleteHealthMetricResponse
+
+  # Adds a new medical record.
+  addMedicalRecord(
+    # The type of the medical record.
+    recordType: String!
+
+    # The content of the medical record.
+    content: String!
+  ): AddMedicalRecordResponse
+
+  # Updates an existing medical record.
+  updateMedicalRecord(
+    # The ID of the medical record to be updated.
+    recordId: String!
+
+    # The new type of the medical record.
+    recordType: String
+
+    # The new content of the medical record.
+    content: String
+  ): UpdateMedicalRecordResponse
+
+  # Deletes a medical record.
+  deleteMedicalRecord(
+    # The ID of the medical record to be deleted.
+    recordId: String!
+  ): DeleteMedicalRecordResponse
 }

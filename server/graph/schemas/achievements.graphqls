@@ -1,71 +1,189 @@
+"""
+Represents an achievement badge that can be awarded to users.
+"""
 type AchievementBadge{
+  # The unique identifier of the achievement badge.
   id: String!
+
+  # The name of the achievement badge.
   name: String!
+
+  # A description of the achievement badge.
   description: String!
+
+  # The URL of the icon representing the achievement badge.
   iconUrl: String!
+
+  # The date and time when the achievement badge was created.
   createdAt: DateTime!
 }
 
+"""
+Represents a user's achievement, linking a user to a badge.
+"""
 type UserAchievement{
+  # The unique identifier of the user achievement.
   id: String!
+
+  # The ID of the user who earned the achievement.
   userId: String!
+
+  # The ID of the badge that was earned.
   badgeId: String!
+
+  # The date and time when the achievement was earned.
   earnedAt: DateTime!
+
+  # The date and time when the user achievement was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for creating an achievement badge.
+"""
 type CreateAchievementBadgeResponse {
+  # The ID of the newly created achievement badge.
   badgeId: String!
+
+  # A message indicating the result of the creation operation.
   message: String!
 }
 
+"""
+Detailed information about an achievement badge.
+"""
 type AchievementBadgeDetail {
+  # The ID of the achievement badge.
   badgeId: String!
+
+  # The name of the achievement badge.
   name: String!
+
+  # A description of the achievement badge.
   description: String!
+
+  # The URL of the icon representing the achievement badge.
   iconUrl: String!
+
+  # The date and time when the achievement badge was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for awarding an achievement to a user.
+"""
 type AwardAchievementResponse {
+  # The ID of the user achievement that was awarded.
   userAchievementId: String!
+
+  # A message indicating the result of the award operation.
   message: String!
 }
 
+"""
+Detailed information about a user's achievement.
+"""
 type UserAchievementDetail {
+  # The ID of the user achievement.
   userAchievementId: String!
+
+  # The ID of the badge that was earned.
   badgeId: String!
+
+  # The date and time when the achievement was earned.
   earnedAt: DateTime!
 }
 
+"""
+Represents a record of points earned by a user.
+"""
 type UserPointRecord{
+  # The unique identifier of the point record.
   id: String!
+
+  # The ID of the user who earned the points.
   userId: String!
+
+  # The number of points earned.
   pointsEarned: Float!
+
+  # The reason for earning the points.
   reason: String!
+
+  # The date and time when the points were earned.
   earnedAt: DateTime!
 }
 
+"""
+Detailed information about a user's point record.
+"""
 type UserPointRecordDetail{
+  # The ID of the point record.
   recordId: String!
+
+  # The number of points earned.
   pointsEarned: Float!
+
+  # The reason for earning the points.
   reason: String!
+
+  # The date and time when the points were earned.
   earnedAt: DateTime!
 }
 
+"""
+Response type for earning points.
+"""
 type earnPointsResponse{
+  # The updated total points of the user.
   updatedPoints: Float!
+
+  # A message indicating the result of the points earning operation.
   message: String!
 }
 
 extend type Query{
+  # Retrieves a list of achievement badges.
   getAchievementBadges: [AchievementBadgeDetail]
+
+  # Retrieves a list of achievements earned by the user.
   getUserAchievements: [UserAchievementDetail]
+
+  # Retrieves a list of point records for the user.
   getUserPointRecords: [UserPointRecordDetail]
 }
 
 extend type Mutation{
-  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
-  awardAchievement(badgeId: String!): AwardAchievementResponse  
-  earnPoints(pointsEarned: Float!, reason:String!) : earnPointsResponse
+  """
+  Creates a new achievement badge.
+  """
+  createAchievementBadge(
+    # The name of the achievement badge.
+    name: String!
+
+    # A description of the achievement badge.
+    description: String!
+
+    # The URL of the icon representing the achievement badge.
+    iconUrl: String!
+  ): CreateAchievementBadgeResponse
+
+  """
+  Awards an achievement badge to a user.
+  """
+  awardAchievement(
+    # The ID of the badge to be awarded.
+    badgeId: String!
+  ): AwardAchievementResponse  
+
+  """
+  Records points earned by a user.
+  """
+  earnPoints(
+    # The number of points earned.
+    pointsEarned: Float!
+
+    # The reason for earning the points.
+    reason: String!
+  ): earnPointsResponse
 }

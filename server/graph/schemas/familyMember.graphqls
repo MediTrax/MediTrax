@@ -1,57 +1,147 @@
+"""
+Represents a family member linked to a user.
+"""
 type FamilyMember{
+  # The unique identifier of the family member entry.
   id: String!
+
+  # The ID of the user who added the family member.
   userId: String!
+
+  # The ID of the patient user linked to the family member.
   patient_userId: String!
+
+  # The relationship of the family member to the user.
   relationship: String! # deprecated
+
+  # The access level granted to the family member.
   accessLevel: Int!    # deprecated
+
+  # The date and time when the family member was added.
   createdAt: DateTime!
 }
 
+"""
+Response type for adding a family member.
+"""
 type AddFamilyMemberResponse {
+  # The ID of the newly added family member.
   memberId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a family member.
+"""
 type FamilyMemberDetail {
-  memberId: String!   # id of the family member entry
-  familyId: String!   # user id of the related family member
+  # The ID of the family member entry.
+  memberId: String!
+
+  # The user ID of the related family member.
+  familyId: String!
+
+  # The name of the family member.
   name: String!
+
+  # The phone number of the family member.
   phoneNumber: String!
+
+  # The relationship of the family member to the user.
   relationship: String!
+
+  # The access level granted to the family member.
   accessLevel: Int!
 }
 
+"""
+Detailed information about a patient.
+"""
 type PatientDetail{
+    # The ID of the patient.
     patientId: String!
+
+    # The name of the patient.
     name: String!
+
+    # The phone number of the patient.
     phoneNumber: String!
+
+    # The relationship of the patient to the user.
     relationship: String!
+
+    # The access level granted to the user.
     accessLevel: Int!
 }
 
+"""
+Response type for updating a family member.
+"""
 type UpdateFamilyMemberResponse {
+  # The ID of the updated family member.
   memberId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a family member.
+"""
 type DeleteFamilyMemberResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
 extend type Query{
+    # Retrieves a list of family members for the user.
     getFamilyMembers: [FamilyMemberDetail]
+
+    # Retrieves a list of related patients for the user.
     getRelatedPatients: [PatientDetail]
 
+    # Retrieves medical records for a specific patient.
     getPatientMedicalRecords(patientId: String!): [MedicalRecordDetail]
+
+    # Retrieves treatment schedules for a specific patient.
     getPatientTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+
+    # Retrieves medications for a specific patient.
     getPatientMedications(patientId: String!): [MedicationDetail]
+
+    # Retrieves health metrics for a specific patient.
     getPatientHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
-    addFamilyMember(memberPhoneNumber: String!, relationship: String!, accessLevel: Int!): AddFamilyMemberResponse
-    deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+    # Adds a new family member.
+    addFamilyMember(
+      # The phone number of the family member.
+      memberPhoneNumber: String!
 
-    # deprecated
-    updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+      # The relationship of the family member to the user.
+      relationship: String!
+
+      # The access level granted to the family member.
+      accessLevel: Int!
+    ): AddFamilyMemberResponse
+
+    # Deletes a family member.
+    deleteFamilyMember(
+      # The ID of the family member to be deleted.
+      memberId: String!
+    ): DeleteFamilyMemberResponse
+
+    # Updates a family member. (deprecated)
+    updateFamilyMember(
+      # The ID of the family member to be updated.
+      memberId: String!
+
+      # The new relationship of the family member to the user.
+      relationship: String
+
+      # The new access level granted to the family member.
+      accessLevel: String
+    ): UpdateFamilyMemberResponse
 }

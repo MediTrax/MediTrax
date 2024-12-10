@@ -1,26 +1,65 @@
+"""
+Represents an activity log entry for a user.
+"""
 type ActivityLog {
+    # The unique identifier of the activity log entry.
     id: String!
+
+    # The ID of the user associated with the activity.
     userId: String!
+
+    # The type of activity performed.
     activityType: String!
+
+    # A description of the activity.
     description: String!
+
+    # The object that was changed during the activity.
     changedObject: String!
+
+    # The field of the object that was changed.
     changedField: String!
+
+    # The original value before the change.
     from: String!
+
+    # The new value after the change.
     to: String!
+
+    # The timestamp when the activity occurred.
     timestamp: DateTime!
 }
 
+"""
+Detailed information about an activity log entry.
+"""
 type ActivityLogDetail{
+    # The ID of the activity log entry.
     logId: String!
+
+    # The type of activity performed.
     activityType: String!
+
+    # A description of the activity.
     description: String!
+
+    # The object that was changed during the activity.
     changedObject: String!
+
+    # The field of the object that was changed.
     changedField: String!
+
+    # The original value before the change.
     from: String!
+
+    # The new value after the change.
     to: String!
+
+    # The timestamp when the activity occurred.
     timestamp: DateTime!
 }
 
 extend type Query{
+    # Retrieves a list of activity logs for the user.
     getActivityLog: [ActivityLogDetail]
 }
