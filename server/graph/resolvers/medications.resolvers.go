@@ -36,13 +36,11 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 		return nil, err
 	}
 
-	println("Finished query")
 	medications, err := surrealdb.SmartUnmarshal[[]*model.Medication](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	println("Finished unmarshaling medications")
 	if len(medications) > 0 {
 		return nil, fmt.Errorf("identical medication name already exists for the user, please use update medication instead")
 	}
@@ -864,37 +862,7 @@ func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.Medication
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// query for all the medications associated with the user
-	result, err := database.DB.Query(
-		`SELECT * FROM medication WHERE user_id = $user_id;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
-	var medicationDetails []*model.MedicationDetail
-	for _, med := range medications {
-		medicationDetail := &model.MedicationDetail{
-			MedicationID: med.ID,
-			Name:         med.Name,
-			Dosage:       med.Dosage,
-			Unit:         med.Unit,
-			Frequency:    med.Frequency,
-			Inventory:    med.Inventory,
-		}
-		medicationDetails = append(medicationDetails, medicationDetail)
-	}
-
-	return medicationDetails, nil
+	return utils.GetMedications(*user)
 }
 
 // GetMedicationReminders is the resolver for the getMedicationReminders field.
@@ -941,31 +909,5 @@ func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.Tre
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: please modify this line as it may result in a bug
-	schedules, err := surrealdb.SmartUnmarshal[[]*model.TreatmentSchedule](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var scheduleDetails []*model.TreatmentScheduleDetail
-	for _, schedule := range schedules {
-		scheduleDetail := &model.TreatmentScheduleDetail{
-			ScheduleID:    schedule.ID,
-			TreatmentType: schedule.TreatmentType,
-			ScheduledTime: schedule.ScheduledTime,
-			Location:      schedule.Location,
-			Notes:         schedule.Notes,
-		}
-		scheduleDetails = append(scheduleDetails, scheduleDetail)
-	}
-
-	return scheduleDetails, nil
+	return utils.GetTreatmentSchedules(*user)
 }

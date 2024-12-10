@@ -358,54 +358,7 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 		return nil, fmt.Errorf("access denied")
 	}
 
-	var result interface{}
-	var err error
-
-	// get all the health metric entries that is associated with the user
-	if metricType == nil {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
-			map[string]interface{}{
-				"user_id": user.ID,
-			},
-		)
-	} else {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
-			map[string]interface{}{
-				"user_id":     user.ID,
-				"metric_type": *metricType,
-			},
-		)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	// unmarshal results into Go objects
-	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// loop through the metrics, convert them into HealthMetricDetail, then return the converted list and nil
-	var metricDetails []*model.HealthMetricDetail
-	for _, metric := range metrics {
-		// check that the metric is within the record time constraints
-		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
-			metricDetail := &model.HealthMetricDetail{
-				MetricID:   metric.ID,
-				MetricType: metric.MetricType,
-				Value:      metric.Value,
-				RecordedAt: metric.RecordedAt,
-				Unit:       metric.Unit,
-			}
-			metricDetails = append(metricDetails, metricDetail)
-		}
-	}
-
-	return metricDetails, nil
+	return utils.GetHealthMetrics(*user, startDate, endDate, metricType)
 }
 
 // GetMedicalRecords is the resolver for the getMedicalRecords field.
@@ -415,30 +368,5 @@ func (r *queryResolver) GetMedicalRecords(ctx context.Context) ([]*model.Medical
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: please modify this line as it may result in a bug
-	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecord](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var record_details []*model.MedicalRecordDetail
-	for _, record := range records {
-		recordDetail := &model.MedicalRecordDetail{
-			RecordID:   record.ID,
-			RecordType: record.RecordType,
-			Content:    record.Content,
-			CreatedAt:  record.CreatedAt,
-		}
-		record_details = append(record_details, recordDetail)
-	}
-
-	return record_details, nil
+	return utils.GetMedicalRecords(*user)
 }
