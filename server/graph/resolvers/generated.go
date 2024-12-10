@@ -321,7 +321,7 @@ type ComplexityRoot struct {
 		RefreshToken                 func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
 		ResetPassword                func(childComplexity int, token string, newPassword string) int
-		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string) int
+		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
 		TakeMedication               func(childComplexity int, reminderID *string) int
 		UnshareProfile               func(childComplexity int, targetUserID string) int
 		UpdateFamilyMember           func(childComplexity int, memberID string, relationship *string, accessLevel *string) int
@@ -376,7 +376,11 @@ type ComplexityRoot struct {
 		GetPatientTreatmentSchedule     func(childComplexity int, patientID string) int
 		GetProfiles                     func(childComplexity int) int
 		GetRelatedPatients              func(childComplexity int) int
+		GetSharedHealthMetrics          func(childComplexity int, patientID string, startDate *string, endDate *string, metricType *string) int
+		GetSharedMedicalRecords         func(childComplexity int, patientID string) int
+		GetSharedMedications            func(childComplexity int, patientID string) int
 		GetSharedProfiles               func(childComplexity int) int
+		GetSharedTreatmentSchedule      func(childComplexity int, patientID string) int
 		GetTreatmentSchedules           func(childComplexity int) int
 		GetUser                         func(childComplexity int) int
 		GetUserAchievements             func(childComplexity int) int
@@ -572,7 +576,7 @@ type MutationResolver interface {
 	DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error)
 	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
 	ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error)
-	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string) (*model.ShareProfileResponse, error)
+	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error)
 	UnshareProfile(ctx context.Context, targetUserID string) (*model.UnshareProfileResponse, error)
 }
 type QueryResolver interface {
@@ -600,6 +604,10 @@ type QueryResolver interface {
 	GetUser(ctx context.Context) (*model.UserDetailResponse, error)
 	GetProfiles(ctx context.Context) ([]*model.ProfileDetail, error)
 	GetSharedProfiles(ctx context.Context) ([]*model.ProfileDetail, error)
+	GetSharedMedicalRecords(ctx context.Context, patientID string) ([]*model.MedicalRecordDetail, error)
+	GetSharedTreatmentSchedule(ctx context.Context, patientID string) ([]*model.TreatmentScheduleDetail, error)
+	GetSharedMedications(ctx context.Context, patientID string) ([]*model.MedicationDetail, error)
+	GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
 }
 
 type executableSchema struct {
@@ -1856,7 +1864,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ShareProfile(childComplexity, args["phoneNumber"].(string), args["accessLevel"].(string)), true
+		return e.complexity.Mutation.ShareProfile(childComplexity, args["phoneNumber"].(string), args["accessLevel"].(string), args["remarks"].(string)), true
 
 	case "Mutation.takeMedication":
 		if e.complexity.Mutation.TakeMedication == nil {
@@ -2232,12 +2240,60 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetRelatedPatients(childComplexity), true
 
+	case "Query.getSharedHealthMetrics":
+		if e.complexity.Query.GetSharedHealthMetrics == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedHealthMetrics_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedHealthMetrics(childComplexity, args["patientId"].(string), args["startDate"].(*string), args["endDate"].(*string), args["metricType"].(*string)), true
+
+	case "Query.getSharedMedicalRecords":
+		if e.complexity.Query.GetSharedMedicalRecords == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedMedicalRecords_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedMedicalRecords(childComplexity, args["patientId"].(string)), true
+
+	case "Query.getSharedMedications":
+		if e.complexity.Query.GetSharedMedications == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedMedications_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedMedications(childComplexity, args["patientId"].(string)), true
+
 	case "Query.getSharedProfiles":
 		if e.complexity.Query.GetSharedProfiles == nil {
 			break
 		}
 
 		return e.complexity.Query.GetSharedProfiles(childComplexity), true
+
+	case "Query.getSharedTreatmentSchedule":
+		if e.complexity.Query.GetSharedTreatmentSchedule == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedTreatmentSchedule_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedTreatmentSchedule(childComplexity, args["patientId"].(string)), true
 
 	case "Query.getTreatmentSchedules":
 		if e.complexity.Query.GetTreatmentSchedules == nil {
@@ -3495,6 +3551,11 @@ extend type Query{
   getUser: UserDetailResponse
   getProfiles: [ProfileDetail]
   getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
@@ -3507,7 +3568,7 @@ extend type Mutation{
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
   
-  shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
   unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }`, BuiltIn: false},
 }
@@ -4445,6 +4506,11 @@ func (ec *executionContext) field_Mutation_shareProfile_args(ctx context.Context
 		return nil, err
 	}
 	args["accessLevel"] = arg1
+	arg2, err := ec.field_Mutation_shareProfile_argsRemarks(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["remarks"] = arg2
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_shareProfile_argsPhoneNumber(
@@ -4466,6 +4532,19 @@ func (ec *executionContext) field_Mutation_shareProfile_argsAccessLevel(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
 	if tmp, ok := rawArgs["accessLevel"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_shareProfile_argsRemarks(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("remarks"))
+	if tmp, ok := rawArgs["remarks"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -5296,6 +5375,152 @@ func (ec *executionContext) field_Query_getPatientTreatmentSchedule_argsPatientI
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_getSharedHealthMetrics_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedHealthMetrics_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	arg1, err := ec.field_Query_getSharedHealthMetrics_argsStartDate(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["startDate"] = arg1
+	arg2, err := ec.field_Query_getSharedHealthMetrics_argsEndDate(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["endDate"] = arg2
+	arg3, err := ec.field_Query_getSharedHealthMetrics_argsMetricType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["metricType"] = arg3
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsStartDate(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+	if tmp, ok := rawArgs["startDate"]; ok {
+		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsEndDate(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+	if tmp, ok := rawArgs["endDate"]; ok {
+		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsMetricType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("metricType"))
+	if tmp, ok := rawArgs["metricType"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedMedicalRecords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedMedicalRecords_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedMedicalRecords_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedMedications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedMedications_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedMedications_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedTreatmentSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedTreatmentSchedule_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedTreatmentSchedule_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5350,8 +5575,8 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AchievementbadgeId(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AchievementbadgeId(ctx, field)
+func (ec *executionContext) _AchievementBadge_id(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AchievementBadge_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5381,7 +5606,7 @@ func (ec *executionContext) _AchievementbadgeId(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_AchievementbadgeId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_AchievementBadge_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AchievementBadge",
 		Field:      field,
@@ -10365,8 +10590,8 @@ func (ec *executionContext) fieldContext_MedicalRecordDetail_createdAt(_ context
 	return fc, nil
 }
 
-func (ec *executionContext) _medicationId(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_medicationId(ctx, field)
+func (ec *executionContext) _Medication_id(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Medication_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10396,7 +10621,7 @@ func (ec *executionContext) _medicationId(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_medicationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Medication_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Medication",
 		Field:      field,
@@ -13209,7 +13434,7 @@ func (ec *executionContext) _Mutation_shareProfile(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ShareProfile(rctx, fc.Args["phoneNumber"].(string), fc.Args["accessLevel"].(string))
+		return ec.resolvers.Mutation().ShareProfile(rctx, fc.Args["phoneNumber"].(string), fc.Args["accessLevel"].(string), fc.Args["remarks"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15244,6 +15469,262 @@ func (ec *executionContext) fieldContext_Query_getSharedProfiles(_ context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProfileDetail", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedMedicalRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedMedicalRecords(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedMedicalRecords(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MedicalRecordDetail)
+	fc.Result = res
+	return ec.marshalOMedicalRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicalRecordDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedMedicalRecords(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "recordId":
+				return ec.fieldContext_MedicalRecordDetail_recordId(ctx, field)
+			case "recordType":
+				return ec.fieldContext_MedicalRecordDetail_recordType(ctx, field)
+			case "content":
+				return ec.fieldContext_MedicalRecordDetail_content(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_MedicalRecordDetail_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MedicalRecordDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedMedicalRecords_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedTreatmentSchedule(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedTreatmentSchedule(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TreatmentScheduleDetail)
+	fc.Result = res
+	return ec.marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "scheduleId":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduleId(ctx, field)
+			case "treatmentType":
+				return ec.fieldContext_TreatmentScheduleDetail_treatmentType(ctx, field)
+			case "scheduledTime":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduledTime(ctx, field)
+			case "location":
+				return ec.fieldContext_TreatmentScheduleDetail_location(ctx, field)
+			case "notes":
+				return ec.fieldContext_TreatmentScheduleDetail_notes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TreatmentScheduleDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedTreatmentSchedule_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedMedications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedMedications(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedMedications(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MedicationDetail)
+	fc.Result = res
+	return ec.marshalOMedicationDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicationDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedMedications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "medicationId":
+				return ec.fieldContext_MedicationDetail_medicationId(ctx, field)
+			case "name":
+				return ec.fieldContext_MedicationDetail_name(ctx, field)
+			case "dosage":
+				return ec.fieldContext_MedicationDetail_dosage(ctx, field)
+			case "unit":
+				return ec.fieldContext_MedicationDetail_unit(ctx, field)
+			case "frequency":
+				return ec.fieldContext_MedicationDetail_frequency(ctx, field)
+			case "inventory":
+				return ec.fieldContext_MedicationDetail_inventory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MedicationDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedMedications_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedHealthMetrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedHealthMetrics(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedHealthMetrics(rctx, fc.Args["patientId"].(string), fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["metricType"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.HealthMetricDetail)
+	fc.Result = res
+	return ec.marshalOHealthMetricDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐHealthMetricDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedHealthMetrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "metricId":
+				return ec.fieldContext_HealthMetricDetail_metricId(ctx, field)
+			case "metricType":
+				return ec.fieldContext_HealthMetricDetail_metricType(ctx, field)
+			case "value":
+				return ec.fieldContext_HealthMetricDetail_value(ctx, field)
+			case "unit":
+				return ec.fieldContext_HealthMetricDetail_unit(ctx, field)
+			case "recordedAt":
+				return ec.fieldContext_HealthMetricDetail_recordedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HealthMetricDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedHealthMetrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -17402,8 +17883,8 @@ func (ec *executionContext) fieldContext_UpdateUserResponse_message(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _userId(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_userId(ctx, field)
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17433,7 +17914,7 @@ func (ec *executionContext) _userId(ctx context.Context, field graphql.Collected
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -20851,7 +21332,7 @@ func (ec *executionContext) _AchievementBadge(ctx context.Context, sel ast.Selec
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AchievementBadge")
 		case "id":
-			out.Values[i] = ec._AchievementbadgeId(ctx, field, obj)
+			out.Values[i] = ec._AchievementBadge_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -22569,7 +23050,7 @@ func (ec *executionContext) _Medication(ctx context.Context, sel ast.SelectionSe
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Medication")
 		case "id":
-			out.Values[i] = ec._medicationId(ctx, field, obj)
+			out.Values[i] = ec._Medication_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23644,6 +24125,82 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedMedicalRecords":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedMedicalRecords(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedTreatmentSchedule":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedTreatmentSchedule(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedMedications":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedMedications(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedHealthMetrics":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedHealthMetrics(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -24520,7 +25077,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
 		case "id":
-			out.Values[i] = ec._userId(ctx, field, obj)
+			out.Values[i] = ec._User_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

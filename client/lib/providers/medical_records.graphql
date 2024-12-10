@@ -7,6 +7,15 @@ query GetMedicalRecords {
   }
 }
 
+query GetSharedMedicalRecords($patientId: String!) {
+  getSharedMedicalRecords(patientId: $patientId) {
+    recordId
+    recordType
+    content
+    createdAt
+  }
+}
+
 mutation AddMedicalRecord($recordType: String!, $content: String!) {
   addMedicalRecord(recordType: $recordType, content: $content) {
     recordId

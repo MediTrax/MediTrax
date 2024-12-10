@@ -565,6 +565,717 @@ class _CopyWithStubImpl$Query$GetMedicalRecords$getMedicalRecords<TRes>
       _res;
 }
 
+class Variables$Query$GetSharedMedicalRecords {
+  factory Variables$Query$GetSharedMedicalRecords(
+          {required String patientId}) =>
+      Variables$Query$GetSharedMedicalRecords._({
+        r'patientId': patientId,
+      });
+
+  Variables$Query$GetSharedMedicalRecords._(this._$data);
+
+  factory Variables$Query$GetSharedMedicalRecords.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$patientId = data['patientId'];
+    result$data['patientId'] = (l$patientId as String);
+    return Variables$Query$GetSharedMedicalRecords._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get patientId => (_$data['patientId'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$patientId = patientId;
+    result$data['patientId'] = l$patientId;
+    return result$data;
+  }
+
+  CopyWith$Variables$Query$GetSharedMedicalRecords<
+          Variables$Query$GetSharedMedicalRecords>
+      get copyWith => CopyWith$Variables$Query$GetSharedMedicalRecords(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Variables$Query$GetSharedMedicalRecords) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$patientId = patientId;
+    final lOther$patientId = other.patientId;
+    if (l$patientId != lOther$patientId) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$patientId = patientId;
+    return Object.hashAll([l$patientId]);
+  }
+}
+
+abstract class CopyWith$Variables$Query$GetSharedMedicalRecords<TRes> {
+  factory CopyWith$Variables$Query$GetSharedMedicalRecords(
+    Variables$Query$GetSharedMedicalRecords instance,
+    TRes Function(Variables$Query$GetSharedMedicalRecords) then,
+  ) = _CopyWithImpl$Variables$Query$GetSharedMedicalRecords;
+
+  factory CopyWith$Variables$Query$GetSharedMedicalRecords.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Query$GetSharedMedicalRecords;
+
+  TRes call({String? patientId});
+}
+
+class _CopyWithImpl$Variables$Query$GetSharedMedicalRecords<TRes>
+    implements CopyWith$Variables$Query$GetSharedMedicalRecords<TRes> {
+  _CopyWithImpl$Variables$Query$GetSharedMedicalRecords(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Query$GetSharedMedicalRecords _instance;
+
+  final TRes Function(Variables$Query$GetSharedMedicalRecords) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({Object? patientId = _undefined}) =>
+      _then(Variables$Query$GetSharedMedicalRecords._({
+        ..._instance._$data,
+        if (patientId != _undefined && patientId != null)
+          'patientId': (patientId as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Query$GetSharedMedicalRecords<TRes>
+    implements CopyWith$Variables$Query$GetSharedMedicalRecords<TRes> {
+  _CopyWithStubImpl$Variables$Query$GetSharedMedicalRecords(this._res);
+
+  TRes _res;
+
+  call({String? patientId}) => _res;
+}
+
+class Query$GetSharedMedicalRecords {
+  Query$GetSharedMedicalRecords({
+    this.getSharedMedicalRecords,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetSharedMedicalRecords.fromJson(Map<String, dynamic> json) {
+    final l$getSharedMedicalRecords = json['getSharedMedicalRecords'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedMedicalRecords(
+      getSharedMedicalRecords: (l$getSharedMedicalRecords as List<dynamic>?)
+          ?.map((e) => e == null
+              ? null
+              : Query$GetSharedMedicalRecords$getSharedMedicalRecords.fromJson(
+                  (e as Map<String, dynamic>)))
+          .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetSharedMedicalRecords$getSharedMedicalRecords?>?
+      getSharedMedicalRecords;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getSharedMedicalRecords = getSharedMedicalRecords;
+    _resultData['getSharedMedicalRecords'] =
+        l$getSharedMedicalRecords?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getSharedMedicalRecords = getSharedMedicalRecords;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getSharedMedicalRecords == null
+          ? null
+          : Object.hashAll(l$getSharedMedicalRecords.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedMedicalRecords) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getSharedMedicalRecords = getSharedMedicalRecords;
+    final lOther$getSharedMedicalRecords = other.getSharedMedicalRecords;
+    if (l$getSharedMedicalRecords != null &&
+        lOther$getSharedMedicalRecords != null) {
+      if (l$getSharedMedicalRecords.length !=
+          lOther$getSharedMedicalRecords.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getSharedMedicalRecords.length; i++) {
+        final l$getSharedMedicalRecords$entry = l$getSharedMedicalRecords[i];
+        final lOther$getSharedMedicalRecords$entry =
+            lOther$getSharedMedicalRecords[i];
+        if (l$getSharedMedicalRecords$entry !=
+            lOther$getSharedMedicalRecords$entry) {
+          return false;
+        }
+      }
+    } else if (l$getSharedMedicalRecords != lOther$getSharedMedicalRecords) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedMedicalRecords
+    on Query$GetSharedMedicalRecords {
+  CopyWith$Query$GetSharedMedicalRecords<Query$GetSharedMedicalRecords>
+      get copyWith => CopyWith$Query$GetSharedMedicalRecords(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedMedicalRecords<TRes> {
+  factory CopyWith$Query$GetSharedMedicalRecords(
+    Query$GetSharedMedicalRecords instance,
+    TRes Function(Query$GetSharedMedicalRecords) then,
+  ) = _CopyWithImpl$Query$GetSharedMedicalRecords;
+
+  factory CopyWith$Query$GetSharedMedicalRecords.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetSharedMedicalRecords;
+
+  TRes call({
+    List<Query$GetSharedMedicalRecords$getSharedMedicalRecords?>?
+        getSharedMedicalRecords,
+    String? $__typename,
+  });
+  TRes getSharedMedicalRecords(
+      Iterable<Query$GetSharedMedicalRecords$getSharedMedicalRecords?>? Function(
+              Iterable<
+                  CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<
+                      Query$GetSharedMedicalRecords$getSharedMedicalRecords>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetSharedMedicalRecords<TRes>
+    implements CopyWith$Query$GetSharedMedicalRecords<TRes> {
+  _CopyWithImpl$Query$GetSharedMedicalRecords(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedMedicalRecords _instance;
+
+  final TRes Function(Query$GetSharedMedicalRecords) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getSharedMedicalRecords = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedMedicalRecords(
+        getSharedMedicalRecords: getSharedMedicalRecords == _undefined
+            ? _instance.getSharedMedicalRecords
+            : (getSharedMedicalRecords as List<
+                Query$GetSharedMedicalRecords$getSharedMedicalRecords?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getSharedMedicalRecords(
+          Iterable<Query$GetSharedMedicalRecords$getSharedMedicalRecords?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<
+                          Query$GetSharedMedicalRecords$getSharedMedicalRecords>?>?)
+              _fn) =>
+      call(
+          getSharedMedicalRecords:
+              _fn(_instance.getSharedMedicalRecords?.map((e) => e == null
+                  ? null
+                  : CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+                      e,
+                      (i) => i,
+                    )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetSharedMedicalRecords<TRes>
+    implements CopyWith$Query$GetSharedMedicalRecords<TRes> {
+  _CopyWithStubImpl$Query$GetSharedMedicalRecords(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetSharedMedicalRecords$getSharedMedicalRecords?>?
+        getSharedMedicalRecords,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getSharedMedicalRecords(_fn) => _res;
+}
+
+const documentNodeQueryGetSharedMedicalRecords = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetSharedMedicalRecords'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'patientId')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      )
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getSharedMedicalRecords'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'patientId'),
+            value: VariableNode(name: NameNode(value: 'patientId')),
+          )
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'recordId'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'recordType'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'content'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'createdAt'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetSharedMedicalRecords _parserFn$Query$GetSharedMedicalRecords(
+        Map<String, dynamic> data) =>
+    Query$GetSharedMedicalRecords.fromJson(data);
+typedef OnQueryComplete$Query$GetSharedMedicalRecords = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetSharedMedicalRecords?,
+);
+
+class Options$Query$GetSharedMedicalRecords
+    extends graphql.QueryOptions<Query$GetSharedMedicalRecords> {
+  Options$Query$GetSharedMedicalRecords({
+    String? operationName,
+    required Variables$Query$GetSharedMedicalRecords variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedMedicalRecords? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetSharedMedicalRecords? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetSharedMedicalRecords(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetSharedMedicalRecords,
+          parserFn: _parserFn$Query$GetSharedMedicalRecords,
+        );
+
+  final OnQueryComplete$Query$GetSharedMedicalRecords? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetSharedMedicalRecords
+    extends graphql.WatchQueryOptions<Query$GetSharedMedicalRecords> {
+  WatchOptions$Query$GetSharedMedicalRecords({
+    String? operationName,
+    required Variables$Query$GetSharedMedicalRecords variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedMedicalRecords? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetSharedMedicalRecords,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetSharedMedicalRecords,
+        );
+}
+
+class FetchMoreOptions$Query$GetSharedMedicalRecords
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetSharedMedicalRecords({
+    required graphql.UpdateQuery updateQuery,
+    required Variables$Query$GetSharedMedicalRecords variables,
+  }) : super(
+          updateQuery: updateQuery,
+          variables: variables.toJson(),
+          document: documentNodeQueryGetSharedMedicalRecords,
+        );
+}
+
+extension ClientExtension$Query$GetSharedMedicalRecords
+    on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetSharedMedicalRecords>>
+      query$GetSharedMedicalRecords(
+              Options$Query$GetSharedMedicalRecords options) async =>
+          await this.query(options);
+  graphql.ObservableQuery<Query$GetSharedMedicalRecords>
+      watchQuery$GetSharedMedicalRecords(
+              WatchOptions$Query$GetSharedMedicalRecords options) =>
+          this.watchQuery(options);
+  void writeQuery$GetSharedMedicalRecords({
+    required Query$GetSharedMedicalRecords data,
+    required Variables$Query$GetSharedMedicalRecords variables,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetSharedMedicalRecords),
+          variables: variables.toJson(),
+        ),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetSharedMedicalRecords? readQuery$GetSharedMedicalRecords({
+    required Variables$Query$GetSharedMedicalRecords variables,
+    bool optimistic = true,
+  }) {
+    final result = this.readQuery(
+      graphql.Request(
+        operation: graphql.Operation(
+            document: documentNodeQueryGetSharedMedicalRecords),
+        variables: variables.toJson(),
+      ),
+      optimistic: optimistic,
+    );
+    return result == null
+        ? null
+        : Query$GetSharedMedicalRecords.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetSharedMedicalRecords>
+    useQuery$GetSharedMedicalRecords(
+            Options$Query$GetSharedMedicalRecords options) =>
+        graphql_flutter.useQuery(options);
+graphql.ObservableQuery<Query$GetSharedMedicalRecords>
+    useWatchQuery$GetSharedMedicalRecords(
+            WatchOptions$Query$GetSharedMedicalRecords options) =>
+        graphql_flutter.useWatchQuery(options);
+
+class Query$GetSharedMedicalRecords$Widget
+    extends graphql_flutter.Query<Query$GetSharedMedicalRecords> {
+  Query$GetSharedMedicalRecords$Widget({
+    widgets.Key? key,
+    required Options$Query$GetSharedMedicalRecords options,
+    required graphql_flutter.QueryBuilder<Query$GetSharedMedicalRecords>
+        builder,
+  }) : super(
+          key: key,
+          options: options,
+          builder: builder,
+        );
+}
+
+class Query$GetSharedMedicalRecords$getSharedMedicalRecords {
+  Query$GetSharedMedicalRecords$getSharedMedicalRecords({
+    required this.recordId,
+    required this.recordType,
+    required this.content,
+    required this.createdAt,
+    this.$__typename = 'MedicalRecordDetail',
+  });
+
+  factory Query$GetSharedMedicalRecords$getSharedMedicalRecords.fromJson(
+      Map<String, dynamic> json) {
+    final l$recordId = json['recordId'];
+    final l$recordType = json['recordType'];
+    final l$content = json['content'];
+    final l$createdAt = json['createdAt'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+      recordId: (l$recordId as String),
+      recordType: (l$recordType as String),
+      content: (l$content as String),
+      createdAt: dateTimeFromJson(l$createdAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String recordId;
+
+  final String recordType;
+
+  final String content;
+
+  final DateTime createdAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$recordId = recordId;
+    _resultData['recordId'] = l$recordId;
+    final l$recordType = recordType;
+    _resultData['recordType'] = l$recordType;
+    final l$content = content;
+    _resultData['content'] = l$content;
+    final l$createdAt = createdAt;
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$recordId = recordId;
+    final l$recordType = recordType;
+    final l$content = content;
+    final l$createdAt = createdAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$recordId,
+      l$recordType,
+      l$content,
+      l$createdAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedMedicalRecords$getSharedMedicalRecords) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$recordId = recordId;
+    final lOther$recordId = other.recordId;
+    if (l$recordId != lOther$recordId) {
+      return false;
+    }
+    final l$recordType = recordType;
+    final lOther$recordType = other.recordType;
+    if (l$recordType != lOther$recordType) {
+      return false;
+    }
+    final l$content = content;
+    final lOther$content = other.content;
+    if (l$content != lOther$content) {
+      return false;
+    }
+    final l$createdAt = createdAt;
+    final lOther$createdAt = other.createdAt;
+    if (l$createdAt != lOther$createdAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedMedicalRecords$getSharedMedicalRecords
+    on Query$GetSharedMedicalRecords$getSharedMedicalRecords {
+  CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<
+          Query$GetSharedMedicalRecords$getSharedMedicalRecords>
+      get copyWith =>
+          CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<
+    TRes> {
+  factory CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+    Query$GetSharedMedicalRecords$getSharedMedicalRecords instance,
+    TRes Function(Query$GetSharedMedicalRecords$getSharedMedicalRecords) then,
+  ) = _CopyWithImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords;
+
+  factory CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords;
+
+  TRes call({
+    String? recordId,
+    String? recordType,
+    String? content,
+    DateTime? createdAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords<TRes>
+    implements
+        CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<TRes> {
+  _CopyWithImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedMedicalRecords$getSharedMedicalRecords _instance;
+
+  final TRes Function(Query$GetSharedMedicalRecords$getSharedMedicalRecords)
+      _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? recordId = _undefined,
+    Object? recordType = _undefined,
+    Object? content = _undefined,
+    Object? createdAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+        recordId: recordId == _undefined || recordId == null
+            ? _instance.recordId
+            : (recordId as String),
+        recordType: recordType == _undefined || recordType == null
+            ? _instance.recordType
+            : (recordType as String),
+        content: content == _undefined || content == null
+            ? _instance.content
+            : (content as String),
+        createdAt: createdAt == _undefined || createdAt == null
+            ? _instance.createdAt
+            : (createdAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords<
+        TRes>
+    implements
+        CopyWith$Query$GetSharedMedicalRecords$getSharedMedicalRecords<TRes> {
+  _CopyWithStubImpl$Query$GetSharedMedicalRecords$getSharedMedicalRecords(
+      this._res);
+
+  TRes _res;
+
+  call({
+    String? recordId,
+    String? recordType,
+    String? content,
+    DateTime? createdAt,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
 class Variables$Mutation$AddMedicalRecord {
   factory Variables$Mutation$AddMedicalRecord({
     required String recordType,

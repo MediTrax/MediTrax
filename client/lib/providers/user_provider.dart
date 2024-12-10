@@ -113,12 +113,14 @@ class UserData extends _$UserData {
     }
   }
 
-  Future<void> shareProfile(String phoneNumber, String accessLevel) async {
+  Future<void> shareProfile(
+      String phoneNumber, String accessLevel, String remarks) async {
     final result = await ref.read(graphQLServiceProvider).mutate$ShareProfile(
           Options$Mutation$ShareProfile(
             variables: Variables$Mutation$ShareProfile(
               phoneNumber: phoneNumber,
               accessLevel: accessLevel,
+              remarks: remarks,
             ),
           ),
         );

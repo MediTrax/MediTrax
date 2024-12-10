@@ -91,8 +91,8 @@ query GetSharedProfiles {
   }
 }
 
-mutation ShareProfile($phoneNumber: String!, $accessLevel: String!) {
-  shareProfile(phoneNumber: $phoneNumber, accessLevel: $accessLevel) {
+mutation ShareProfile($phoneNumber: String!, $accessLevel: String!, $remarks: String!) {
+  shareProfile(phoneNumber: $phoneNumber, accessLevel: $accessLevel, remarks: $remarks) {
     message
   }
 }

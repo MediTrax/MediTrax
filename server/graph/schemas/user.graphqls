@@ -88,6 +88,11 @@ extend type Query{
   getUser: UserDetailResponse
   getProfiles: [ProfileDetail]
   getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
@@ -100,6 +105,6 @@ extend type Mutation{
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
   
-  shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
   unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }
