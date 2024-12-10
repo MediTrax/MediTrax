@@ -21,13 +21,14 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
       token: fields[1] as Token?,
       theme: fields[2] as String,
       autoLoginResult: fields[3] as bool?,
+      selectedProfile: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, _$AppStateDataImpl obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.navigatorIndex)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class AppStateDataImplAdapter extends TypeAdapter<_$AppStateDataImpl> {
       ..writeByte(2)
       ..write(obj.theme)
       ..writeByte(3)
-      ..write(obj.autoLoginResult);
+      ..write(obj.autoLoginResult)
+      ..writeByte(4)
+      ..write(obj.selectedProfile);
   }
 
   @override

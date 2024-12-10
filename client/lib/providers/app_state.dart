@@ -36,6 +36,11 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
+  void changeSelectedProfile(String profileId) {
+    state = state.copyWith(selectedProfile: profileId);
+    _hiveBox!.put("appState", state);
+  }
+
   Future<void> loginWithPhoneNumberPassword(
       String phoneNumber, String password, String captcha) async {
     final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(

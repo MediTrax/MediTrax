@@ -513,6 +513,110 @@ func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID stri
 	return response, nil
 }
 
+// ShareProfile is the resolver for the shareProfile field.
+func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string, accessLevel string) (*model.ShareProfileResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// First, find the target user by phone number
+	result, err := database.DB.Query(`
+        SELECT * FROM user 
+        WHERE phoneNumber = $phone_number 
+        LIMIT 1;
+    `, map[string]interface{}{
+		"phone_number": phoneNumber,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return nil, fmt.Errorf("no user found with the provided phone number")
+	}
+
+	targetUser := users[0]
+
+	// Prevent sharing with self
+	if targetUser.ID == user.ID {
+		return nil, fmt.Errorf("cannot share profile with yourself")
+	}
+
+	// Check if sharing already exists
+	checkResult, err := database.DB.Query(`
+        SELECT * FROM profile_access 
+        WHERE in = $from_user 
+        AND out = $to_user;
+    `, map[string]interface{}{
+		"from_user": user.ID,
+		"to_user":   targetUser.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	existingShares, err := surrealdb.SmartUnmarshal[[]interface{}](checkResult, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(existingShares) > 0 {
+		return nil, fmt.Errorf("profile is already shared with this user")
+	}
+	fmt.Println("creating profile access edge")
+
+	// Create the profile_access edge
+	_, err = database.DB.Query(`
+        RELATE $from_user->profile_access->$to_user 
+        SET 
+            access_level = $access_level,
+            created_at = time::now();
+    `, map[string]interface{}{
+		"from_user":    user.ID,
+		"to_user":      targetUser.ID,
+		"access_level": accessLevel,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ShareProfileResponse{
+		Message: fmt.Sprintf("Profile shared successfully with %s", targetUser.Name),
+	}, nil
+}
+
+// UnshareProfile is the resolver for the unshareProfile field.
+func (r *mutationResolver) UnshareProfile(ctx context.Context, targetUserID string) (*model.UnshareProfileResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Delete the profile_access edge between current user and target user
+	_, err := database.DB.Query(`
+        DELETE ->profile_access->user 
+        FROM user 
+        WHERE id = $from_user 
+        AND ->profile_access->user.id = $to_user;
+    `, map[string]interface{}{
+		"from_user": user.ID,
+		"to_user":   targetUserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.UnshareProfileResponse{
+		Message: fmt.Sprintf("Profile access removed for user %s", targetUserID),
+	}, nil
+}
+
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context) (*model.UserDetailResponse, error) {
 	// Fetch the user details
@@ -565,4 +669,114 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 	}
 
 	return record_details, nil
+}
+
+// GetProfiles is the resolver for the getProfiles field.
+func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// First get all family member relationships for the current user
+	result, err := database.DB.Query(
+		`SELECT * FROM family_member WHERE user_id = $user_id;`,
+		map[string]interface{}{
+			"user_id": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	familyMembers, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a slice to store all profiles
+	var profiles []*model.ProfileDetail
+
+	// Add current user's profile
+	profiles = append(profiles, &model.ProfileDetail{
+		ID:          user.ID,
+		Name:        user.Name,
+		PhoneNumber: user.PhoneNumber,
+		Role:        user.Role,
+		CreatedAt:   user.CreatedAt,
+	})
+
+	// For each family member relationship, fetch the related user's profile
+	for _, member := range familyMembers {
+		result, err := database.DB.Select(member.RelatedUserID)
+		if err != nil {
+			continue // Skip if we can't fetch a particular user
+		}
+
+		relatedUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+		if err != nil {
+			continue
+		}
+
+		profiles = append(profiles, &model.ProfileDetail{
+			ID:          relatedUser.ID,
+			Name:        relatedUser.Name,
+			PhoneNumber: relatedUser.PhoneNumber,
+			Role:        relatedUser.Role,
+			CreatedAt:   relatedUser.CreatedAt,
+		})
+	}
+
+	return profiles, nil
+}
+
+// GetSharedProfiles is the resolver for the getSharedProfiles field.
+func (r *queryResolver) GetSharedProfiles(ctx context.Context) ([]*model.ProfileDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Get all users that the current user has shared their profile with
+	// This query will:
+	// 1. Start from the current user
+	// 2. Find all outgoing profile_access edges
+	// 3. Return the users on the other end of those edges
+	result, err := database.DB.Query(`
+        SELECT <-profile_access<-user.* as shared_with
+        FROM user 
+        WHERE id = $user_id;
+    `, map[string]interface{}{
+		"user_id": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the query result
+	type QueryResult struct {
+		SharedWith []model.User `json:"shared_with"`
+	}
+	results, err := surrealdb.SmartUnmarshal[[]QueryResult](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a slice to store all shared profiles
+	var profiles []*model.ProfileDetail
+
+	// Add all users that the current user has shared their profile with
+	if len(results) > 0 && len(results[0].SharedWith) > 0 {
+		for _, sharedUser := range results[0].SharedWith {
+			profiles = append(profiles, &model.ProfileDetail{
+				ID:          sharedUser.ID,
+				Name:        sharedUser.Name,
+				PhoneNumber: sharedUser.PhoneNumber,
+				Role:        sharedUser.Role,
+				CreatedAt:   sharedUser.CreatedAt,
+			})
+		}
+	}
+
+	return profiles, nil
 }

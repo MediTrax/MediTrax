@@ -113,6 +113,54 @@ class UserData extends _$UserData {
       throw result.exception!;
     }
   }
+
+  Future<void> shareProfile(String phoneNumber, String accessLevel) async {
+    final result = await ref.read(graphQLServiceProvider).mutate$ShareProfile(
+          Options$Mutation$ShareProfile(
+            variables: Variables$Mutation$ShareProfile(
+              phoneNumber: phoneNumber,
+              accessLevel: accessLevel,
+            ),
+          ),
+        );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+  }
+
+  Future<void> unshareProfile(String targetUserId) async {
+    final result = await ref.read(graphQLServiceProvider).mutate$UnshareProfile(
+          Options$Mutation$UnshareProfile(
+            variables: Variables$Mutation$UnshareProfile(
+              targetUserId: targetUserId,
+            ),
+          ),
+        );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+  }
+
+  Future<List<Query$GetProfiles$getProfiles>> getProfiles() async {
+    final result = await ref.read(graphQLServiceProvider).query$GetProfiles(
+          Options$Query$GetProfiles(),
+        );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+    final List<Query$GetProfiles$getProfiles> results = [];
+
+    for (var profile in result.parsedData!.getProfiles ?? []) {
+      if (profile != null) {
+        results.add(profile);
+      }
+    }
+
+    return results;
+  }
 }
 
 @riverpod

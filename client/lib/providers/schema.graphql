@@ -383,6 +383,22 @@ type FoodRecommendation{
   name: String!
 }
 
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+  message: String!
+}
+
+type UnshareProfileResponse {
+  message: String!
+}
+
 type Query{
   # finish unwritten get functions
   getUser: UserDetailResponse
@@ -401,6 +417,8 @@ type Query{
   getMockFoodSpecs(food: String!) : FoodSpecs
   getFoodRecommendation : FoodRecommendation
   getMockFoodRecommendation : FoodRecommendation
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
 }
 
 type Mutation {
@@ -444,4 +462,7 @@ type Mutation {
 
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
   awardAchievement(badgeId: String!): AwardAchievementResponse  
+
+  shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }
