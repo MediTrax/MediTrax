@@ -26,10 +26,10 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 
 	// query database for medications for the same user with the same name
 	result, err := database.DB.Query(
-		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
+		`SELECT * FROM medication WHERE name=$name AND userId=$userId;`,
 		map[string]interface{}{
-			"name":    name,
-			"user_id": user.ID,
+			"name":   name,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -58,9 +58,9 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 		unit=$unit,
 		frequency=$frequency,
 		inventory=$inventory,
-		user_id=$user_id,
-		created_at=time::now(),
-		updated_at=time::now();
+		userId=$userId,
+		createdAt=time::now(),
+		updatedAt=time::now();
 		`,
 		map[string]interface{}{
 			"name":      name,
@@ -68,7 +68,7 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 			"unit":      unit,
 			"frequency": frequency,
 			"inventory": inventory,
-			"user_id":   user.ID,
+			"userId":    user.ID,
 		},
 	)
 	if err != nil {
@@ -103,10 +103,10 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	result, err := database.DB.Query(
-		`SELECT * FROM ONLY $medicationId WHERE user_id=$user_id;`,
+		`SELECT * FROM ONLY $medicationId WHERE userId=$userId;`,
 		map[string]interface{}{
 			"medicationId": medicationID,
-			"user_id":      user.ID,
+			"userId":       user.ID,
 		},
 	)
 	if err != nil {
@@ -118,7 +118,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": medicationID, "user_id": user.ID}
+	updateValues := map[string]interface{}{"id": medicationID, "userId": user.ID}
 	var changeLog []utils.ChangeLog
 
 	// Prepare the fields to be updated
@@ -179,7 +179,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	// Construct the final query with the medicationID in quotes
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
 
 	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
@@ -227,10 +227,10 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 
 	// Execute the query
 	result, err := database.DB.Query(
-		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
+		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
 		map[string]interface{}{
-			"id":      medicationID,
-			"user_id": user.ID,
+			"id":     medicationID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -247,9 +247,9 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 	}
 
 	_, err = database.DB.Query(
-		`DELETE medication_reminder WHERE medication_id=$medication_id;`,
+		`DELETE medication_reminder WHERE medicationId=$medicationId;`,
 		map[string]interface{}{
-			"medication_id": medicationID,
+			"medicationId": medicationID,
 		},
 	)
 	if err != nil {
@@ -279,10 +279,10 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 
 	// query for the medication and check if it exists
 	result, err := database.DB.Query(
-		`SELECT * FROM $medication_id WHERE user_id = $user_id;`,
+		`SELECT * FROM $medicationId WHERE userId = $userId;`,
 		map[string]interface{}{
-			"medication_id": medicationID,
-			"user_id":       user.ID,
+			"medicationId": medicationID,
+			"userId":       user.ID,
 		},
 	)
 	if err != nil {
@@ -299,11 +299,11 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 	// query database for medications with the same reminder time
 	result, err = database.DB.Query(
 		`SELECT * FROM medication_reminder 
-		WHERE medication_id=$medication_id AND user_id=$user_id AND reminder_time=$reminder_time;`,
+		WHERE medicationId=$medicationId AND userId=$userId AND reminderTime=$reminderTime;`,
 		map[string]interface{}{
-			"medication_id": medicationID,
-			"user_id":       user.ID,
-			"reminder_time": reminderTime,
+			"medicationId": medicationID,
+			"userId":       user.ID,
+			"reminderTime": reminderTime,
 		},
 	)
 	if err != nil {
@@ -320,16 +320,16 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 	// finally, send the create reminder query
 	result, err = database.DB.Query(
 		`CREATE ONLY medication_reminder:ulid()
-		SET medication_id=$medication_id,
-		user_id=$user_id,
-		reminder_time=$reminder_time,
-		is_taken=false,
-		created_at=time::now()
+		SET medicationId=$medicationId,
+		userId=$userId,
+		reminderTime=$reminderTime,
+		isTaken=false,
+		createdAt=time::now()
 		`,
 		map[string]interface{}{
-			"medication_id": medicationID,
-			"user_id":       user.ID,
-			"reminder_time": reminderTime,
+			"medicationId": medicationID,
+			"userId":       user.ID,
+			"reminderTime": reminderTime,
 		},
 	)
 	if err != nil {
@@ -364,10 +364,10 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 	// query database to see if the reminder exists
 	result, err := database.DB.Query(
-		`SELECT * FROM medication_reminder WHERE id=$reminder_id AND user_id=$user_id;`,
+		`SELECT * FROM medication_reminder WHERE id=$reminder_id AND userId=$userId;`,
 		map[string]interface{}{
 			"reminder_id": reminderID,
-			"user_id":     user.ID,
+			"userId":      user.ID,
 		},
 	)
 	if err != nil {
@@ -450,20 +450,20 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if reminderTime != nil {
-		updateValues["reminder_time"] = *reminderTime
-		updateFields = append(updateFields, "reminder_time = $reminder_time")
+		updateValues["reminderTime"] = *reminderTime
+		updateFields = append(updateFields, "reminderTime = $reminderTime")
 		change := utils.ChangeLog{
-			Field: "reminder_time",
+			Field: "reminderTime",
 			From:  remBefore.ReminderTime,
 			To:    *reminderTime,
 		}
 		changeLog = append(changeLog, change)
 	}
 	if isTaken != nil {
-		updateValues["is_taken"] = *isTaken
-		updateFields = append(updateFields, "is_taken = $is_taken")
+		updateValues["isTaken"] = *isTaken
+		updateFields = append(updateFields, "isTaken = $isTaken")
 		change := utils.ChangeLog{
-			Field: "is_taken",
+			Field: "isTaken",
 			From:  fmt.Sprintf("%t", remBefore.IsTaken),
 			To:    fmt.Sprintf("%t", *isTaken),
 		}
@@ -514,10 +514,10 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 
 	// query database to see if the reminder exists
 	result, err := database.DB.Query(
-		`SELECT * FROM $reminder_id WHERE user_id=$user_id;`,
+		`SELECT * FROM $reminder_id WHERE userId=$userId;`,
 		map[string]interface{}{
 			"reminder_id": reminderID,
-			"user_id":     user.ID,
+			"userId":      user.ID,
 		},
 	)
 	if err != nil {
@@ -590,10 +590,10 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 
 	/* Update the reminder itself */
 	_, err = database.DB.Query(`
-		UPDATE $id SET istaken=$is_taken;`,
+		UPDATE $id SET istaken=$isTaken;`,
 		map[string]interface{}{
-			"id":       *reminderID,
-			"is_taken": true,
+			"id":      *reminderID,
+			"isTaken": true,
 		})
 	if err != nil {
 		return nil, err
@@ -603,7 +603,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication", *reminderID,
 		[]utils.ChangeLog{
 			{
-				Field: "is_taken",
+				Field: "isTaken",
 				From:  "false",
 				To:    "true",
 			},
@@ -633,10 +633,10 @@ func (r *mutationResolver) DeleteMedicationReminder(ctx context.Context, reminde
 
 	// Execute the query
 	result, err := database.DB.Query(
-		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
+		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
 		map[string]interface{}{
-			"id":      reminderID,
-			"user_id": user.ID,
+			"id":     reminderID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -678,15 +678,15 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
         scheduledTime=$scheduledTime,
         location=$location,
         notes=$notes,
-        user_id=$user_id,
-        created_at=time::now(),
-        updated_at=time::now();`,
+        userId=$userId,
+        createdAt=time::now(),
+        updatedAt=time::now();`,
 		map[string]interface{}{
 			"treatmentType": treatmentType,
 			"scheduledTime": scheduledTime,
 			"location":      location,
 			"notes":         notes,
-			"user_id":       user.ID,
+			"userId":        user.ID,
 		},
 	)
 	if err != nil {
@@ -719,10 +719,10 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 
 	// get the original entry before updating
 	result, err := database.DB.Query(
-		`SELECT * FROM ONLY $scheduleId WHERE user_id=$user_id;`,
+		`SELECT * FROM ONLY $scheduleId WHERE userId=$userId;`,
 		map[string]interface{}{
 			"scheduleId": scheduleID,
-			"user_id":    user.ID,
+			"userId":     user.ID,
 		},
 	)
 	if err != nil {
@@ -735,8 +735,8 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 
 	// 准备更新字段
 	updateValues := map[string]interface{}{
-		"id":      scheduleID,
-		"user_id": user.ID,
+		"id":     scheduleID,
+		"userId": user.ID,
 	}
 	updateFields := []string{}
 	var changeLog []utils.ChangeLog
@@ -784,10 +784,10 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		}
 		changeLog = append(changeLog, change)
 	}
-	updateFields = append(updateFields, "updated_at = time::now()")
+	updateFields = append(updateFields, "updatedAt = time::now()")
 
 	// 构建并执行更新查询
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id = $user_id;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId = $userId;", strings.Join(updateFields, ", "))
 	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
 		return nil, err
@@ -829,10 +829,10 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 
 	// 执行删除操作
 	result, err := database.DB.Query(
-		`DELETE $id WHERE user_id = $user_id RETURN BEFORE;`,
+		`DELETE $id WHERE userId = $userId RETURN BEFORE;`,
 		map[string]interface{}{
-			"id":      scheduleID,
-			"user_id": user.ID,
+			"id":     scheduleID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -874,9 +874,9 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.Me
 
 	// get all the medication reminders for the user
 	result, err := database.DB.Query(
-		`SELECT * FROM medication_reminder WHERE user_id = $user_id;`,
+		`SELECT * FROM medication_reminder WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {

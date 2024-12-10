@@ -1,4 +1,3 @@
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/family_member.dart';
 import 'package:meditrax/models/user.dart';
@@ -42,9 +41,9 @@ class UserData extends _$UserData {
       password: '', // We don't store password in state
       role: userData.role,
       status: 1,
-      created_at: userData.createdAt,
-      updated_at: DateTime.now(),
-      last_login: userData.lastLogin ?? DateTime.now(),
+      createdAt: userData.createdAt,
+      updatedAt: DateTime.now(),
+      lastLogin: userData.lastLogin ?? DateTime.now(),
     );
   }
 
@@ -154,6 +153,28 @@ class UserData extends _$UserData {
     final List<Query$GetProfiles$getProfiles> results = [];
 
     for (var profile in result.parsedData!.getProfiles ?? []) {
+      if (profile != null) {
+        results.add(profile);
+      }
+    }
+
+    return results;
+  }
+
+  Future<List<Query$GetSharedProfiles$getSharedProfiles>>
+      getSharedProfiles() async {
+    final result =
+        await ref.read(graphQLServiceProvider).query$GetSharedProfiles(
+              Options$Query$GetSharedProfiles(),
+            );
+
+    if (result.hasException) {
+      throw result.exception!;
+    }
+
+    final List<Query$GetSharedProfiles$getSharedProfiles> results = [];
+
+    for (var profile in result.parsedData!.getSharedProfiles ?? []) {
       if (profile != null) {
         results.add(profile);
       }

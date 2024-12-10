@@ -5,9 +5,9 @@
 	}
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
-		`SELECT * FROM health_assessment WHERE user_id = $user_id;`,
+		`SELECT * FROM health_assessment WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
