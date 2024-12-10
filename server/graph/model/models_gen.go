@@ -123,17 +123,18 @@ type EvaluateHealthRiskAssessmentResponse struct {
 type FamilyMember struct {
 	ID            string `json:"id"`
 	UserID        string `json:"user_id"`
-	RelatedUserID string `json:"related_user_id"`
+	PatientUserID string `json:"patient_user_id"`
 	Relationship  string `json:"relationship"`
 	AccessLevel   int    `json:"access_level"`
 	CreatedAt     string `json:"created_at"`
 }
 
 type FamilyMemberDetail struct {
-	MemberID      string `json:"memberId"`
-	RelatedUserID string `json:"relatedUserId"`
-	Relationship  string `json:"relationship"`
-	AccessLevel   int    `json:"accessLevel"`
+	MemberID     string `json:"memberId"`
+	Name         string `json:"name"`
+	PhoneNumber  string `json:"phoneNumber"`
+	Relationship string `json:"relationship"`
+	AccessLevel  int    `json:"accessLevel"`
 }
 
 type FilledQuestionnaire struct {
@@ -265,6 +266,14 @@ type PasswordChange struct {
 	User      string `json:"user"`
 	Token     string `json:"token"`
 	CreatedAt string `json:"createdAt"`
+}
+
+type PatientDetail struct {
+	PatientID    string `json:"patientId"`
+	Name         string `json:"name"`
+	PhoneNumber  string `json:"phoneNumber"`
+	Relationship string `json:"relationship"`
+	AccessLevel  int    `json:"accessLevel"`
 }
 
 type Query struct {
