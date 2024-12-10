@@ -16,9 +16,9 @@ type User{
   password: String!
   name: String!
   points: Float!
-  created_at: DateTime!
-  updated_at: DateTime!
-  last_login: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
   status: Int!
   role: String!
 }
@@ -86,7 +86,6 @@ type UnshareProfileResponse {
 
 extend type Query{
   getUser: UserDetailResponse
-  getFamilyMembers: [FamilyMemberDetail]
   getProfiles: [ProfileDetail]
   getSharedProfiles: [ProfileDetail]
 }

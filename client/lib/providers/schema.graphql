@@ -61,20 +61,20 @@ type User{
   phoneNumber: String!
   password: String!
   name: String!
-  created_at: DateTime!
-  updated_at: DateTime!
-  last_login: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
   status: Int!
   role: String!
 }
 
 type HealthRiskAssessment{
   id: String!
-  user_id: String!
-  questionnaire_data: String!
-  risk_level: String!
+  userId: String!
+  questionnaireData: String!
+  riskLevel: String!
   recommendations: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type Medication{
@@ -84,37 +84,37 @@ type Medication{
   unit: String!
   frequency: String!
   inventory: Float!
-  user_id: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  userId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type MedicationReminder{
   id: String!
-  medication_id: String!
-  user_id: String!
-  reminder_time: DateTime!
-  is_taken: Boolean!
-  created_at: DateTime!
+  medicationId: String!
+  userId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+  createdAt: DateTime!
 }
 
 type MedicalRecord{
   id: String!
-  user_id: String!
-  record_type: String!
+  userId: String!
+  recordType: String!
   content: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type HealthMetric{
   id: String!
-  user_id: String!
-  metric_type: String!
+  userId: String!
+  metricType: String!
   value: Float!
   unit: String!
-  recorded_at: DateTime!
-  created_at: DateTime!
+  recordedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type TreatmentSchedule{
@@ -127,27 +127,27 @@ type TreatmentSchedule{
 
 type FamilyMember{
   id: String!
-  user_id: String!
-  related_user_id: String!
+  userId: String!
+  relatedUserId: String!
   relationship: String!
-  access_level: Int!
-  created_at: DateTime!
+  accessLevel: Int!
+  createdAt: DateTime!
 }
 
 type AchievementBadge{
   id: String!
   name: String!
   description: String!
-  icon_url: String!
-  created_at: DateTime!
+  iconUrl: String!
+  createdAt: DateTime!
 }
 
 type UserAchievement{
   id: String!
-  user_id: String!
-  badge_id: String!
-  earned_at: DateTime!
-  created_at: DateTime!
+  userId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type PasswordChange {

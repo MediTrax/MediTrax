@@ -50,12 +50,18 @@ class _ProfileSharingScreenState extends State<ProfileSharingScreen>
   }
 }
 
-class SharedProfilesTab extends ConsumerWidget {
+class SharedProfilesTab extends ConsumerStatefulWidget {
   const SharedProfilesTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profilesFuture = ref.watch(userDataProvider.notifier).getProfiles();
+  ConsumerState<SharedProfilesTab> createState() => _SharedProfilesTabState();
+}
+
+class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
+  @override
+  Widget build(BuildContext context) {
+    final profilesFuture =
+        ref.watch(userDataProvider.notifier).getSharedProfiles();
     final currentUser = ref.watch(userDataProvider).value;
 
     return Padding(
@@ -87,8 +93,9 @@ class SharedProfilesTab extends ConsumerWidget {
                       children: [
                         const Text('加载失败'),
                         TextButton(
-                          onPressed: () =>
-                              ref.read(userDataProvider.notifier).getProfiles(),
+                          onPressed: () => ref
+                              .read(userDataProvider.notifier)
+                              .getSharedProfiles(),
                           child: const Text('重试'),
                         ),
                       ],
@@ -117,6 +124,11 @@ class SharedProfilesTab extends ConsumerWidget {
                       profile.name,
                       profile.phoneNumber,
                       profile.role,
+                      () async {
+                        await _showUnshareConfirmation(
+                            context, ref, profile.id, profile.name);
+                        setState(() {});
+                      },
                     );
                   },
                 );
@@ -127,7 +139,10 @@ class SharedProfilesTab extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => _showShareProfileDialog(context, ref),
+              onPressed: () async {
+                await _showShareProfileDialog(context, ref);
+                setState(() {});
+              },
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -147,6 +162,7 @@ class SharedProfilesTab extends ConsumerWidget {
     String name,
     String phoneNumber,
     String role,
+    Function() onDelete,
   ) {
     return Card(
       elevation: 0,
@@ -178,7 +194,7 @@ class SharedProfilesTab extends ConsumerWidget {
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showUnshareConfirmation(context, ref, id, name),
+              onPressed: () => onDelete(),
               color: Colors.red,
             ),
           ],
@@ -187,11 +203,12 @@ class SharedProfilesTab extends ConsumerWidget {
     );
   }
 
-  void _showShareProfileDialog(BuildContext context, WidgetRef ref) {
+  Future<void> _showShareProfileDialog(
+      BuildContext context, WidgetRef ref) async {
     final phoneController = TextEditingController();
     String accessLevel = 'read';
 
-    showDialog(
+    return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('共享档案'),
@@ -236,7 +253,6 @@ class SharedProfilesTab extends ConsumerWidget {
                       phoneController.text,
                       accessLevel,
                     );
-                await ref.read(userDataProvider.notifier).getProfiles();
                 if (context.mounted) {
                   Navigator.pop(context);
                   // Refresh the profiles list
@@ -254,13 +270,13 @@ class SharedProfilesTab extends ConsumerWidget {
     );
   }
 
-  void _showUnshareConfirmation(
+  Future<void> _showUnshareConfirmation(
     BuildContext context,
     WidgetRef ref,
     String id,
     String name,
-  ) {
-    showDialog(
+  ) async {
+    return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('确认取消共享'),
@@ -276,8 +292,6 @@ class SharedProfilesTab extends ConsumerWidget {
                 await ref.read(userDataProvider.notifier).unshareProfile(id);
                 if (context.mounted) {
                   Navigator.pop(context);
-                  // Refresh the profiles list
-                  ref.read(userDataProvider.notifier).getProfiles();
                 }
               } catch (e) {
                 if (context.mounted) {

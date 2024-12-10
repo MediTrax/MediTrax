@@ -96,7 +96,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 	for _, change := range changes {
 		_, err := database.DB.Query(
 			`CREATE ONLY activity_log:ulid()
-			SET user_id=$user_id,
+			SET userId=$userId,
 			activityType=$activityType,
 			description=$description,
 			changedObject=$changedObject,
@@ -106,7 +106,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 			timestamp=$timestamp;
 			`,
 			map[string]interface{}{
-				"user_id":       userId,
+				"userId":        userId,
 				"activityType":  actType,
 				"description":   description,
 				"changedObject": objId,
@@ -127,7 +127,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 
 func IsFamilyMember(memberId string, patientId string) bool {
 	result, err := database.DB.Query(`SELECT * FROM family_member 
-	WHERE user_id=$userID AND patient_user_id=$patientId;`,
+	WHERE userId=$userID AND patient_userId=$patientId;`,
 		map[string]interface{}{
 			"userID":    memberId,
 			"patientId": patientId,
@@ -151,9 +151,9 @@ func IsFamilyMember(memberId string, patientId string) bool {
 }
 
 func GetUserByID(userID string) (*model.User, error) {
-	result, err := database.DB.Query(`SELECT * FROM ONLY $user_id`,
+	result, err := database.DB.Query(`SELECT * FROM ONLY $userId`,
 		map[string]interface{}{
-			"user_id": userID,
+			"userId": userID,
 		})
 	if err != nil {
 		return nil, err

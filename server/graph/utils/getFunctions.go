@@ -14,17 +14,17 @@ func GetHealthMetrics(user model.User, startDate *string, endDate *string, metri
 	// get all the health metric entries that is associated with the user
 	if metricType == nil {
 		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
+			`SELECT * FROM health_metric WHERE userId = $userId;`,
 			map[string]interface{}{
-				"user_id": user.ID,
+				"userId": user.ID,
 			},
 		)
 	} else {
 		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
+			`SELECT * FROM health_metric WHERE userId = $userId AND metricType=$metricType;`,
 			map[string]interface{}{
-				"user_id":     user.ID,
-				"metric_type": *metricType,
+				"userId":     user.ID,
+				"metricType": *metricType,
 			},
 		)
 	}
@@ -60,7 +60,7 @@ func GetHealthMetrics(user model.User, startDate *string, endDate *string, metri
 
 func GetMedicalRecords(user model.User) ([]*model.MedicalRecordDetail, error) {
 	// Fetch medical records for the user
-	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE userId=$userID;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -89,7 +89,7 @@ func GetMedicalRecords(user model.User) ([]*model.MedicalRecordDetail, error) {
 
 func GetTreatmentSchedules(user model.User) ([]*model.TreatmentScheduleDetail, error) {
 	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE userId=$userID;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -120,9 +120,9 @@ func GetTreatmentSchedules(user model.User) ([]*model.TreatmentScheduleDetail, e
 func GetMedications(user model.User) ([]*model.MedicationDetail, error) {
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
-		`SELECT * FROM medication WHERE user_id = $user_id;`,
+		`SELECT * FROM medication WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {

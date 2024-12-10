@@ -44,10 +44,10 @@ func (r *mutationResolver) AddFamilyMember(ctx context.Context, memberPhoneNumbe
 
 	// query database for family member entries with the same member
 	result, err = database.DB.Query(
-		`SELECT * FROM family_member WHERE user_id=$user_id AND patient_user_id=$patient_user_id;`,
+		`SELECT * FROM family_member WHERE userId=$userId AND patient_userId=$patient_userId;`,
 		map[string]interface{}{
-			"user_id":         family.ID,
-			"patient_user_id": user.ID,
+			"userId":         family.ID,
+			"patient_userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -64,17 +64,17 @@ func (r *mutationResolver) AddFamilyMember(ctx context.Context, memberPhoneNumbe
 	// finally, send the create family member query
 	result, err = database.DB.Query(
 		`CREATE ONLY family_member:ulid()
-		SET user_id=$user_id,
-		patient_user_id=$patient_user_id,
+		SET userId=$userId,
+		patient_userId=$patient_userId,
 		relationship=$relationship,
-		access_level=$access_level,
-		created_at=time::now()
+		accessLevel=$accessLevel,
+		createdAt=time::now()
 		`,
 		map[string]interface{}{
-			"user_id":         family.ID,
-			"patient_user_id": user.ID,
-			"relationship":    relationship,
-			"access_level":    accessLevel,
+			"userId":         family.ID,
+			"patient_userId": user.ID,
+			"relationship":   relationship,
+			"accessLevel":    accessLevel,
 		},
 	)
 	if err != nil {
@@ -109,10 +109,10 @@ func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID stri
 
 	// Execute the query
 	result, err := database.DB.Query(
-		`DELETE $id WHERE patient_user_id=$user_id RETURN BEFORE;`,
+		`DELETE $id WHERE patient_userId=$userId RETURN BEFORE;`,
 		map[string]interface{}{
-			"id":      memberID,
-			"user_id": user.ID,
+			"id":     memberID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -150,7 +150,7 @@ func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID stri
 	}
 
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": memberID, "user_id": user.ID}
+	updateValues := map[string]interface{}{"id": memberID, "userId": user.ID}
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
@@ -159,12 +159,12 @@ func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID stri
 		updateFields = append(updateFields, "relationship = $relationship")
 	}
 	if accessLevel != nil {
-		updateValues["access_level"] = *accessLevel
-		updateFields = append(updateFields, "access_level = $access_level")
+		updateValues["accessLevel"] = *accessLevel
+		updateFields = append(updateFields, "accessLevel = $accessLevel")
 	}
 
 	// Construct the final query with the medicationID in quotes
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
 
 	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
@@ -199,7 +199,7 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 	}
 
 	// Fetch family members (with shared access) of the user
-	result, err := database.DB.Query(`SELECT * FROM family_member WHERE patient_user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM family_member WHERE patient_userId=$userID;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -240,7 +240,7 @@ func (r *queryResolver) GetRelatedPatients(ctx context.Context) ([]*model.Patien
 	}
 
 	// Fetch family members (with shared access) of the user
-	result, err := database.DB.Query(`SELECT * FROM family_member WHERE user_id=$userID;`, map[string]interface{}{
+	result, err := database.DB.Query(`SELECT * FROM family_member WHERE userId=$userID;`, map[string]interface{}{
 		"userID": user.ID,
 	})
 	if err != nil {

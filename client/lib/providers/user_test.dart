@@ -14,9 +14,9 @@ class UserTest extends UserData {
       password: "",
       role: "USER",
       status: 1,
-      created_at: DateTime.now(),
-      updated_at: DateTime.now(),
-      last_login: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      lastLogin: DateTime.now(),
     );
   }
 
@@ -34,9 +34,9 @@ class UserTest extends UserData {
       password: password ?? state.value!.password,
       role: state.value!.role,
       status: state.value!.status,
-      created_at: state.value!.created_at,
-      updated_at: DateTime.now(),
-      last_login: state.value!.last_login,
+      createdAt: state.value!.createdAt,
+      updatedAt: DateTime.now(),
+      lastLogin: state.value!.lastLogin,
     ));
   }
 

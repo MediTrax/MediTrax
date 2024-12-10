@@ -23,9 +23,9 @@ func (r *queryResolver) GetActivityLog(ctx context.Context) ([]*model.ActivityLo
 
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
-		`SELECT * FROM activity_log WHERE user_id = $user_id;`,
+		`SELECT * FROM activity_log WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {

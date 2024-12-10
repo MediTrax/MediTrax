@@ -1,10 +1,10 @@
 type FamilyMember{
   id: String!
-  user_id: String!
-  patient_user_id: String!
+  userId: String!
+  patient_userId: String!
   relationship: String! # deprecated
-  access_level: Int!    # deprecated
-  created_at: DateTime!
+  accessLevel: Int!    # deprecated
+  createdAt: DateTime!
 }
 
 type AddFamilyMemberResponse {

@@ -84,8 +84,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 		password=crypto::argon2::generate($password),
 		role=$role,
 		points=0.0,
-		created_at=time::now(),
-		updated_at=time::now();`, map[string]interface{}{
+		createdAt=time::now(),
+		updatedAt=time::now();`, map[string]interface{}{
 			"username":    username,
 			"phoneNumber": phoneNumber,
 			"password":    password,
@@ -145,8 +145,8 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 	}
 
 	_, err = database.DB.Query(
-		`UPDATE $user_id SET last_login=time::now();`, map[string]interface{}{
-			"user_id": user.ID,
+		`UPDATE $userId SET lastLogin=time::now();`, map[string]interface{}{
+			"userId": user.ID,
 		})
 	if err != nil {
 		return nil, err
@@ -246,10 +246,10 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 	}
 
 	/* delete related data entries */
-	// delete all objects with user_id=user.ID
+	// delete all objects with userId=user.ID
 	for _, tableName := range utils.UserRelatedTables {
 		_, err = database.DB.Query(
-			`DELETE $table_name WHERE user_id = $id;`,
+			`DELETE $table_name WHERE userId = $id;`,
 			map[string]interface{}{
 				"table_name": tableName,
 				"id":         user.ID,
@@ -261,7 +261,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 	}
 	// delete family member entries where user is the patient.
 	_, err = database.DB.Query(
-		`DELETE family_member WHERE patient_user_id = $id;`,
+		`DELETE family_member WHERE patient_userId = $id;`,
 		map[string]interface{}{
 			"id": user.ID,
 		},
@@ -272,7 +272,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 
 	// detete family members that relate to this user
 	_, err = database.DB.Query(
-		`DELETE $table_name WHERE related_user_id = $id;`,
+		`DELETE $table_name WHERE relatedUserId = $id;`,
 		map[string]interface{}{
 			"table_name": "family_member",
 			"id":         user.ID,
@@ -424,23 +424,23 @@ func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string,
 	if len(existingShares) > 0 {
 		return nil, fmt.Errorf("profile is already shared with this user")
 	}
-	fmt.Println("creating profile access edge")
+	fmt.Println("creating profile access edge from", user.ID, "to", targetUser.ID)
 
 	// Create the profile_access edge
-	_, err = database.DB.Query(`
-        RELATE $from_user->profile_access->$to_user 
-        SET 
-            access_level = $access_level,
-            created_at = time::now();
+	result, err = database.DB.Query(`
+        RELATE $from->profile_access->$to
+        SET accessLevel = $accessLevel,
+            createdAt = time::now();
     `, map[string]interface{}{
-		"from_user":    user.ID,
-		"to_user":      targetUser.ID,
-		"access_level": accessLevel,
+		"from":        user.ID,
+		"to":          targetUser.ID,
+		"accessLevel": accessLevel,
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Println("profile shared successfully with", targetUser.Name, result)
 	return &model.ShareProfileResponse{
 		Message: fmt.Sprintf("Profile shared successfully with %s", targetUser.Name),
 	}, nil
@@ -499,18 +499,18 @@ func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// First get all family member relationships for the current user
-	result, err := database.DB.Query(
-		`SELECT * FROM family_member WHERE user_id = $user_id;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-		},
-	)
+	// Get all profiles shared with the current user (incoming edges)
+	result, err := database.DB.Query(`
+        SELECT in.* FROM profile_access 
+        WHERE out = $userId;
+    `, map[string]interface{}{
+		"userId": user.ID,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	familyMembers, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
+	results, err := surrealdb.SmartUnmarshal[[]map[string]interface{}](result, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -518,7 +518,7 @@ func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail
 	// Create a slice to store all profiles
 	var profiles []*model.ProfileDetail
 
-	// Add current user's profile
+	// Add current user's profile first
 	profiles = append(profiles, &model.ProfileDetail{
 		ID:          user.ID,
 		Name:        user.Name,
@@ -527,24 +527,15 @@ func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail
 		CreatedAt:   user.CreatedAt,
 	})
 
-	// For each family member relationship, fetch the related user's profile
-	for _, member := range familyMembers {
-		result, err := database.DB.Select(member.RelatedUserID)
-		if err != nil {
-			continue // Skip if we can't fetch a particular user
-		}
-
-		relatedUser, err := surrealdb.SmartUnmarshal[model.User](result, nil)
-		if err != nil {
-			continue
-		}
-
+	// Add all profiles shared with the current user
+	for _, result := range results {
+		user := result["in"].(map[string]interface{})
 		profiles = append(profiles, &model.ProfileDetail{
-			ID:          relatedUser.ID,
-			Name:        relatedUser.Name,
-			PhoneNumber: relatedUser.PhoneNumber,
-			Role:        relatedUser.Role,
-			CreatedAt:   relatedUser.CreatedAt,
+			ID:          user["id"].(string),
+			Name:        user["name"].(string),
+			PhoneNumber: user["phoneNumber"].(string),
+			Role:        user["role"].(string),
+			CreatedAt:   user["createdAt"].(string),
 		})
 	}
 
@@ -558,45 +549,44 @@ func (r *queryResolver) GetSharedProfiles(ctx context.Context) ([]*model.Profile
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// Get all users that the current user has shared their profile with
-	// This query will:
-	// 1. Start from the current user
-	// 2. Find all outgoing profile_access edges
-	// 3. Return the users on the other end of those edges
+	// Get all profiles that the current user has shared with others (outgoing edges)
 	result, err := database.DB.Query(`
-        SELECT <-profile_access<-user.* as shared_with
-        FROM user 
-        WHERE id = $user_id;
+        SELECT out.* FROM profile_access 
+        WHERE in = $userId;
     `, map[string]interface{}{
-		"user_id": user.ID,
+		"userId": user.ID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// Parse the query result
-	type QueryResult struct {
-		SharedWith []model.User `json:"shared_with"`
-	}
-	results, err := surrealdb.SmartUnmarshal[[]QueryResult](result, nil)
+	results, err := surrealdb.SmartUnmarshal[[]map[string]interface{}](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a slice to store all shared profiles
+	// Create a slice to store all profiles
 	var profiles []*model.ProfileDetail
 
-	// Add all users that the current user has shared their profile with
-	if len(results) > 0 && len(results[0].SharedWith) > 0 {
-		for _, sharedUser := range results[0].SharedWith {
-			profiles = append(profiles, &model.ProfileDetail{
-				ID:          sharedUser.ID,
-				Name:        sharedUser.Name,
-				PhoneNumber: sharedUser.PhoneNumber,
-				Role:        sharedUser.Role,
-				CreatedAt:   sharedUser.CreatedAt,
-			})
-		}
+	// Add current user's profile first
+	profiles = append(profiles, &model.ProfileDetail{
+		ID:          user.ID,
+		Name:        user.Name,
+		PhoneNumber: user.PhoneNumber,
+		Role:        user.Role,
+		CreatedAt:   user.CreatedAt,
+	})
+
+	// Add all profiles shared with the current user
+	for _, result := range results {
+		user := result["out"].(map[string]interface{})
+		profiles = append(profiles, &model.ProfileDetail{
+			ID:          user["id"].(string),
+			Name:        user["name"].(string),
+			PhoneNumber: user["phoneNumber"].(string),
+			Role:        user["role"].(string),
+			CreatedAt:   user["createdAt"].(string),
+		})
 	}
 
 	return profiles, nil
