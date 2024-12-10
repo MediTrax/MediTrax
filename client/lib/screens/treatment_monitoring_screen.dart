@@ -362,6 +362,12 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final schedulesAsync = ref.watch(treatmentSchedulesProvider);
 
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -405,23 +411,26 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                           schedule.scheduledTime,
                           schedule.location,
                           schedule.notes,
+                          canEdit,
                         );
                       },
                     ),
             ),
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () => _showAddScheduleDialog(context, ref),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          if (canEdit) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => _showAddScheduleDialog(context, ref),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('添加新日程'),
               ),
-              child: const Text('添加新日程'),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -435,6 +444,7 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
     DateTime scheduledTime,
     String location,
     String? notes,
+    bool canEdit,
   ) {
     return Card(
       elevation: 0,
@@ -477,36 +487,37 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                 ],
               ),
             ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _showEditScheduleDialog(
-                    context,
-                    ref,
-                    id,
-                    type,
-                    scheduledTime,
-                    location,
-                    notes,
-                  );
-                } else if (value == 'delete') {
-                  _showDeleteConfirmation(context, ref, id);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Text('编辑'),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text(
-                    '删除',
-                    style: TextStyle(color: Colors.red),
+            if (canEdit)
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _showEditScheduleDialog(
+                      context,
+                      ref,
+                      id,
+                      type,
+                      scheduledTime,
+                      location,
+                      notes,
+                    );
+                  } else if (value == 'delete') {
+                    _showDeleteConfirmation(context, ref, id);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Text('编辑'),
                   ),
-                ),
-              ],
-            ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      '删除',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

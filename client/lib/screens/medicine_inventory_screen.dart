@@ -10,33 +10,64 @@ import 'package:meditrax/widgets/add_reminder_dialog.dart';
 import 'package:meditrax/widgets/edit_reminder_dialog.dart';
 import 'package:flutter/services.dart';
 
-class MedicineInventoryScreen extends StatelessWidget {
+class MedicineInventoryScreen extends ConsumerStatefulWidget {
   const MedicineInventoryScreen({super.key});
 
   @override
+  ConsumerState<MedicineInventoryScreen> createState() =>
+      _MedicineInventoryScreenState();
+}
+
+class _MedicineInventoryScreenState
+    extends ConsumerState<MedicineInventoryScreen> {
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('药品管理'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: '药品库存'),
-              Tab(text: '添加药品'),
-              Tab(text: '服药提醒'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _InventoryTab(),
-            _AddMedicineTab(),
-            _ReminderTab(),
-          ],
-        ),
-      ),
-    );
+    final selectedProfile = ref.watch(appStateProvider).selectedProfile;
+    final currentUser = ref.watch(userDataProvider).value;
+
+    final bool canEdit =
+        selectedProfile == null || selectedProfile == currentUser?.id;
+    return canEdit
+        ? DefaultTabController(
+            length: 3,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('药品管理'),
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(text: '药品库存'),
+                    Tab(text: '添加药品'),
+                    Tab(text: '服药提醒'),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  _InventoryTab(),
+                  _AddMedicineTab(),
+                  _ReminderTab(),
+                ],
+              ),
+            ),
+          )
+        : DefaultTabController(
+            length: 1,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('药品管理'),
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(text: '药品库存'),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  _InventoryTab(),
+                ],
+              ),
+            ),
+          );
   }
 }
 
