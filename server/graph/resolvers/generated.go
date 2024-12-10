@@ -3004,446 +3004,1207 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schemas/achievements.graphqls", Input: `type AchievementBadge{
+	{Name: "../schemas/achievements.graphqls", Input: `"""
+Represents an achievement badge that can be awarded to users.
+"""
+type AchievementBadge{
+  """
+  The unique identifier of the achievement badge.
+  """
   id: String!
+
+  """ 
+  The name of the achievement badge.
+  """
   name: String!
+
+  """
+  A description of the achievement badge.
+  """
   description: String!
+
+  """
+  The URL of the icon representing the achievement badge.
+  """
   iconUrl: String!
+
+  """
+  The date and time when the achievement badge was created.
+  """
   createdAt: DateTime!
 }
 
+"""
+Represents a user's achievement, linking a user to a badge.
+"""
 type UserAchievement{
+  # The unique identifier of the user achievement.
   id: String!
+
+  # The ID of the user who earned the achievement.
   userId: String!
+
+  # The ID of the badge that was earned.
   badgeId: String!
+
+  # The date and time when the achievement was earned.
   earnedAt: DateTime!
+
+  # The date and time when the user achievement was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for creating an achievement badge.
+"""
 type CreateAchievementBadgeResponse {
+  # The ID of the newly created achievement badge.
   badgeId: String!
+
+  # A message indicating the result of the creation operation.
   message: String!
 }
 
+"""
+Detailed information about an achievement badge.
+"""
 type AchievementBadgeDetail {
+  # The ID of the achievement badge.
   badgeId: String!
+
+  # The name of the achievement badge.
   name: String!
+
+  # A description of the achievement badge.
   description: String!
+
+  # The URL of the icon representing the achievement badge.
   iconUrl: String!
+
+  # The date and time when the achievement badge was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for awarding an achievement to a user.
+"""
 type AwardAchievementResponse {
+  # The ID of the user achievement that was awarded.
   userAchievementId: String!
+
+  # A message indicating the result of the award operation.
   message: String!
 }
 
+"""
+Detailed information about a user's achievement.
+"""
 type UserAchievementDetail {
+  # The ID of the user achievement.
   userAchievementId: String!
+
+  # The ID of the badge that was earned.
   badgeId: String!
+
+  # The date and time when the achievement was earned.
   earnedAt: DateTime!
 }
 
+"""
+Represents a record of points earned by a user.
+"""
 type UserPointRecord{
+  # The unique identifier of the point record.
   id: String!
+
+  # The ID of the user who earned the points.
   userId: String!
+
+  # The number of points earned.
   pointsEarned: Float!
+
+  # The reason for earning the points.
   reason: String!
+
+  # The date and time when the points were earned.
   earnedAt: DateTime!
 }
 
+"""
+Detailed information about a user's point record.
+"""
 type UserPointRecordDetail{
+  # The ID of the point record.
   recordId: String!
+
+  # The number of points earned.
   pointsEarned: Float!
+
+  # The reason for earning the points.
   reason: String!
+
+  # The date and time when the points were earned.
   earnedAt: DateTime!
 }
 
+"""
+Response type for earning points.
+"""
 type earnPointsResponse{
+  # The updated total points of the user.
   updatedPoints: Float!
+
+  # A message indicating the result of the points earning operation.
   message: String!
 }
 
 extend type Query{
+  # Retrieves a list of achievement badges.
   getAchievementBadges: [AchievementBadgeDetail]
+
+  # Retrieves a list of achievements earned by the user.
   getUserAchievements: [UserAchievementDetail]
+
+  # Retrieves a list of point records for the user.
   getUserPointRecords: [UserPointRecordDetail]
 }
 
 extend type Mutation{
-  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
-  awardAchievement(badgeId: String!): AwardAchievementResponse  
-  earnPoints(pointsEarned: Float!, reason:String!) : earnPointsResponse
-}`, BuiltIn: false},
-	{Name: "../schemas/activityLog.graphqls", Input: `type ActivityLog {
-    id: String!
-    userId: String!
-    activityType: String!
+  """
+  Creates a new achievement badge.
+  """
+  createAchievementBadge(
+    # The name of the achievement badge.
+    name: String!
+
+    # A description of the achievement badge.
     description: String!
+
+    # The URL of the icon representing the achievement badge.
+    iconUrl: String!
+  ): CreateAchievementBadgeResponse
+
+  """
+  Awards an achievement badge to a user.
+  """
+  awardAchievement(
+    # The ID of the badge to be awarded.
+    badgeId: String!
+  ): AwardAchievementResponse  
+
+  """
+  Records points earned by a user.
+  """
+  earnPoints(
+    # The number of points earned.
+    pointsEarned: Float!
+
+    # The reason for earning the points.
+    reason: String!
+  ): earnPointsResponse
+}`, BuiltIn: false},
+	{Name: "../schemas/activityLog.graphqls", Input: `"""
+Represents an activity log entry for a user.
+"""
+type ActivityLog {
+    # The unique identifier of the activity log entry.
+    id: String!
+
+    # The ID of the user associated with the activity.
+    userId: String!
+
+    # The type of activity performed.
+    activityType: String!
+
+    # A description of the activity.
+    description: String!
+
+    # The object that was changed during the activity.
     changedObject: String!
+
+    # The field of the object that was changed.
     changedField: String!
+
+    # The original value before the change.
     from: String!
+
+    # The new value after the change.
     to: String!
+
+    # The timestamp when the activity occurred.
     timestamp: DateTime!
 }
 
+"""
+Detailed information about an activity log entry.
+"""
 type ActivityLogDetail{
+    # The ID of the activity log entry.
     logId: String!
+
+    # The type of activity performed.
     activityType: String!
+
+    # A description of the activity.
     description: String!
+
+    # The object that was changed during the activity.
     changedObject: String!
+
+    # The field of the object that was changed.
     changedField: String!
+
+    # The original value before the change.
     from: String!
+
+    # The new value after the change.
     to: String!
+
+    # The timestamp when the activity occurred.
     timestamp: DateTime!
 }
 
 extend type Query{
+    # Retrieves a list of activity logs for the user.
     getActivityLog: [ActivityLogDetail]
 }`, BuiltIn: false},
-	{Name: "../schemas/assessment.graphqls", Input: `type Question{
+	{Name: "../schemas/assessment.graphqls", Input: `"""
+Represents a question in a health risk assessment questionnaire.
+"""
+type Question{
+  # The unique identifier of the question.
   questionId: Int!
+
+  # The text of the question.
   question: String!
+
+  # The type of choice available for the question (e.g., single choice, multiple choice).
   questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
+
+  # The list of choices available for the question.
   choices: [String!] # empty if it is fill in the blank
 }
 
+"""
+Represents a questionnaire object containing multiple questions.
+"""
 type QuestionnaireObject{
+  # The unique identifier of the questionnaire.
   questionnaireId: Int!
+
+  # The list of questions in the questionnaire.
   data: [Question!]!
 }
 
+"""
+Input type for a response to a questionnaire.
+"""
 input Response{
+  # The ID of the question being answered.
   questionId: Int!
+
+  # The choice selected for the question.
   choice: String!#数字序号用，隔开
+
+  # The answer provided for the question, if applicable.
   answer: String
 }
 
+"""
+Represents a health response in a risk assessment.
+"""
 type HealthResponse{
+  # The ID of the question being answered.
   questionId: Int!
+
+  # The choice selected for the question.
   choice: String!#数字序号用，隔开
+
+  # The answer provided for the question, if applicable.
   answer: String
 }
 
+"""
+Input type for a filled questionnaire.
+"""
 input FilledQuestionnaire{
+  # The ID of the questionnaire being filled.
   questionnaireId: Int!  # 第几套测试题
+
+  # The list of responses to the questionnaire.
   responses: [Response!]!
 }
 
+"""
+Represents a health risk assessment for a user.
+"""
 type HealthRiskAssessment{
+  # The unique identifier of the health risk assessment.
   id: String!
+
+  # The ID of the user who completed the assessment.
   userId: String!
+
+  # The data from the completed questionnaire.
   questionnaireData: [HealthResponse!]!
+
+  # The risk level determined from the assessment.
   riskLevel: String!
+
+  # Recommendations based on the assessment results.
   recommendations: String!
+
+  # The date and time when the assessment was created.
   createdAt: DateTime!
 }
 
+"""
+Detailed response for a health risk assessment.
+"""
 type HealthRiskAssessmentDetailResponse {
+  # The ID of the health risk assessment.
   assessmentId: String!
+
+  # The data from the completed questionnaire.
   questionnaireData: [HealthResponse!]!
+
+  # The risk level determined from the assessment.
   riskLevel: String!
+
+  # Recommendations based on the assessment results.
   recommendations: String!
+
+  # The date and time when the assessment was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for evaluating a health risk assessment.
+"""
 type EvaluateHealthRiskAssessmentResponse {
+  # The ID of the health risk assessment.
   assessmentId: String!
+
+  # The risk level determined from the assessment.
   riskLevel: String!
+
+  # Recommendations based on the assessment results.
   recommendations: String!
 }
 
 extend type Query{
+  # Retrieves previous health risk assessments for the user.
   getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
+  # Retrieves the questions for a health risk assessment.
   getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
 }
 
 extend type Mutation{
-  evaluateHealthRiskAssessment(filledQuestionnaire: FilledQuestionnaire!): EvaluateHealthRiskAssessmentResponse #拿结果
+  # Evaluates a health risk assessment based on the filled questionnaire.
+  evaluateHealthRiskAssessment(
+    # The filled questionnaire to be evaluated.
+    filledQuestionnaire: FilledQuestionnaire!
+  ): EvaluateHealthRiskAssessmentResponse #拿结果
 }`, BuiltIn: false},
-	{Name: "../schemas/familyMember.graphqls", Input: `type FamilyMember{
+	{Name: "../schemas/familyMember.graphqls", Input: `"""
+Represents a family member linked to a user.
+"""
+type FamilyMember{
+  # The unique identifier of the family member entry.
   id: String!
+
+  # The ID of the user who added the family member.
   userId: String!
+
+  # The ID of the patient user linked to the family member.
   patient_userId: String!
+
+  # The relationship of the family member to the user.
   relationship: String! # deprecated
+
+  # The access level granted to the family member.
   accessLevel: Int!    # deprecated
+
+  # The date and time when the family member was added.
   createdAt: DateTime!
 }
 
+"""
+Response type for adding a family member.
+"""
 type AddFamilyMemberResponse {
+  # The ID of the newly added family member.
   memberId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a family member.
+"""
 type FamilyMemberDetail {
-  memberId: String!   # id of the family member entry
-  familyId: String!   # user id of the related family member
+  # The ID of the family member entry.
+  memberId: String!
+
+  # The user ID of the related family member.
+  familyId: String!
+
+  # The name of the family member.
   name: String!
+
+  # The phone number of the family member.
   phoneNumber: String!
+
+  # The relationship of the family member to the user.
   relationship: String!
+
+  # The access level granted to the family member.
   accessLevel: Int!
 }
 
+"""
+Detailed information about a patient.
+"""
 type PatientDetail{
+    # The ID of the patient.
     patientId: String!
+
+    # The name of the patient.
     name: String!
+
+    # The phone number of the patient.
     phoneNumber: String!
+
+    # The relationship of the patient to the user.
     relationship: String!
+
+    # The access level granted to the user.
     accessLevel: Int!
 }
 
+"""
+Response type for updating a family member.
+"""
 type UpdateFamilyMemberResponse {
+  # The ID of the updated family member.
   memberId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a family member.
+"""
 type DeleteFamilyMemberResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
 extend type Query{
+    # Retrieves a list of family members for the user.
     getFamilyMembers: [FamilyMemberDetail]
+
+    # Retrieves a list of related patients for the user.
     getRelatedPatients: [PatientDetail]
 
+    # Retrieves medical records for a specific patient.
     getPatientMedicalRecords(patientId: String!): [MedicalRecordDetail]
+
+    # Retrieves treatment schedules for a specific patient.
     getPatientTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+
+    # Retrieves medications for a specific patient.
     getPatientMedications(patientId: String!): [MedicationDetail]
+
+    # Retrieves health metrics for a specific patient.
     getPatientHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
-    addFamilyMember(memberPhoneNumber: String!, relationship: String!, accessLevel: Int!): AddFamilyMemberResponse
-    deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+    # Adds a new family member.
+    addFamilyMember(
+      # The phone number of the family member.
+      memberPhoneNumber: String!
 
-    # deprecated
-    updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
+      # The relationship of the family member to the user.
+      relationship: String!
+
+      # The access level granted to the family member.
+      accessLevel: Int!
+    ): AddFamilyMemberResponse
+
+    # Deletes a family member.
+    deleteFamilyMember(
+      # The ID of the family member to be deleted.
+      memberId: String!
+    ): DeleteFamilyMemberResponse
+
+    # Updates a family member. (deprecated)
+    updateFamilyMember(
+      # The ID of the family member to be updated.
+      memberId: String!
+
+      # The new relationship of the family member to the user.
+      relationship: String
+
+      # The new access level granted to the family member.
+      accessLevel: String
+    ): UpdateFamilyMemberResponse
 }`, BuiltIn: false},
-	{Name: "../schemas/foodspec.graphqls", Input: `type FoodSpec{
+	{Name: "../schemas/foodspec.graphqls", Input: `"""
+Represents the specification of a food item.
+"""
+type FoodSpec {
+  # The name of the food specification.
   name: String!
+
+  # The value of the food specification.
   value: Float!
+
+  # The unit of measurement for the food specification.
   unit: String!
+
+  # A measure of how high the specification value is compared to a standard.
   howHigh: Float!
 }
 
-type FoodRecommendation{
+"""
+Represents a recommendation for a food item.
+"""
+type FoodRecommendation {
+  # The name of the recommended food item.
   name: String!
 }
 
-type FoodSpecs{
+"""
+Represents a collection of food specifications.
+"""
+type FoodSpecs {
+  # The list of food specifications.
   specs: [FoodSpec!]!
+
+  # A measure of how recommended the food item is.
   howRecommend: Float!
 }
 
-extend type Query{
-  getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSpecs(food: String!) : FoodSpecs  
+extend type Query {
+  # Retrieves the specifications for a given food item.
+  getFoodSpecs(
+    # The name of the food item.
+    food: String!
+  ): FoodSpecs
 
-  # add endpoint for recommending ONE food
-  getFoodRecommendation : FoodRecommendation
-  getMockFoodRecommendation : FoodRecommendation
+  # Retrieves mock specifications for a given food item.
+  getMockFoodSpecs(
+    # The name of the food item.
+    food: String!
+  ): FoodSpecs
+
+  # Retrieves a recommendation for a food item.
+  getFoodRecommendation: FoodRecommendation
+
+  # Retrieves a mock recommendation for a food item.
+  getMockFoodRecommendation: FoodRecommendation
 }`, BuiltIn: false},
-	{Name: "../schemas/medications.graphqls", Input: `type Medication{
+	{Name: "../schemas/medications.graphqls", Input: `"""
+Represents a medication prescribed to a user.
+"""
+type Medication {
+  # The unique identifier of the medication.
   id: String!
+
+  # The name of the medication.
   name: String!
+
+  # The dosage of the medication.
   dosage: Float!
+
+  # The unit of measurement for the dosage.
   unit: String!
+
+  # The frequency at which the medication should be taken.
   frequency: String!
+
+  # The inventory count of the medication.
   inventory: Float!
+
+  # The ID of the user who is prescribed the medication.
   userId: String!
+
+  # The date and time when the medication was created.
   createdAt: DateTime!
+
+  # The date and time when the medication was last updated.
   updatedAt: DateTime!
 }
 
-type MedicationReminder{
+"""
+Represents a reminder for taking a medication.
+"""
+type MedicationReminder {
+  # The unique identifier of the medication reminder.
   id: String!
+
+  # The ID of the medication associated with the reminder.
   medicationId: String!
+
+  # The ID of the user who set the reminder.
   userId: String!
+
+  # The time at which the reminder is set.
   reminderTime: DateTime!
+
+  # Indicates whether the medication has been taken.
   isTaken: Boolean!
+
+  # The date and time when the reminder was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for adding a medication.
+"""
 type AddMedicationResponse {
+  # The ID of the newly added medication.
   medicationId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a medication.
+"""
 type MedicationDetail {
+  # The ID of the medication.
   medicationId: String!
+
+  # The name of the medication.
   name: String!
+
+  # The dosage of the medication.
   dosage: Float!
+
+  # The unit of measurement for the dosage.
   unit: String!
+
+  # The frequency at which the medication should be taken.
   frequency: String!
+
+  # The inventory count of the medication.
   inventory: Float!
 }
 
+"""
+Response type for updating a medication.
+"""
 type UpdateMedicationResponse {
+  # The ID of the updated medication.
   medicationId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a medication.
+"""
 type DeleteMedicationResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
+"""
+Response type for creating a medication reminder.
+"""
 type CreateMedicationReminderResponse {
+  # The ID of the newly created medication reminder.
   reminderId: String!
+
+  # A message indicating the result of the creation operation.
   message: String!
 }
 
+"""
+Response type for updating a medication reminder.
+"""
 type UpdateMedicationReminderResponse {
+  # The ID of the updated medication reminder.
   reminderId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Detailed information about a medication reminder.
+"""
 type MedicationReminderDetail {
+  # The ID of the medication reminder.
   reminderId: String!
+
+  # The ID of the medication associated with the reminder.
   medicationId: String!
+
+  # The time at which the reminder is set.
   reminderTime: DateTime!
+
+  # Indicates whether the medication has been taken.
   isTaken: Boolean!
 }
 
-type TreatmentSchedule{
+"""
+Represents a treatment schedule for a user.
+"""
+type TreatmentSchedule {
+  # The unique identifier of the treatment schedule.
   id: String!
+
+  # The ID of the user who is scheduled for the treatment.
   userId: String!
+
+  # The type of treatment scheduled.
   treatmentType: String!
+
+  # The time at which the treatment is scheduled.
   scheduledTime: DateTime!
+
+  # The location where the treatment is scheduled.
   location: String!
+
+  # Additional notes about the treatment.
   notes: String
 }
 
-type DeleteMedicationReminderResponse{
+"""
+Response type for deleting a medication reminder.
+"""
+type DeleteMedicationReminderResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
+"""
+Response type for creating a treatment schedule.
+"""
 type CreateTreatmentScheduleResponse {
+  # The ID of the newly created treatment schedule.
   scheduleId: String!
+
+  # A message indicating the result of the creation operation.
   message: String!
 }
 
+"""
+Detailed information about a treatment schedule.
+"""
 type TreatmentScheduleDetail {
+  # The ID of the treatment schedule.
   scheduleId: String!
+
+  # The type of treatment scheduled.
   treatmentType: String!
+
+  # The time at which the treatment is scheduled.
   scheduledTime: DateTime!
+
+  # The location where the treatment is scheduled.
   location: String!
+
+  # Additional notes about the treatment.
   notes: String
 }
 
+"""
+Response type for updating a treatment schedule.
+"""
 type UpdateTreatmentScheduleResponse {
+  # The ID of the updated treatment schedule.
   scheduleId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a treatment schedule.
+"""
 type DeleteTreatmentScheduleResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
-type TakeMedicationResponse{
+"""
+Response type for taking a medication.
+"""
+type TakeMedicationResponse {
+  # A message indicating the result of the medication taking operation.
   message: String!
 }
 
-extend type Query{
+extend type Query {
+  # Retrieves a list of medications for the user.
   getMedications: [MedicationDetail]
+
+  # Retrieves a list of medication reminders for the user.
   getMedicationReminders: [MedicationReminderDetail]
+
+  # Retrieves a list of treatment schedules for the user.
   getTreatmentSchedules: [TreatmentScheduleDetail]
 }
 
-extend type Mutation{
-  addMedication(name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
-  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Float): UpdateMedicationResponse
-  deleteMedication(medicationId: String!): DeleteMedicationResponse
-  
-  createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
-  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
-  takeMedication(reminderId: String) : TakeMedicationResponse!
-  deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
-  
-  createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
-  updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
-  deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
+extend type Mutation {
+  # Adds a new medication.
+  addMedication(
+    # The name of the medication.
+    name: String!
+
+    # The dosage of the medication.
+    dosage: Float!
+
+    # The unit of measurement for the dosage.
+    unit: String!
+
+    # The frequency at which the medication should be taken.
+    frequency: String!
+
+    # The inventory count of the medication.
+    inventory: Float!
+  ): AddMedicationResponse
+
+  # Updates an existing medication.
+  updateMedication(
+    # The ID of the medication to be updated.
+    medicationId: String!
+
+    # The new name of the medication.
+    name: String
+
+    # The new dosage of the medication.
+    dosage: Float
+
+    # The new unit of measurement for the dosage.
+    unit: String
+
+    # The new frequency at which the medication should be taken.
+    frequency: String
+
+    # The new inventory count of the medication.
+    inventory: Float
+  ): UpdateMedicationResponse
+
+  # Deletes a medication.
+  deleteMedication(
+    # The ID of the medication to be deleted.
+    medicationId: String!
+  ): DeleteMedicationResponse
+
+  # Creates a new medication reminder.
+  createMedicationReminder(
+    # The ID of the medication associated with the reminder.
+    medicationId: String!
+
+    # The time at which the reminder is set.
+    reminderTime: DateTime!
+  ): CreateMedicationReminderResponse
+
+  # Updates an existing medication reminder.
+  updateMedicationReminder(
+    # The ID of the medication reminder to be updated.
+    reminderId: String!
+
+    # The new time at which the reminder is set.
+    reminderTime: DateTime
+
+    # Indicates whether the medication has been taken.
+    isTaken: Boolean
+  ): UpdateMedicationReminderResponse
+
+  # Marks a medication as taken.
+  takeMedication(
+    # The ID of the medication reminder.
+    reminderId: String
+  ): TakeMedicationResponse!
+
+  # Deletes a medication reminder.
+  deleteMedicationReminder(
+    # The ID of the medication reminder to be deleted.
+    reminderId: String!
+  ): DeleteMedicationReminderResponse
+
+  # Creates a new treatment schedule.
+  createTreatmentSchedule(
+    # The type of treatment scheduled.
+    treatmentType: String!
+
+    # The time at which the treatment is scheduled.
+    scheduledTime: DateTime!
+
+    # The location where the treatment is scheduled.
+    location: String!
+
+    # Additional notes about the treatment.
+    notes: String
+  ): CreateTreatmentScheduleResponse
+
+  # Updates an existing treatment schedule.
+  updateTreatmentSchedule(
+    # The ID of the treatment schedule to be updated.
+    scheduleId: String!
+
+    # The new type of treatment scheduled.
+    treatmentType: String
+
+    # The new time at which the treatment is scheduled.
+    scheduledTime: DateTime
+
+    # The new location where the treatment is scheduled.
+    location: String
+
+    # Additional notes about the treatment.
+    notes: String
+  ): UpdateTreatmentScheduleResponse
+
+  # Deletes a treatment schedule.
+  deleteTreatmentSchedule(
+    # The ID of the treatment schedule to be deleted.
+    scheduleId: String!
+  ): DeleteTreatmentScheduleResponse
 }
 `, BuiltIn: false},
-	{Name: "../schemas/record.graphqls", Input: `type MedicalRecord{
+	{Name: "../schemas/record.graphqls", Input: `"""
+Represents a medical record for a user.
+"""
+type MedicalRecord {
+  # The unique identifier of the medical record.
   id: String!
+
+  # The ID of the user associated with the medical record.
   userId: String!
+
+  # The type of the medical record.
   recordType: String!
-  # content: RecordObject!
+
+  # The content of the medical record.
   content: String!
+
+  # The date and time when the medical record was created.
   createdAt: DateTime!
+
+  # The date and time when the medical record was last updated.
   updatedAt: DateTime!
 }
 
-type HealthMetric{
+"""
+Represents a health metric recorded for a user.
+"""
+type HealthMetric {
+  # The unique identifier of the health metric.
   id: String!
+
+  # The ID of the user associated with the health metric.
   userId: String!
+
+  # The type of the health metric.
   metricType: String!
+
+  # The value of the health metric.
   value: Float!
+
+  # The unit of measurement for the health metric.
   unit: String!
+
+  # The date and time when the health metric was recorded.
   recordedAt: DateTime!
+
+  # The date and time when the health metric was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for adding a health metric.
+"""
 type AddHealthMetricResponse {
+  # The ID of the newly added health metric.
   metricId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a health metric.
+"""
 type HealthMetricDetail {
+  # The ID of the health metric.
   metricId: String!
+
+  # The type of the health metric.
   metricType: String!
+
+  # The value of the health metric.
   value: Float!
+
+  # The unit of measurement for the health metric.
   unit: String!
+
+  # The date and time when the health metric was recorded.
   recordedAt: DateTime!
 }
 
+"""
+Response type for updating a health metric.
+"""
 type UpdateHealthMetricResponse {
+  # The ID of the updated health metric.
   metricId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a health metric.
+"""
 type DeleteHealthMetricResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
-type RecordObject{
+"""
+Represents a record object containing data.
+"""
+type RecordObject {
+  # The data contained in the record object.
   data: String!
 }
 
+"""
+Response type for adding a medical record.
+"""
 type AddMedicalRecordResponse {
+  # The ID of the newly added medical record.
   recordId: String!
+
+  # A message indicating the result of the addition operation.
   message: String!
 }
 
+"""
+Detailed information about a medical record.
+"""
 type MedicalRecordDetail {
+  # The ID of the medical record.
   recordId: String!
+
+  # The type of the medical record.
   recordType: String!
-  # content: RecordObject!
+
+  # The content of the medical record.
   content: String!
+
+  # The date and time when the medical record was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for updating a medical record.
+"""
 type UpdateMedicalRecordResponse {
+  # The ID of the updated medical record.
   recordId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a medical record.
+"""
 type DeleteMedicalRecordResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
-extend type Query{
-  getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+extend type Query {
+  # Retrieves a list of health metrics for the user.
+  getHealthMetrics(
+    # The start date for filtering health metrics.
+    startDate: DateTime
+
+    # The end date for filtering health metrics.
+    endDate: DateTime
+
+    # The type of health metric to filter by.
+    metricType: String
+  ): [HealthMetricDetail]
+
+  # Retrieves a list of medical records for the user.
   getMedicalRecords: [MedicalRecordDetail]
 }
 
-extend type Mutation{
-  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
-  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
-  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
-   
-  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
-  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
-  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
+extend type Mutation {
+  # Adds a new health metric.
+  addHealthMetric(
+    # The type of the health metric.
+    metricType: String!
+
+    # The value of the health metric.
+    value: Float!
+
+    # The unit of measurement for the health metric.
+    unit: String!
+
+    # The date and time when the health metric was recorded.
+    recordedAt: String!
+  ): AddHealthMetricResponse
+
+  # Updates an existing health metric.
+  updateHealthMetric(
+    # The ID of the health metric to be updated.
+    metricId: String!
+
+    # The new value of the health metric.
+    value: Float
+
+    # The new unit of measurement for the health metric.
+    unit: String
+  ): UpdateHealthMetricResponse
+
+  # Deletes a health metric.
+  deleteHealthMetric(
+    # The ID of the health metric to be deleted.
+    metricId: String!
+  ): DeleteHealthMetricResponse
+
+  # Adds a new medical record.
+  addMedicalRecord(
+    # The type of the medical record.
+    recordType: String!
+
+    # The content of the medical record.
+    content: String!
+  ): AddMedicalRecordResponse
+
+  # Updates an existing medical record.
+  updateMedicalRecord(
+    # The ID of the medical record to be updated.
+    recordId: String!
+
+    # The new type of the medical record.
+    recordType: String
+
+    # The new content of the medical record.
+    content: String
+  ): UpdateMedicalRecordResponse
+
+  # Deletes a medical record.
+  deleteMedicalRecord(
+    # The ID of the medical record to be deleted.
+    recordId: String!
+  ): DeleteMedicalRecordResponse
 }
 `, BuiltIn: false},
 	{Name: "../schemas/schema.graphqls", Input: `# GraphQL schema example
@@ -3461,115 +4222,340 @@ type Query
 
 type Mutation
 `, BuiltIn: false},
-	{Name: "../schemas/user.graphqls", Input: `type Token {
+	{Name: "../schemas/user.graphqls", Input: `"""
+Represents a token for user authentication.
+"""
+type Token {
+  # The unique identifier of the token.
   id: String!
+
+  # The ID of the user associated with the token.
   user: String!
+
+  # The access token for authentication.
   accessToken: String!
+
+  # The refresh token for renewing the access token.
   refreshToken: String!
+
+  # The expiry date and time of the access token.
   accessTokenExpiry: DateTime!
+
+  # The expiry date and time of the refresh token.
   refreshTokenExpiry: DateTime!
+
+  # The device associated with the token.
   device: String!
+
+  # The date and time when the token was created.
   createdAt: DateTime!
+
+  # The date and time when the token was last updated.
   updatedAt: DateTime!
 }
 
-type User{
+"""
+Represents a user in the system.
+"""
+type User {
+  # The unique identifier of the user.
   id: String!
+
+  # The phone number of the user.
   phoneNumber: String!
+
+  # The password of the user.
   password: String!
+
+  # The name of the user.
   name: String!
+
+  # The total points earned by the user.
   points: Float!
+
+  # The date and time when the user was created.
   createdAt: DateTime!
+
+  # The date and time when the user was last updated.
   updatedAt: DateTime!
+
+  # The date and time when the user last logged in.
   lastLogin: DateTime!
+
+  # The status of the user account.
   status: Int!
+
+  # The role of the user in the system.
   role: String!
 }
 
+"""
+Represents a password change request.
+"""
 type PasswordChange {
+  # The unique identifier of the password change request.
   id: String!
+
+  # The ID of the user requesting the password change.
   user: String!
+
+  # The token associated with the password change request.
   token: String!
+
+  # The date and time when the password change request was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for creating a user.
+"""
 type CreateUserResponse {
+  # The ID of the newly created user.
   userId: String!
+
+  # A message indicating the result of the creation operation.
   message: String!
 }
 
+"""
+Response type for logging in a user.
+"""
 type LoginUserResponse {
+  # The ID of the logged-in user.
   userId: String!
+
+  # The token associated with the logged-in user.
   token: Token!
+
+  # A message indicating the result of the login operation.
   message: String!
 }
 
+"""
+Detailed information about a user.
+"""
 type UserDetailResponse {
+  # The ID of the user.
   userId: String!
+
+  # The phone number of the user.
   phoneNumber: String!
+
+  # The name of the user.
   name: String!
+
+  # The total points earned by the user.
   points: Float!
+
+  # The role of the user in the system.
   role: String!
+
+  # The date and time when the user was created.
   createdAt: DateTime!
+
+  # The date and time when the user last logged in.
   lastLogin: DateTime
 }
 
+"""
+Response type for updating a user.
+"""
 type UpdateUserResponse {
+  # The ID of the updated user.
   userId: String!
+
+  # A message indicating the result of the update operation.
   message: String!
 }
 
+"""
+Response type for deleting a user.
+"""
 type DeleteUserResponse {
+  # A message indicating the result of the deletion operation.
   message: String!
 }
 
+"""
+Response type for requesting a password reset.
+"""
 type RequestPasswordResetResponse {
+  # A message indicating the result of the password reset request.
   message: String!
 }
 
+"""
+Response type for resetting a password.
+"""
 type ResetPasswordResponse {
+  # A message indicating the result of the password reset operation.
   message: String!
 }
 
+"""
+Detailed information about a user profile.
+"""
 type ProfileDetail {
+  # The unique identifier of the profile.
   id: String!
+
+  # The name of the profile.
   name: String!
+
+  # The phone number associated with the profile.
   phoneNumber: String!
+
+  # The role of the profile in the system.
   role: String!
+
+  # The date and time when the profile was created.
   createdAt: DateTime!
 }
 
+"""
+Response type for sharing a profile.
+"""
 type ShareProfileResponse {
-    message: String!
+  # A message indicating the result of the profile sharing operation.
+  message: String!
 }
 
+"""
+Response type for unsharing a profile.
+"""
 type UnshareProfileResponse {
-    message: String!
+  # A message indicating the result of the profile unsharing operation.
+  message: String!
 }
 
-extend type Query{
+extend type Query {
+  # Retrieves the details of the current user.
   getUser: UserDetailResponse
+
+  # Retrieves a list of profiles for the user.
   getProfiles: [ProfileDetail]
+
+  # Retrieves a list of shared profiles for the user.
   getSharedProfiles: [ProfileDetail]
 
-  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
-  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
-  getSharedMedications(patientId: String!): [MedicationDetail]
-  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  # Retrieves shared medical records for a specific patient.
+  getSharedMedicalRecords(
+    # The ID of the patient.
+    patientId: String!
+  ): [MedicalRecordDetail]
+
+  # Retrieves shared treatment schedules for a specific patient.
+  getSharedTreatmentSchedule(
+    # The ID of the patient.
+    patientId: String!
+  ): [TreatmentScheduleDetail]
+
+  # Retrieves shared medications for a specific patient.
+  getSharedMedications(
+    # The ID of the patient.
+    patientId: String!
+  ): [MedicationDetail]
+
+  # Retrieves shared health metrics for a specific patient.
+  getSharedHealthMetrics(
+    # The ID of the patient.
+    patientId: String!
+
+    # The start date for filtering health metrics.
+    startDate: DateTime
+
+    # The end date for filtering health metrics.
+    endDate: DateTime
+
+    # The type of health metric to filter by.
+    metricType: String
+  ): [HealthMetricDetail]
 }
 
-extend type Mutation{
-  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+extend type Mutation {
+  # Refreshes the authentication token.
+  refreshToken(
+    # The current access token.
+    accessToken: String!
 
-  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
-  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
-  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+    # The current refresh token.
+    refreshToken: String!
+
+    # The device associated with the token.
+    device: String!
+  ): Token
+
+  # Creates a new user.
+  createUser(
+    # The phone number of the user.
+    phoneNumber: String!
+
+    # The password of the user.
+    password: String!
+
+    # The username of the user.
+    username: String!
+
+    # The role of the user in the system.
+    role: String!
+  ): CreateUserResponse
+
+  # Logs in a user.
+  loginUser(
+    # The phone number of the user.
+    phoneNumber: String!
+
+    # The password of the user.
+    password: String!
+  ): LoginUserResponse
+
+  # Updates the details of the current user.
+  updateUser(
+    # The new name of the user.
+    name: String
+
+    # The new phone number of the user.
+    phoneNumber: String
+
+    # The new password of the user.
+    password: String
+  ): UpdateUserResponse
+
+  # Deletes the current user.
   deleteUser: DeleteUserResponse
-  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
-  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
-  
-  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
-  unshareProfile(targetUserId: String!): UnshareProfileResponse!
+
+  # Requests a password reset for a user.
+  requestPasswordReset(
+    # The phone number of the user.
+    phoneNumber: String!
+  ): RequestPasswordResetResponse
+
+  # Resets the password for a user.
+  resetPassword(
+    # The token associated with the password reset request.
+    token: String!
+
+    # The new password for the user.
+    newPassword: String!
+  ): ResetPasswordResponse
+
+  # Shares a user profile.
+  shareProfile(
+    # The phone number of the user to share the profile with.
+    phoneNumber: String!
+
+    # The access level granted to the shared profile.
+    accessLevel: String!
+
+    # Additional remarks about the profile sharing.
+    remarks: String!
+  ): ShareProfileResponse!
+
+  # Unshares a user profile.
+  unshareProfile(
+    # The ID of the user to unshare the profile with.
+    targetUserId: String!
+  ): UnshareProfileResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

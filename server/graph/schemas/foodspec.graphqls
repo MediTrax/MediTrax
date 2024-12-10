@@ -2,16 +2,24 @@
 Represents the specification of a food item.
 """
 type FoodSpec {
-  # The name of the food specification.
+  """
+  The name of the food specification.
+  """
   name: String!
 
-  # The value of the food specification.
+  """
+  The value of the food specification.
+  """
   value: Float!
 
-  # The unit of measurement for the food specification.
+  """
+  The unit of measurement for the food specification.
+  """
   unit: String!
 
-  # A measure of how high the specification value is compared to a standard.
+  """
+  A measure of how high the specification value is compared to a standard.
+  """
   howHigh: Float!
 }
 
@@ -19,7 +27,9 @@ type FoodSpec {
 Represents a recommendation for a food item.
 """
 type FoodRecommendation {
-  # The name of the recommended food item.
+  """
+  The name of the recommended food item.
+  """
   name: String!
 }
 
@@ -27,29 +37,45 @@ type FoodRecommendation {
 Represents a collection of food specifications.
 """
 type FoodSpecs {
-  # The list of food specifications.
+  """
+  The list of food specifications.
+  """
   specs: [FoodSpec!]!
 
-  # A measure of how recommended the food item is.
+  """
+  A measure of how recommended the food item is.
+  """
   howRecommend: Float!
 }
 
 extend type Query {
-  # Retrieves the specifications for a given food item.
+  """
+  Retrieves the specifications for a given food item.
+  """
   getFoodSpecs(
-    # The name of the food item.
+    """
+    The name of the food item.
+    """
     food: String!
   ): FoodSpecs
 
-  # Retrieves mock specifications for a given food item.
+  """
+  Retrieves mock specifications for a given food item.
+  """
   getMockFoodSpecs(
-    # The name of the food item.
+    """
+    The name of the food item.
+    """
     food: String!
   ): FoodSpecs
 
-  # Retrieves a recommendation for a food item.
+  """
+  Retrieves a recommendation for a food item.
+  """
   getFoodRecommendation: FoodRecommendation
 
-  # Retrieves a mock recommendation for a food item.
+  """
+  Retrieves a mock recommendation for a food item.
+  """
   getMockFoodRecommendation: FoodRecommendation
 }

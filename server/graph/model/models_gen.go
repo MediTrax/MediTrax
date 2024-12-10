@@ -2,14 +2,21 @@
 
 package model
 
+// Represents an achievement badge that can be awarded to users.
 type AchievementBadge struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
+	// The unique identifier of the achievement badge.
+	ID string `json:"id"`
+	// The name of the achievement badge.
+	Name string `json:"name"`
+	// A description of the achievement badge.
 	Description string `json:"description"`
-	IconURL     string `json:"iconUrl"`
-	CreatedAt   string `json:"createdAt"`
+	// The URL of the icon representing the achievement badge.
+	IconURL string `json:"iconUrl"`
+	// The date and time when the achievement badge was created.
+	CreatedAt string `json:"createdAt"`
 }
 
+// Detailed information about an achievement badge.
 type AchievementBadgeDetail struct {
 	BadgeID     string `json:"badgeId"`
 	Name        string `json:"name"`
@@ -18,6 +25,7 @@ type AchievementBadgeDetail struct {
 	CreatedAt   string `json:"createdAt"`
 }
 
+// Represents an activity log entry for a user.
 type ActivityLog struct {
 	ID            string `json:"id"`
 	UserID        string `json:"userId"`
@@ -30,6 +38,7 @@ type ActivityLog struct {
 	Timestamp     string `json:"timestamp"`
 }
 
+// Detailed information about an activity log entry.
 type ActivityLogDetail struct {
 	LogID         string `json:"logId"`
 	ActivityType  string `json:"activityType"`
@@ -41,85 +50,103 @@ type ActivityLogDetail struct {
 	Timestamp     string `json:"timestamp"`
 }
 
+// Response type for adding a family member.
 type AddFamilyMemberResponse struct {
 	MemberID string `json:"memberId"`
 	Message  string `json:"message"`
 }
 
+// Response type for adding a health metric.
 type AddHealthMetricResponse struct {
 	MetricID string `json:"metricId"`
 	Message  string `json:"message"`
 }
 
+// Response type for adding a medical record.
 type AddMedicalRecordResponse struct {
 	RecordID string `json:"recordId"`
 	Message  string `json:"message"`
 }
 
+// Response type for adding a medication.
 type AddMedicationResponse struct {
 	MedicationID string `json:"medicationId"`
 	Message      string `json:"message"`
 }
 
+// Response type for awarding an achievement to a user.
 type AwardAchievementResponse struct {
 	UserAchievementID string `json:"userAchievementId"`
 	Message           string `json:"message"`
 }
 
+// Response type for creating an achievement badge.
 type CreateAchievementBadgeResponse struct {
 	BadgeID string `json:"badgeId"`
 	Message string `json:"message"`
 }
 
+// Response type for creating a medication reminder.
 type CreateMedicationReminderResponse struct {
 	ReminderID string `json:"reminderId"`
 	Message    string `json:"message"`
 }
 
+// Response type for creating a treatment schedule.
 type CreateTreatmentScheduleResponse struct {
 	ScheduleID string `json:"scheduleId"`
 	Message    string `json:"message"`
 }
 
+// Response type for creating a user.
 type CreateUserResponse struct {
 	UserID  string `json:"userId"`
 	Message string `json:"message"`
 }
 
+// Response type for deleting a family member.
 type DeleteFamilyMemberResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a health metric.
 type DeleteHealthMetricResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medical record.
 type DeleteMedicalRecordResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medication reminder.
 type DeleteMedicationReminderResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medication.
 type DeleteMedicationResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a treatment schedule.
 type DeleteTreatmentScheduleResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for deleting a user.
 type DeleteUserResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for evaluating a health risk assessment.
 type EvaluateHealthRiskAssessmentResponse struct {
 	AssessmentID    string `json:"assessmentId"`
 	RiskLevel       string `json:"riskLevel"`
 	Recommendations string `json:"recommendations"`
 }
 
+// Represents a family member linked to a user.
 type FamilyMember struct {
 	ID            string `json:"id"`
 	UserID        string `json:"userId"`
@@ -129,6 +156,7 @@ type FamilyMember struct {
 	CreatedAt     string `json:"createdAt"`
 }
 
+// Detailed information about a family member.
 type FamilyMemberDetail struct {
 	MemberID     string `json:"memberId"`
 	FamilyID     string `json:"familyId"`
@@ -138,15 +166,18 @@ type FamilyMemberDetail struct {
 	AccessLevel  int    `json:"accessLevel"`
 }
 
+// Input type for a filled questionnaire.
 type FilledQuestionnaire struct {
 	QuestionnaireID int         `json:"questionnaireId"`
 	Responses       []*Response `json:"responses"`
 }
 
+// Represents a recommendation for a food item.
 type FoodRecommendation struct {
 	Name string `json:"name"`
 }
 
+// Represents the specification of a food item.
 type FoodSpec struct {
 	Name    string  `json:"name"`
 	Value   float64 `json:"value"`
@@ -154,11 +185,13 @@ type FoodSpec struct {
 	HowHigh float64 `json:"howHigh"`
 }
 
+// Represents a collection of food specifications.
 type FoodSpecs struct {
 	Specs        []*FoodSpec `json:"specs"`
 	HowRecommend float64     `json:"howRecommend"`
 }
 
+// Represents a health metric recorded for a user.
 type HealthMetric struct {
 	ID         string  `json:"id"`
 	UserID     string  `json:"userId"`
@@ -169,6 +202,7 @@ type HealthMetric struct {
 	CreatedAt  string  `json:"createdAt"`
 }
 
+// Detailed information about a health metric.
 type HealthMetricDetail struct {
 	MetricID   string  `json:"metricId"`
 	MetricType string  `json:"metricType"`
@@ -177,12 +211,14 @@ type HealthMetricDetail struct {
 	RecordedAt string  `json:"recordedAt"`
 }
 
+// Represents a health response in a risk assessment.
 type HealthResponse struct {
 	QuestionID int     `json:"questionId"`
 	Choice     string  `json:"choice"`
 	Answer     *string `json:"answer,omitempty"`
 }
 
+// Represents a health risk assessment for a user.
 type HealthRiskAssessment struct {
 	ID                string            `json:"id"`
 	UserID            string            `json:"userId"`
@@ -192,6 +228,7 @@ type HealthRiskAssessment struct {
 	CreatedAt         string            `json:"createdAt"`
 }
 
+// Detailed response for a health risk assessment.
 type HealthRiskAssessmentDetailResponse struct {
 	AssessmentID      string            `json:"assessmentId"`
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
@@ -200,12 +237,14 @@ type HealthRiskAssessmentDetailResponse struct {
 	CreatedAt         string            `json:"createdAt"`
 }
 
+// Response type for logging in a user.
 type LoginUserResponse struct {
 	UserID  string `json:"userId"`
 	Token   *Token `json:"token"`
 	Message string `json:"message"`
 }
 
+// Represents a medical record for a user.
 type MedicalRecord struct {
 	ID         string `json:"id"`
 	UserID     string `json:"userId"`
@@ -215,6 +254,7 @@ type MedicalRecord struct {
 	UpdatedAt  string `json:"updatedAt"`
 }
 
+// Detailed information about a medical record.
 type MedicalRecordDetail struct {
 	RecordID   string `json:"recordId"`
 	RecordType string `json:"recordType"`
@@ -222,6 +262,7 @@ type MedicalRecordDetail struct {
 	CreatedAt  string `json:"createdAt"`
 }
 
+// Represents a medication prescribed to a user.
 type Medication struct {
 	ID        string  `json:"id"`
 	Name      string  `json:"name"`
@@ -234,6 +275,7 @@ type Medication struct {
 	UpdatedAt string  `json:"updatedAt"`
 }
 
+// Detailed information about a medication.
 type MedicationDetail struct {
 	MedicationID string  `json:"medicationId"`
 	Name         string  `json:"name"`
@@ -243,6 +285,7 @@ type MedicationDetail struct {
 	Inventory    float64 `json:"inventory"`
 }
 
+// Represents a reminder for taking a medication.
 type MedicationReminder struct {
 	ID           string `json:"id"`
 	MedicationID string `json:"medicationId"`
@@ -252,6 +295,7 @@ type MedicationReminder struct {
 	CreatedAt    string `json:"createdAt"`
 }
 
+// Detailed information about a medication reminder.
 type MedicationReminderDetail struct {
 	ReminderID   string `json:"reminderId"`
 	MedicationID string `json:"medicationId"`
@@ -262,6 +306,7 @@ type MedicationReminderDetail struct {
 type Mutation struct {
 }
 
+// Represents a password change request.
 type PasswordChange struct {
 	ID        string `json:"id"`
 	User      string `json:"user"`
@@ -269,6 +314,7 @@ type PasswordChange struct {
 	CreatedAt string `json:"createdAt"`
 }
 
+// Detailed information about a patient.
 type PatientDetail struct {
 	PatientID    string `json:"patientId"`
 	Name         string `json:"name"`
@@ -277,6 +323,7 @@ type PatientDetail struct {
 	AccessLevel  int    `json:"accessLevel"`
 }
 
+// Detailed information about a user profile.
 type ProfileDetail struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -288,6 +335,7 @@ type ProfileDetail struct {
 type Query struct {
 }
 
+// Represents a question in a health risk assessment questionnaire.
 type Question struct {
 	QuestionID   int      `json:"questionId"`
 	Question     string   `json:"question"`
@@ -295,37 +343,45 @@ type Question struct {
 	Choices      []string `json:"choices,omitempty"`
 }
 
+// Represents a questionnaire object containing multiple questions.
 type QuestionnaireObject struct {
 	QuestionnaireID int         `json:"questionnaireId"`
 	Data            []*Question `json:"data"`
 }
 
+// Represents a record object containing data.
 type RecordObject struct {
 	Data string `json:"data"`
 }
 
+// Response type for requesting a password reset.
 type RequestPasswordResetResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for resetting a password.
 type ResetPasswordResponse struct {
 	Message string `json:"message"`
 }
 
+// Input type for a response to a questionnaire.
 type Response struct {
 	QuestionID int     `json:"questionId"`
 	Choice     string  `json:"choice"`
 	Answer     *string `json:"answer,omitempty"`
 }
 
+// Response type for sharing a profile.
 type ShareProfileResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for taking a medication.
 type TakeMedicationResponse struct {
 	Message string `json:"message"`
 }
 
+// Represents a token for user authentication.
 type Token struct {
 	ID                 string `json:"id"`
 	User               string `json:"user"`
@@ -338,6 +394,7 @@ type Token struct {
 	UpdatedAt          string `json:"updatedAt"`
 }
 
+// Represents a treatment schedule for a user.
 type TreatmentSchedule struct {
 	ID            string  `json:"id"`
 	UserID        string  `json:"userId"`
@@ -347,6 +404,7 @@ type TreatmentSchedule struct {
 	Notes         *string `json:"notes,omitempty"`
 }
 
+// Detailed information about a treatment schedule.
 type TreatmentScheduleDetail struct {
 	ScheduleID    string  `json:"scheduleId"`
 	TreatmentType string  `json:"treatmentType"`
@@ -355,45 +413,54 @@ type TreatmentScheduleDetail struct {
 	Notes         *string `json:"notes,omitempty"`
 }
 
+// Response type for unsharing a profile.
 type UnshareProfileResponse struct {
 	Message string `json:"message"`
 }
 
+// Response type for updating a family member.
 type UpdateFamilyMemberResponse struct {
 	MemberID string `json:"memberId"`
 	Message  string `json:"message"`
 }
 
+// Response type for updating a health metric.
 type UpdateHealthMetricResponse struct {
 	MetricID string `json:"metricId"`
 	Message  string `json:"message"`
 }
 
+// Response type for updating a medical record.
 type UpdateMedicalRecordResponse struct {
 	RecordID string `json:"recordId"`
 	Message  string `json:"message"`
 }
 
+// Response type for updating a medication reminder.
 type UpdateMedicationReminderResponse struct {
 	ReminderID string `json:"reminderId"`
 	Message    string `json:"message"`
 }
 
+// Response type for updating a medication.
 type UpdateMedicationResponse struct {
 	MedicationID string `json:"medicationId"`
 	Message      string `json:"message"`
 }
 
+// Response type for updating a treatment schedule.
 type UpdateTreatmentScheduleResponse struct {
 	ScheduleID string `json:"scheduleId"`
 	Message    string `json:"message"`
 }
 
+// Response type for updating a user.
 type UpdateUserResponse struct {
 	UserID  string `json:"userId"`
 	Message string `json:"message"`
 }
 
+// Represents a user in the system.
 type User struct {
 	ID          string  `json:"id"`
 	PhoneNumber string  `json:"phoneNumber"`
@@ -407,6 +474,7 @@ type User struct {
 	Role        string  `json:"role"`
 }
 
+// Represents a user's achievement, linking a user to a badge.
 type UserAchievement struct {
 	ID        string `json:"id"`
 	UserID    string `json:"userId"`
@@ -415,12 +483,14 @@ type UserAchievement struct {
 	CreatedAt string `json:"createdAt"`
 }
 
+// Detailed information about a user's achievement.
 type UserAchievementDetail struct {
 	UserAchievementID string `json:"userAchievementId"`
 	BadgeID           string `json:"badgeId"`
 	EarnedAt          string `json:"earnedAt"`
 }
 
+// Detailed information about a user.
 type UserDetailResponse struct {
 	UserID      string  `json:"userId"`
 	PhoneNumber string  `json:"phoneNumber"`
@@ -431,6 +501,7 @@ type UserDetailResponse struct {
 	LastLogin   *string `json:"lastLogin,omitempty"`
 }
 
+// Represents a record of points earned by a user.
 type UserPointRecord struct {
 	ID           string  `json:"id"`
 	UserID       string  `json:"userId"`
@@ -439,6 +510,7 @@ type UserPointRecord struct {
 	EarnedAt     string  `json:"earnedAt"`
 }
 
+// Detailed information about a user's point record.
 type UserPointRecordDetail struct {
 	RecordID     string  `json:"recordId"`
 	PointsEarned float64 `json:"pointsEarned"`
@@ -446,6 +518,7 @@ type UserPointRecordDetail struct {
 	EarnedAt     string  `json:"earnedAt"`
 }
 
+// Response type for earning points.
 type EarnPointsResponse struct {
 	UpdatedPoints float64 `json:"updatedPoints"`
 	Message       string  `json:"message"`

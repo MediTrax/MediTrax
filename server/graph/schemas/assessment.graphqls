@@ -1,90 +1,130 @@
 """
 Represents a question in a health risk assessment questionnaire.
 """
-type Question{
-  # The unique identifier of the question.
+type Question {
+  """
+  The unique identifier of the question.
+  """
   questionId: Int!
 
-  # The text of the question.
+  """
+  The text of the question.
+  """
   question: String!
 
-  # The type of choice available for the question (e.g., single choice, multiple choice).
-  questionchoiceType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
+  """
+  The type of choice available for the question (e.g., single choice, multiple choice).
+  """
+  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
 
-  # The list of choices available for the question.
+  """
+  The list of choices available for the question.
+  """
   choices: [String!] # empty if it is fill in the blank
 }
 
 """
 Represents a questionnaire object containing multiple questions.
 """
-type QuestionnaireObject{
-  # The unique identifier of the questionnaire.
+type QuestionnaireObject {
+  """
+  The unique identifier of the questionnaire.
+  """
   questionnaireId: Int!
 
-  # The list of questions in the questionnaire.
+  """
+  The list of questions in the questionnaire.
+  """
   data: [Question!]!
 }
 
 """
 Input type for a response to a questionnaire.
 """
-input Response{
-  # The ID of the question being answered.
+input Response {
+  """
+  The ID of the question being answered.
+  """
   questionId: Int!
 
-  # The choice selected for the question.
-  choice: String!#数字序号用，隔开
+  """
+  The choice selected for the question.
+  """
+  choice: String! #数字序号用，隔开
 
-  # The answer provided for the question, if applicable.
+  """
+  The answer provided for the question, if applicable.
+  """
   answer: String
 }
 
 """
 Represents a health response in a risk assessment.
 """
-type HealthResponse{
-  # The ID of the question being answered.
+type HealthResponse {
+  """
+  The ID of the question being answered.
+  """
   questionId: Int!
 
-  # The choice selected for the question.
-  choice: String!#数字序号用，隔开
+  """
+  The choice selected for the question.
+  """
+  choice: String! #数字序号用，隔开
 
-  # The answer provided for the question, if applicable.
+  """
+  The answer provided for the question, if applicable.
+  """
   answer: String
 }
 
 """
 Input type for a filled questionnaire.
 """
-input FilledQuestionnaire{
-  # The ID of the questionnaire being filled.
+input FilledQuestionnaire {
+  """
+  The ID of the questionnaire being filled.
+  """
   questionnaireId: Int!  # 第几套测试题
 
-  # The list of responses to the questionnaire.
+  """
+  The list of responses to the questionnaire.
+  """
   responses: [Response!]!
 }
 
 """
 Represents a health risk assessment for a user.
 """
-type HealthRiskAssessment{
-  # The unique identifier of the health risk assessment.
+type HealthRiskAssessment {
+  """
+  The unique identifier of the health risk assessment.
+  """
   id: String!
 
-  # The ID of the user who completed the assessment.
+  """
+  The ID of the user who completed the assessment.
+  """
   userId: String!
 
-  # The data from the completed questionnaire.
+  """
+  The data from the completed questionnaire.
+  """
   questionnaireData: [HealthResponse!]!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 
-  # The date and time when the assessment was created.
+  """
+  The date and time when the assessment was created.
+  """
   createdAt: DateTime!
 }
 
@@ -92,19 +132,29 @@ type HealthRiskAssessment{
 Detailed response for a health risk assessment.
 """
 type HealthRiskAssessmentDetailResponse {
-  # The ID of the health risk assessment.
+  """
+  The ID of the health risk assessment.
+  """
   assessmentId: String!
 
-  # The data from the completed questionnaire.
+  """
+  The data from the completed questionnaire.
+  """
   questionnaireData: [HealthResponse!]!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 
-  # The date and time when the assessment was created.
+  """
+  The date and time when the assessment was created.
+  """
   createdAt: DateTime!
 }
 
@@ -112,27 +162,42 @@ type HealthRiskAssessmentDetailResponse {
 Response type for evaluating a health risk assessment.
 """
 type EvaluateHealthRiskAssessmentResponse {
-  # The ID of the health risk assessment.
+  """
+  The ID of the health risk assessment.
+  """
   assessmentId: String!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 }
 
-extend type Query{
-  # Retrieves previous health risk assessments for the user.
+extend type Query {
+  """
+  Retrieves previous health risk assessments for the user.
+  """
   getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
-  # Retrieves the questions for a health risk assessment.
+
+  """
+  Retrieves the questions for a health risk assessment.
+  """
   getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
 }
 
-extend type Mutation{
-  # Evaluates a health risk assessment based on the filled questionnaire.
+extend type Mutation {
+  """
+  Evaluates a health risk assessment based on the filled questionnaire.
+  """
   evaluateHealthRiskAssessment(
-    # The filled questionnaire to be evaluated.
+    """
+    The filled questionnaire to be evaluated.
+    """
     filledQuestionnaire: FilledQuestionnaire!
   ): EvaluateHealthRiskAssessmentResponse #拿结果
 }

@@ -2,31 +2,49 @@
 Represents a medication prescribed to a user.
 """
 type Medication {
-  # The unique identifier of the medication.
+  """
+  The unique identifier of the medication.
+  """
   id: String!
 
-  # The name of the medication.
+  """
+  The name of the medication.
+  """
   name: String!
 
-  # The dosage of the medication.
+  """
+  The dosage of the medication.
+  """
   dosage: Float!
 
-  # The unit of measurement for the dosage.
+  """
+  The unit of measurement for the dosage.
+  """
   unit: String!
 
-  # The frequency at which the medication should be taken.
+  """
+  The frequency at which the medication should be taken.
+  """
   frequency: String!
 
-  # The inventory count of the medication.
+  """
+  The inventory count of the medication.
+  """
   inventory: Float!
 
-  # The ID of the user who is prescribed the medication.
+  """
+  The ID of the user who is prescribed the medication.
+  """
   userId: String!
 
-  # The date and time when the medication was created.
+  """
+  The date and time when the medication was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the medication was last updated.
+  """
+  The date and time when the medication was last updated.
+  """
   updatedAt: DateTime!
 }
 
@@ -34,22 +52,34 @@ type Medication {
 Represents a reminder for taking a medication.
 """
 type MedicationReminder {
-  # The unique identifier of the medication reminder.
+  """
+  The unique identifier of the medication reminder.
+  """
   id: String!
 
-  # The ID of the medication associated with the reminder.
+  """
+  The ID of the medication associated with the reminder.
+  """
   medicationId: String!
 
-  # The ID of the user who set the reminder.
+  """
+  The ID of the user who set the reminder.
+  """
   userId: String!
 
-  # The time at which the reminder is set.
+  """
+  The time at which the reminder is set.
+  """
   reminderTime: DateTime!
 
-  # Indicates whether the medication has been taken.
+  """
+  Indicates whether the medication has been taken.
+  """
   isTaken: Boolean!
 
-  # The date and time when the reminder was created.
+  """
+  The date and time when the reminder was created.
+  """
   createdAt: DateTime!
 }
 
@@ -57,10 +87,14 @@ type MedicationReminder {
 Response type for adding a medication.
 """
 type AddMedicationResponse {
-  # The ID of the newly added medication.
+  """
+  The ID of the newly added medication.
+  """
   medicationId: String!
 
-  # A message indicating the result of the addition operation.
+  """
+  A message indicating the result of the addition operation.
+  """
   message: String!
 }
 
@@ -68,22 +102,34 @@ type AddMedicationResponse {
 Detailed information about a medication.
 """
 type MedicationDetail {
-  # The ID of the medication.
+  """
+  The ID of the medication.
+  """
   medicationId: String!
 
-  # The name of the medication.
+  """
+  The name of the medication.
+  """
   name: String!
 
-  # The dosage of the medication.
+  """
+  The dosage of the medication.
+  """
   dosage: Float!
 
-  # The unit of measurement for the dosage.
+  """
+  The unit of measurement for the dosage.
+  """
   unit: String!
 
-  # The frequency at which the medication should be taken.
+  """
+  The frequency at which the medication should be taken.
+  """
   frequency: String!
 
-  # The inventory count of the medication.
+  """
+  The inventory count of the medication.
+  """
   inventory: Float!
 }
 
@@ -91,10 +137,14 @@ type MedicationDetail {
 Response type for updating a medication.
 """
 type UpdateMedicationResponse {
-  # The ID of the updated medication.
+  """
+  The ID of the updated medication.
+  """
   medicationId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -102,7 +152,9 @@ type UpdateMedicationResponse {
 Response type for deleting a medication.
 """
 type DeleteMedicationResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -110,10 +162,14 @@ type DeleteMedicationResponse {
 Response type for creating a medication reminder.
 """
 type CreateMedicationReminderResponse {
-  # The ID of the newly created medication reminder.
+  """
+  The ID of the newly created medication reminder.
+  """
   reminderId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -121,10 +177,14 @@ type CreateMedicationReminderResponse {
 Response type for updating a medication reminder.
 """
 type UpdateMedicationReminderResponse {
-  # The ID of the updated medication reminder.
+  """
+  The ID of the updated medication reminder.
+  """
   reminderId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -132,16 +192,24 @@ type UpdateMedicationReminderResponse {
 Detailed information about a medication reminder.
 """
 type MedicationReminderDetail {
-  # The ID of the medication reminder.
+  """
+  The ID of the medication reminder.
+  """
   reminderId: String!
 
-  # The ID of the medication associated with the reminder.
+  """
+  The ID of the medication associated with the reminder.
+  """
   medicationId: String!
 
-  # The time at which the reminder is set.
+  """
+  The time at which the reminder is set.
+  """
   reminderTime: DateTime!
 
-  # Indicates whether the medication has been taken.
+  """
+  Indicates whether the medication has been taken.
+  """
   isTaken: Boolean!
 }
 
@@ -149,22 +217,34 @@ type MedicationReminderDetail {
 Represents a treatment schedule for a user.
 """
 type TreatmentSchedule {
-  # The unique identifier of the treatment schedule.
+  """
+  The unique identifier of the treatment schedule.
+  """
   id: String!
 
-  # The ID of the user who is scheduled for the treatment.
+  """
+  The ID of the user who is scheduled for the treatment.
+  """
   userId: String!
 
-  # The type of treatment scheduled.
+  """
+  The type of treatment scheduled.
+  """
   treatmentType: String!
 
-  # The time at which the treatment is scheduled.
+  """
+  The time at which the treatment is scheduled.
+  """
   scheduledTime: DateTime!
 
-  # The location where the treatment is scheduled.
+  """
+  The location where the treatment is scheduled.
+  """
   location: String!
 
-  # Additional notes about the treatment.
+  """
+  Additional notes about the treatment.
+  """
   notes: String
 }
 
@@ -172,7 +252,9 @@ type TreatmentSchedule {
 Response type for deleting a medication reminder.
 """
 type DeleteMedicationReminderResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -180,10 +262,14 @@ type DeleteMedicationReminderResponse {
 Response type for creating a treatment schedule.
 """
 type CreateTreatmentScheduleResponse {
-  # The ID of the newly created treatment schedule.
+  """
+  The ID of the newly created treatment schedule.
+  """
   scheduleId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -191,19 +277,29 @@ type CreateTreatmentScheduleResponse {
 Detailed information about a treatment schedule.
 """
 type TreatmentScheduleDetail {
-  # The ID of the treatment schedule.
+  """
+  The ID of the treatment schedule.
+  """
   scheduleId: String!
 
-  # The type of treatment scheduled.
+  """
+  The type of treatment scheduled.
+  """
   treatmentType: String!
 
-  # The time at which the treatment is scheduled.
+  """
+  The time at which the treatment is scheduled.
+  """
   scheduledTime: DateTime!
 
-  # The location where the treatment is scheduled.
+  """
+  The location where the treatment is scheduled.
+  """
   location: String!
 
-  # Additional notes about the treatment.
+  """
+  Additional notes about the treatment.
+  """
   notes: String
 }
 
@@ -211,10 +307,14 @@ type TreatmentScheduleDetail {
 Response type for updating a treatment schedule.
 """
 type UpdateTreatmentScheduleResponse {
-  # The ID of the updated treatment schedule.
+  """
+  The ID of the updated treatment schedule.
+  """
   scheduleId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -222,7 +322,9 @@ type UpdateTreatmentScheduleResponse {
 Response type for deleting a treatment schedule.
 """
 type DeleteTreatmentScheduleResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -230,136 +332,222 @@ type DeleteTreatmentScheduleResponse {
 Response type for taking a medication.
 """
 type TakeMedicationResponse {
-  # A message indicating the result of the medication taking operation.
+  """
+  A message indicating the result of the medication taking operation.
+  """
   message: String!
 }
 
 extend type Query {
-  # Retrieves a list of medications for the user.
+  """
+  Retrieves a list of medications for the user.
+  """
   getMedications: [MedicationDetail]
 
-  # Retrieves a list of medication reminders for the user.
+  """
+  Retrieves a list of medication reminders for the user.
+  """
   getMedicationReminders: [MedicationReminderDetail]
 
-  # Retrieves a list of treatment schedules for the user.
+  """
+  Retrieves a list of treatment schedules for the user.
+  """
   getTreatmentSchedules: [TreatmentScheduleDetail]
 }
 
 extend type Mutation {
-  # Adds a new medication.
+  """
+  Adds a new medication.
+  """
   addMedication(
-    # The name of the medication.
+    """
+    The name of the medication.
+    """
     name: String!
 
-    # The dosage of the medication.
+    """
+    The dosage of the medication.
+    """
     dosage: Float!
 
-    # The unit of measurement for the dosage.
+    """
+    The unit of measurement for the dosage.
+    """
     unit: String!
 
-    # The frequency at which the medication should be taken.
+    """
+    The frequency at which the medication should be taken.
+    """
     frequency: String!
 
-    # The inventory count of the medication.
+    """
+    The inventory count of the medication.
+    """
     inventory: Float!
   ): AddMedicationResponse
 
-  # Updates an existing medication.
+  """
+  Updates an existing medication.
+  """
   updateMedication(
-    # The ID of the medication to be updated.
+    """
+    The ID of the medication to be updated.
+    """
     medicationId: String!
 
-    # The new name of the medication.
+    """
+    The new name of the medication.
+    """
     name: String
 
-    # The new dosage of the medication.
+    """
+    The new dosage of the medication.
+    """
     dosage: Float
 
-    # The new unit of measurement for the dosage.
+    """
+    The new unit of measurement for the dosage.
+    """
     unit: String
 
-    # The new frequency at which the medication should be taken.
+    """
+    The new frequency at which the medication should be taken.
+    """
     frequency: String
 
-    # The new inventory count of the medication.
+    """
+    The new inventory count of the medication.
+    """
     inventory: Float
   ): UpdateMedicationResponse
 
-  # Deletes a medication.
+  """
+  Deletes a medication.
+  """
   deleteMedication(
-    # The ID of the medication to be deleted.
+    """
+    The ID of the medication to be deleted.
+    """
     medicationId: String!
   ): DeleteMedicationResponse
 
-  # Creates a new medication reminder.
+  """
+  Creates a new medication reminder.
+  """
   createMedicationReminder(
-    # The ID of the medication associated with the reminder.
+    """
+    The ID of the medication associated with the reminder.
+    """
     medicationId: String!
 
-    # The time at which the reminder is set.
+    """
+    The time at which the reminder is set.
+    """
     reminderTime: DateTime!
   ): CreateMedicationReminderResponse
 
-  # Updates an existing medication reminder.
+  """
+  Updates an existing medication reminder.
+  """
   updateMedicationReminder(
-    # The ID of the medication reminder to be updated.
+    """
+    The ID of the medication reminder to be updated.
+    """
     reminderId: String!
 
-    # The new time at which the reminder is set.
+    """
+    The new time at which the reminder is set.
+    """
     reminderTime: DateTime
 
-    # Indicates whether the medication has been taken.
+    """
+    Indicates whether the medication has been taken.
+    """
     isTaken: Boolean
   ): UpdateMedicationReminderResponse
 
-  # Marks a medication as taken.
+  """
+  Marks a medication as taken.
+  """
   takeMedication(
-    # The ID of the medication reminder.
+    """
+    The ID of the medication reminder.
+    """
     reminderId: String
   ): TakeMedicationResponse!
 
-  # Deletes a medication reminder.
+  """
+  Deletes a medication reminder.
+  """
   deleteMedicationReminder(
-    # The ID of the medication reminder to be deleted.
+    """
+    The ID of the medication reminder to be deleted.
+    """
     reminderId: String!
   ): DeleteMedicationReminderResponse
 
-  # Creates a new treatment schedule.
+  """
+  Creates a new treatment schedule.
+  """
   createTreatmentSchedule(
-    # The type of treatment scheduled.
+    """
+    The type of treatment scheduled.
+    """
     treatmentType: String!
 
-    # The time at which the treatment is scheduled.
+    """
+    The time at which the treatment is scheduled.
+    """
     scheduledTime: DateTime!
 
-    # The location where the treatment is scheduled.
+    """
+    The location where the treatment is scheduled.
+    """
     location: String!
 
-    # Additional notes about the treatment.
+    """
+    Additional notes about the treatment.
+    """
     notes: String
   ): CreateTreatmentScheduleResponse
 
-  # Updates an existing treatment schedule.
+  """
+  Updates an existing treatment schedule.
+  """
   updateTreatmentSchedule(
-    # The ID of the treatment schedule to be updated.
+    """
+    The ID of the treatment schedule to be updated.
+    """
     scheduleId: String!
 
-    # The new type of treatment scheduled.
+    """
+    The new type of treatment scheduled.
+    """
     treatmentType: String
 
-    # The new time at which the treatment is scheduled.
+    """
+    The new time at which the treatment is scheduled.
+    """
     scheduledTime: DateTime
 
-    # The new location where the treatment is scheduled.
+    """
+    The new location where the treatment is scheduled.
+    """
     location: String
 
-    # Additional notes about the treatment.
+    """
+    Additional notes about the treatment.
+    """
     notes: String
   ): UpdateTreatmentScheduleResponse
 
-  # Deletes a treatment schedule.
+  """
+  Deletes a treatment schedule.
+  """
   deleteTreatmentSchedule(
-    # The ID of the treatment schedule to be deleted.
+    """
+    The ID of the treatment schedule to be deleted.
+    """
     scheduleId: String!
   ): DeleteTreatmentScheduleResponse
 }
