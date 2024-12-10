@@ -7,11 +7,13 @@ package graph
 import (
 	"context"
 	"fmt"
+	"meditrax/graph/custom"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
+	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
@@ -589,23 +591,35 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 	}
 
 	/* Update the reminder itself */
+	// calculate next reminder time
+	current_time, err := custom.UnmarshalDateTime(reminder.ReminderTime)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling reminder time: %e", err)
+	}
+	_, days, err := utils.FrequencyParser(medications[0].Frequency)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing frequency of medication: %e", err)
+	}
+	next_reminder_time := time.Time.Add(current_time, time.Hour*time.Duration(24*days))
+
+	// update reminder
 	_, err = database.DB.Query(`
-		UPDATE $id SET istaken=$isTaken;`,
+		UPDATE $id SET istaken=$is_taken;`,
 		map[string]interface{}{
-			"id":      *reminderID,
-			"isTaken": true,
+			"id":           *reminderID,
+			"reminderTime": next_reminder_time,
 		})
 	if err != nil {
 		return nil, err
 	}
 
 	// add to change log
-	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication", *reminderID,
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication, update reminder time", *reminderID,
 		[]utils.ChangeLog{
 			{
-				Field: "isTaken",
-				From:  "false",
-				To:    "true",
+				Field: "reminderTime",
+				From:  reminder.ReminderTime,
+				To:    next_reminder_time.Format("2006-01-02T15:04:05.000"),
 			},
 		})
 	if err != nil {
