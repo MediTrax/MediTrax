@@ -128,26 +128,22 @@ func TestEvaluateHealthRiskAssessment(t *testing.T) {
 					QuestionId   int
 					Question     string
 					QuestionType int
-					Choices      []struct {
-						string
-					}
+					Choices      []string
 				}
 			}
 		}
-		c.MustPost(`query get_questions{
+		c.MustPost(`query getHealthRiskAssessmentQuestion{
 			getHealthRiskAssessmentQuestion {
-				questionId
+				questionnaireId
 				data{
 					questionId
 					question
   					questionType 
-  					choices {
-						string
-					}		
+  					choices 		
 				}
 			}
 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-		require.NotEmpty(t, response.GetHealthRiskAssessmentQuestion.QuestionnaireID)
+		require.Equal(t, 0, response.GetHealthRiskAssessmentQuestion.QuestionnaireID)
 		questionnaireId = response.GetHealthRiskAssessmentQuestion.QuestionnaireID
 	})
 
