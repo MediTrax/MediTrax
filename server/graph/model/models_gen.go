@@ -131,6 +131,7 @@ type FamilyMember struct {
 
 type FamilyMemberDetail struct {
 	MemberID     string `json:"memberId"`
+	FamilyID     string `json:"familyId"`
 	Name         string `json:"name"`
 	PhoneNumber  string `json:"phoneNumber"`
 	Relationship string `json:"relationship"`

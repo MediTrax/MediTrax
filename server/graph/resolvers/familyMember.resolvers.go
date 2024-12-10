@@ -213,13 +213,14 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 
 	var member_details []*model.FamilyMemberDetail
 	for _, member := range members {
-		member_user, err := utils.GetUserByID(member.ID)
+		member_user, err := utils.GetUserByID(member.UserID)
 		// Error handling, could change it so that this particular member is skipped.
 		if err != nil {
 			return nil, fmt.Errorf("error getting family member information: %e", err)
 		}
 		memberDetail := &model.FamilyMemberDetail{
-			MemberID:     member_user.ID,
+			MemberID:     member.ID,
+			FamilyID:     member_user.ID,
 			Name:         member_user.Name,
 			PhoneNumber:  member_user.PhoneNumber,
 			Relationship: member.Relationship,
