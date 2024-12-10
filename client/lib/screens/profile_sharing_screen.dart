@@ -93,9 +93,9 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
                       children: [
                         const Text('加载失败'),
                         TextButton(
-                          onPressed: () => ref
-                              .read(userDataProvider.notifier)
-                              .getSharedProfiles(),
+                          onPressed: () {
+                            setState(() {});
+                          },
                           child: const Text('重试'),
                         ),
                       ],
@@ -114,7 +114,7 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
                 }
 
                 return ListView.builder(
-                  itemCount: profiles.length,
+                  itemCount: sharedProfiles.length,
                   itemBuilder: (context, index) {
                     final profile = sharedProfiles[index];
                     return _buildProfileCard(
@@ -207,7 +207,7 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
       BuildContext context, WidgetRef ref) async {
     final phoneController = TextEditingController();
     String accessLevel = 'read';
-
+    final remarksController = TextEditingController();
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -239,6 +239,13 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
                 }
               },
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: remarksController,
+              decoration: const InputDecoration(
+                labelText: '备注',
+              ),
+            ),
           ],
         ),
         actions: [
@@ -252,6 +259,7 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
                 await ref.read(userDataProvider.notifier).shareProfile(
                       phoneController.text,
                       accessLevel,
+                      remarksController.text,
                     );
                 if (context.mounted) {
                   Navigator.pop(context);

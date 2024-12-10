@@ -8,6 +8,16 @@ query GetHealthMetrics($startDate: DateTime, $endDate: DateTime, $metricType: St
   }
 }
 
+query GetSharedHealthMetrics($patientId: String!, $startDate: DateTime, $endDate: DateTime, $metricType: String) {
+  getSharedHealthMetrics(patientId: $patientId, startDate: $startDate, endDate: $endDate, metricType: $metricType) {
+    metricId
+    metricType
+    value
+    unit
+    recordedAt
+  }
+}
+
 mutation AddHealthMetric($metricType: String!, $value: Float!, $unit: String!, $recordedAt: String!) {
   addHealthMetric(metricType: $metricType, value: $value, unit: $unit, recordedAt: $recordedAt) {
     metricId
@@ -30,6 +40,16 @@ mutation DeleteHealthMetric($metricId: String!) {
 
 query GetTreatmentSchedules {
   getTreatmentSchedules {
+    scheduleId
+    treatmentType
+    scheduledTime
+    location
+    notes
+  }
+}
+
+query GetSharedTreatmentSchedule($patientId: String!) {
+  getSharedTreatmentSchedule(patientId: $patientId) {
     scheduleId
     treatmentType
     scheduledTime

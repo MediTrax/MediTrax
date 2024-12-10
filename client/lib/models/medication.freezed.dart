@@ -28,8 +28,6 @@ mixin _$Medication {
   String get frequency => throw _privateConstructorUsedError;
   @HiveField(5)
   double get inventory => throw _privateConstructorUsedError;
-  @HiveField(6)
-  String get userId => throw _privateConstructorUsedError;
   @HiveField(7)
   DateTime get createdAt => throw _privateConstructorUsedError;
   @HiveField(8)
@@ -55,7 +53,6 @@ abstract class $MedicationCopyWith<$Res> {
       @HiveField(3) String unit,
       @HiveField(4) String frequency,
       @HiveField(5) double inventory,
-      @HiveField(6) String userId,
       @HiveField(7) DateTime createdAt,
       @HiveField(8) DateTime updatedAt});
 }
@@ -81,7 +78,6 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
     Object? unit = null,
     Object? frequency = null,
     Object? inventory = null,
-    Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -110,10 +106,6 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
           ? _value.inventory
           : inventory // ignore: cast_nullable_to_non_nullable
               as double,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -141,7 +133,6 @@ abstract class _$$MedicationImplCopyWith<$Res>
       @HiveField(3) String unit,
       @HiveField(4) String frequency,
       @HiveField(5) double inventory,
-      @HiveField(6) String userId,
       @HiveField(7) DateTime createdAt,
       @HiveField(8) DateTime updatedAt});
 }
@@ -165,7 +156,6 @@ class __$$MedicationImplCopyWithImpl<$Res>
     Object? unit = null,
     Object? frequency = null,
     Object? inventory = null,
-    Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -194,10 +184,6 @@ class __$$MedicationImplCopyWithImpl<$Res>
           ? _value.inventory
           : inventory // ignore: cast_nullable_to_non_nullable
               as double,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -221,7 +207,6 @@ class _$MedicationImpl extends _Medication {
       @HiveField(3) required this.unit,
       @HiveField(4) required this.frequency,
       @HiveField(5) required this.inventory,
-      @HiveField(6) required this.userId,
       @HiveField(7) required this.createdAt,
       @HiveField(8) required this.updatedAt})
       : super._();
@@ -245,9 +230,6 @@ class _$MedicationImpl extends _Medication {
   @HiveField(5)
   final double inventory;
   @override
-  @HiveField(6)
-  final String userId;
-  @override
   @HiveField(7)
   final DateTime createdAt;
   @override
@@ -256,7 +238,7 @@ class _$MedicationImpl extends _Medication {
 
   @override
   String toString() {
-    return 'Medication(id: $id, name: $name, dosage: $dosage, unit: $unit, frequency: $frequency, inventory: $inventory, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Medication(id: $id, name: $name, dosage: $dosage, unit: $unit, frequency: $frequency, inventory: $inventory, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -272,7 +254,6 @@ class _$MedicationImpl extends _Medication {
                 other.frequency == frequency) &&
             (identical(other.inventory, inventory) ||
                 other.inventory == inventory) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -281,7 +262,7 @@ class _$MedicationImpl extends _Medication {
 
   @override
   int get hashCode => Object.hash(runtimeType, id, name, dosage, unit,
-      frequency, inventory, userId, createdAt, updatedAt);
+      frequency, inventory, createdAt, updatedAt);
 
   /// Create a copy of Medication
   /// with the given fields replaced by the non-null parameter values.
@@ -300,7 +281,6 @@ abstract class _Medication extends Medication {
       @HiveField(3) required final String unit,
       @HiveField(4) required final String frequency,
       @HiveField(5) required final double inventory,
-      @HiveField(6) required final String userId,
       @HiveField(7) required final DateTime createdAt,
       @HiveField(8) required final DateTime updatedAt}) = _$MedicationImpl;
   _Medication._() : super._();
@@ -323,9 +303,6 @@ abstract class _Medication extends Medication {
   @override
   @HiveField(5)
   double get inventory;
-  @override
-  @HiveField(6)
-  String get userId;
   @override
   @HiveField(7)
   DateTime get createdAt;

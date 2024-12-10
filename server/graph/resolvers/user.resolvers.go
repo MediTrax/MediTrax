@@ -369,7 +369,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newP
 }
 
 // ShareProfile is the resolver for the shareProfile field.
-func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string, accessLevel string) (*model.ShareProfileResponse, error) {
+func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -403,38 +403,22 @@ func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string,
 		return nil, fmt.Errorf("cannot share profile with yourself")
 	}
 
-	// Check if sharing already exists
-	checkResult, err := database.DB.Query(`
-        SELECT * FROM profile_access 
-        WHERE in = $from_user 
-        AND out = $to_user;
-    `, map[string]interface{}{
-		"from_user": user.ID,
-		"to_user":   targetUser.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	existingShares, err := surrealdb.SmartUnmarshal[[]interface{}](checkResult, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(existingShares) > 0 {
-		return nil, fmt.Errorf("profile is already shared with this user")
-	}
-	fmt.Println("creating profile access edge from", user.ID, "to", targetUser.ID)
-
 	// Create the profile_access edge
 	result, err = database.DB.Query(`
-        RELATE $from->profile_access->$to
-        SET accessLevel = $accessLevel,
-            createdAt = time::now();
+        LET $edge = (SELECT * FROM profile_access WHERE in = $from AND out = $to);
+        IF $edge == [] THEN
+            CREATE profile_access SET
+                in = $from,
+                out = $to,
+                accessLevel = $accessLevel,
+                remarks = $remarks,
+                createdAt = time::now();
+        END;
     `, map[string]interface{}{
 		"from":        user.ID,
 		"to":          targetUser.ID,
 		"accessLevel": accessLevel,
+		"remarks":     remarks,
 	})
 	if err != nil {
 		return nil, err
@@ -455,10 +439,9 @@ func (r *mutationResolver) UnshareProfile(ctx context.Context, targetUserID stri
 
 	// Delete the profile_access edge between current user and target user
 	_, err := database.DB.Query(`
-        DELETE ->profile_access->user 
-        FROM user 
-        WHERE id = $from_user 
-        AND ->profile_access->user.id = $to_user;
+        DELETE profile_access 
+        WHERE in = $from_user 
+        AND out = $to_user;
     `, map[string]interface{}{
 		"from_user": user.ID,
 		"to_user":   targetUserID,
@@ -590,4 +573,76 @@ func (r *queryResolver) GetSharedProfiles(ctx context.Context) ([]*model.Profile
 	}
 
 	return profiles, nil
+}
+
+// GetSharedMedicalRecords is the resolver for the getSharedMedicalRecords field.
+func (r *queryResolver) GetSharedMedicalRecords(ctx context.Context, patientID string) ([]*model.MedicalRecordDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	if !utils.IsProfileShared(patientID, user.ID) {
+		return nil, fmt.Errorf("access denied, user is not a family member of patient")
+	}
+
+	user, err := utils.GetUserByID(patientID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting patient information: %e", err)
+	}
+
+	return utils.GetMedicalRecords(*user)
+}
+
+// GetSharedTreatmentSchedule is the resolver for the getSharedTreatmentSchedule field.
+func (r *queryResolver) GetSharedTreatmentSchedule(ctx context.Context, patientID string) ([]*model.TreatmentScheduleDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	if !utils.IsProfileShared(patientID, user.ID) {
+		return nil, fmt.Errorf("access denied, user is not a family member of patient")
+	}
+
+	user, err := utils.GetUserByID(patientID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting patient information: %e", err)
+	}
+
+	return utils.GetTreatmentSchedules(*user)
+}
+
+// GetSharedMedications is the resolver for the getSharedMedications field.
+func (r *queryResolver) GetSharedMedications(ctx context.Context, patientID string) ([]*model.MedicationDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	if !utils.IsProfileShared(patientID, user.ID) {
+		return nil, fmt.Errorf("access denied, user is not a family member of patient")
+	}
+
+	user, err := utils.GetUserByID(patientID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting patient information: %e", err)
+	}
+
+	return utils.GetMedications(*user)
+}
+
+// GetSharedHealthMetrics is the resolver for the getSharedHealthMetrics field.
+func (r *queryResolver) GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	if !utils.IsProfileShared(patientID, user.ID) {
+		return nil, fmt.Errorf("access denied, user is not a family member of patient")
+	}
+
+	user, err := utils.GetUserByID(patientID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting patient information: %e", err)
+	}
+
+	return utils.GetHealthMetrics(*user, startDate, endDate, metricType)
 }

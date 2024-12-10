@@ -150,6 +150,27 @@ func IsFamilyMember(memberId string, patientId string) bool {
 	return false
 }
 
+func IsProfileShared(from string, to string) bool {
+	result, err := database.DB.Query(`SELECT * FROM profile_access 
+	WHERE in=$from AND out=$to;`,
+		map[string]interface{}{
+			"from": from,
+			"to":   to,
+		})
+	if err != nil {
+		return false
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]interface{}](result, nil)
+	if err != nil {
+		return false
+	}
+	if len(members) > 0 {
+		return true
+	}
+	return false
+}
+
 func GetUserByID(userID string) (*model.User, error) {
 	result, err := database.DB.Query(`SELECT * FROM ONLY $userId`,
 		map[string]interface{}{

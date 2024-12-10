@@ -7552,10 +7552,12 @@ class Variables$Mutation$ShareProfile {
   factory Variables$Mutation$ShareProfile({
     required String phoneNumber,
     required String accessLevel,
+    required String remarks,
   }) =>
       Variables$Mutation$ShareProfile._({
         r'phoneNumber': phoneNumber,
         r'accessLevel': accessLevel,
+        r'remarks': remarks,
       });
 
   Variables$Mutation$ShareProfile._(this._$data);
@@ -7566,6 +7568,8 @@ class Variables$Mutation$ShareProfile {
     result$data['phoneNumber'] = (l$phoneNumber as String);
     final l$accessLevel = data['accessLevel'];
     result$data['accessLevel'] = (l$accessLevel as String);
+    final l$remarks = data['remarks'];
+    result$data['remarks'] = (l$remarks as String);
     return Variables$Mutation$ShareProfile._(result$data);
   }
 
@@ -7575,12 +7579,16 @@ class Variables$Mutation$ShareProfile {
 
   String get accessLevel => (_$data['accessLevel'] as String);
 
+  String get remarks => (_$data['remarks'] as String);
+
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
     final l$phoneNumber = phoneNumber;
     result$data['phoneNumber'] = l$phoneNumber;
     final l$accessLevel = accessLevel;
     result$data['accessLevel'] = l$accessLevel;
+    final l$remarks = remarks;
+    result$data['remarks'] = l$remarks;
     return result$data;
   }
 
@@ -7609,6 +7617,11 @@ class Variables$Mutation$ShareProfile {
     if (l$accessLevel != lOther$accessLevel) {
       return false;
     }
+    final l$remarks = remarks;
+    final lOther$remarks = other.remarks;
+    if (l$remarks != lOther$remarks) {
+      return false;
+    }
     return true;
   }
 
@@ -7616,9 +7629,11 @@ class Variables$Mutation$ShareProfile {
   int get hashCode {
     final l$phoneNumber = phoneNumber;
     final l$accessLevel = accessLevel;
+    final l$remarks = remarks;
     return Object.hashAll([
       l$phoneNumber,
       l$accessLevel,
+      l$remarks,
     ]);
   }
 }
@@ -7635,6 +7650,7 @@ abstract class CopyWith$Variables$Mutation$ShareProfile<TRes> {
   TRes call({
     String? phoneNumber,
     String? accessLevel,
+    String? remarks,
   });
 }
 
@@ -7654,6 +7670,7 @@ class _CopyWithImpl$Variables$Mutation$ShareProfile<TRes>
   TRes call({
     Object? phoneNumber = _undefined,
     Object? accessLevel = _undefined,
+    Object? remarks = _undefined,
   }) =>
       _then(Variables$Mutation$ShareProfile._({
         ..._instance._$data,
@@ -7661,6 +7678,8 @@ class _CopyWithImpl$Variables$Mutation$ShareProfile<TRes>
           'phoneNumber': (phoneNumber as String),
         if (accessLevel != _undefined && accessLevel != null)
           'accessLevel': (accessLevel as String),
+        if (remarks != _undefined && remarks != null)
+          'remarks': (remarks as String),
       }));
 }
 
@@ -7673,6 +7692,7 @@ class _CopyWithStubImpl$Variables$Mutation$ShareProfile<TRes>
   call({
     String? phoneNumber,
     String? accessLevel,
+    String? remarks,
   }) =>
       _res;
 }
@@ -7834,6 +7854,15 @@ const documentNodeMutationShareProfile = DocumentNode(definitions: [
         defaultValue: DefaultValueNode(value: null),
         directives: [],
       ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'remarks')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
     ],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
@@ -7848,6 +7877,10 @@ const documentNodeMutationShareProfile = DocumentNode(definitions: [
           ArgumentNode(
             name: NameNode(value: 'accessLevel'),
             value: VariableNode(name: NameNode(value: 'accessLevel')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'remarks'),
+            value: VariableNode(name: NameNode(value: 'remarks')),
           ),
         ],
         directives: [],

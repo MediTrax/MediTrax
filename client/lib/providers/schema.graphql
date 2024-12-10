@@ -419,6 +419,11 @@ type Query{
   getMockFoodRecommendation : FoodRecommendation
   getProfiles: [ProfileDetail]
   getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 type Mutation {
@@ -463,6 +468,6 @@ type Mutation {
   createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
   awardAchievement(badgeId: String!): AwardAchievementResponse  
 
-  shareProfile(phoneNumber: String!, accessLevel: String!): ShareProfileResponse!
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
   unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }

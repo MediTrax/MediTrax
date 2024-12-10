@@ -57,7 +57,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null) {
         print("Fetching medications for user: ${userData.id}");
-        await ref.read(medicationProvider.notifier).fetchMedications(userData.id);
+        await ref.read(medicationNotifierProvider.notifier).fetchMedications();
       } else {
         print("No user data available");
       }
@@ -68,8 +68,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
   @override
   Widget build(BuildContext context) {
-    final medicationsState = ref.watch(medicationProvider);
-    
+    final medicationsState = ref.watch(medicationNotifierProvider);
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -150,13 +150,15 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                 actions: [
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.of(context).pop(false); // Don't delete
+                                      Navigator.of(context)
+                                          .pop(false); // Don't delete
                                     },
                                     child: const Text('取消'),
                                   ),
                                   FilledButton(
                                     onPressed: () {
-                                      Navigator.of(context).pop(true); // Confirm delete
+                                      Navigator.of(context)
+                                          .pop(true); // Confirm delete
                                     },
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Colors.red,
@@ -171,14 +173,17 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         onDismissed: (_) async {
                           try {
                             final deletedMedication = medication;
-                            
+
                             // Delete medication and its reminders
-                            final success = await ref.read(medicationProvider.notifier)
+                            final success = await ref
+                                .read(medicationNotifierProvider.notifier)
                                 .deleteMedication(medication.id);
-                            
+
                             // Refresh reminders after medication deletion
-                            await ref.read(medicationReminderProvider.notifier).fetchReminders();
-                            
+                            await ref
+                                .read(medicationReminderProvider.notifier)
+                                .fetchReminders();
+
                             if (success && mounted) {
                               _showUndoSnackBar(context, deletedMedication);
                             } else if (mounted) {
@@ -227,10 +232,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final frequencyParts = medication.frequency.split('/');
     // print('Frequency Parts: $frequencyParts'); // Debug info
 
-    final times = frequencyParts.isNotEmpty ? int.tryParse(frequencyParts[0]) ?? 1 : 1;
+    final times =
+        frequencyParts.isNotEmpty ? int.tryParse(frequencyParts[0]) ?? 1 : 1;
     // print('Times: $times'); // Debug info
 
-    final days = frequencyParts.length > 1 ? int.tryParse(frequencyParts[1]) ?? 1 : 1;
+    final days =
+        frequencyParts.length > 1 ? int.tryParse(frequencyParts[1]) ?? 1 : 1;
     // print('Days: $days'); // Debug info
 
     final dailyUsage = (times * medication.dosage) / days;
@@ -293,12 +300,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: isLowStock 
+                      color: isLowStock
                           ? Colors.orange.withOpacity(0.1)
                           : Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isLowStock 
+                        color: isLowStock
                             ? Colors.orange.shade300
                             : Colors.green.shade300,
                       ),
@@ -309,7 +316,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         Icon(
                           Icons.inventory_2_rounded,
                           size: 16,
-                          color: isLowStock 
+                          color: isLowStock
                               ? Colors.orange.shade700
                               : Colors.green.shade700,
                         ),
@@ -319,7 +326,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: isLowStock 
+                            color: isLowStock
                                 ? Colors.orange.shade700
                                 : Colors.green.shade700,
                           ),
@@ -398,7 +405,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     children: [
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        onPressed: () => _showEditDialog(context, ref, medication),
+                        onPressed: () =>
+                            _showEditDialog(context, ref, medication),
                         icon: Icon(
                           Icons.edit_rounded,
                           color: Colors.blue.shade400,
@@ -408,7 +416,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        onPressed: () => _showRefillDialog(context, ref, medication),
+                        onPressed: () =>
+                            _showRefillDialog(context, ref, medication),
                         icon: Icon(
                           Icons.add_circle_outline_rounded,
                           color: Colors.green.shade400,
@@ -452,17 +461,22 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     );
   }
 
-  void _showEditDialog(BuildContext context, WidgetRef ref, Medication medication) {
+  void _showEditDialog(
+      BuildContext context, WidgetRef ref, Medication medication) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: medication.name);
-    final dosageController = TextEditingController(text: medication.dosage.toString());
+    final dosageController =
+        TextEditingController(text: medication.dosage.toString());
     final unitController = TextEditingController(text: medication.unit);
-    final inventoryController = TextEditingController(text: medication.inventory.toString());
+    final inventoryController =
+        TextEditingController(text: medication.inventory.toString());
 
     // Split frequency into times and days
     final frequencyParts = medication.frequency.split('/');
-    final timesController = TextEditingController(text: frequencyParts.isNotEmpty ? frequencyParts[0] : '1');
-    final daysController = TextEditingController(text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
+    final timesController = TextEditingController(
+        text: frequencyParts.isNotEmpty ? frequencyParts[0] : '1');
+    final daysController = TextEditingController(
+        text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
 
     bool isDisposed = false;
 
@@ -567,7 +581,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     hintText: '输入剂量数值',
                                     prefixIcon: Icons.scale_rounded,
                                     iconColor: Colors.blue.shade300,
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return '请输入剂量';
@@ -664,7 +680,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                               hintText: '输入库存数量',
                               prefixIcon: Icons.inventory_rounded,
                               iconColor: Colors.orange.shade300,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return '请输入库存数量';
@@ -698,14 +716,17 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
                             try {
-                              final success = await ref.read(medicationProvider.notifier)
+                              final success = await ref
+                                  .read(medicationNotifierProvider.notifier)
                                   .updateMedication(
                                     medicationId: medication.id,
                                     name: nameController.text,
                                     dosage: double.parse(dosageController.text),
                                     unit: unitController.text,
-                                    frequency: '${timesController.text}/${daysController.text}', // Use split frequency
-                                    inventory: double.parse(inventoryController.text),
+                                    frequency:
+                                        '${timesController.text}/${daysController.text}', // Use split frequency
+                                    inventory:
+                                        double.parse(inventoryController.text),
                                   );
 
                               if (success && dialogContext.mounted) {
@@ -809,7 +830,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     );
   }
 
-  void _showRefillDialog(BuildContext context, WidgetRef ref, Medication medication) {
+  void _showRefillDialog(
+      BuildContext context, WidgetRef ref, Medication medication) {
     final controller = TextEditingController();
     bool isDisposed = false;
     bool isClosing = false;
@@ -871,7 +893,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   errorState.value = '请输入补充剂量';
                   return;
                 }
-                
+
                 final amount = double.tryParse(controller.text);
                 if (amount == null || amount <= 0) {
                   errorState.value = '请输入有效的补充剂量';
@@ -880,12 +902,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
                 try {
                   final newInventory = medication.inventory + amount;
-                  final success = await ref.read(medicationProvider.notifier)
+                  final success = await ref
+                      .read(medicationNotifierProvider.notifier)
                       .updateMedication(
                         medicationId: medication.id,
                         inventory: newInventory,
                       );
-                  
+
                   if (success && dialogContext.mounted && !isClosing) {
                     closeDialog(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -911,12 +934,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
   void _showUndoSnackBar(BuildContext context, Medication deletedMedication) {
     if (!context.mounted) return;
-    
+
     final messenger = ScaffoldMessenger.of(context);
-    
+
     Future.microtask(() async {
       if (!context.mounted) return;
-      
+
       messenger.clearSnackBars();
       messenger.showSnackBar(
         SnackBar(
@@ -926,21 +949,24 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
             onPressed: () async {
               try {
                 // Restore the medication
-                final successRestore = await ref.read(medicationProvider.notifier)
-                  .addMedication(
-                    name: deletedMedication.name,
-                    dosage: deletedMedication.dosage,
-                    unit: deletedMedication.unit,
-                    frequency: deletedMedication.frequency,
-                    inventory: deletedMedication.inventory,
-                  );
-                  
+                final successRestore = await ref
+                    .read(medicationNotifierProvider.notifier)
+                    .addMedication(
+                      name: deletedMedication.name,
+                      dosage: deletedMedication.dosage,
+                      unit: deletedMedication.unit,
+                      frequency: deletedMedication.frequency,
+                      inventory: deletedMedication.inventory,
+                    );
+
                 if (successRestore) {
                   // Fetch medications after successful restore
                   await _fetchMedications();
                   // Also refresh reminders since they might have been restored
-                  await ref.read(medicationReminderProvider.notifier).fetchReminders();
-                  
+                  await ref
+                      .read(medicationReminderProvider.notifier)
+                      .fetchReminders();
+
                   if (context.mounted) {
                     messenger.showSnackBar(
                       const SnackBar(
@@ -995,8 +1021,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
   final dosageController = TextEditingController();
   final unitController = TextEditingController();
   final inventoryController = TextEditingController();
-  int _timesPerPeriod = 1;  // Default to 1 time
-  int _periodInDays = 1;    // Default to 1 day
+  int _timesPerPeriod = 1; // Default to 1 time
+  int _periodInDays = 1; // Default to 1 day
   bool _isLoading = false;
 
   String get formattedFrequency => '$_timesPerPeriod/$_periodInDays';
@@ -1049,7 +1075,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         prefixIcon: Icon(
                           Icons.calendar_today_rounded,
                           color: Colors.blue.shade300,
@@ -1095,7 +1122,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         prefixIcon: Icon(
                           Icons.medication_rounded,
                           color: Colors.orange.shade300,
@@ -1174,12 +1202,13 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
 
       try {
         // Watch the medication provider to get the current state
-        final medicationsState = ref.watch(medicationProvider);
+        final medicationsState = ref.watch(medicationNotifierProvider);
 
         // Check if the medication already exists
         final medicationExists = medicationsState.maybeWhen(
           data: (medications) => medications.any((medication) =>
-              medication.name.toLowerCase() == nameController.text.toLowerCase()),
+              medication.name.toLowerCase() ==
+              nameController.text.toLowerCase()),
           orElse: () => false,
         );
 
@@ -1193,13 +1222,14 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
           );
         } else {
           // Add the medication if it doesn't exist
-          final success = await ref.read(medicationProvider.notifier).addMedication(
-            name: nameController.text,
-            dosage: double.parse(dosageController.text),
-            unit: unitController.text,
-            frequency: formattedFrequency,
-            inventory: double.parse(inventoryController.text),
-          );
+          final success =
+              await ref.read(medicationNotifierProvider.notifier).addMedication(
+                    name: nameController.text,
+                    dosage: double.parse(dosageController.text),
+                    unit: unitController.text,
+                    frequency: formattedFrequency,
+                    inventory: double.parse(inventoryController.text),
+                  );
 
           if (success && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -1310,9 +1340,12 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 ),
                                 hintText: '输入剂量值',
                               ),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
                               inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*')),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -1401,7 +1434,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
                                 prefixIcon: Icon(
                                   Icons.calendar_today_rounded,
                                   color: Colors.blue.shade300,
@@ -1447,7 +1481,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
                                 prefixIcon: Icon(
                                   Icons.medication_rounded,
                                   color: Colors.orange.shade300,
@@ -1535,7 +1570,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                   ),
                   hintText: '输入库存数量',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
@@ -1564,7 +1600,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Icon(Icons.save_rounded),
@@ -1659,7 +1696,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
 
   Future<void> _fetchReminders() async {
     if (_isDisposed) return;
-    
+
     try {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null && !_isDisposed) {
@@ -1697,7 +1734,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
   @override
   Widget build(BuildContext context) {
     final remindersState = ref.watch(medicationReminderProvider);
-    final medicationsState = ref.watch(medicationProvider);
+    final medicationsState = ref.watch(medicationNotifierProvider);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1748,7 +1785,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     );
                   }
                   return FilledButton.icon(
-                    onPressed: () => _showAddReminderDialog(context, medications),
+                    onPressed: () =>
+                        _showAddReminderDialog(context, medications),
                     icon: const Icon(Icons.add),
                     label: const Text('添加提醒'),
                   );
@@ -1786,7 +1824,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     itemBuilder: (context, index) {
                       final reminder = reminders[index];
                       return medicationsState.when(
-                        loading: () => const Center(child: CircularProgressIndicator()),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (_, __) => const Center(child: Text('加载药品信息失败')),
                         data: (medications) {
                           final medication = medications.firstWhere(
@@ -1798,7 +1837,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                               unit: '',
                               frequency: '',
                               inventory: 0,
-                              userId: '',
                               createdAt: DateTime.now(),
                               updatedAt: DateTime.now(),
                             ),
@@ -1835,17 +1873,20 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('确认删除'),
-                                    content: Text('确定要删除 ${medication.name} 的提醒吗？'),
+                                    content:
+                                        Text('确定要删除 ${medication.name} 的提醒吗？'),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.of(context).pop(false); // Don't delete
+                                          Navigator.of(context)
+                                              .pop(false); // Don't delete
                                         },
                                         child: const Text('取消'),
                                       ),
                                       FilledButton(
                                         onPressed: () {
-                                          Navigator.of(context).pop(true); // Confirm delete
+                                          Navigator.of(context)
+                                              .pop(true); // Confirm delete
                                         },
                                         style: FilledButton.styleFrom(
                                           backgroundColor: Colors.red,
@@ -1859,9 +1900,10 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                             },
                             onDismissed: (_) async {
                               try {
-                                final success = await ref.read(medicationReminderProvider.notifier)
+                                final success = await ref
+                                    .read(medicationReminderProvider.notifier)
                                     .deleteReminder(reminder.id);
-                                
+
                                 if (success && mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -1894,8 +1936,10 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                               reminder: reminder,
                               medication: medication,
                               onToggle: (newValue) async {
-                                final success = await ref.read(medicationReminderProvider.notifier)
-                                    .toggleReminderStatus(reminder.id, newValue);
+                                final success = await ref
+                                    .read(medicationReminderProvider.notifier)
+                                    .toggleReminderStatus(
+                                        reminder.id, newValue);
 
                                 if (!success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -1932,11 +1976,11 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       final now = DateTime.now();
       // Ensure we're working with local time
       final reminderTime = reminder.reminderTime.toLocal();
-      
+
       // Parse frequency to get days interval
       final frequencyParts = medication.frequency.split('/');
-      final daysInterval = frequencyParts.length > 1 ? 
-          int.tryParse(frequencyParts[1]) ?? 1 : 1;
+      final daysInterval =
+          frequencyParts.length > 1 ? int.tryParse(frequencyParts[1]) ?? 1 : 1;
 
       // Create base next reminder time for today using local time
       DateTime nextReminder = DateTime(
@@ -1958,11 +2002,11 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
           if (!reminder.isTaken && !nextReminder.isBefore(now)) {
             return nextReminder;
           }
-          
+
           // If reminder is taken or time has passed, add interval days
           nextReminder = nextReminder.add(Duration(days: daysInterval));
-          
-          // If the calculated next reminder is in the past, 
+
+          // If the calculated next reminder is in the past,
           // keep adding interval until we get a future date
           while (nextReminder.isBefore(now)) {
             nextReminder = nextReminder.add(Duration(days: daysInterval));
@@ -1978,13 +2022,13 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       final now = DateTime.now();
       final difference = nextReminder.difference(now).inDays;
 
-      if (nextReminder.year == now.year && 
-          nextReminder.month == now.month && 
+      if (nextReminder.year == now.year &&
+          nextReminder.month == now.month &&
           nextReminder.day == now.day) {
         return '今天';
-      } else if (nextReminder.year == now.year && 
-                 nextReminder.month == now.month && 
-                 nextReminder.day == now.day + 1) {
+      } else if (nextReminder.year == now.year &&
+          nextReminder.month == now.month &&
+          nextReminder.day == now.day + 1) {
         return '明天';
       } else if (difference < 7) {
         // Show weekday for dates within a week
@@ -2013,8 +2057,11 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: reminder.isTaken ? Colors.green.shade200 : 
-                     isLowStock ? Colors.orange.shade200 : Colors.transparent,
+              color: reminder.isTaken
+                  ? Colors.green.shade200
+                  : isLowStock
+                      ? Colors.orange.shade200
+                      : Colors.transparent,
               width: 2,
             ),
           ),
@@ -2113,7 +2160,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      getReminderFrequencyText(medication.frequency),
+                                      getReminderFrequencyText(
+                                          medication.frequency),
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontSize: 12,
@@ -2131,7 +2179,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.blue.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             '${medication.dosage}${medication.unit}/次',
@@ -2148,15 +2197,22 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: Colors.purple.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(6),
+                                            color:
+                                                Colors.purple.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             // Extract frequency parts here
                                             (() {
-                                              final parts = medication.frequency.split('/');
-                                              final times = parts.isNotEmpty ? parts[0] : '1';
-                                              final days = parts.length > 1 ? parts[1] : '1';
+                                              final parts = medication.frequency
+                                                  .split('/');
+                                              final times = parts.isNotEmpty
+                                                  ? parts[0]
+                                                  : '1';
+                                              final days = parts.length > 1
+                                                  ? parts[1]
+                                                  : '1';
                                               return '每$days天$times次';
                                             })(),
                                             style: TextStyle(
@@ -2238,7 +2294,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     );
   }
 
-  void _showAddReminderDialog(BuildContext context, List<Medication> medications) {
+  void _showAddReminderDialog(
+      BuildContext context, List<Medication> medications) {
     showDialog(
       context: context,
       builder: (context) => AddReminderDialog(medications: medications),

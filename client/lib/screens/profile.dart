@@ -8,11 +8,16 @@ import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
 import 'package:meditrax/providers/schema.graphql.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(userDataProvider);
 
     return Scaffold(
@@ -254,9 +259,12 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showProfileSwitcher(BuildContext context, WidgetRef ref,
-      List<Query$GetProfiles$getProfiles> profiles, String currentUserId) {
-    showModalBottomSheet(
+  void _showProfileSwitcher(
+      BuildContext context,
+      WidgetRef ref,
+      List<Query$GetProfiles$getProfiles> profiles,
+      String currentUserId) async {
+    await showModalBottomSheet(
       context: context,
       builder: (context) => Container(
         padding: const EdgeInsets.all(16),
@@ -273,7 +281,8 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             ...profiles.map((profile) {
-              final isCurrentProfile = profile.id == currentUserId;
+              final isCurrentProfile =
+                  profile.id == ref.read(appStateProvider).selectedProfile;
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Colors.grey[200],
@@ -293,10 +302,11 @@ class ProfileScreen extends ConsumerWidget {
                         ref
                             .read(appStateProvider.notifier)
                             .changeSelectedProfile(profile.id);
+                        setState(() {});
                         Navigator.pop(context);
                       },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
