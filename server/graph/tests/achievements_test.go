@@ -56,6 +56,7 @@ func TestAchievement(t *testing.T) {
 		badgeId2 = response.CreateAchievementBadge.BadgeID
 
 		require.NotEqual(t, badgeId1, badgeId2)
+
 	})
 
 	t.Run("Award Achievement", func(t *testing.T) {
@@ -285,5 +286,82 @@ func TestPoints(t *testing.T) {
 		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
+	// AwardAchievement - Access Denied
+	t.Run("Award Achievement Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			AwardAchievement struct {
+				UserAchievementID string
+				Message           string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		// 无效令牌
+		err := c.Post(`mutation award_achievement($badgeId: String!) {
+		awardAchievement(badgeId: $badgeId) {
+			userAchievementId
+			message
+		}
+		}`, &deniedResponse, client.Var("badgeId", "dummy-badge"),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "invalid badge ID", err_msg[0].Message)
+	})
+
+	// GetAchievementBadges - Access Denied
+	t.Run("Get Achievement Badges Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetAchievementBadges []struct {
+				BadgeID     string
+				Name        string
+				Description string
+				IconURL     string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		// 无效令牌
+		err := c.Post(`query{
+		getAchievementBadges {
+			badgeId
+			name
+			description
+			iconUrl
+		}
+	}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+
+	// GetUserAchievements - Access Denied
+	t.Run("Get User Achievements Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetUserAchievements []struct {
+				BadgeID           string
+				UserAchievementID string
+				EarnedAt          string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// 无效令牌
+		err := c.Post(`query{
+		getUserAchievements {
+			badgeId
+			userAchievementId
+			earnedAt
+		}
+	}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
 	DeleteUser(t, c, user)
 }
