@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/medication_reminder.dart';
 import '../providers/medication_reminder_provider.dart';
+import '../services/notification_service.dart';
 
 class EditReminderDialog extends ConsumerStatefulWidget {
   final MedicationReminder reminder;
@@ -61,34 +62,85 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
         ),
         FilledButton(
           onPressed: () async {
-            final now = DateTime.now();
-            final reminderTime = DateTime(
-              now.year,
-              now.month,
-              now.day,
-              selectedTime.hour,
-              selectedTime.minute,
-            );
+            try {
+              final now = DateTime.now();
+              final reminderTime = DateTime(
+                now.year,
+                now.month,
+                now.day,
+                selectedTime.hour,
+                selectedTime.minute,
+              ).toLocal();
 
-            final adjustedReminderTime = reminderTime.isBefore(now) 
-                ? reminderTime.add(const Duration(days: 1))
-                : reminderTime;
+              print('\n=== Edit Reminder Debug Info ===');
+              print('Selected time: ${selectedTime.format(context)}');
+              print('Created DateTime: $reminderTime');
+              print('Hour: ${reminderTime.hour}, Minute: ${reminderTime.minute}');
 
-            final utcReminderTime = adjustedReminderTime.toUtc();
+              final adjustedReminderTime = reminderTime.isBefore(now)
+                  ? reminderTime.add(const Duration(days: 1))
+                  : reminderTime;
 
-            final success = await ref.read(medicationReminderProvider.notifier)
-                .updateReminder(
-                  reminderId: widget.reminder.id,
-                  reminderTime: utcReminderTime.toIso8601String(),
-                  isTaken: widget.reminder.isTaken,
+              print('\n=== Edit Reminder Debug Info ===');
+              print('Selected time: ${selectedTime.format(context)}');
+              print('Created DateTime: $reminderTime');
+              print('Hour: ${reminderTime.hour}, Minute: ${reminderTime.minute}');
+
+              final formattedTimeString = '${adjustedReminderTime.year}-'
+                  '${adjustedReminderTime.month.toString().padLeft(2, '0')}-'
+                  '${adjustedReminderTime.day.toString().padLeft(2, '0')}T'
+                  '${adjustedReminderTime.hour.toString().padLeft(2, '0')}:'
+                  '${adjustedReminderTime.minute.toString().padLeft(2, '0')}:00.000';
+
+              print('Adjusted DateTime: $formattedTimeString');
+
+              final notificationService = NotificationService();
+              await notificationService.cancelReminder(widget.reminder.id);
+
+              final success = await ref.read(medicationReminderProvider.notifier)
+                  .updateReminder(
+                    reminderId: widget.reminder.id,
+                    reminderTime: formattedTimeString,
+                    isTaken: widget.reminder.isTaken,
+                  );
+
+              if (!mounted) return;
+
+              if (success) {
+                await notificationService.scheduleReminder(
+                  MedicationReminder(
+                    id: widget.reminder.id,
+                    medicationId: widget.reminder.medicationId,
+                    reminderTime: adjustedReminderTime,
+                    isTaken: widget.reminder.isTaken,
+                    userId: widget.reminder.userId,
+                    createdAt: widget.reminder.createdAt,
+                  ),
+                  widget.medicationName,
                 );
 
-            if (success && mounted) {
-              Navigator.pop(context);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('提醒已更新')),
+                );
+                await ref.read(medicationReminderProvider.notifier).fetchReminders();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('更新失败，请重试'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (!mounted) return;
+              
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('提醒已更新')),
+                SnackBar(
+                  content: Text('错误: $e'),
+                  backgroundColor: Colors.red,
+                ),
               );
-              await ref.read(medicationReminderProvider.notifier).fetchReminders();
             }
           },
           child: const Text('保存'),

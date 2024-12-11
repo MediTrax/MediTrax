@@ -23,6 +23,7 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
       unit: fields[3] as String,
       frequency: fields[4] as String,
       inventory: fields[5] as double,
+      userId: fields[6] as String,
       createdAt: fields[7] as DateTime,
       updatedAt: fields[8] as DateTime,
     );
@@ -31,7 +32,7 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
   @override
   void write(BinaryWriter writer, _$MedicationImpl obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,6 +45,8 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
       ..write(obj.frequency)
       ..writeByte(5)
       ..write(obj.inventory)
+      ..writeByte(6)
+      ..write(obj.userId)
       ..writeByte(7)
       ..write(obj.createdAt)
       ..writeByte(8)
