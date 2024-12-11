@@ -283,6 +283,102 @@ func TestMedication(t *testing.T) {
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "invalid id, no associated medication object found", err_msg[0].Message)
 	})
+	t.Run("Take Medication", func(t *testing.T) {
+		var addMedResponse struct {
+			AddMedication struct {
+				MedicationID string
+				Message      string
+			}
+		}
+		c.MustPost(`mutation add_med{
+			addMedication(
+				name: "test_medication_take"
+				unit: "tablets"
+				dosage: 1
+				frequency: "1/1"
+				inventory: 10
+			  ) {
+				medicationId
+				message
+			  }
+		  }`, &addMedResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "Medication test_medication_take added successfully", addMedResponse.AddMedication.Message)
+		medId := addMedResponse.AddMedication.MedicationID
+
+		var addReminderResponse struct {
+			CreateMedicationReminder struct {
+				ReminderID string
+				Message    string
+			}
+		}
+		c.MustPost(`mutation create_Med_Reminder($medicationId: String!){
+			createMedicationReminder(
+				medicationId: $medicationId
+				reminderTime: "2024-12-11T08:00:00.000"
+			) {
+				reminderId
+				message
+			}
+		  }`, &addReminderResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("medicationId", medId))
+		reminderId := addReminderResponse.CreateMedicationReminder.ReminderID
+
+		var takeResponse struct {
+			TakeMedication struct {
+				Message string
+			}
+		}
+		c.MustPost(`mutation take_med($reminderId: String!) {
+			takeMedication(reminderId: $reminderId) {
+				message
+			}
+		  }`, &takeResponse, client.Var("reminderId", reminderId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		require.Equal(t, "medication taken successfully", takeResponse.TakeMedication.Message)
+		fmt.Printf(reminderId)
+		var getMedResponse struct {
+			GetMedications []struct {
+				MedicationID string
+				Inventory    float64
+			}
+		}
+		c.MustPost(`query get_meds{
+			getMedications {
+				medicationId
+				inventory
+			}
+		}`, &getMedResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+
+		var errMsg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		fmt.Printf(reminderId)
+		// err := c.Post(`mutation take_med($reminderId: String!) {
+		// 	takeMedication(reminderId: $reminderId) {
+		// 		message
+		// 	}
+		//   }`, &takeResponse, client.Var("reminderId", reminderId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		// json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		// require.Equal(t, "reminder already taken, cannot take again", errMsg[0].Message)
+
+		err := c.Post(`mutation take_med($reminderId: String!) {
+			takeMedication(reminderId: $reminderId) {
+				message
+			}
+		  }`, &takeResponse, client.Var("reminderId", "invalid_reminder_id"), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		require.Equal(t, "illegal reminder id", errMsg[0].Message)
+
+		var deleteMedResponse struct {
+			DeleteMedication struct {
+				Message string
+			}
+		}
+		c.MustPost(`mutation delete_med($medicationId: String!){
+			deleteMedication(medicationId: $medicationId){
+				message
+			}
+		}`, &deleteMedResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("medicationId", medId))
+	})
 
 	DeleteUser(t, c, user)
 }

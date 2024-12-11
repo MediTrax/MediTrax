@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"meditrax/graph/model"
 	"testing"
@@ -147,5 +148,108 @@ func TestEvaluateHealthRiskAssessment(t *testing.T) {
 		questionnaireId = response.GetHealthRiskAssessmentQuestion.QuestionnaireID
 	})
 
+	t.Run("Evaluate Health Risk Assessment access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			EvaluateHealthRiskAssessment struct {
+				AssessmentID    string
+				RiskLevel       string
+				Recommendations string
+			}
+		}
+		// 创建评估填充问卷数据
+		filledQuestionnaire := model.FilledQuestionnaire{
+			QuestionnaireID: questionnaireId,
+			Responses: []*model.Response{
+				{QuestionID: 1, Choice: "是"},
+				{QuestionID: 2, Choice: "是"},
+				{QuestionID: 3, Choice: "是"},
+				{QuestionID: 4, Choice: "是"},
+				{QuestionID: 5, Choice: "是"},
+				{QuestionID: 6, Choice: "否"},
+				{QuestionID: 7, Choice: "是"},
+				{QuestionID: 8, Choice: "否"},
+				{QuestionID: 9, Choice: "是"},
+				{QuestionID: 10, Choice: "否"},
+			},
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		// 无效令牌
+		err := c.Post(`mutation evaluateHealthRiskAssessment($filledQuestionnaire: FilledQuestionnaire!) {
+			evaluateHealthRiskAssessment(filledQuestionnaire: $filledQuestionnaire) {
+				assessmentId
+				riskLevel
+				recommendations
+			}
+		}`, &deniedResponse, client.Var("filledQuestionnaire", filledQuestionnaire))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+	t.Run("Get Health Risk Assessment Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetHealthRiskAssessment []struct {
+				AssessmentID      string
+				QuestionnaireData []struct {
+					QuestionId int
+					Choice     string
+					Answer     string
+				}
+				RiskLevel       string
+				Recommendations string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// 无效令牌
+		err := c.Post(`query getHealthRiskAssessment {
+			getHealthRiskAssessment {
+				assessmentId
+				questionnaireData {
+					questionId
+					answer
+				}
+				riskLevel
+				recommendations
+			}
+		}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+	t.Run("Get Health Assessment Questions Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetHealthRiskAssessmentQuestion struct {
+				QuestionnaireID int
+				Data            []struct {
+					QuestionId   int
+					Question     string
+					QuestionType int
+					Choices      []string
+				}
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// 无效令牌
+		err := c.Post(`query getHealthRiskAssessmentQuestion{
+			getHealthRiskAssessmentQuestion {
+				questionnaireId
+				data{
+					questionId
+					question
+  					questionType 
+  					choices 		
+				}
+			}
+		}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
 	DeleteUser(t, c, user)
 }

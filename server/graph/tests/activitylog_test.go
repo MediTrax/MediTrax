@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"meditrax/graph/utils"
 	"testing"
@@ -76,4 +77,38 @@ func TestActivityLogWithAddFunction(t *testing.T) {
 		require.Equal(t, "Old Name", response.GetActivityLog[1].From)
 		require.Equal(t, "New Name", response.GetActivityLog[1].To)
 	})
+	t.Run("Get Health Assessment Questions Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetActivityLog []struct {
+				LogID         string `json:"logId"`
+				ActivityType  string `json:"activityType"`
+				Description   string `json:"description"`
+				ChangedObject string `json:"changedObject"`
+				ChangedField  string `json:"changedField"`
+				From          string `json:"from"`
+				To            string `json:"to"`
+				Timestamp     string `json:"timestamp"`
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// 无效令牌
+		err := c.Post(`query {
+			getActivityLog {
+				logId
+				activityType
+				description
+				changedObject
+				changedField
+				from
+				to
+				timestamp
+			}
+		}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+	DeleteUser(t, c, user)
 }
