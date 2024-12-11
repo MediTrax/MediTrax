@@ -934,6 +934,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   errorState.value = '请输入补充剂量';
                   return;
                 }
+
                 final amount = double.tryParse(controller.text);
                 if (amount == null || amount <= 0) {
                   errorState.value = '请输入有效的补充剂量';
@@ -948,6 +949,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         medicationId: medication.id,
                         inventory: newInventory,
                       );
+
                   if (success && dialogContext.mounted && !isClosing) {
                     closeDialog(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1735,6 +1737,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
 
   Future<void> _fetchReminders() async {
     if (_isDisposed) return;
+
     try {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null && !_isDisposed) {
