@@ -607,7 +607,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 		UPDATE $id SET reminder_time=$reminder_time;`,
 		map[string]interface{}{
 			"id":            *reminderID,
-			"reminder_time": next_reminder_time,
+			"reminder_time": next_reminder_time.Format("2006-01-02T15:04:05.000"),
 		})
 	if err != nil {
 		return nil, err

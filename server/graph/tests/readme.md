@@ -1,4 +1,4 @@
-to use tests, run `go test meditrax/graph/tests -coverprofile coverage.out.tmp -coverpkg=meditrax/graph/resolvers`
+to use tests, run `go test meditrax/graph/tests -coverprofile coverage.out.tmp -coverpkg=meditrax/graph/resolvers,meditrax/graph/utils`
 then, to visualize, do
 ```
 cat coverage.out.tmp | grep -v "generated.go" > coverage.out
