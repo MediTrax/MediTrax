@@ -30,17 +30,17 @@ func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, fil
 	result, err := database.DB.Query(
 		`CREATE ONLY health_assessment:ulid()
 		SET
-		user_id=$user_id,
-		questionnaire_data=$questionnaire_data,
-		risk_level=$risk_level,
+		userId=$userId,
+		questionnaireData=$questionnaireData,
+		riskLevel=$riskLevel,
 		recommendations=$recommendations,
-		created_at=time::now();
+		createdAt=time::now();
 		`,
 		map[string]interface{}{
-			"user_id":            user.ID,
-			"questionnaire_data": filledQuestionnaire.Responses,
-			"risk_level":         riskLevel,
-			"recommendations":    recommendations,
+			"userId":            user.ID,
+			"questionnaireData": filledQuestionnaire.Responses,
+			"riskLevel":         riskLevel,
+			"recommendations":   recommendations,
 		},
 	)
 	if err != nil {
@@ -68,9 +68,9 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) ([]*model.H
 	}
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
-		`SELECT * FROM health_assessment WHERE user_id = $user_id;`,
+		`SELECT * FROM health_assessment WHERE userId = $userId;`,
 		map[string]interface{}{
-			"user_id": user.ID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -125,11 +125,11 @@ func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*m
 		SET
 		questionnaireId=$questionnaireId,
 		data=$data,
-		created_at=time::now();`,
+		createdAt=time::now();`,
 		map[string]interface{}{
 			"questionnaire_id": questionnaireId,
 			"data":             questions,
-			"created_at":       time.Now(),
+			"createdAt":        time.Now(),
 		},
 	)
 	if err != nil {

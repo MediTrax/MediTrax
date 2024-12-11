@@ -25,9 +25,9 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 
 	// check that there isn't already a metric entry for the user with the same type and record time
 	result, err := database.DB.Query(
-		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
+		`SELECT * FROM health_metric WHERE userId=$userId AND recordedAt=$recordedAt AND metricType=$metricType;`,
 		map[string]interface{}{
-			"user_id":    user.ID,
+			"userId":     user.ID,
 			"recordedAt": recordedAt,
 			"metricType": metricType,
 		},
@@ -47,19 +47,19 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 	result, err = database.DB.Query(
 		`CREATE ONLY health_metric:ulid()
 		SET
-		user_id=$user_id,
-		metric_type=$metric_type,
+		userId=$userId,
+		metricType=$metricType,
 		value=$value,
 		unit=$unit,
-		recorded_at=$recorded_at,
-		created_at=time::now();
+		recordedAt=$recordedAt,
+		createdAt=time::now();
 		`,
 		map[string]interface{}{
-			"user_id":     user.ID,
-			"metric_type": metricType,
-			"value":       value,
-			"unit":        unit,
-			"recorded_at": recordedAt,
+			"userId":     user.ID,
+			"metricType": metricType,
+			"value":      value,
+			"unit":       unit,
+			"recordedAt": recordedAt,
 		},
 	)
 	if err != nil {
@@ -92,10 +92,10 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	result, err := database.DB.Query(
-		`SELECT * FROM ONLY $metricId WHERE user_id=$user_id;`,
+		`SELECT * FROM ONLY $metricId WHERE userId=$userId;`,
 		map[string]interface{}{
 			"metricId": metricID,
-			"user_id":  user.ID,
+			"userId":   user.ID,
 		},
 	)
 	if err != nil {
@@ -107,7 +107,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": metricID, "user_id": user.ID}
+	updateValues := map[string]interface{}{"id": metricID, "userId": user.ID}
 
 	var changeLog []utils.ChangeLog
 
@@ -135,7 +135,7 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	}
 
 	// write to the query
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
 	if err != nil {
@@ -179,10 +179,10 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 
 	// Execute the query, returning the entry before it is deleted
 	result, err := database.DB.Query(
-		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
+		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
 		map[string]interface{}{
-			"id":      metricID,
-			"user_id": user.ID,
+			"id":     metricID,
+			"userId": user.ID,
 		},
 	)
 	if err != nil {
@@ -215,13 +215,13 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 	// 插入新的医疗记录
 	result, err := database.DB.Query(
 		`CREATE ONLY medical_record:ulid() 
-        SET user_id=$user_id,
-			record_type=$recordType,
+        SET userId=$userId,
+			recordType=$recordType,
             content=$content,
-            created_at=time::now(),
-            updated_at=time::now();`,
+            createdAt=time::now(),
+            updatedAt=time::now();`,
 		map[string]interface{}{
-			"user_id":    user.ID,
+			"userId":     user.ID,
 			"recordType": recordType,
 			"content":    content,
 		},
@@ -256,10 +256,10 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	}
 
 	result, err := database.DB.Query(
-		`SELECT * FROM ONLY $recordId WHERE user_id=$user_id;`,
+		`SELECT * FROM ONLY $recordId WHERE userId=$userId;`,
 		map[string]interface{}{
 			"recordId": recordID,
-			"user_id":  user.ID,
+			"userId":   user.ID,
 		},
 	)
 	if err != nil {
@@ -271,7 +271,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	}
 
 	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": recordID, "user_id": user.ID}
+	updateValues := map[string]interface{}{"id": recordID, "userId": user.ID}
 
 	var changeLog []utils.ChangeLog
 
@@ -279,9 +279,9 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	updateFields := []string{}
 	if recordType != nil {
 		updateValues["recordType"] = *recordType
-		updateFields = append(updateFields, "record_type = $recordType")
+		updateFields = append(updateFields, "recordType = $recordType")
 		change := utils.ChangeLog{
-			Field: "record_type",
+			Field: "recordType",
 			From:  original.RecordType,
 			To:    *recordType,
 		}
@@ -299,7 +299,7 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	}
 
 	// write to the query
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
 	if err != nil {

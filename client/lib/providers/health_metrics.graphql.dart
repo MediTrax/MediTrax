@@ -816,6 +816,876 @@ class _CopyWithStubImpl$Query$GetHealthMetrics$getHealthMetrics<TRes>
       _res;
 }
 
+class Variables$Query$GetSharedHealthMetrics {
+  factory Variables$Query$GetSharedHealthMetrics({
+    required String patientId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? metricType,
+  }) =>
+      Variables$Query$GetSharedHealthMetrics._({
+        r'patientId': patientId,
+        if (startDate != null) r'startDate': startDate,
+        if (endDate != null) r'endDate': endDate,
+        if (metricType != null) r'metricType': metricType,
+      });
+
+  Variables$Query$GetSharedHealthMetrics._(this._$data);
+
+  factory Variables$Query$GetSharedHealthMetrics.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$patientId = data['patientId'];
+    result$data['patientId'] = (l$patientId as String);
+    if (data.containsKey('startDate')) {
+      final l$startDate = data['startDate'];
+      result$data['startDate'] =
+          l$startDate == null ? null : dateTimeFromJson(l$startDate);
+    }
+    if (data.containsKey('endDate')) {
+      final l$endDate = data['endDate'];
+      result$data['endDate'] =
+          l$endDate == null ? null : dateTimeFromJson(l$endDate);
+    }
+    if (data.containsKey('metricType')) {
+      final l$metricType = data['metricType'];
+      result$data['metricType'] = (l$metricType as String?);
+    }
+    return Variables$Query$GetSharedHealthMetrics._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get patientId => (_$data['patientId'] as String);
+
+  DateTime? get startDate => (_$data['startDate'] as DateTime?);
+
+  DateTime? get endDate => (_$data['endDate'] as DateTime?);
+
+  String? get metricType => (_$data['metricType'] as String?);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$patientId = patientId;
+    result$data['patientId'] = l$patientId;
+    if (_$data.containsKey('startDate')) {
+      final l$startDate = startDate;
+      result$data['startDate'] =
+          l$startDate == null ? null : dateTimeToJson(l$startDate);
+    }
+    if (_$data.containsKey('endDate')) {
+      final l$endDate = endDate;
+      result$data['endDate'] =
+          l$endDate == null ? null : dateTimeToJson(l$endDate);
+    }
+    if (_$data.containsKey('metricType')) {
+      final l$metricType = metricType;
+      result$data['metricType'] = l$metricType;
+    }
+    return result$data;
+  }
+
+  CopyWith$Variables$Query$GetSharedHealthMetrics<
+          Variables$Query$GetSharedHealthMetrics>
+      get copyWith => CopyWith$Variables$Query$GetSharedHealthMetrics(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Variables$Query$GetSharedHealthMetrics) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$patientId = patientId;
+    final lOther$patientId = other.patientId;
+    if (l$patientId != lOther$patientId) {
+      return false;
+    }
+    final l$startDate = startDate;
+    final lOther$startDate = other.startDate;
+    if (_$data.containsKey('startDate') !=
+        other._$data.containsKey('startDate')) {
+      return false;
+    }
+    if (l$startDate != lOther$startDate) {
+      return false;
+    }
+    final l$endDate = endDate;
+    final lOther$endDate = other.endDate;
+    if (_$data.containsKey('endDate') != other._$data.containsKey('endDate')) {
+      return false;
+    }
+    if (l$endDate != lOther$endDate) {
+      return false;
+    }
+    final l$metricType = metricType;
+    final lOther$metricType = other.metricType;
+    if (_$data.containsKey('metricType') !=
+        other._$data.containsKey('metricType')) {
+      return false;
+    }
+    if (l$metricType != lOther$metricType) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$patientId = patientId;
+    final l$startDate = startDate;
+    final l$endDate = endDate;
+    final l$metricType = metricType;
+    return Object.hashAll([
+      l$patientId,
+      _$data.containsKey('startDate') ? l$startDate : const {},
+      _$data.containsKey('endDate') ? l$endDate : const {},
+      _$data.containsKey('metricType') ? l$metricType : const {},
+    ]);
+  }
+}
+
+abstract class CopyWith$Variables$Query$GetSharedHealthMetrics<TRes> {
+  factory CopyWith$Variables$Query$GetSharedHealthMetrics(
+    Variables$Query$GetSharedHealthMetrics instance,
+    TRes Function(Variables$Query$GetSharedHealthMetrics) then,
+  ) = _CopyWithImpl$Variables$Query$GetSharedHealthMetrics;
+
+  factory CopyWith$Variables$Query$GetSharedHealthMetrics.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Query$GetSharedHealthMetrics;
+
+  TRes call({
+    String? patientId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? metricType,
+  });
+}
+
+class _CopyWithImpl$Variables$Query$GetSharedHealthMetrics<TRes>
+    implements CopyWith$Variables$Query$GetSharedHealthMetrics<TRes> {
+  _CopyWithImpl$Variables$Query$GetSharedHealthMetrics(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Query$GetSharedHealthMetrics _instance;
+
+  final TRes Function(Variables$Query$GetSharedHealthMetrics) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? patientId = _undefined,
+    Object? startDate = _undefined,
+    Object? endDate = _undefined,
+    Object? metricType = _undefined,
+  }) =>
+      _then(Variables$Query$GetSharedHealthMetrics._({
+        ..._instance._$data,
+        if (patientId != _undefined && patientId != null)
+          'patientId': (patientId as String),
+        if (startDate != _undefined) 'startDate': (startDate as DateTime?),
+        if (endDate != _undefined) 'endDate': (endDate as DateTime?),
+        if (metricType != _undefined) 'metricType': (metricType as String?),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Query$GetSharedHealthMetrics<TRes>
+    implements CopyWith$Variables$Query$GetSharedHealthMetrics<TRes> {
+  _CopyWithStubImpl$Variables$Query$GetSharedHealthMetrics(this._res);
+
+  TRes _res;
+
+  call({
+    String? patientId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? metricType,
+  }) =>
+      _res;
+}
+
+class Query$GetSharedHealthMetrics {
+  Query$GetSharedHealthMetrics({
+    this.getSharedHealthMetrics,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetSharedHealthMetrics.fromJson(Map<String, dynamic> json) {
+    final l$getSharedHealthMetrics = json['getSharedHealthMetrics'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedHealthMetrics(
+      getSharedHealthMetrics: (l$getSharedHealthMetrics as List<dynamic>?)
+          ?.map((e) => e == null
+              ? null
+              : Query$GetSharedHealthMetrics$getSharedHealthMetrics.fromJson(
+                  (e as Map<String, dynamic>)))
+          .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>?
+      getSharedHealthMetrics;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getSharedHealthMetrics = getSharedHealthMetrics;
+    _resultData['getSharedHealthMetrics'] =
+        l$getSharedHealthMetrics?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getSharedHealthMetrics = getSharedHealthMetrics;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getSharedHealthMetrics == null
+          ? null
+          : Object.hashAll(l$getSharedHealthMetrics.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedHealthMetrics) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getSharedHealthMetrics = getSharedHealthMetrics;
+    final lOther$getSharedHealthMetrics = other.getSharedHealthMetrics;
+    if (l$getSharedHealthMetrics != null &&
+        lOther$getSharedHealthMetrics != null) {
+      if (l$getSharedHealthMetrics.length !=
+          lOther$getSharedHealthMetrics.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getSharedHealthMetrics.length; i++) {
+        final l$getSharedHealthMetrics$entry = l$getSharedHealthMetrics[i];
+        final lOther$getSharedHealthMetrics$entry =
+            lOther$getSharedHealthMetrics[i];
+        if (l$getSharedHealthMetrics$entry !=
+            lOther$getSharedHealthMetrics$entry) {
+          return false;
+        }
+      }
+    } else if (l$getSharedHealthMetrics != lOther$getSharedHealthMetrics) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedHealthMetrics
+    on Query$GetSharedHealthMetrics {
+  CopyWith$Query$GetSharedHealthMetrics<Query$GetSharedHealthMetrics>
+      get copyWith => CopyWith$Query$GetSharedHealthMetrics(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedHealthMetrics<TRes> {
+  factory CopyWith$Query$GetSharedHealthMetrics(
+    Query$GetSharedHealthMetrics instance,
+    TRes Function(Query$GetSharedHealthMetrics) then,
+  ) = _CopyWithImpl$Query$GetSharedHealthMetrics;
+
+  factory CopyWith$Query$GetSharedHealthMetrics.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetSharedHealthMetrics;
+
+  TRes call({
+    List<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>?
+        getSharedHealthMetrics,
+    String? $__typename,
+  });
+  TRes getSharedHealthMetrics(
+      Iterable<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>? Function(
+              Iterable<
+                  CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<
+                      Query$GetSharedHealthMetrics$getSharedHealthMetrics>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetSharedHealthMetrics<TRes>
+    implements CopyWith$Query$GetSharedHealthMetrics<TRes> {
+  _CopyWithImpl$Query$GetSharedHealthMetrics(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedHealthMetrics _instance;
+
+  final TRes Function(Query$GetSharedHealthMetrics) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getSharedHealthMetrics = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedHealthMetrics(
+        getSharedHealthMetrics: getSharedHealthMetrics == _undefined
+            ? _instance.getSharedHealthMetrics
+            : (getSharedHealthMetrics
+                as List<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getSharedHealthMetrics(
+          Iterable<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<
+                          Query$GetSharedHealthMetrics$getSharedHealthMetrics>?>?)
+              _fn) =>
+      call(
+          getSharedHealthMetrics:
+              _fn(_instance.getSharedHealthMetrics?.map((e) => e == null
+                  ? null
+                  : CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+                      e,
+                      (i) => i,
+                    )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetSharedHealthMetrics<TRes>
+    implements CopyWith$Query$GetSharedHealthMetrics<TRes> {
+  _CopyWithStubImpl$Query$GetSharedHealthMetrics(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetSharedHealthMetrics$getSharedHealthMetrics?>?
+        getSharedHealthMetrics,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getSharedHealthMetrics(_fn) => _res;
+}
+
+const documentNodeQueryGetSharedHealthMetrics = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetSharedHealthMetrics'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'patientId')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'startDate')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'DateTime'),
+          isNonNull: false,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'endDate')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'DateTime'),
+          isNonNull: false,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'metricType')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: false,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getSharedHealthMetrics'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'patientId'),
+            value: VariableNode(name: NameNode(value: 'patientId')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'startDate'),
+            value: VariableNode(name: NameNode(value: 'startDate')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'endDate'),
+            value: VariableNode(name: NameNode(value: 'endDate')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'metricType'),
+            value: VariableNode(name: NameNode(value: 'metricType')),
+          ),
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'metricId'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'metricType'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'value'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'unit'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'recordedAt'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetSharedHealthMetrics _parserFn$Query$GetSharedHealthMetrics(
+        Map<String, dynamic> data) =>
+    Query$GetSharedHealthMetrics.fromJson(data);
+typedef OnQueryComplete$Query$GetSharedHealthMetrics = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetSharedHealthMetrics?,
+);
+
+class Options$Query$GetSharedHealthMetrics
+    extends graphql.QueryOptions<Query$GetSharedHealthMetrics> {
+  Options$Query$GetSharedHealthMetrics({
+    String? operationName,
+    required Variables$Query$GetSharedHealthMetrics variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedHealthMetrics? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetSharedHealthMetrics? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetSharedHealthMetrics(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetSharedHealthMetrics,
+          parserFn: _parserFn$Query$GetSharedHealthMetrics,
+        );
+
+  final OnQueryComplete$Query$GetSharedHealthMetrics? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetSharedHealthMetrics
+    extends graphql.WatchQueryOptions<Query$GetSharedHealthMetrics> {
+  WatchOptions$Query$GetSharedHealthMetrics({
+    String? operationName,
+    required Variables$Query$GetSharedHealthMetrics variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedHealthMetrics? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetSharedHealthMetrics,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetSharedHealthMetrics,
+        );
+}
+
+class FetchMoreOptions$Query$GetSharedHealthMetrics
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetSharedHealthMetrics({
+    required graphql.UpdateQuery updateQuery,
+    required Variables$Query$GetSharedHealthMetrics variables,
+  }) : super(
+          updateQuery: updateQuery,
+          variables: variables.toJson(),
+          document: documentNodeQueryGetSharedHealthMetrics,
+        );
+}
+
+extension ClientExtension$Query$GetSharedHealthMetrics
+    on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetSharedHealthMetrics>>
+      query$GetSharedHealthMetrics(
+              Options$Query$GetSharedHealthMetrics options) async =>
+          await this.query(options);
+  graphql.ObservableQuery<Query$GetSharedHealthMetrics>
+      watchQuery$GetSharedHealthMetrics(
+              WatchOptions$Query$GetSharedHealthMetrics options) =>
+          this.watchQuery(options);
+  void writeQuery$GetSharedHealthMetrics({
+    required Query$GetSharedHealthMetrics data,
+    required Variables$Query$GetSharedHealthMetrics variables,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetSharedHealthMetrics),
+          variables: variables.toJson(),
+        ),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetSharedHealthMetrics? readQuery$GetSharedHealthMetrics({
+    required Variables$Query$GetSharedHealthMetrics variables,
+    bool optimistic = true,
+  }) {
+    final result = this.readQuery(
+      graphql.Request(
+        operation: graphql.Operation(
+            document: documentNodeQueryGetSharedHealthMetrics),
+        variables: variables.toJson(),
+      ),
+      optimistic: optimistic,
+    );
+    return result == null
+        ? null
+        : Query$GetSharedHealthMetrics.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetSharedHealthMetrics>
+    useQuery$GetSharedHealthMetrics(
+            Options$Query$GetSharedHealthMetrics options) =>
+        graphql_flutter.useQuery(options);
+graphql.ObservableQuery<Query$GetSharedHealthMetrics>
+    useWatchQuery$GetSharedHealthMetrics(
+            WatchOptions$Query$GetSharedHealthMetrics options) =>
+        graphql_flutter.useWatchQuery(options);
+
+class Query$GetSharedHealthMetrics$Widget
+    extends graphql_flutter.Query<Query$GetSharedHealthMetrics> {
+  Query$GetSharedHealthMetrics$Widget({
+    widgets.Key? key,
+    required Options$Query$GetSharedHealthMetrics options,
+    required graphql_flutter.QueryBuilder<Query$GetSharedHealthMetrics> builder,
+  }) : super(
+          key: key,
+          options: options,
+          builder: builder,
+        );
+}
+
+class Query$GetSharedHealthMetrics$getSharedHealthMetrics {
+  Query$GetSharedHealthMetrics$getSharedHealthMetrics({
+    required this.metricId,
+    required this.metricType,
+    required this.value,
+    required this.unit,
+    required this.recordedAt,
+    this.$__typename = 'HealthMetricDetail',
+  });
+
+  factory Query$GetSharedHealthMetrics$getSharedHealthMetrics.fromJson(
+      Map<String, dynamic> json) {
+    final l$metricId = json['metricId'];
+    final l$metricType = json['metricType'];
+    final l$value = json['value'];
+    final l$unit = json['unit'];
+    final l$recordedAt = json['recordedAt'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+      metricId: (l$metricId as String),
+      metricType: (l$metricType as String),
+      value: (l$value as num).toDouble(),
+      unit: (l$unit as String),
+      recordedAt: dateTimeFromJson(l$recordedAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String metricId;
+
+  final String metricType;
+
+  final double value;
+
+  final String unit;
+
+  final DateTime recordedAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$metricId = metricId;
+    _resultData['metricId'] = l$metricId;
+    final l$metricType = metricType;
+    _resultData['metricType'] = l$metricType;
+    final l$value = value;
+    _resultData['value'] = l$value;
+    final l$unit = unit;
+    _resultData['unit'] = l$unit;
+    final l$recordedAt = recordedAt;
+    _resultData['recordedAt'] = dateTimeToJson(l$recordedAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$metricId = metricId;
+    final l$metricType = metricType;
+    final l$value = value;
+    final l$unit = unit;
+    final l$recordedAt = recordedAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$metricId,
+      l$metricType,
+      l$value,
+      l$unit,
+      l$recordedAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedHealthMetrics$getSharedHealthMetrics) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$metricId = metricId;
+    final lOther$metricId = other.metricId;
+    if (l$metricId != lOther$metricId) {
+      return false;
+    }
+    final l$metricType = metricType;
+    final lOther$metricType = other.metricType;
+    if (l$metricType != lOther$metricType) {
+      return false;
+    }
+    final l$value = value;
+    final lOther$value = other.value;
+    if (l$value != lOther$value) {
+      return false;
+    }
+    final l$unit = unit;
+    final lOther$unit = other.unit;
+    if (l$unit != lOther$unit) {
+      return false;
+    }
+    final l$recordedAt = recordedAt;
+    final lOther$recordedAt = other.recordedAt;
+    if (l$recordedAt != lOther$recordedAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedHealthMetrics$getSharedHealthMetrics
+    on Query$GetSharedHealthMetrics$getSharedHealthMetrics {
+  CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<
+          Query$GetSharedHealthMetrics$getSharedHealthMetrics>
+      get copyWith =>
+          CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<
+    TRes> {
+  factory CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+    Query$GetSharedHealthMetrics$getSharedHealthMetrics instance,
+    TRes Function(Query$GetSharedHealthMetrics$getSharedHealthMetrics) then,
+  ) = _CopyWithImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics;
+
+  factory CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics;
+
+  TRes call({
+    String? metricId,
+    String? metricType,
+    double? value,
+    String? unit,
+    DateTime? recordedAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics<TRes>
+    implements
+        CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<TRes> {
+  _CopyWithImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedHealthMetrics$getSharedHealthMetrics _instance;
+
+  final TRes Function(Query$GetSharedHealthMetrics$getSharedHealthMetrics)
+      _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? metricId = _undefined,
+    Object? metricType = _undefined,
+    Object? value = _undefined,
+    Object? unit = _undefined,
+    Object? recordedAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+        metricId: metricId == _undefined || metricId == null
+            ? _instance.metricId
+            : (metricId as String),
+        metricType: metricType == _undefined || metricType == null
+            ? _instance.metricType
+            : (metricType as String),
+        value: value == _undefined || value == null
+            ? _instance.value
+            : (value as double),
+        unit: unit == _undefined || unit == null
+            ? _instance.unit
+            : (unit as String),
+        recordedAt: recordedAt == _undefined || recordedAt == null
+            ? _instance.recordedAt
+            : (recordedAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics<
+        TRes>
+    implements
+        CopyWith$Query$GetSharedHealthMetrics$getSharedHealthMetrics<TRes> {
+  _CopyWithStubImpl$Query$GetSharedHealthMetrics$getSharedHealthMetrics(
+      this._res);
+
+  TRes _res;
+
+  call({
+    String? metricId,
+    String? metricType,
+    double? value,
+    String? unit,
+    DateTime? recordedAt,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
 class Variables$Mutation$AddHealthMetric {
   factory Variables$Mutation$AddHealthMetric({
     required String metricType,
@@ -3577,6 +4447,751 @@ class _CopyWithStubImpl$Query$GetTreatmentSchedules$getTreatmentSchedules<TRes>
     implements
         CopyWith$Query$GetTreatmentSchedules$getTreatmentSchedules<TRes> {
   _CopyWithStubImpl$Query$GetTreatmentSchedules$getTreatmentSchedules(
+      this._res);
+
+  TRes _res;
+
+  call({
+    String? scheduleId,
+    String? treatmentType,
+    DateTime? scheduledTime,
+    String? location,
+    String? notes,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Variables$Query$GetSharedTreatmentSchedule {
+  factory Variables$Query$GetSharedTreatmentSchedule(
+          {required String patientId}) =>
+      Variables$Query$GetSharedTreatmentSchedule._({
+        r'patientId': patientId,
+      });
+
+  Variables$Query$GetSharedTreatmentSchedule._(this._$data);
+
+  factory Variables$Query$GetSharedTreatmentSchedule.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$patientId = data['patientId'];
+    result$data['patientId'] = (l$patientId as String);
+    return Variables$Query$GetSharedTreatmentSchedule._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get patientId => (_$data['patientId'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$patientId = patientId;
+    result$data['patientId'] = l$patientId;
+    return result$data;
+  }
+
+  CopyWith$Variables$Query$GetSharedTreatmentSchedule<
+          Variables$Query$GetSharedTreatmentSchedule>
+      get copyWith => CopyWith$Variables$Query$GetSharedTreatmentSchedule(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Variables$Query$GetSharedTreatmentSchedule) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$patientId = patientId;
+    final lOther$patientId = other.patientId;
+    if (l$patientId != lOther$patientId) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$patientId = patientId;
+    return Object.hashAll([l$patientId]);
+  }
+}
+
+abstract class CopyWith$Variables$Query$GetSharedTreatmentSchedule<TRes> {
+  factory CopyWith$Variables$Query$GetSharedTreatmentSchedule(
+    Variables$Query$GetSharedTreatmentSchedule instance,
+    TRes Function(Variables$Query$GetSharedTreatmentSchedule) then,
+  ) = _CopyWithImpl$Variables$Query$GetSharedTreatmentSchedule;
+
+  factory CopyWith$Variables$Query$GetSharedTreatmentSchedule.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Query$GetSharedTreatmentSchedule;
+
+  TRes call({String? patientId});
+}
+
+class _CopyWithImpl$Variables$Query$GetSharedTreatmentSchedule<TRes>
+    implements CopyWith$Variables$Query$GetSharedTreatmentSchedule<TRes> {
+  _CopyWithImpl$Variables$Query$GetSharedTreatmentSchedule(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Query$GetSharedTreatmentSchedule _instance;
+
+  final TRes Function(Variables$Query$GetSharedTreatmentSchedule) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({Object? patientId = _undefined}) =>
+      _then(Variables$Query$GetSharedTreatmentSchedule._({
+        ..._instance._$data,
+        if (patientId != _undefined && patientId != null)
+          'patientId': (patientId as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Query$GetSharedTreatmentSchedule<TRes>
+    implements CopyWith$Variables$Query$GetSharedTreatmentSchedule<TRes> {
+  _CopyWithStubImpl$Variables$Query$GetSharedTreatmentSchedule(this._res);
+
+  TRes _res;
+
+  call({String? patientId}) => _res;
+}
+
+class Query$GetSharedTreatmentSchedule {
+  Query$GetSharedTreatmentSchedule({
+    this.getSharedTreatmentSchedule,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetSharedTreatmentSchedule.fromJson(Map<String, dynamic> json) {
+    final l$getSharedTreatmentSchedule = json['getSharedTreatmentSchedule'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedTreatmentSchedule(
+      getSharedTreatmentSchedule:
+          (l$getSharedTreatmentSchedule as List<dynamic>?)
+              ?.map((e) => e == null
+                  ? null
+                  : Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule
+                      .fromJson((e as Map<String, dynamic>)))
+              .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>?
+      getSharedTreatmentSchedule;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getSharedTreatmentSchedule = getSharedTreatmentSchedule;
+    _resultData['getSharedTreatmentSchedule'] =
+        l$getSharedTreatmentSchedule?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getSharedTreatmentSchedule = getSharedTreatmentSchedule;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getSharedTreatmentSchedule == null
+          ? null
+          : Object.hashAll(l$getSharedTreatmentSchedule.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedTreatmentSchedule) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getSharedTreatmentSchedule = getSharedTreatmentSchedule;
+    final lOther$getSharedTreatmentSchedule = other.getSharedTreatmentSchedule;
+    if (l$getSharedTreatmentSchedule != null &&
+        lOther$getSharedTreatmentSchedule != null) {
+      if (l$getSharedTreatmentSchedule.length !=
+          lOther$getSharedTreatmentSchedule.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getSharedTreatmentSchedule.length; i++) {
+        final l$getSharedTreatmentSchedule$entry =
+            l$getSharedTreatmentSchedule[i];
+        final lOther$getSharedTreatmentSchedule$entry =
+            lOther$getSharedTreatmentSchedule[i];
+        if (l$getSharedTreatmentSchedule$entry !=
+            lOther$getSharedTreatmentSchedule$entry) {
+          return false;
+        }
+      }
+    } else if (l$getSharedTreatmentSchedule !=
+        lOther$getSharedTreatmentSchedule) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedTreatmentSchedule
+    on Query$GetSharedTreatmentSchedule {
+  CopyWith$Query$GetSharedTreatmentSchedule<Query$GetSharedTreatmentSchedule>
+      get copyWith => CopyWith$Query$GetSharedTreatmentSchedule(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedTreatmentSchedule<TRes> {
+  factory CopyWith$Query$GetSharedTreatmentSchedule(
+    Query$GetSharedTreatmentSchedule instance,
+    TRes Function(Query$GetSharedTreatmentSchedule) then,
+  ) = _CopyWithImpl$Query$GetSharedTreatmentSchedule;
+
+  factory CopyWith$Query$GetSharedTreatmentSchedule.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetSharedTreatmentSchedule;
+
+  TRes call({
+    List<Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>?
+        getSharedTreatmentSchedule,
+    String? $__typename,
+  });
+  TRes getSharedTreatmentSchedule(
+      Iterable<Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>? Function(
+              Iterable<
+                  CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+                      Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetSharedTreatmentSchedule<TRes>
+    implements CopyWith$Query$GetSharedTreatmentSchedule<TRes> {
+  _CopyWithImpl$Query$GetSharedTreatmentSchedule(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedTreatmentSchedule _instance;
+
+  final TRes Function(Query$GetSharedTreatmentSchedule) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getSharedTreatmentSchedule = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedTreatmentSchedule(
+        getSharedTreatmentSchedule: getSharedTreatmentSchedule == _undefined
+            ? _instance.getSharedTreatmentSchedule
+            : (getSharedTreatmentSchedule as List<
+                Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getSharedTreatmentSchedule(
+          Iterable<Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+                          Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule>?>?)
+              _fn) =>
+      call(
+          getSharedTreatmentSchedule:
+              _fn(_instance.getSharedTreatmentSchedule?.map((e) => e == null
+                  ? null
+                  : CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+                      e,
+                      (i) => i,
+                    )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetSharedTreatmentSchedule<TRes>
+    implements CopyWith$Query$GetSharedTreatmentSchedule<TRes> {
+  _CopyWithStubImpl$Query$GetSharedTreatmentSchedule(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule?>?
+        getSharedTreatmentSchedule,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getSharedTreatmentSchedule(_fn) => _res;
+}
+
+const documentNodeQueryGetSharedTreatmentSchedule = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetSharedTreatmentSchedule'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'patientId')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      )
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getSharedTreatmentSchedule'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'patientId'),
+            value: VariableNode(name: NameNode(value: 'patientId')),
+          )
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'scheduleId'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'treatmentType'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'scheduledTime'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'location'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'notes'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetSharedTreatmentSchedule _parserFn$Query$GetSharedTreatmentSchedule(
+        Map<String, dynamic> data) =>
+    Query$GetSharedTreatmentSchedule.fromJson(data);
+typedef OnQueryComplete$Query$GetSharedTreatmentSchedule = FutureOr<void>
+    Function(
+  Map<String, dynamic>?,
+  Query$GetSharedTreatmentSchedule?,
+);
+
+class Options$Query$GetSharedTreatmentSchedule
+    extends graphql.QueryOptions<Query$GetSharedTreatmentSchedule> {
+  Options$Query$GetSharedTreatmentSchedule({
+    String? operationName,
+    required Variables$Query$GetSharedTreatmentSchedule variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedTreatmentSchedule? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetSharedTreatmentSchedule? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetSharedTreatmentSchedule(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetSharedTreatmentSchedule,
+          parserFn: _parserFn$Query$GetSharedTreatmentSchedule,
+        );
+
+  final OnQueryComplete$Query$GetSharedTreatmentSchedule? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetSharedTreatmentSchedule
+    extends graphql.WatchQueryOptions<Query$GetSharedTreatmentSchedule> {
+  WatchOptions$Query$GetSharedTreatmentSchedule({
+    String? operationName,
+    required Variables$Query$GetSharedTreatmentSchedule variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedTreatmentSchedule? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetSharedTreatmentSchedule,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetSharedTreatmentSchedule,
+        );
+}
+
+class FetchMoreOptions$Query$GetSharedTreatmentSchedule
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetSharedTreatmentSchedule({
+    required graphql.UpdateQuery updateQuery,
+    required Variables$Query$GetSharedTreatmentSchedule variables,
+  }) : super(
+          updateQuery: updateQuery,
+          variables: variables.toJson(),
+          document: documentNodeQueryGetSharedTreatmentSchedule,
+        );
+}
+
+extension ClientExtension$Query$GetSharedTreatmentSchedule
+    on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetSharedTreatmentSchedule>>
+      query$GetSharedTreatmentSchedule(
+              Options$Query$GetSharedTreatmentSchedule options) async =>
+          await this.query(options);
+  graphql.ObservableQuery<Query$GetSharedTreatmentSchedule>
+      watchQuery$GetSharedTreatmentSchedule(
+              WatchOptions$Query$GetSharedTreatmentSchedule options) =>
+          this.watchQuery(options);
+  void writeQuery$GetSharedTreatmentSchedule({
+    required Query$GetSharedTreatmentSchedule data,
+    required Variables$Query$GetSharedTreatmentSchedule variables,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetSharedTreatmentSchedule),
+          variables: variables.toJson(),
+        ),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetSharedTreatmentSchedule? readQuery$GetSharedTreatmentSchedule({
+    required Variables$Query$GetSharedTreatmentSchedule variables,
+    bool optimistic = true,
+  }) {
+    final result = this.readQuery(
+      graphql.Request(
+        operation: graphql.Operation(
+            document: documentNodeQueryGetSharedTreatmentSchedule),
+        variables: variables.toJson(),
+      ),
+      optimistic: optimistic,
+    );
+    return result == null
+        ? null
+        : Query$GetSharedTreatmentSchedule.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetSharedTreatmentSchedule>
+    useQuery$GetSharedTreatmentSchedule(
+            Options$Query$GetSharedTreatmentSchedule options) =>
+        graphql_flutter.useQuery(options);
+graphql.ObservableQuery<Query$GetSharedTreatmentSchedule>
+    useWatchQuery$GetSharedTreatmentSchedule(
+            WatchOptions$Query$GetSharedTreatmentSchedule options) =>
+        graphql_flutter.useWatchQuery(options);
+
+class Query$GetSharedTreatmentSchedule$Widget
+    extends graphql_flutter.Query<Query$GetSharedTreatmentSchedule> {
+  Query$GetSharedTreatmentSchedule$Widget({
+    widgets.Key? key,
+    required Options$Query$GetSharedTreatmentSchedule options,
+    required graphql_flutter.QueryBuilder<Query$GetSharedTreatmentSchedule>
+        builder,
+  }) : super(
+          key: key,
+          options: options,
+          builder: builder,
+        );
+}
+
+class Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule {
+  Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule({
+    required this.scheduleId,
+    required this.treatmentType,
+    required this.scheduledTime,
+    required this.location,
+    this.notes,
+    this.$__typename = 'TreatmentScheduleDetail',
+  });
+
+  factory Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule.fromJson(
+      Map<String, dynamic> json) {
+    final l$scheduleId = json['scheduleId'];
+    final l$treatmentType = json['treatmentType'];
+    final l$scheduledTime = json['scheduledTime'];
+    final l$location = json['location'];
+    final l$notes = json['notes'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+      scheduleId: (l$scheduleId as String),
+      treatmentType: (l$treatmentType as String),
+      scheduledTime: dateTimeFromJson(l$scheduledTime),
+      location: (l$location as String),
+      notes: (l$notes as String?),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String scheduleId;
+
+  final String treatmentType;
+
+  final DateTime scheduledTime;
+
+  final String location;
+
+  final String? notes;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$scheduleId = scheduleId;
+    _resultData['scheduleId'] = l$scheduleId;
+    final l$treatmentType = treatmentType;
+    _resultData['treatmentType'] = l$treatmentType;
+    final l$scheduledTime = scheduledTime;
+    _resultData['scheduledTime'] = dateTimeToJson(l$scheduledTime);
+    final l$location = location;
+    _resultData['location'] = l$location;
+    final l$notes = notes;
+    _resultData['notes'] = l$notes;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$scheduleId = scheduleId;
+    final l$treatmentType = treatmentType;
+    final l$scheduledTime = scheduledTime;
+    final l$location = location;
+    final l$notes = notes;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$scheduleId,
+      l$treatmentType,
+      l$scheduledTime,
+      l$location,
+      l$notes,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other
+            is Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$scheduleId = scheduleId;
+    final lOther$scheduleId = other.scheduleId;
+    if (l$scheduleId != lOther$scheduleId) {
+      return false;
+    }
+    final l$treatmentType = treatmentType;
+    final lOther$treatmentType = other.treatmentType;
+    if (l$treatmentType != lOther$treatmentType) {
+      return false;
+    }
+    final l$scheduledTime = scheduledTime;
+    final lOther$scheduledTime = other.scheduledTime;
+    if (l$scheduledTime != lOther$scheduledTime) {
+      return false;
+    }
+    final l$location = location;
+    final lOther$location = other.location;
+    if (l$location != lOther$location) {
+      return false;
+    }
+    final l$notes = notes;
+    final lOther$notes = other.notes;
+    if (l$notes != lOther$notes) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule
+    on Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule {
+  CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+          Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule>
+      get copyWith =>
+          CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+    TRes> {
+  factory CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+    Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule instance,
+    TRes Function(Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule)
+        then,
+  ) = _CopyWithImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule;
+
+  factory CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule;
+
+  TRes call({
+    String? scheduleId,
+    String? treatmentType,
+    DateTime? scheduledTime,
+    String? location,
+    String? notes,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+        TRes>
+    implements
+        CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+            TRes> {
+  _CopyWithImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule _instance;
+
+  final TRes Function(
+      Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? scheduleId = _undefined,
+    Object? treatmentType = _undefined,
+    Object? scheduledTime = _undefined,
+    Object? location = _undefined,
+    Object? notes = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
+        scheduleId: scheduleId == _undefined || scheduleId == null
+            ? _instance.scheduleId
+            : (scheduleId as String),
+        treatmentType: treatmentType == _undefined || treatmentType == null
+            ? _instance.treatmentType
+            : (treatmentType as String),
+        scheduledTime: scheduledTime == _undefined || scheduledTime == null
+            ? _instance.scheduledTime
+            : (scheduledTime as DateTime),
+        location: location == _undefined || location == null
+            ? _instance.location
+            : (location as String),
+        notes: notes == _undefined ? _instance.notes : (notes as String?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+        TRes>
+    implements
+        CopyWith$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule<
+            TRes> {
+  _CopyWithStubImpl$Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule(
       this._res);
 
   TRes _res;

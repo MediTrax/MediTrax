@@ -15,6 +15,7 @@ class AppStateData extends HiveObject with _$AppStateData {
     @HiveField(1) Token? token,
     @HiveField(2) @Default("system") String theme,
     @HiveField(3) bool? autoLoginResult,
+    @HiveField(4) String? selectedProfile,
   }) = _AppStateData;
 
   String get bearerToken =>

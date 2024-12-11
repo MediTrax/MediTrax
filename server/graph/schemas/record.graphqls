@@ -1,21 +1,21 @@
 type MedicalRecord{
   id: String!
-  user_id: String!
-  record_type: String!
+  userId: String!
+  recordType: String!
   # content: RecordObject!
   content: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type HealthMetric{
   id: String!
-  user_id: String!
-  metric_type: String!
+  userId: String!
+  metricType: String!
   value: Float!
   unit: String!
-  recorded_at: DateTime!
-  created_at: DateTime!
+  recordedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type AddHealthMetricResponse {

@@ -149,7 +149,7 @@ func TestAchievement(t *testing.T) {
                 userAchievementId
                 message
             }
-        }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badge_id"))
+        }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badgeId"))
 
 		// 检查 err 是否为 nil
 		if err == nil {

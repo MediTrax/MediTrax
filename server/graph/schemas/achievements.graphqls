@@ -2,16 +2,16 @@ type AchievementBadge{
   id: String!
   name: String!
   description: String!
-  icon_url: String!
-  created_at: DateTime!
+  iconUrl: String!
+  createdAt: DateTime!
 }
 
 type UserAchievement{
   id: String!
-  user_id: String!
-  badge_id: String!
-  earned_at: DateTime!
-  created_at: DateTime!
+  userId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type CreateAchievementBadgeResponse {
@@ -24,7 +24,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type AwardAchievementResponse {
@@ -40,7 +40,7 @@ type UserAchievementDetail {
 
 type UserPointRecord{
   id: String!
-  user_id: String!
+  userId: String!
   pointsEarned: Float!
   reason: String!
   earnedAt: DateTime!
