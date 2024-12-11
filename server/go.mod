@@ -5,6 +5,10 @@ go 1.23.1
 require (
 	github.com/99designs/gqlgen v0.17.55
 	github.com/ayush6624/go-chatgpt v0.3.0
+<<<<<<< HEAD
+=======
+	github.com/google/uuid v1.6.0
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.78
 	github.com/redis/go-redis/v9 v9.7.0
@@ -27,7 +31,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect

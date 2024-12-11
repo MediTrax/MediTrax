@@ -31,6 +31,7 @@ import 'screens/medicine_inventory_screen.dart';
 import 'screens/prescription_management_screen.dart';
 import 'screens/rewards_screen.dart';
 import 'screens/treatment_monitoring_screen.dart';
+import 'screens/profile_sharing_screen.dart';
 import 'providers/app_state.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'services/notification_service.dart';
@@ -138,7 +139,8 @@ class RouterNotifier extends ChangeNotifier {
       return 2;
     } else if (location.startsWith('/medical-records')) {
       return 3;
-    } else if (location.startsWith('/profile')) {
+    } else if (location.startsWith('/profile') ||
+        location.startsWith('/profile-sharing')) {
       return 4;
     }
     // Check if the route is a sub-route of any main routes
@@ -203,6 +205,10 @@ class RouterNotifier extends ChangeNotifier {
             GoRoute(
               path: '/diet-management',
               builder: (context, state) => const DietManagementScreen(),
+            ),
+            GoRoute(
+              path: '/profile-sharing',
+              builder: (context, state) => const ProfileSharingScreen(),
             ),
             GoRoute(
               path: '/family-collaboration',

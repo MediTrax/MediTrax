@@ -1,21 +1,39 @@
 type MedicalRecord{
   id: String!
+<<<<<<< HEAD
   user_id: String!
   record_type: String!
   # content: RecordObject!
   content: String!
   created_at: DateTime!
   updated_at: DateTime!
+=======
+  userId: String!
+  recordType: String!
+  # content: RecordObject!
+  content: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type HealthMetric{
   id: String!
+<<<<<<< HEAD
   user_id: String!
   metric_type: String!
   value: Float!
   unit: String!
   recorded_at: DateTime!
   created_at: DateTime!
+=======
+  userId: String!
+  metricType: String!
+  value: Float!
+  unit: String!
+  recordedAt: DateTime!
+  createdAt: DateTime!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type AddHealthMetricResponse {
@@ -57,6 +75,18 @@ type MedicalRecordDetail {
   createdAt: DateTime!
 }
 
+<<<<<<< HEAD
+=======
+type UpdateMedicalRecordResponse {
+  recordId: String!
+  message: String!
+}
+
+type DeleteMedicalRecordResponse {
+  message: String!
+}
+
+>>>>>>> 01096166741546756a9456fc584388602358902c
 extend type Query{
   getHealthMetrics(startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
   getMedicalRecords: [MedicalRecordDetail]

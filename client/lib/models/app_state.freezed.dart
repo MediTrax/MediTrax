@@ -24,6 +24,8 @@ mixin _$AppStateData {
   String get theme => throw _privateConstructorUsedError;
   @HiveField(3)
   bool? get autoLoginResult => throw _privateConstructorUsedError;
+  @HiveField(4)
+  String? get selectedProfile => throw _privateConstructorUsedError;
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +44,8 @@ abstract class $AppStateDataCopyWith<$Res> {
       {@HiveField(0) int navigatorIndex,
       @HiveField(1) Token? token,
       @HiveField(2) String theme,
-      @HiveField(3) bool? autoLoginResult});
+      @HiveField(3) bool? autoLoginResult,
+      @HiveField(4) String? selectedProfile});
 }
 
 /// @nodoc
@@ -64,6 +67,7 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
     Object? token = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
+    Object? selectedProfile = freezed,
   }) {
     return _then(_value.copyWith(
       navigatorIndex: null == navigatorIndex
@@ -82,6 +86,10 @@ class _$AppStateDataCopyWithImpl<$Res, $Val extends AppStateData>
           ? _value.autoLoginResult
           : autoLoginResult // ignore: cast_nullable_to_non_nullable
               as bool?,
+      selectedProfile: freezed == selectedProfile
+          ? _value.selectedProfile
+          : selectedProfile // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -98,7 +106,8 @@ abstract class _$$AppStateDataImplCopyWith<$Res>
       {@HiveField(0) int navigatorIndex,
       @HiveField(1) Token? token,
       @HiveField(2) String theme,
-      @HiveField(3) bool? autoLoginResult});
+      @HiveField(3) bool? autoLoginResult,
+      @HiveField(4) String? selectedProfile});
 }
 
 /// @nodoc
@@ -118,6 +127,7 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
     Object? token = freezed,
     Object? theme = null,
     Object? autoLoginResult = freezed,
+    Object? selectedProfile = freezed,
   }) {
     return _then(_$AppStateDataImpl(
       navigatorIndex: null == navigatorIndex
@@ -136,6 +146,10 @@ class __$$AppStateDataImplCopyWithImpl<$Res>
           ? _value.autoLoginResult
           : autoLoginResult // ignore: cast_nullable_to_non_nullable
               as bool?,
+      selectedProfile: freezed == selectedProfile
+          ? _value.selectedProfile
+          : selectedProfile // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -148,7 +162,8 @@ class _$AppStateDataImpl extends _AppStateData {
       {@HiveField(0) this.navigatorIndex = 0,
       @HiveField(1) this.token,
       @HiveField(2) this.theme = "system",
-      @HiveField(3) this.autoLoginResult})
+      @HiveField(3) this.autoLoginResult,
+      @HiveField(4) this.selectedProfile})
       : super._();
 
   @override
@@ -165,10 +180,13 @@ class _$AppStateDataImpl extends _AppStateData {
   @override
   @HiveField(3)
   final bool? autoLoginResult;
+  @override
+  @HiveField(4)
+  final String? selectedProfile;
 
   @override
   String toString() {
-    return 'AppStateData(navigatorIndex: $navigatorIndex, token: $token, theme: $theme, autoLoginResult: $autoLoginResult)';
+    return 'AppStateData(navigatorIndex: $navigatorIndex, token: $token, theme: $theme, autoLoginResult: $autoLoginResult, selectedProfile: $selectedProfile)';
   }
 
   @override
@@ -181,12 +199,14 @@ class _$AppStateDataImpl extends _AppStateData {
             (identical(other.token, token) || other.token == token) &&
             (identical(other.theme, theme) || other.theme == theme) &&
             (identical(other.autoLoginResult, autoLoginResult) ||
-                other.autoLoginResult == autoLoginResult));
+                other.autoLoginResult == autoLoginResult) &&
+            (identical(other.selectedProfile, selectedProfile) ||
+                other.selectedProfile == selectedProfile));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, navigatorIndex, token, theme, autoLoginResult);
+  int get hashCode => Object.hash(runtimeType, navigatorIndex, token, theme,
+      autoLoginResult, selectedProfile);
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.
@@ -202,7 +222,8 @@ abstract class _AppStateData extends AppStateData {
       {@HiveField(0) final int navigatorIndex,
       @HiveField(1) final Token? token,
       @HiveField(2) final String theme,
-      @HiveField(3) final bool? autoLoginResult}) = _$AppStateDataImpl;
+      @HiveField(3) final bool? autoLoginResult,
+      @HiveField(4) final String? selectedProfile}) = _$AppStateDataImpl;
   _AppStateData._() : super._();
 
   @override
@@ -217,6 +238,9 @@ abstract class _AppStateData extends AppStateData {
   @override
   @HiveField(3)
   bool? get autoLoginResult;
+  @override
+  @HiveField(4)
+  String? get selectedProfile;
 
   /// Create a copy of AppStateData
   /// with the given fields replaced by the non-null parameter values.

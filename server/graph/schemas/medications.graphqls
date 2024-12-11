@@ -5,18 +5,32 @@ type Medication{
   unit: String!
   frequency: String!
   inventory: Float!
+<<<<<<< HEAD
   user_id: String!
   created_at: DateTime!
   updated_at: DateTime!
+=======
+  userId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type MedicationReminder{
   id: String!
+<<<<<<< HEAD
   medication_id: String!
   user_id: String!
   reminder_time: DateTime!
   is_taken: Boolean!
   created_at: DateTime!
+=======
+  medicationId: String!
+  userId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+  createdAt: DateTime!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type AddMedicationResponse {
@@ -61,7 +75,11 @@ type MedicationReminderDetail {
 
 type TreatmentSchedule{
   id: String!
+<<<<<<< HEAD
   user_id: String!
+=======
+  userId: String!
+>>>>>>> 01096166741546756a9456fc584388602358902c
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
@@ -94,6 +112,12 @@ type DeleteTreatmentScheduleResponse {
   message: String!
 }
 
+<<<<<<< HEAD
+=======
+type TakeMedicationResponse{
+  message: String!
+}
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 extend type Query{
   getMedications: [MedicationDetail]
@@ -108,10 +132,17 @@ extend type Mutation{
   
   createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
   updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+<<<<<<< HEAD
+=======
+  takeMedication(reminderId: String) : TakeMedicationResponse!
+>>>>>>> 01096166741546756a9456fc584388602358902c
   deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
   
   createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
   updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
   deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
+<<<<<<< HEAD
 
+=======
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }

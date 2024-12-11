@@ -11,6 +11,7 @@ import (
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
+<<<<<<< HEAD
 	"strings"
 	"time"
 
@@ -20,11 +21,23 @@ import (
 // CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
 func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
+=======
+	"time"
+
+	"github.com/google/uuid"
+	surrealdb "github.com/surrealdb/surrealdb.go"
+)
+
+// EvaluateHealthRiskAssessment is the resolver for the evaluateHealthRiskAssessment field.
+func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, filledQuestionnaire model.FilledQuestionnaire) (*model.EvaluateHealthRiskAssessmentResponse, error) {
+	//panic(fmt.Errorf("not implemented: EvaluateHealthRiskAssessment - evaluateHealthRiskAssessment"))
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
+<<<<<<< HEAD
 	riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
 
 	result, err := database.DB.Query(
@@ -40,17 +53,70 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 			"riskLevel":         riskLevel,
 			"recommendations":   recommendations,
 			"user_id":           user.ID,
+=======
+	riskLevel, recommendations := utils.EvaluateHealthRisk(filledQuestionnaire.Responses)
+	// create new HealthMetric record
+	result, err := database.DB.Query(
+		`CREATE ONLY health_assessment:ulid()
+		SET
+		userId=$userId,
+		questionnaireData=$questionnaireData,
+		riskLevel=$riskLevel,
+		recommendations=$recommendations,
+		createdAt=time::now();
+		`,
+		map[string]interface{}{
+			"userId":            user.ID,
+			"questionnaireData": filledQuestionnaire.Responses,
+			"riskLevel":         riskLevel,
+			"recommendations":   recommendations,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	newassessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessment](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	// create response
+	response := &model.EvaluateHealthRiskAssessmentResponse{
+		AssessmentID:    newassessment.ID,
+		RiskLevel:       newassessment.RiskLevel,
+		Recommendations: newassessment.Recommendations,
+	}
+	return response, nil
+}
+
+// GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
+func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) ([]*model.HealthRiskAssessmentDetailResponse, error) {
+	//panic(fmt.Errorf("not implemented: GetHealthRiskAssessment - getHealthRiskAssessment"))
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	// query for all the medications associated with the user
+	result, err := database.DB.Query(
+		`SELECT * FROM health_assessment WHERE userId = $userId;`,
+		map[string]interface{}{
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	newAssessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessment](result, nil)
+=======
+	HealthRiskAssessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	response := &model.HealthRiskAssessmentResponse{
 		AssessmentID:    newAssessment.ID,
 		RiskLevel:       newAssessment.RiskLevel,
@@ -64,10 +130,31 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
 	//check if they are logged in correctly
+=======
+	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
+	var AssessmentDetails []*model.HealthRiskAssessmentDetailResponse
+	for _, ass := range HealthRiskAssessment {
+		AssessmentDetail := &model.HealthRiskAssessmentDetailResponse{
+			AssessmentID:      ass.ID,
+			QuestionnaireData: ass.QuestionnaireData,
+			RiskLevel:         ass.RiskLevel,
+			Recommendations:   ass.Recommendations,
+			CreatedAt:         ass.CreatedAt,
+		}
+		AssessmentDetails = append(AssessmentDetails, AssessmentDetail)
+	}
+
+	return AssessmentDetails, nil
+}
+
+// GetHealthRiskAssessmentQuestion is the resolver for the getHealthRiskAssessmentQuestion field.
+func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*model.QuestionnaireObject, error) {
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
+<<<<<<< HEAD
 	// check if id is legal
 	if !utils.MatchID(assessmentID, "health_risk_assessment") {
 		return nil, fmt.Errorf("illegal assessment id")
@@ -158,3 +245,50 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 
 	return detailResponse, nil
 }
+=======
+
+	questionnaireId := uuid.New().String()
+	// 返回完整的问卷问题
+	questions := []*model.Question{
+		{QuestionID: 1, Question: "您是否有高血压病史？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 2, Question: "您是否有糖尿病病史？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 3, Question: "您是否有家族肾病史？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 4, Question: "您的年龄是多少？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 5, Question: "您是否有水肿、尿频、尿急等排尿异常症状？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 6, Question: "您的体重是否过重（BMI大于25）？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 7, Question: "您是否有长期使用肾毒性药物的历史？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 8, Question: "您最近一次的尿检结果是否显示尿蛋白或血尿？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 9, Question: "您是否经常感到疲劳、虚弱？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 10, Question: "您是否有过肾功能衰竭或其他严重肾脏问题的诊断记录？", QuestionType: 0, Choices: []string{"是", "否"}},
+	}
+
+	result, err := database.DB.Query(
+		`CREATE ONLY questionnare_object:ulid()
+		SET
+		questionnaireId=$questionnaireId,
+		data=$data,
+		createdAt=time::now();`,
+		map[string]interface{}{
+			"questionnaire_id": questionnaireId,
+			"data":             questions,
+			"createdAt":        time.Now(),
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert questionnaire into database: %v", err)
+	}
+
+	// 使用 SmartUnmarshal 将数据库返回的数据解析到模型中
+	newquestionnaire, err := surrealdb.SmartUnmarshal[model.QuestionnaireObject](result, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal questionnaire data: %v", err)
+	}
+	response := &model.QuestionnaireObject{
+		QuestionnaireID: newquestionnaire.QuestionnaireID,
+		Data:            newquestionnaire.Data,
+	}
+
+	// 返回问卷对象
+	return response, nil
+}
+>>>>>>> 01096166741546756a9456fc584388602358902c

@@ -16,9 +16,15 @@ type User{
   password: String!
   name: String!
   points: Float!
+<<<<<<< HEAD
   created_at: DateTime!
   updated_at: DateTime!
   last_login: DateTime!
+=======
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
+>>>>>>> 01096166741546756a9456fc584388602358902c
   status: Int!
   role: String!
 }
@@ -68,6 +74,7 @@ type ResetPasswordResponse {
   message: String!
 }
 
+<<<<<<< HEAD
 type FamilyMember{
   id: String!
   user_id: String!
@@ -96,12 +103,38 @@ type UpdateFamilyMemberResponse {
 
 type DeleteFamilyMemberResponse {
   message: String!
+=======
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+    message: String!
+}
+
+type UnshareProfileResponse {
+    message: String!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 extend type Query{
   getUser: UserDetailResponse
+<<<<<<< HEAD
   getFamilyMembers: [FamilyMemberDetail]
 
+=======
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 extend type Mutation{
@@ -114,7 +147,12 @@ extend type Mutation{
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
   
+<<<<<<< HEAD
   addFamilyMember(relatedUserId: String!, relationship: String!, accessLevel: String!): AddFamilyMemberResponse
   updateFamilyMember(memberId: String!, relationship: String, accessLevel: String): UpdateFamilyMemberResponse
   deleteFamilyMember(memberId: String!): DeleteFamilyMemberResponse
+=======
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }

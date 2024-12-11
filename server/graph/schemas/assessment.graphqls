@@ -1,4 +1,5 @@
 type Question{
+<<<<<<< HEAD
   question: String!
   questionType: Int!
   choices: [String!]!
@@ -27,18 +28,65 @@ type HealthRiskAssessmentResponse {
 type HealthRiskAssessmentDetailResponse {
   assessmentId: String!
   questionnaireData: String!
+=======
+  questionId: Int!
+  question: String!
+  questionchoiceType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
+  choices: [String!] # empty if it is fill in the blank
+}
+
+type QuestionnaireObject{
+  questionnaireId: Int!
+  data: [Question!]!
+}
+
+input Response{
+  questionId: Int!
+  : String!#数字序号用，隔开
+  answer: String
+}
+
+type HealthResponse{
+  questionId: Int!
+  choice: String!#数字序号用，隔开
+  answer: String
+}
+
+input FilledQuestionnaire{
+  questionnaireId: Int!  # 第几套测试题
+  responses: [Response!]!
+}
+
+type HealthRiskAssessment{
+  id: String!
+  userId: String!
+  questionnaireData: [HealthResponse!]!
+>>>>>>> 01096166741546756a9456fc584388602358902c
   riskLevel: String!
   recommendations: String!
   createdAt: DateTime!
 }
 
+<<<<<<< HEAD
 type UpdateHealthRiskAssessmentResponse {
+=======
+type HealthRiskAssessmentDetailResponse {
+  assessmentId: String!
+  questionnaireData: [HealthResponse!]!
+  riskLevel: String!
+  recommendations: String!
+  createdAt: DateTime!
+}
+
+type EvaluateHealthRiskAssessmentResponse {
+>>>>>>> 01096166741546756a9456fc584388602358902c
   assessmentId: String!
   riskLevel: String!
   recommendations: String!
 }
 
 extend type Query{
+<<<<<<< HEAD
   getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
 }
 
@@ -46,4 +94,12 @@ extend type Mutation{
   createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
   updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
 
+=======
+  getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
+  getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
+}
+
+extend type Mutation{
+  evaluateHealthRiskAssessment(filledQuestionnaire: FilledQuestionnaire!): EvaluateHealthRiskAssessmentResponse #拿结果
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }

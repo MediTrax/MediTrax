@@ -6,7 +6,7 @@ part of 'health_metrics_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$healthMetricsHash() => r'2a517d1a482394ac8d4b4b16ea435a7039823a0b';
+String _$healthMetricsHash() => r'c58a2ee4702fedc824fef62ef0abef0d0242fd6a';
 
 /// See also [HealthMetrics].
 @ProviderFor(HealthMetrics)
@@ -23,7 +23,7 @@ final healthMetricsProvider = AutoDisposeAsyncNotifierProvider<HealthMetrics,
 
 typedef _$HealthMetrics = AutoDisposeAsyncNotifier<List<HealthMetric>>;
 String _$treatmentSchedulesHash() =>
-    r'89ad4e95a67f56e1f5cc1c7e25ddaa2dd459e7ee';
+    r'64ff13daa72755185a7e58222f6c0d019ac17e16';
 
 /// See also [TreatmentSchedules].
 @ProviderFor(TreatmentSchedules)

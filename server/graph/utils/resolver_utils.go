@@ -2,13 +2,33 @@ package utils
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"regexp"
 	"strconv"
+=======
+	"meditrax/graph/database"
+	"meditrax/graph/model"
+	"regexp"
+	"strconv"
+	"time"
+
+	"github.com/surrealdb/surrealdb.go"
+>>>>>>> 01096166741546756a9456fc584388602358902c
 )
 
 var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
 	"medication", "medication_reminder", "treatment_schedule", "health_metric",
+<<<<<<< HEAD
 	"medical_record", "family_member"}
+=======
+	"medical_record", "family_member", "activity_log"}
+
+type ChangeLog struct {
+	Field string
+	From  string
+	To    string
+}
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 func FrequencyParser(frequency string) (int, int, error) {
 	// Compile the regex pattern to match the expected format
@@ -44,6 +64,7 @@ func MatchID(id string, table string) bool {
 	}
 }
 
+<<<<<<< HEAD
 func EvaluateHealthRisk(questionnaireData string) (string, string) {
 	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
 	var riskLevel, recommendations string
@@ -57,3 +78,137 @@ func EvaluateHealthRisk(questionnaireData string) (string, string) {
 	}
 	return riskLevel, recommendations
 }
+=======
+func EvaluateHealthRisk(responses []*model.Response) (string, string) {
+	// 假设我们根据响应的答案来进行风险评估
+	var riskLevel string
+	var recommendations string
+
+	// 基于一些问题回答进行简单评估
+	score := 0
+	for _, response := range responses {
+		if response.Choice == "是" {
+			score++
+		}
+	}
+
+	// 简单示例：如果选择了超过5个“是”，则认为风险较高
+	if score > 5 {
+		riskLevel = "高风险"
+		recommendations = "请尽早就医，做肾功能检查。"
+	} else {
+		riskLevel = "低风险"
+		recommendations = "保持健康饮食，定期体检。"
+	}
+
+	return riskLevel, recommendations
+}
+
+// /**
+// Add activity logs for the object with id objId, returns error is not successful
+//   - userId: id of user
+//   - actType: name of mutation that made the change (ex. takeMedication)
+//   - description: more detailed description of the activity
+//   - objId: id of object being modified
+//   - changes: list of ChangLog of what fields are modified
+//     */
+func AddActivityLogs(userId string, actType string, description string, objId string, changes []ChangeLog) error {
+	// get current time and convert to string
+	timestamp := time.Now().Format("2006-01-02T15:04:05.000")
+
+	// go through changes and add them one by one to the database
+	for _, change := range changes {
+		_, err := database.DB.Query(
+			`CREATE ONLY activity_log:ulid()
+			SET userId=$userId,
+			activityType=$activityType,
+			description=$description,
+			changedObject=$changedObject,
+			changedField=$changedField,
+			from=$from,
+			to=$to,
+			timestamp=$timestamp;
+			`,
+			map[string]interface{}{
+				"userId":        userId,
+				"activityType":  actType,
+				"description":   description,
+				"changedObject": objId,
+				"changedField":  change.Field,
+				"from":          change.From,
+				"to":            change.To,
+				"timestamp":     timestamp,
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	// added succcesfully without errors
+	return nil
+}
+
+func IsFamilyMember(memberId string, patientId string) bool {
+	result, err := database.DB.Query(`SELECT * FROM family_member 
+	WHERE userId=$userID AND patient_userId=$patientId;`,
+		map[string]interface{}{
+			"userID":    memberId,
+			"patientId": patientId,
+		})
+	if err != nil {
+		return false
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
+	if err != nil {
+		return false
+	}
+	if len(members) < 1 {
+		return false
+	}
+
+	if members[0].UserID == memberId && members[0].PatientUserID == patientId {
+		return true
+	}
+	return false
+}
+
+func IsProfileShared(from string, to string) bool {
+	result, err := database.DB.Query(`SELECT * FROM profile_access 
+	WHERE in=$from AND out=$to;`,
+		map[string]interface{}{
+			"from": from,
+			"to":   to,
+		})
+	if err != nil {
+		return false
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]interface{}](result, nil)
+	if err != nil {
+		return false
+	}
+	if len(members) > 0 {
+		return true
+	}
+	return false
+}
+
+func GetUserByID(userID string) (*model.User, error) {
+	result, err := database.DB.Query(`SELECT * FROM ONLY $userId`,
+		map[string]interface{}{
+			"userId": userID,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := surrealdb.SmartUnmarshal[model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+>>>>>>> 01096166741546756a9456fc584388602358902c

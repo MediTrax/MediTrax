@@ -7,11 +7,19 @@ package graph
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
+=======
+	"meditrax/graph/custom"
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
+<<<<<<< HEAD
+=======
+	"time"
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
@@ -26,23 +34,36 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 
 	// query database for medications for the same user with the same name
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`SELECT * FROM medication WHERE name=$name AND user_id=$user_id;`,
 		map[string]interface{}{
 			"name":    name,
 			"user_id": user.ID,
+=======
+		`SELECT * FROM medication WHERE name=$name AND userId=$userId;`,
+		map[string]interface{}{
+			"name":   name,
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	println("Finished query")
+=======
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	medications, err := surrealdb.SmartUnmarshal[[]*model.Medication](result, nil)
 	if err != nil {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	println("Finished unmarshaling medications")
+=======
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	if len(medications) > 0 {
 		return nil, fmt.Errorf("identical medication name already exists for the user, please use update medication instead")
 	}
@@ -60,9 +81,15 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 		unit=$unit,
 		frequency=$frequency,
 		inventory=$inventory,
+<<<<<<< HEAD
 		user_id=$user_id,
 		created_at=time::now(),
 		updated_at=time::now();
+=======
+		userId=$userId,
+		createdAt=time::now(),
+		updatedAt=time::now();
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		`,
 		map[string]interface{}{
 			"name":      name,
@@ -70,7 +97,11 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 			"unit":      unit,
 			"frequency": frequency,
 			"inventory": inventory,
+<<<<<<< HEAD
 			"user_id":   user.ID,
+=======
+			"userId":    user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -104,22 +135,70 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("illegal medication id")
 	}
 
+<<<<<<< HEAD
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": medicationID, "user_id": user.ID}
+=======
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $medicationId WHERE userId=$userId;`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+			"userId":       user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{"id": medicationID, "userId": user.ID}
+	var changeLog []utils.ChangeLog
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if name != nil {
 		updateValues["name"] = *name
 		updateFields = append(updateFields, "name = $name")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "name",
+			From:  original.Name,
+			To:    *name,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if dosage != nil {
 		updateValues["dosage"] = *dosage
 		updateFields = append(updateFields, "dosage = $dosage")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "dosage",
+			From:  fmt.Sprintf("%f", original.Dosage),
+			To:    fmt.Sprintf("%f", *dosage),
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if unit != nil {
 		updateValues["unit"] = *unit
 		updateFields = append(updateFields, "unit = $unit")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "unit",
+			From:  original.Unit,
+			To:    *unit,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if frequency != nil {
 		// Validate the frequency format
@@ -128,10 +207,20 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		}
 		updateValues["frequency"] = *frequency
 		updateFields = append(updateFields, "frequency = $frequency")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "frequency",
+			From:  original.Frequency,
+			To:    *frequency,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if inventory != nil {
 		updateValues["inventory"] = *inventory
 		updateFields = append(updateFields, "inventory = $inventory")
+<<<<<<< HEAD
 	}
 
 	// Construct the final query with the medicationID in quotes
@@ -139,6 +228,21 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 
 	// send the UPDATE query
 	result, err := database.DB.Query(query, updateValues)
+=======
+		change := utils.ChangeLog{
+			Field: "inventory",
+			From:  fmt.Sprintf("%f", original.Inventory),
+			To:    fmt.Sprintf("%f", *inventory),
+		}
+		changeLog = append(changeLog, change)
+	}
+
+	// Construct the final query with the medicationID in quotes
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
+
+	// send the UPDATE query
+	result, err = database.DB.Query(query, updateValues)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +256,15 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("invalid id. no associated medication object found")
 	}
 
+<<<<<<< HEAD
+=======
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateMedication", "user updated specs of a medicaion", medicationID, changeLog)
+	if err != nil {
+		return nil, err
+	}
+
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	// create response
 	response := &model.UpdateMedicationResponse{
 		MedicationID: results[0].ID,
@@ -177,10 +290,17 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 
 	// Execute the query
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
 		map[string]interface{}{
 			"id":      medicationID,
 			"user_id": user.ID,
+=======
+		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":     medicationID,
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -197,9 +317,15 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 	}
 
 	_, err = database.DB.Query(
+<<<<<<< HEAD
 		`DELETE medication_reminder WHERE medication_id=$medication_id;`,
 		map[string]interface{}{
 			"medication_id": medicationID,
+=======
+		`DELETE medication_reminder WHERE medicationId=$medicationId;`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -229,10 +355,17 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 
 	// query for the medication and check if it exists
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`SELECT * FROM $medication_id WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"medication_id": medicationID,
 			"user_id":       user.ID,
+=======
+		`SELECT * FROM $medicationId WHERE userId = $userId;`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+			"userId":       user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -249,11 +382,19 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 	// query database for medications with the same reminder time
 	result, err = database.DB.Query(
 		`SELECT * FROM medication_reminder 
+<<<<<<< HEAD
 		WHERE medication_id=$medication_id AND user_id=$user_id AND reminder_time=$reminder_time;`,
 		map[string]interface{}{
 			"medication_id": medicationID,
 			"user_id":       user.ID,
 			"reminder_time": reminderTime,
+=======
+		WHERE medicationId=$medicationId AND userId=$userId AND reminderTime=$reminderTime;`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+			"userId":       user.ID,
+			"reminderTime": reminderTime,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -270,6 +411,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 	// finally, send the create reminder query
 	result, err = database.DB.Query(
 		`CREATE ONLY medication_reminder:ulid()
+<<<<<<< HEAD
 		SET medication_id=$medication_id,
 		user_id=$user_id,
 		reminder_time=$reminder_time,
@@ -280,6 +422,18 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 			"medication_id": medicationID,
 			"user_id":       user.ID,
 			"reminder_time": reminderTime,
+=======
+		SET medicationId=$medicationId,
+		userId=$userId,
+		reminderTime=$reminderTime,
+		isTaken=false,
+		createdAt=time::now()
+		`,
+		map[string]interface{}{
+			"medicationId": medicationID,
+			"userId":       user.ID,
+			"reminderTime": reminderTime,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -314,10 +468,17 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 
 	// query database to see if the reminder exists
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`SELECT * FROM medication_reminder WHERE id=$reminder_id AND user_id=$user_id;`,
 		map[string]interface{}{
 			"reminder_id": reminderID,
 			"user_id":     user.ID,
+=======
+		`SELECT * FROM medication_reminder WHERE id=$reminder_id AND userId=$userId;`,
+		map[string]interface{}{
+			"reminder_id": reminderID,
+			"userId":      user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -337,6 +498,10 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	// logic for when the reminder changes from not taken to taken, subtract the medication's remaining by its dosage
 	if isTaken != nil {
 		if !remBefore.IsTaken && *isTaken {
+<<<<<<< HEAD
+=======
+			// deprecated
+>>>>>>> 01096166741546756a9456fc584388602358902c
 			result, err = database.DB.Query(
 				`SELECT * FROM medication WHERE id=$med_id;`,
 				map[string]interface{}{
@@ -376,12 +541,28 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 			if err != nil {
 				return nil, err
 			}
+<<<<<<< HEAD
+=======
+
+			err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "decrease medication inventory after medicaion is taken",
+				remBefore.MedicationID, []utils.ChangeLog{
+					{
+						Field: "inventory",
+						From:  fmt.Sprintf("%f", medications[0].Inventory),
+						To:    fmt.Sprintf("%f", new_inventory),
+					},
+				})
+			if err != nil {
+				return nil, err
+			}
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		}
 	}
 
 	// Initialize a map to hold the update values
 	updateValues := map[string]interface{}{"id": reminderID}
 
+<<<<<<< HEAD
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if reminderTime != nil {
@@ -391,6 +572,31 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	if isTaken != nil {
 		updateValues["is_taken"] = *isTaken
 		updateFields = append(updateFields, "is_taken = $is_taken")
+=======
+	var changeLog []utils.ChangeLog
+
+	// Prepare the fields to be updated
+	updateFields := []string{}
+	if reminderTime != nil {
+		updateValues["reminderTime"] = *reminderTime
+		updateFields = append(updateFields, "reminderTime = $reminderTime")
+		change := utils.ChangeLog{
+			Field: "reminderTime",
+			From:  remBefore.ReminderTime,
+			To:    *reminderTime,
+		}
+		changeLog = append(changeLog, change)
+	}
+	if isTaken != nil {
+		updateValues["isTaken"] = *isTaken
+		updateFields = append(updateFields, "isTaken = $isTaken")
+		change := utils.ChangeLog{
+			Field: "isTaken",
+			From:  fmt.Sprintf("%t", remBefore.IsTaken),
+			To:    fmt.Sprintf("%t", *isTaken),
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 
 	// Construct the final query
@@ -401,6 +607,14 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, err
 	}
 
+<<<<<<< HEAD
+=======
+	err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "user updated specs of a medicaion reminder", reminderID, changeLog)
+	if err != nil {
+		return nil, err
+	}
+
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	// unmarshal results and construct response
 	results, err := surrealdb.SmartUnmarshal[[]*model.MedicationReminder](result, nil)
 	if err != nil {
@@ -414,6 +628,144 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	return response, nil
 }
 
+<<<<<<< HEAD
+=======
+// TakeMedication is the resolver for the takeMedication field.
+func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error) {
+	user := middlewares.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	if reminderID == nil {
+		return nil, fmt.Errorf("no medication id given")
+	}
+
+	// check legality of the reminder id
+	if !utils.MatchID(*reminderID, "medication_reminder") {
+		return nil, fmt.Errorf("illegal reminder id")
+	}
+
+	// query database to see if the reminder exists
+	result, err := database.DB.Query(
+		`SELECT * FROM $reminder_id WHERE userId=$userId;`,
+		map[string]interface{}{
+			"reminder_id": reminderID,
+			"userId":      user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(reminders) < 1 {
+		return nil, fmt.Errorf("wrong medication reminder id, no reminder associated with userfound")
+	}
+
+	reminder := reminders[0]
+	if reminder.IsTaken {
+		return nil, fmt.Errorf("reminder already taken, cannot take again")
+	}
+
+	/* Decrease inventory of linked medication */
+	result, err = database.DB.Query(
+		`SELECT * FROM medication WHERE id=$med_id;`,
+		map[string]interface{}{
+			"med_id": reminder.MedicationID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// verify that there is a medication linked to this reminder
+	// NOTE: should NEVER happen since deleting a medication also deletes the reminder
+	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(medications) == 0 {
+		return nil, fmt.Errorf("no medication linked to reminder found")
+	}
+
+	// calculate the new inventory
+	new_inventory := medications[0].Inventory - medications[0].Dosage
+	// if the inventory becomes negative, throw an error
+	if new_inventory < 0 {
+		return nil, fmt.Errorf("negative inventory")
+	}
+
+	// update the inventory
+	_, err = database.DB.Query(
+		`UPDATE ONLY $id SET inventory=$inventory`,
+		map[string]interface{}{
+			"id":        reminder.MedicationID,
+			"inventory": new_inventory,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "decrease medication inventory after user takes medication",
+		reminder.MedicationID, []utils.ChangeLog{
+			{
+				Field: "inventory",
+				From:  fmt.Sprintf("%f", medications[0].Inventory),
+				To:    fmt.Sprintf("%f", new_inventory),
+			},
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	/* Update the reminder itself */
+	// calculate next reminder time
+	current_time, err := custom.UnmarshalDateTime(reminder.ReminderTime)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling reminder time: %e", err)
+	}
+	_, days, err := utils.FrequencyParser(medications[0].Frequency)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing frequency of medication: %e", err)
+	}
+	next_reminder_time := time.Time.Add(current_time, time.Hour*time.Duration(24*days))
+
+	// update reminder
+	_, err = database.DB.Query(`
+		UPDATE $id SET reminderTime=$reminderTime;`,
+		map[string]interface{}{
+			"id":           *reminderID,
+			"reminderTime": next_reminder_time.Format("2006-01-02T15:04:05.000"),
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// add to change log
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication, update reminder time", *reminderID,
+		[]utils.ChangeLog{
+			{
+				Field: "reminderTime",
+				From:  reminder.ReminderTime,
+				To:    next_reminder_time.Format("2006-01-02T15:04:05.000"),
+			},
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	response := &model.TakeMedicationResponse{
+		Message: "medication taken successfully",
+	}
+
+	return response, nil
+}
+
+>>>>>>> 01096166741546756a9456fc584388602358902c
 // DeleteMedicationReminder is the resolver for the deleteMedicationReminder field.
 func (r *mutationResolver) DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error) {
 	user := middlewares.ForContext(ctx)
@@ -428,10 +780,17 @@ func (r *mutationResolver) DeleteMedicationReminder(ctx context.Context, reminde
 
 	// Execute the query
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
 		map[string]interface{}{
 			"id":      reminderID,
 			"user_id": user.ID,
+=======
+		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":     reminderID,
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -473,15 +832,25 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
         scheduledTime=$scheduledTime,
         location=$location,
         notes=$notes,
+<<<<<<< HEAD
         user_id=$user_id,
         created_at=time::now(),
         updated_at=time::now();`,
+=======
+        userId=$userId,
+        createdAt=time::now(),
+        updatedAt=time::now();`,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		map[string]interface{}{
 			"treatmentType": treatmentType,
 			"scheduledTime": scheduledTime,
 			"location":      location,
 			"notes":         notes,
+<<<<<<< HEAD
 			"user_id":       user.ID,
+=======
+			"userId":        user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -512,34 +881,105 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		return nil, fmt.Errorf("illegal schedule id")
 	}
 
+<<<<<<< HEAD
 	// 准备更新字段
 	updateValues := map[string]interface{}{
 		"id":      scheduleID,
 		"user_id": user.ID,
 	}
 	updateFields := []string{}
+=======
+	// get the original entry before updating
+	result, err := database.DB.Query(
+		`SELECT * FROM ONLY $scheduleId WHERE userId=$userId;`,
+		map[string]interface{}{
+			"scheduleId": scheduleID,
+			"userId":     user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	original, err := surrealdb.SmartUnmarshal[model.TreatmentSchedule](result, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 准备更新字段
+	updateValues := map[string]interface{}{
+		"id":     scheduleID,
+		"userId": user.ID,
+	}
+	updateFields := []string{}
+	var changeLog []utils.ChangeLog
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 	if treatmentType != nil {
 		updateValues["treatmentType"] = *treatmentType
 		updateFields = append(updateFields, "treatmentType = $treatmentType")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "treatmentType",
+			From:  original.TreatmentType,
+			To:    *treatmentType,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if scheduledTime != nil {
 		updateValues["scheduledTime"] = *scheduledTime
 		updateFields = append(updateFields, "scheduledTime = $scheduledTime")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "scheduledTime",
+			From:  original.ScheduledTime,
+			To:    *scheduledTime,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if location != nil {
 		updateValues["location"] = *location
 		updateFields = append(updateFields, "location = $location")
+<<<<<<< HEAD
+=======
+		change := utils.ChangeLog{
+			Field: "location",
+			From:  original.Location,
+			To:    *location,
+		}
+		changeLog = append(changeLog, change)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if notes != nil {
 		updateValues["notes"] = *notes
 		updateFields = append(updateFields, "notes = $notes")
+<<<<<<< HEAD
 	}
 	updateFields = append(updateFields, "updated_at = time::now()")
 
 	// 构建并执行更新查询
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id = $user_id;", strings.Join(updateFields, ", "))
 	result, err := database.DB.Query(query, updateValues)
+=======
+		change := utils.ChangeLog{
+			Field: "notes",
+			From:  *original.Notes,
+			To:    *notes,
+		}
+		if original.Notes == nil {
+			change.From = "Null"
+		}
+		changeLog = append(changeLog, change)
+	}
+	updateFields = append(updateFields, "updatedAt = time::now()")
+
+	// 构建并执行更新查询
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId = $userId;", strings.Join(updateFields, ", "))
+	result, err = database.DB.Query(query, updateValues)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
@@ -553,6 +993,15 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		return nil, fmt.Errorf("invalid id. no associated treatment schedule found")
 	}
 
+<<<<<<< HEAD
+=======
+	// add to activity log
+	err = utils.AddActivityLogs(user.ID, "updateTreatmentSchedule", "user updated specs of a treatment schedule", scheduleID, changeLog)
+	if err != nil {
+		return nil, err
+	}
+
+>>>>>>> 01096166741546756a9456fc584388602358902c
 	response := &model.UpdateTreatmentScheduleResponse{
 		ScheduleID: schedules[0].ID,
 		Message:    "Treatment schedule updated successfully",
@@ -574,10 +1023,17 @@ func (r *mutationResolver) DeleteTreatmentSchedule(ctx context.Context, schedule
 
 	// 执行删除操作
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`DELETE $id WHERE user_id = $user_id RETURN BEFORE;`,
 		map[string]interface{}{
 			"id":      scheduleID,
 			"user_id": user.ID,
+=======
+		`DELETE $id WHERE userId = $userId RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":     scheduleID,
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -607,6 +1063,7 @@ func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.Medication
 		return nil, fmt.Errorf("access denied")
 	}
 
+<<<<<<< HEAD
 	// query for all the medications associated with the user
 	result, err := database.DB.Query(
 		`SELECT * FROM medication WHERE user_id = $user_id;`,
@@ -638,6 +1095,9 @@ func (r *queryResolver) GetMedications(ctx context.Context) ([]*model.Medication
 	}
 
 	return medicationDetails, nil
+=======
+	return utils.GetMedications(*user)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 // GetMedicationReminders is the resolver for the getMedicationReminders field.
@@ -649,9 +1109,15 @@ func (r *queryResolver) GetMedicationReminders(ctx context.Context) ([]*model.Me
 
 	// get all the medication reminders for the user
 	result, err := database.DB.Query(
+<<<<<<< HEAD
 		`SELECT * FROM medication_reminder WHERE user_id = $user_id;`,
 		map[string]interface{}{
 			"user_id": user.ID,
+=======
+		`SELECT * FROM medication_reminder WHERE userId = $userId;`,
+		map[string]interface{}{
+			"userId": user.ID,
+>>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -684,6 +1150,7 @@ func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.Tre
 		return nil, fmt.Errorf("access denied")
 	}
 
+<<<<<<< HEAD
 	// Fetch treatment schedules for the user
 	result, err := database.DB.Query(`SELECT * FROM treatment_schedule WHERE user_id=$userID;`, map[string]interface{}{
 		"userID": user.ID,
@@ -711,4 +1178,7 @@ func (r *queryResolver) GetTreatmentSchedules(ctx context.Context) ([]*model.Tre
 	}
 
 	return scheduleDetails, nil
+=======
+	return utils.GetTreatmentSchedules(*user)
+>>>>>>> 01096166741546756a9456fc584388602358902c
 }

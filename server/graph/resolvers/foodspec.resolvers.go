@@ -59,6 +59,10 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 		for _, spec_limit := range chat.SpecLimits {
 			if spec.Name == spec_limit.Name {
 				valid_spec = true
+<<<<<<< HEAD
+=======
+				spec.Name = spec_limit.ChineseName
+>>>>>>> 01096166741546756a9456fc584388602358902c
 
 				spec.HowHigh = min(1, value/spec_limit.UpperRange)
 				n_spec = n_spec + 1

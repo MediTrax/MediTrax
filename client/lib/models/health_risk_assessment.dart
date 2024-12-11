@@ -53,3 +53,4 @@ class HealthRiskAssessment extends HiveObject with _$HealthRiskAssessment {
     @HiveField(4) required DateTime createdAt,
   }) = _HealthRiskAssessment;
 }
+
