@@ -29,11 +29,11 @@ mixin _$User {
   @HiveField(5)
   int get status => throw _privateConstructorUsedError;
   @HiveField(6)
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime get created_at => throw _privateConstructorUsedError;
   @HiveField(7)
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime get updated_at => throw _privateConstructorUsedError;
   @HiveField(8)
-  DateTime get lastLogin => throw _privateConstructorUsedError;
+  DateTime get last_login => throw _privateConstructorUsedError;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -53,9 +53,9 @@ abstract class $UserCopyWith<$Res> {
       @HiveField(3) String name,
       @HiveField(4) String role,
       @HiveField(5) int status,
-      @HiveField(6) DateTime createdAt,
-      @HiveField(7) DateTime updatedAt,
-      @HiveField(8) DateTime lastLogin});
+      @HiveField(6) DateTime created_at,
+      @HiveField(7) DateTime updated_at,
+      @HiveField(8) DateTime last_login});
 }
 
 /// @nodoc
@@ -79,9 +79,9 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? name = null,
     Object? role = null,
     Object? status = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? lastLogin = null,
+    Object? created_at = null,
+    Object? updated_at = null,
+    Object? last_login = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -108,17 +108,17 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as int,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
+      created_at: null == created_at
+          ? _value.created_at
+          : created_at // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
+      updated_at: null == updated_at
+          ? _value.updated_at
+          : updated_at // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      lastLogin: null == lastLogin
-          ? _value.lastLogin
-          : lastLogin // ignore: cast_nullable_to_non_nullable
+      last_login: null == last_login
+          ? _value.last_login
+          : last_login // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ) as $Val);
   }
@@ -138,9 +138,9 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
       @HiveField(3) String name,
       @HiveField(4) String role,
       @HiveField(5) int status,
-      @HiveField(6) DateTime createdAt,
-      @HiveField(7) DateTime updatedAt,
-      @HiveField(8) DateTime lastLogin});
+      @HiveField(6) DateTime created_at,
+      @HiveField(7) DateTime updated_at,
+      @HiveField(8) DateTime last_login});
 }
 
 /// @nodoc
@@ -161,9 +161,9 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? name = null,
     Object? role = null,
     Object? status = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? lastLogin = null,
+    Object? created_at = null,
+    Object? updated_at = null,
+    Object? last_login = null,
   }) {
     return _then(_$UserImpl(
       id: null == id
@@ -190,17 +190,17 @@ class __$$UserImplCopyWithImpl<$Res>
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
               as int,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
+      created_at: null == created_at
+          ? _value.created_at
+          : created_at // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
+      updated_at: null == updated_at
+          ? _value.updated_at
+          : updated_at // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      lastLogin: null == lastLogin
-          ? _value.lastLogin
-          : lastLogin // ignore: cast_nullable_to_non_nullable
+      last_login: null == last_login
+          ? _value.last_login
+          : last_login // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
@@ -217,9 +217,9 @@ class _$UserImpl extends _User {
       @HiveField(3) required this.name,
       @HiveField(4) required this.role,
       @HiveField(5) required this.status,
-      @HiveField(6) required this.createdAt,
-      @HiveField(7) required this.updatedAt,
-      @HiveField(8) required this.lastLogin})
+      @HiveField(6) required this.created_at,
+      @HiveField(7) required this.updated_at,
+      @HiveField(8) required this.last_login})
       : super._();
 
   @override
@@ -242,17 +242,17 @@ class _$UserImpl extends _User {
   final int status;
   @override
   @HiveField(6)
-  final DateTime createdAt;
+  final DateTime created_at;
   @override
   @HiveField(7)
-  final DateTime updatedAt;
+  final DateTime updated_at;
   @override
   @HiveField(8)
-  final DateTime lastLogin;
+  final DateTime last_login;
 
   @override
   String toString() {
-    return 'User(id: $id, phoneNumber: $phoneNumber, password: $password, name: $name, role: $role, status: $status, createdAt: $createdAt, updatedAt: $updatedAt, lastLogin: $lastLogin)';
+    return 'User(id: $id, phoneNumber: $phoneNumber, password: $password, name: $name, role: $role, status: $status, created_at: $created_at, updated_at: $updated_at, last_login: $last_login)';
   }
 
   @override
@@ -268,17 +268,17 @@ class _$UserImpl extends _User {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.lastLogin, lastLogin) ||
-                other.lastLogin == lastLogin));
+            (identical(other.created_at, created_at) ||
+                other.created_at == created_at) &&
+            (identical(other.updated_at, updated_at) ||
+                other.updated_at == updated_at) &&
+            (identical(other.last_login, last_login) ||
+                other.last_login == last_login));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, phoneNumber, password, name,
-      role, status, createdAt, updatedAt, lastLogin);
+      role, status, created_at, updated_at, last_login);
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
@@ -297,9 +297,9 @@ abstract class _User extends User {
       @HiveField(3) required final String name,
       @HiveField(4) required final String role,
       @HiveField(5) required final int status,
-      @HiveField(6) required final DateTime createdAt,
-      @HiveField(7) required final DateTime updatedAt,
-      @HiveField(8) required final DateTime lastLogin}) = _$UserImpl;
+      @HiveField(6) required final DateTime created_at,
+      @HiveField(7) required final DateTime updated_at,
+      @HiveField(8) required final DateTime last_login}) = _$UserImpl;
   _User._() : super._();
 
   @override
@@ -322,13 +322,13 @@ abstract class _User extends User {
   int get status;
   @override
   @HiveField(6)
-  DateTime get createdAt;
+  DateTime get created_at;
   @override
   @HiveField(7)
-  DateTime get updatedAt;
+  DateTime get updated_at;
   @override
   @HiveField(8)
-  DateTime get lastLogin;
+  DateTime get last_login;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.

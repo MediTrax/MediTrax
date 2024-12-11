@@ -23,9 +23,9 @@ class UserImplAdapter extends TypeAdapter<_$UserImpl> {
       name: fields[3] as String,
       role: fields[4] as String,
       status: fields[5] as int,
-      createdAt: fields[6] as DateTime,
-      updatedAt: fields[7] as DateTime,
-      lastLogin: fields[8] as DateTime,
+      created_at: fields[6] as DateTime,
+      updated_at: fields[7] as DateTime,
+      last_login: fields[8] as DateTime,
     );
   }
 
@@ -46,11 +46,11 @@ class UserImplAdapter extends TypeAdapter<_$UserImpl> {
       ..writeByte(5)
       ..write(obj.status)
       ..writeByte(6)
-      ..write(obj.createdAt)
+      ..write(obj.created_at)
       ..writeByte(7)
-      ..write(obj.updatedAt)
+      ..write(obj.updated_at)
       ..writeByte(8)
-      ..write(obj.lastLogin);
+      ..write(obj.last_login);
   }
 
   @override

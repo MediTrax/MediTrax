@@ -16,8 +16,8 @@ class User extends HiveObject with _$User {
     @HiveField(3) required String name,
     @HiveField(4) required String role,
     @HiveField(5) required int status,
-    @HiveField(6) required DateTime createdAt,
-    @HiveField(7) required DateTime updatedAt,
-    @HiveField(8) required DateTime lastLogin,
+    @HiveField(6) required DateTime created_at,
+    @HiveField(7) required DateTime updated_at,
+    @HiveField(8) required DateTime last_login,
   }) = _User;
 }

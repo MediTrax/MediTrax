@@ -16,7 +16,6 @@ import 'package:meditrax/models/treatment_schedule.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/models/user_achievement.dart';
 import 'package:meditrax/screens/profile.dart';
-import 'package:meditrax/screens/profile_sharing_screen.dart';
 import 'package:meditrax/screens/splash_screen.dart';
 
 // Import all screens
