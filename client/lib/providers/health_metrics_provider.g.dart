@@ -23,7 +23,7 @@ final healthMetricsProvider = AutoDisposeAsyncNotifierProvider<HealthMetrics,
 
 typedef _$HealthMetrics = AutoDisposeAsyncNotifier<List<HealthMetric>>;
 String _$treatmentSchedulesHash() =>
-    r'58c7224246fcc298b3d396ee2206705cacf5799d';
+    r'64ff13daa72755185a7e58222f6c0d019ac17e16';
 
 /// See also [TreatmentSchedules].
 @ProviderFor(TreatmentSchedules)
