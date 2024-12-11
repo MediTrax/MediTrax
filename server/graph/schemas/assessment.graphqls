@@ -29,11 +29,11 @@ input FilledQuestionnaire{
 
 type HealthRiskAssessment{
   id: String!
-  user_id: String!
-  questionnaire_data: [HealthResponse!]!
-  risk_level: String!
+  userId: String!
+  questionnaireData: [HealthResponse!]!
+  riskLevel: String!
   recommendations: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type HealthRiskAssessmentDetailResponse {

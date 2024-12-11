@@ -321,7 +321,9 @@ type ComplexityRoot struct {
 		RefreshToken                 func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
 		ResetPassword                func(childComplexity int, token string, newPassword string) int
+		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
 		TakeMedication               func(childComplexity int, reminderID *string) int
+		UnshareProfile               func(childComplexity int, targetUserID string) int
 		UpdateFamilyMember           func(childComplexity int, memberID string, relationship *string, accessLevel *string) int
 		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string) int
 		UpdateMedicalRecord          func(childComplexity int, recordID string, recordType *string, content *string) int
@@ -346,6 +348,14 @@ type ComplexityRoot struct {
 		Relationship func(childComplexity int) int
 	}
 
+	ProfileDetail struct {
+		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		Role        func(childComplexity int) int
+	}
+
 	Query struct {
 		GetAchievementBadges            func(childComplexity int) int
 		GetActivityLog                  func(childComplexity int) int
@@ -364,7 +374,13 @@ type ComplexityRoot struct {
 		GetPatientMedicalRecords        func(childComplexity int, patientID string) int
 		GetPatientMedications           func(childComplexity int, patientID string) int
 		GetPatientTreatmentSchedule     func(childComplexity int, patientID string) int
+		GetProfiles                     func(childComplexity int) int
 		GetRelatedPatients              func(childComplexity int) int
+		GetSharedHealthMetrics          func(childComplexity int, patientID string, startDate *string, endDate *string, metricType *string) int
+		GetSharedMedicalRecords         func(childComplexity int, patientID string) int
+		GetSharedMedications            func(childComplexity int, patientID string) int
+		GetSharedProfiles               func(childComplexity int) int
+		GetSharedTreatmentSchedule      func(childComplexity int, patientID string) int
 		GetTreatmentSchedules           func(childComplexity int) int
 		GetUser                         func(childComplexity int) int
 		GetUserAchievements             func(childComplexity int) int
@@ -392,6 +408,10 @@ type ComplexityRoot struct {
 	}
 
 	ResetPasswordResponse struct {
+		Message func(childComplexity int) int
+	}
+
+	ShareProfileResponse struct {
 		Message func(childComplexity int) int
 	}
 
@@ -426,6 +446,10 @@ type ComplexityRoot struct {
 		ScheduleID    func(childComplexity int) int
 		ScheduledTime func(childComplexity int) int
 		TreatmentType func(childComplexity int) int
+	}
+
+	UnshareProfileResponse struct {
+		Message func(childComplexity int) int
 	}
 
 	UpdateFamilyMemberResponse struct {
@@ -552,6 +576,8 @@ type MutationResolver interface {
 	DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error)
 	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
 	ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error)
+	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error)
+	UnshareProfile(ctx context.Context, targetUserID string) (*model.UnshareProfileResponse, error)
 }
 type QueryResolver interface {
 	GetAchievementBadges(ctx context.Context) ([]*model.AchievementBadgeDetail, error)
@@ -576,6 +602,12 @@ type QueryResolver interface {
 	GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
 	GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error)
 	GetUser(ctx context.Context) (*model.UserDetailResponse, error)
+	GetProfiles(ctx context.Context) ([]*model.ProfileDetail, error)
+	GetSharedProfiles(ctx context.Context) ([]*model.ProfileDetail, error)
+	GetSharedMedicalRecords(ctx context.Context, patientID string) ([]*model.MedicalRecordDetail, error)
+	GetSharedTreatmentSchedule(ctx context.Context, patientID string) ([]*model.TreatmentScheduleDetail, error)
+	GetSharedMedications(ctx context.Context, patientID string) ([]*model.MedicationDetail, error)
+	GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
 }
 
 type executableSchema struct {
@@ -597,7 +629,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "AchievementBadge.created_at":
+	case "AchievementBadge.createdAt":
 		if e.complexity.AchievementBadge.CreatedAt == nil {
 			break
 		}
@@ -618,7 +650,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AchievementBadge.ID(childComplexity), true
 
-	case "AchievementBadge.icon_url":
+	case "AchievementBadge.iconUrl":
 		if e.complexity.AchievementBadge.IconURL == nil {
 			break
 		}
@@ -639,7 +671,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AchievementBadgeDetail.BadgeID(childComplexity), true
 
-	case "AchievementBadgeDetail.created_at":
+	case "AchievementBadgeDetail.createdAt":
 		if e.complexity.AchievementBadgeDetail.CreatedAt == nil {
 			break
 		}
@@ -723,7 +755,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ActivityLog.To(childComplexity), true
 
-	case "ActivityLog.user_id":
+	case "ActivityLog.userId":
 		if e.complexity.ActivityLog.UserID == nil {
 			break
 		}
@@ -982,14 +1014,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EvaluateHealthRiskAssessmentResponse.RiskLevel(childComplexity), true
 
-	case "FamilyMember.access_level":
+	case "FamilyMember.accessLevel":
 		if e.complexity.FamilyMember.AccessLevel == nil {
 			break
 		}
 
 		return e.complexity.FamilyMember.AccessLevel(childComplexity), true
 
-	case "FamilyMember.created_at":
+	case "FamilyMember.createdAt":
 		if e.complexity.FamilyMember.CreatedAt == nil {
 			break
 		}
@@ -1003,7 +1035,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FamilyMember.ID(childComplexity), true
 
-	case "FamilyMember.patient_user_id":
+	case "FamilyMember.patient_userId":
 		if e.complexity.FamilyMember.PatientUserID == nil {
 			break
 		}
@@ -1017,7 +1049,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FamilyMember.Relationship(childComplexity), true
 
-	case "FamilyMember.user_id":
+	case "FamilyMember.userId":
 		if e.complexity.FamilyMember.UserID == nil {
 			break
 		}
@@ -1115,7 +1147,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FoodSpecs.Specs(childComplexity), true
 
-	case "HealthMetric.created_at":
+	case "HealthMetric.createdAt":
 		if e.complexity.HealthMetric.CreatedAt == nil {
 			break
 		}
@@ -1129,14 +1161,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HealthMetric.ID(childComplexity), true
 
-	case "HealthMetric.metric_type":
+	case "HealthMetric.metricType":
 		if e.complexity.HealthMetric.MetricType == nil {
 			break
 		}
 
 		return e.complexity.HealthMetric.MetricType(childComplexity), true
 
-	case "HealthMetric.recorded_at":
+	case "HealthMetric.recordedAt":
 		if e.complexity.HealthMetric.RecordedAt == nil {
 			break
 		}
@@ -1150,7 +1182,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HealthMetric.Unit(childComplexity), true
 
-	case "HealthMetric.user_id":
+	case "HealthMetric.userId":
 		if e.complexity.HealthMetric.UserID == nil {
 			break
 		}
@@ -1220,7 +1252,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HealthResponse.QuestionID(childComplexity), true
 
-	case "HealthRiskAssessment.created_at":
+	case "HealthRiskAssessment.createdAt":
 		if e.complexity.HealthRiskAssessment.CreatedAt == nil {
 			break
 		}
@@ -1234,7 +1266,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HealthRiskAssessment.ID(childComplexity), true
 
-	case "HealthRiskAssessment.questionnaire_data":
+	case "HealthRiskAssessment.questionnaireData":
 		if e.complexity.HealthRiskAssessment.QuestionnaireData == nil {
 			break
 		}
@@ -1248,14 +1280,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HealthRiskAssessment.Recommendations(childComplexity), true
 
-	case "HealthRiskAssessment.risk_level":
+	case "HealthRiskAssessment.riskLevel":
 		if e.complexity.HealthRiskAssessment.RiskLevel == nil {
 			break
 		}
 
 		return e.complexity.HealthRiskAssessment.RiskLevel(childComplexity), true
 
-	case "HealthRiskAssessment.user_id":
+	case "HealthRiskAssessment.userId":
 		if e.complexity.HealthRiskAssessment.UserID == nil {
 			break
 		}
@@ -1325,7 +1357,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicalRecord.Content(childComplexity), true
 
-	case "MedicalRecord.created_at":
+	case "MedicalRecord.createdAt":
 		if e.complexity.MedicalRecord.CreatedAt == nil {
 			break
 		}
@@ -1339,21 +1371,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicalRecord.ID(childComplexity), true
 
-	case "MedicalRecord.record_type":
+	case "MedicalRecord.recordType":
 		if e.complexity.MedicalRecord.RecordType == nil {
 			break
 		}
 
 		return e.complexity.MedicalRecord.RecordType(childComplexity), true
 
-	case "MedicalRecord.updated_at":
+	case "MedicalRecord.updatedAt":
 		if e.complexity.MedicalRecord.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.MedicalRecord.UpdatedAt(childComplexity), true
 
-	case "MedicalRecord.user_id":
+	case "MedicalRecord.userId":
 		if e.complexity.MedicalRecord.UserID == nil {
 			break
 		}
@@ -1388,7 +1420,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicalRecordDetail.RecordType(childComplexity), true
 
-	case "Medication.created_at":
+	case "Medication.createdAt":
 		if e.complexity.Medication.CreatedAt == nil {
 			break
 		}
@@ -1437,14 +1469,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Medication.Unit(childComplexity), true
 
-	case "Medication.updated_at":
+	case "Medication.updatedAt":
 		if e.complexity.Medication.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.Medication.UpdatedAt(childComplexity), true
 
-	case "Medication.user_id":
+	case "Medication.userId":
 		if e.complexity.Medication.UserID == nil {
 			break
 		}
@@ -1493,7 +1525,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicationDetail.Unit(childComplexity), true
 
-	case "MedicationReminder.created_at":
+	case "MedicationReminder.createdAt":
 		if e.complexity.MedicationReminder.CreatedAt == nil {
 			break
 		}
@@ -1507,28 +1539,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicationReminder.ID(childComplexity), true
 
-	case "MedicationReminder.is_taken":
+	case "MedicationReminder.isTaken":
 		if e.complexity.MedicationReminder.IsTaken == nil {
 			break
 		}
 
 		return e.complexity.MedicationReminder.IsTaken(childComplexity), true
 
-	case "MedicationReminder.medication_id":
+	case "MedicationReminder.medicationId":
 		if e.complexity.MedicationReminder.MedicationID == nil {
 			break
 		}
 
 		return e.complexity.MedicationReminder.MedicationID(childComplexity), true
 
-	case "MedicationReminder.reminder_time":
+	case "MedicationReminder.reminderTime":
 		if e.complexity.MedicationReminder.ReminderTime == nil {
 			break
 		}
 
 		return e.complexity.MedicationReminder.ReminderTime(childComplexity), true
 
-	case "MedicationReminder.user_id":
+	case "MedicationReminder.userId":
 		if e.complexity.MedicationReminder.UserID == nil {
 			break
 		}
@@ -1822,6 +1854,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["token"].(string), args["newPassword"].(string)), true
 
+	case "Mutation.shareProfile":
+		if e.complexity.Mutation.ShareProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_shareProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ShareProfile(childComplexity, args["phoneNumber"].(string), args["accessLevel"].(string), args["remarks"].(string)), true
+
 	case "Mutation.takeMedication":
 		if e.complexity.Mutation.TakeMedication == nil {
 			break
@@ -1833,6 +1877,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.TakeMedication(childComplexity, args["reminderId"].(*string)), true
+
+	case "Mutation.unshareProfile":
+		if e.complexity.Mutation.UnshareProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unshareProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnshareProfile(childComplexity, args["targetUserId"].(string)), true
 
 	case "Mutation.updateFamilyMember":
 		if e.complexity.Mutation.UpdateFamilyMember == nil {
@@ -1980,6 +2036,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PatientDetail.Relationship(childComplexity), true
+
+	case "ProfileDetail.createdAt":
+		if e.complexity.ProfileDetail.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.ProfileDetail.CreatedAt(childComplexity), true
+
+	case "ProfileDetail.id":
+		if e.complexity.ProfileDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.ProfileDetail.ID(childComplexity), true
+
+	case "ProfileDetail.name":
+		if e.complexity.ProfileDetail.Name == nil {
+			break
+		}
+
+		return e.complexity.ProfileDetail.Name(childComplexity), true
+
+	case "ProfileDetail.phoneNumber":
+		if e.complexity.ProfileDetail.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.ProfileDetail.PhoneNumber(childComplexity), true
+
+	case "ProfileDetail.role":
+		if e.complexity.ProfileDetail.Role == nil {
+			break
+		}
+
+		return e.complexity.ProfileDetail.Role(childComplexity), true
 
 	case "Query.getAchievementBadges":
 		if e.complexity.Query.GetAchievementBadges == nil {
@@ -2135,12 +2226,74 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetPatientTreatmentSchedule(childComplexity, args["patientId"].(string)), true
 
+	case "Query.getProfiles":
+		if e.complexity.Query.GetProfiles == nil {
+			break
+		}
+
+		return e.complexity.Query.GetProfiles(childComplexity), true
+
 	case "Query.getRelatedPatients":
 		if e.complexity.Query.GetRelatedPatients == nil {
 			break
 		}
 
 		return e.complexity.Query.GetRelatedPatients(childComplexity), true
+
+	case "Query.getSharedHealthMetrics":
+		if e.complexity.Query.GetSharedHealthMetrics == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedHealthMetrics_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedHealthMetrics(childComplexity, args["patientId"].(string), args["startDate"].(*string), args["endDate"].(*string), args["metricType"].(*string)), true
+
+	case "Query.getSharedMedicalRecords":
+		if e.complexity.Query.GetSharedMedicalRecords == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedMedicalRecords_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedMedicalRecords(childComplexity, args["patientId"].(string)), true
+
+	case "Query.getSharedMedications":
+		if e.complexity.Query.GetSharedMedications == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedMedications_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedMedications(childComplexity, args["patientId"].(string)), true
+
+	case "Query.getSharedProfiles":
+		if e.complexity.Query.GetSharedProfiles == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSharedProfiles(childComplexity), true
+
+	case "Query.getSharedTreatmentSchedule":
+		if e.complexity.Query.GetSharedTreatmentSchedule == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSharedTreatmentSchedule_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSharedTreatmentSchedule(childComplexity, args["patientId"].(string)), true
 
 	case "Query.getTreatmentSchedules":
 		if e.complexity.Query.GetTreatmentSchedules == nil {
@@ -2232,6 +2385,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResetPasswordResponse.Message(childComplexity), true
+
+	case "ShareProfileResponse.message":
+		if e.complexity.ShareProfileResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.ShareProfileResponse.Message(childComplexity), true
 
 	case "TakeMedicationResponse.message":
 		if e.complexity.TakeMedicationResponse.Message == nil {
@@ -2338,7 +2498,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TreatmentSchedule.TreatmentType(childComplexity), true
 
-	case "TreatmentSchedule.user_id":
+	case "TreatmentSchedule.userId":
 		if e.complexity.TreatmentSchedule.UserID == nil {
 			break
 		}
@@ -2379,6 +2539,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TreatmentScheduleDetail.TreatmentType(childComplexity), true
+
+	case "UnshareProfileResponse.message":
+		if e.complexity.UnshareProfileResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.UnshareProfileResponse.Message(childComplexity), true
 
 	case "UpdateFamilyMemberResponse.memberId":
 		if e.complexity.UpdateFamilyMemberResponse.MemberID == nil {
@@ -2478,7 +2645,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UpdateUserResponse.UserID(childComplexity), true
 
-	case "User.created_at":
+	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
 			break
 		}
@@ -2492,7 +2659,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.ID(childComplexity), true
 
-	case "User.last_login":
+	case "User.lastLogin":
 		if e.complexity.User.LastLogin == nil {
 			break
 		}
@@ -2541,28 +2708,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Status(childComplexity), true
 
-	case "User.updated_at":
+	case "User.updatedAt":
 		if e.complexity.User.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
 
-	case "UserAchievement.badge_id":
+	case "UserAchievement.badgeId":
 		if e.complexity.UserAchievement.BadgeID == nil {
 			break
 		}
 
 		return e.complexity.UserAchievement.BadgeID(childComplexity), true
 
-	case "UserAchievement.created_at":
+	case "UserAchievement.createdAt":
 		if e.complexity.UserAchievement.CreatedAt == nil {
 			break
 		}
 
 		return e.complexity.UserAchievement.CreatedAt(childComplexity), true
 
-	case "UserAchievement.earned_at":
+	case "UserAchievement.earnedAt":
 		if e.complexity.UserAchievement.EarnedAt == nil {
 			break
 		}
@@ -2576,7 +2743,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserAchievement.ID(childComplexity), true
 
-	case "UserAchievement.user_id":
+	case "UserAchievement.userId":
 		if e.complexity.UserAchievement.UserID == nil {
 			break
 		}
@@ -2681,7 +2848,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserPointRecord.Reason(childComplexity), true
 
-	case "UserPointRecord.user_id":
+	case "UserPointRecord.userId":
 		if e.complexity.UserPointRecord.UserID == nil {
 			break
 		}
@@ -2841,16 +3008,16 @@ var sources = []*ast.Source{
   id: String!
   name: String!
   description: String!
-  icon_url: String!
-  created_at: DateTime!
+  iconUrl: String!
+  createdAt: DateTime!
 }
 
 type UserAchievement{
   id: String!
-  user_id: String!
-  badge_id: String!
-  earned_at: DateTime!
-  created_at: DateTime!
+  userId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type CreateAchievementBadgeResponse {
@@ -2863,7 +3030,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type AwardAchievementResponse {
@@ -2879,7 +3046,7 @@ type UserAchievementDetail {
 
 type UserPointRecord{
   id: String!
-  user_id: String!
+  userId: String!
   pointsEarned: Float!
   reason: String!
   earnedAt: DateTime!
@@ -2910,7 +3077,7 @@ extend type Mutation{
 }`, BuiltIn: false},
 	{Name: "../schemas/activityLog.graphqls", Input: `type ActivityLog {
     id: String!
-    user_id: String!
+    userId: String!
     activityType: String!
     description: String!
     changedObject: String!
@@ -2965,11 +3132,11 @@ input FilledQuestionnaire{
 
 type HealthRiskAssessment{
   id: String!
-  user_id: String!
-  questionnaire_data: [HealthResponse!]!
-  risk_level: String!
+  userId: String!
+  questionnaireData: [HealthResponse!]!
+  riskLevel: String!
   recommendations: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type HealthRiskAssessmentDetailResponse {
@@ -2996,11 +3163,11 @@ extend type Mutation{
 }`, BuiltIn: false},
 	{Name: "../schemas/familyMember.graphqls", Input: `type FamilyMember{
   id: String!
-  user_id: String!
-  patient_user_id: String!
+  userId: String!
+  patient_userId: String!
   relationship: String! # deprecated
-  access_level: Int!    # deprecated
-  created_at: DateTime!
+  accessLevel: Int!    # deprecated
+  createdAt: DateTime!
 }
 
 type AddFamilyMemberResponse {
@@ -3082,18 +3249,18 @@ extend type Query{
   unit: String!
   frequency: String!
   inventory: Float!
-  user_id: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  userId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type MedicationReminder{
   id: String!
-  medication_id: String!
-  user_id: String!
-  reminder_time: DateTime!
-  is_taken: Boolean!
-  created_at: DateTime!
+  medicationId: String!
+  userId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+  createdAt: DateTime!
 }
 
 type AddMedicationResponse {
@@ -3138,7 +3305,7 @@ type MedicationReminderDetail {
 
 type TreatmentSchedule{
   id: String!
-  user_id: String!
+  userId: String!
   treatmentType: String!
   scheduledTime: DateTime!
   location: String!
@@ -3198,22 +3365,22 @@ extend type Mutation{
 `, BuiltIn: false},
 	{Name: "../schemas/record.graphqls", Input: `type MedicalRecord{
   id: String!
-  user_id: String!
-  record_type: String!
+  userId: String!
+  recordType: String!
   # content: RecordObject!
   content: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type HealthMetric{
   id: String!
-  user_id: String!
-  metric_type: String!
+  userId: String!
+  metricType: String!
   value: Float!
   unit: String!
-  recorded_at: DateTime!
-  created_at: DateTime!
+  recordedAt: DateTime!
+  createdAt: DateTime!
 }
 
 type AddHealthMetricResponse {
@@ -3312,9 +3479,9 @@ type User{
   password: String!
   name: String!
   points: Float!
-  created_at: DateTime!
-  updated_at: DateTime!
-  last_login: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
   status: Int!
   role: String!
 }
@@ -3364,8 +3531,31 @@ type ResetPasswordResponse {
   message: String!
 }
 
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+    message: String!
+}
+
+type UnshareProfileResponse {
+    message: String!
+}
+
 extend type Query{
   getUser: UserDetailResponse
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
@@ -3377,6 +3567,9 @@ extend type Mutation{
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -4300,6 +4493,65 @@ func (ec *executionContext) field_Mutation_resetPassword_argsNewPassword(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_shareProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_shareProfile_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phoneNumber"] = arg0
+	arg1, err := ec.field_Mutation_shareProfile_argsAccessLevel(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["accessLevel"] = arg1
+	arg2, err := ec.field_Mutation_shareProfile_argsRemarks(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["remarks"] = arg2
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_shareProfile_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_shareProfile_argsAccessLevel(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
+	if tmp, ok := rawArgs["accessLevel"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_shareProfile_argsRemarks(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("remarks"))
+	if tmp, ok := rawArgs["remarks"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_takeMedication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4320,6 +4572,29 @@ func (ec *executionContext) field_Mutation_takeMedication_argsReminderID(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_unshareProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_unshareProfile_argsTargetUserID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["targetUserId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_unshareProfile_argsTargetUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("targetUserId"))
+	if tmp, ok := rawArgs["targetUserId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -5100,6 +5375,152 @@ func (ec *executionContext) field_Query_getPatientTreatmentSchedule_argsPatientI
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_getSharedHealthMetrics_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedHealthMetrics_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	arg1, err := ec.field_Query_getSharedHealthMetrics_argsStartDate(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["startDate"] = arg1
+	arg2, err := ec.field_Query_getSharedHealthMetrics_argsEndDate(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["endDate"] = arg2
+	arg3, err := ec.field_Query_getSharedHealthMetrics_argsMetricType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["metricType"] = arg3
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsStartDate(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+	if tmp, ok := rawArgs["startDate"]; ok {
+		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsEndDate(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+	if tmp, ok := rawArgs["endDate"]; ok {
+		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedHealthMetrics_argsMetricType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("metricType"))
+	if tmp, ok := rawArgs["metricType"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedMedicalRecords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedMedicalRecords_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedMedicalRecords_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedMedications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedMedications_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedMedications_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getSharedTreatmentSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getSharedTreatmentSchedule_argsPatientID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["patientId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getSharedTreatmentSchedule_argsPatientID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
+	if tmp, ok := rawArgs["patientId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5286,8 +5707,8 @@ func (ec *executionContext) fieldContext_AchievementBadge_description(_ context.
 	return fc, nil
 }
 
-func (ec *executionContext) _AchievementBadge_icon_url(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AchievementBadge_icon_url(ctx, field)
+func (ec *executionContext) _AchievementBadge_iconUrl(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AchievementBadge_iconUrl(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5317,7 +5738,7 @@ func (ec *executionContext) _AchievementBadge_icon_url(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_AchievementBadge_icon_url(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_AchievementBadge_iconUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AchievementBadge",
 		Field:      field,
@@ -5330,8 +5751,8 @@ func (ec *executionContext) fieldContext_AchievementBadge_icon_url(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _AchievementBadge_created_at(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AchievementBadge_created_at(ctx, field)
+func (ec *executionContext) _AchievementBadge_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AchievementBadge_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5361,7 +5782,7 @@ func (ec *executionContext) _AchievementBadge_created_at(ctx context.Context, fi
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_AchievementBadge_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_AchievementBadge_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AchievementBadge",
 		Field:      field,
@@ -5550,8 +5971,8 @@ func (ec *executionContext) fieldContext_AchievementBadgeDetail_iconUrl(_ contex
 	return fc, nil
 }
 
-func (ec *executionContext) _AchievementBadgeDetail_created_at(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadgeDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AchievementBadgeDetail_created_at(ctx, field)
+func (ec *executionContext) _AchievementBadgeDetail_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.AchievementBadgeDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AchievementBadgeDetail_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5581,7 +6002,7 @@ func (ec *executionContext) _AchievementBadgeDetail_created_at(ctx context.Conte
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_AchievementBadgeDetail_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_AchievementBadgeDetail_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "AchievementBadgeDetail",
 		Field:      field,
@@ -5638,8 +6059,8 @@ func (ec *executionContext) fieldContext_ActivityLog_id(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _ActivityLog_user_id(ctx context.Context, field graphql.CollectedField, obj *model.ActivityLog) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ActivityLog_user_id(ctx, field)
+func (ec *executionContext) _ActivityLog_userId(ctx context.Context, field graphql.CollectedField, obj *model.ActivityLog) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ActivityLog_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5669,7 +6090,7 @@ func (ec *executionContext) _ActivityLog_user_id(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ActivityLog_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ActivityLog_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ActivityLog",
 		Field:      field,
@@ -7618,8 +8039,8 @@ func (ec *executionContext) fieldContext_FamilyMember_id(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _FamilyMember_user_id(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_user_id(ctx, field)
+func (ec *executionContext) _FamilyMember_userId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FamilyMember_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7649,7 +8070,7 @@ func (ec *executionContext) _FamilyMember_user_id(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FamilyMember_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FamilyMember_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FamilyMember",
 		Field:      field,
@@ -7662,8 +8083,8 @@ func (ec *executionContext) fieldContext_FamilyMember_user_id(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _FamilyMember_patient_user_id(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_patient_user_id(ctx, field)
+func (ec *executionContext) _FamilyMember_patient_userId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FamilyMember_patient_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7693,7 +8114,7 @@ func (ec *executionContext) _FamilyMember_patient_user_id(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FamilyMember_patient_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FamilyMember_patient_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FamilyMember",
 		Field:      field,
@@ -7750,8 +8171,8 @@ func (ec *executionContext) fieldContext_FamilyMember_relationship(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _FamilyMember_access_level(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_access_level(ctx, field)
+func (ec *executionContext) _FamilyMember_accessLevel(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FamilyMember_accessLevel(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7781,7 +8202,7 @@ func (ec *executionContext) _FamilyMember_access_level(ctx context.Context, fiel
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FamilyMember_access_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FamilyMember_accessLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FamilyMember",
 		Field:      field,
@@ -7794,8 +8215,8 @@ func (ec *executionContext) fieldContext_FamilyMember_access_level(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _FamilyMember_created_at(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_created_at(ctx, field)
+func (ec *executionContext) _FamilyMember_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_FamilyMember_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -7825,7 +8246,7 @@ func (ec *executionContext) _FamilyMember_created_at(ctx context.Context, field 
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FamilyMember_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FamilyMember_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FamilyMember",
 		Field:      field,
@@ -8464,8 +8885,8 @@ func (ec *executionContext) fieldContext_HealthMetric_id(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthMetric_user_id(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthMetric_user_id(ctx, field)
+func (ec *executionContext) _HealthMetric_userId(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthMetric_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8495,7 +8916,7 @@ func (ec *executionContext) _HealthMetric_user_id(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthMetric_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthMetric_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthMetric",
 		Field:      field,
@@ -8508,8 +8929,8 @@ func (ec *executionContext) fieldContext_HealthMetric_user_id(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthMetric_metric_type(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthMetric_metric_type(ctx, field)
+func (ec *executionContext) _HealthMetric_metricType(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthMetric_metricType(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8539,7 +8960,7 @@ func (ec *executionContext) _HealthMetric_metric_type(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthMetric_metric_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthMetric_metricType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthMetric",
 		Field:      field,
@@ -8640,8 +9061,8 @@ func (ec *executionContext) fieldContext_HealthMetric_unit(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthMetric_recorded_at(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthMetric_recorded_at(ctx, field)
+func (ec *executionContext) _HealthMetric_recordedAt(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthMetric_recordedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8671,7 +9092,7 @@ func (ec *executionContext) _HealthMetric_recorded_at(ctx context.Context, field
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthMetric_recorded_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthMetric_recordedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthMetric",
 		Field:      field,
@@ -8684,8 +9105,8 @@ func (ec *executionContext) fieldContext_HealthMetric_recorded_at(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthMetric_created_at(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthMetric_created_at(ctx, field)
+func (ec *executionContext) _HealthMetric_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.HealthMetric) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthMetric_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8715,7 +9136,7 @@ func (ec *executionContext) _HealthMetric_created_at(ctx context.Context, field 
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthMetric_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthMetric_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthMetric",
 		Field:      field,
@@ -9121,8 +9542,8 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_id(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthRiskAssessment_user_id(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthRiskAssessment_user_id(ctx, field)
+func (ec *executionContext) _HealthRiskAssessment_userId(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthRiskAssessment_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9152,7 +9573,7 @@ func (ec *executionContext) _HealthRiskAssessment_user_id(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthRiskAssessment_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthRiskAssessment_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthRiskAssessment",
 		Field:      field,
@@ -9165,8 +9586,8 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_user_id(_ context.
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthRiskAssessment_questionnaire_data(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthRiskAssessment_questionnaire_data(ctx, field)
+func (ec *executionContext) _HealthRiskAssessment_questionnaireData(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthRiskAssessment_questionnaireData(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9196,7 +9617,7 @@ func (ec *executionContext) _HealthRiskAssessment_questionnaire_data(ctx context
 	return ec.marshalNHealthResponse2ᚕᚖmeditraxᚋgraphᚋmodelᚐHealthResponseᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthRiskAssessment_questionnaire_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthRiskAssessment_questionnaireData(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthRiskAssessment",
 		Field:      field,
@@ -9217,8 +9638,8 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_questionnaire_data
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthRiskAssessment_risk_level(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthRiskAssessment_risk_level(ctx, field)
+func (ec *executionContext) _HealthRiskAssessment_riskLevel(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthRiskAssessment_riskLevel(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9248,7 +9669,7 @@ func (ec *executionContext) _HealthRiskAssessment_risk_level(ctx context.Context
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthRiskAssessment_risk_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthRiskAssessment_riskLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthRiskAssessment",
 		Field:      field,
@@ -9305,8 +9726,8 @@ func (ec *executionContext) fieldContext_HealthRiskAssessment_recommendations(_ 
 	return fc, nil
 }
 
-func (ec *executionContext) _HealthRiskAssessment_created_at(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HealthRiskAssessment_created_at(ctx, field)
+func (ec *executionContext) _HealthRiskAssessment_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.HealthRiskAssessment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_HealthRiskAssessment_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9336,7 +9757,7 @@ func (ec *executionContext) _HealthRiskAssessment_created_at(ctx context.Context
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_HealthRiskAssessment_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_HealthRiskAssessment_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "HealthRiskAssessment",
 		Field:      field,
@@ -9773,8 +10194,8 @@ func (ec *executionContext) fieldContext_MedicalRecord_id(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicalRecord_user_id(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicalRecord_user_id(ctx, field)
+func (ec *executionContext) _MedicalRecord_userId(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicalRecord_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9804,7 +10225,7 @@ func (ec *executionContext) _MedicalRecord_user_id(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicalRecord_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicalRecord_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicalRecord",
 		Field:      field,
@@ -9817,8 +10238,8 @@ func (ec *executionContext) fieldContext_MedicalRecord_user_id(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicalRecord_record_type(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicalRecord_record_type(ctx, field)
+func (ec *executionContext) _MedicalRecord_recordType(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicalRecord_recordType(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9848,7 +10269,7 @@ func (ec *executionContext) _MedicalRecord_record_type(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicalRecord_record_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicalRecord_recordType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicalRecord",
 		Field:      field,
@@ -9905,8 +10326,8 @@ func (ec *executionContext) fieldContext_MedicalRecord_content(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicalRecord_created_at(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicalRecord_created_at(ctx, field)
+func (ec *executionContext) _MedicalRecord_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicalRecord_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9936,7 +10357,7 @@ func (ec *executionContext) _MedicalRecord_created_at(ctx context.Context, field
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicalRecord_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicalRecord_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicalRecord",
 		Field:      field,
@@ -9949,8 +10370,8 @@ func (ec *executionContext) fieldContext_MedicalRecord_created_at(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicalRecord_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicalRecord_updated_at(ctx, field)
+func (ec *executionContext) _MedicalRecord_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.MedicalRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicalRecord_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -9980,7 +10401,7 @@ func (ec *executionContext) _MedicalRecord_updated_at(ctx context.Context, field
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicalRecord_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicalRecord_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicalRecord",
 		Field:      field,
@@ -10433,8 +10854,8 @@ func (ec *executionContext) fieldContext_Medication_inventory(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Medication_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Medication_user_id(ctx, field)
+func (ec *executionContext) _Medication_userId(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Medication_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10464,7 +10885,7 @@ func (ec *executionContext) _Medication_user_id(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Medication_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Medication_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Medication",
 		Field:      field,
@@ -10477,8 +10898,8 @@ func (ec *executionContext) fieldContext_Medication_user_id(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Medication_created_at(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Medication_created_at(ctx, field)
+func (ec *executionContext) _Medication_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Medication_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10508,7 +10929,7 @@ func (ec *executionContext) _Medication_created_at(ctx context.Context, field gr
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Medication_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Medication_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Medication",
 		Field:      field,
@@ -10521,8 +10942,8 @@ func (ec *executionContext) fieldContext_Medication_created_at(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Medication_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Medication_updated_at(ctx, field)
+func (ec *executionContext) _Medication_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Medication) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Medication_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10552,7 +10973,7 @@ func (ec *executionContext) _Medication_updated_at(ctx context.Context, field gr
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Medication_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Medication_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Medication",
 		Field:      field,
@@ -10873,8 +11294,8 @@ func (ec *executionContext) fieldContext_MedicationReminder_id(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicationReminder_medication_id(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicationReminder_medication_id(ctx, field)
+func (ec *executionContext) _MedicationReminder_medicationId(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicationReminder_medicationId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10904,7 +11325,7 @@ func (ec *executionContext) _MedicationReminder_medication_id(ctx context.Contex
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicationReminder_medication_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicationReminder_medicationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicationReminder",
 		Field:      field,
@@ -10917,8 +11338,8 @@ func (ec *executionContext) fieldContext_MedicationReminder_medication_id(_ cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicationReminder_user_id(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicationReminder_user_id(ctx, field)
+func (ec *executionContext) _MedicationReminder_userId(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicationReminder_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10948,7 +11369,7 @@ func (ec *executionContext) _MedicationReminder_user_id(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicationReminder_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicationReminder_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicationReminder",
 		Field:      field,
@@ -10961,8 +11382,8 @@ func (ec *executionContext) fieldContext_MedicationReminder_user_id(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicationReminder_reminder_time(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicationReminder_reminder_time(ctx, field)
+func (ec *executionContext) _MedicationReminder_reminderTime(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicationReminder_reminderTime(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10992,7 +11413,7 @@ func (ec *executionContext) _MedicationReminder_reminder_time(ctx context.Contex
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicationReminder_reminder_time(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicationReminder_reminderTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicationReminder",
 		Field:      field,
@@ -11005,8 +11426,8 @@ func (ec *executionContext) fieldContext_MedicationReminder_reminder_time(_ cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicationReminder_is_taken(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicationReminder_is_taken(ctx, field)
+func (ec *executionContext) _MedicationReminder_isTaken(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicationReminder_isTaken(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -11036,7 +11457,7 @@ func (ec *executionContext) _MedicationReminder_is_taken(ctx context.Context, fi
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicationReminder_is_taken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicationReminder_isTaken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicationReminder",
 		Field:      field,
@@ -11049,8 +11470,8 @@ func (ec *executionContext) fieldContext_MedicationReminder_is_taken(_ context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _MedicationReminder_created_at(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MedicationReminder_created_at(ctx, field)
+func (ec *executionContext) _MedicationReminder_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.MedicationReminder) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MedicationReminder_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -11080,7 +11501,7 @@ func (ec *executionContext) _MedicationReminder_created_at(ctx context.Context, 
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MedicationReminder_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MedicationReminder_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MedicationReminder",
 		Field:      field,
@@ -12999,6 +13420,124 @@ func (ec *executionContext) fieldContext_Mutation_resetPassword(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_shareProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_shareProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ShareProfile(rctx, fc.Args["phoneNumber"].(string), fc.Args["accessLevel"].(string), fc.Args["remarks"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ShareProfileResponse)
+	fc.Result = res
+	return ec.marshalNShareProfileResponse2ᚖmeditraxᚋgraphᚋmodelᚐShareProfileResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_shareProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_ShareProfileResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShareProfileResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_shareProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unshareProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_unshareProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UnshareProfile(rctx, fc.Args["targetUserId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnshareProfileResponse)
+	fc.Result = res
+	return ec.marshalNUnshareProfileResponse2ᚖmeditraxᚋgraphᚋmodelᚐUnshareProfileResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unshareProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_UnshareProfileResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnshareProfileResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unshareProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PasswordChange_id(ctx context.Context, field graphql.CollectedField, obj *model.PasswordChange) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PasswordChange_id(ctx, field)
 	if err != nil {
@@ -13395,6 +13934,226 @@ func (ec *executionContext) fieldContext_PatientDetail_accessLevel(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _ProfileDetail_id(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDetail_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDetail_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileDetail_name(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDetail_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDetail_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileDetail_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDetail_phoneNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDetail_phoneNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileDetail_role(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDetail_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDetail_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileDetail_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDetail) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDetail_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDetail_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getAchievementBadges(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_getAchievementBadges(ctx, field)
 	if err != nil {
@@ -13439,8 +14198,8 @@ func (ec *executionContext) fieldContext_Query_getAchievementBadges(_ context.Co
 				return ec.fieldContext_AchievementBadgeDetail_description(ctx, field)
 			case "iconUrl":
 				return ec.fieldContext_AchievementBadgeDetail_iconUrl(ctx, field)
-			case "created_at":
-				return ec.fieldContext_AchievementBadgeDetail_created_at(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_AchievementBadgeDetail_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AchievementBadgeDetail", field.Name)
 		},
@@ -14608,6 +15367,368 @@ func (ec *executionContext) fieldContext_Query_getUser(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getProfiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getProfiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProfiles(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProfileDetail)
+	fc.Result = res
+	return ec.marshalOProfileDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getProfiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProfileDetail_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ProfileDetail_name(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_ProfileDetail_phoneNumber(ctx, field)
+			case "role":
+				return ec.fieldContext_ProfileDetail_role(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ProfileDetail_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfileDetail", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedProfiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedProfiles(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedProfiles(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProfileDetail)
+	fc.Result = res
+	return ec.marshalOProfileDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedProfiles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ProfileDetail_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ProfileDetail_name(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_ProfileDetail_phoneNumber(ctx, field)
+			case "role":
+				return ec.fieldContext_ProfileDetail_role(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ProfileDetail_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfileDetail", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedMedicalRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedMedicalRecords(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedMedicalRecords(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MedicalRecordDetail)
+	fc.Result = res
+	return ec.marshalOMedicalRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicalRecordDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedMedicalRecords(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "recordId":
+				return ec.fieldContext_MedicalRecordDetail_recordId(ctx, field)
+			case "recordType":
+				return ec.fieldContext_MedicalRecordDetail_recordType(ctx, field)
+			case "content":
+				return ec.fieldContext_MedicalRecordDetail_content(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_MedicalRecordDetail_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MedicalRecordDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedMedicalRecords_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedTreatmentSchedule(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedTreatmentSchedule(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TreatmentScheduleDetail)
+	fc.Result = res
+	return ec.marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "scheduleId":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduleId(ctx, field)
+			case "treatmentType":
+				return ec.fieldContext_TreatmentScheduleDetail_treatmentType(ctx, field)
+			case "scheduledTime":
+				return ec.fieldContext_TreatmentScheduleDetail_scheduledTime(ctx, field)
+			case "location":
+				return ec.fieldContext_TreatmentScheduleDetail_location(ctx, field)
+			case "notes":
+				return ec.fieldContext_TreatmentScheduleDetail_notes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TreatmentScheduleDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedTreatmentSchedule_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedMedications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedMedications(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedMedications(rctx, fc.Args["patientId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MedicationDetail)
+	fc.Result = res
+	return ec.marshalOMedicationDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicationDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedMedications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "medicationId":
+				return ec.fieldContext_MedicationDetail_medicationId(ctx, field)
+			case "name":
+				return ec.fieldContext_MedicationDetail_name(ctx, field)
+			case "dosage":
+				return ec.fieldContext_MedicationDetail_dosage(ctx, field)
+			case "unit":
+				return ec.fieldContext_MedicationDetail_unit(ctx, field)
+			case "frequency":
+				return ec.fieldContext_MedicationDetail_frequency(ctx, field)
+			case "inventory":
+				return ec.fieldContext_MedicationDetail_inventory(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MedicationDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedMedications_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSharedHealthMetrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSharedHealthMetrics(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSharedHealthMetrics(rctx, fc.Args["patientId"].(string), fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["metricType"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.HealthMetricDetail)
+	fc.Result = res
+	return ec.marshalOHealthMetricDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐHealthMetricDetail(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSharedHealthMetrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "metricId":
+				return ec.fieldContext_HealthMetricDetail_metricId(ctx, field)
+			case "metricType":
+				return ec.fieldContext_HealthMetricDetail_metricType(ctx, field)
+			case "value":
+				return ec.fieldContext_HealthMetricDetail_value(ctx, field)
+			case "unit":
+				return ec.fieldContext_HealthMetricDetail_unit(ctx, field)
+			case "recordedAt":
+				return ec.fieldContext_HealthMetricDetail_recordedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type HealthMetricDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getSharedHealthMetrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -15140,6 +16261,50 @@ func (ec *executionContext) fieldContext_ResetPasswordResponse_message(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _ShareProfileResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.ShareProfileResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShareProfileResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShareProfileResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShareProfileResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TakeMedicationResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.TakeMedicationResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TakeMedicationResponse_message(ctx, field)
 	if err != nil {
@@ -15624,8 +16789,8 @@ func (ec *executionContext) fieldContext_TreatmentSchedule_id(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _TreatmentSchedule_user_id(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TreatmentSchedule_user_id(ctx, field)
+func (ec *executionContext) _TreatmentSchedule_userId(ctx context.Context, field graphql.CollectedField, obj *model.TreatmentSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TreatmentSchedule_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -15655,7 +16820,7 @@ func (ec *executionContext) _TreatmentSchedule_user_id(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TreatmentSchedule_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TreatmentSchedule_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TreatmentSchedule",
 		Field:      field,
@@ -16048,6 +17213,50 @@ func (ec *executionContext) _TreatmentScheduleDetail_notes(ctx context.Context, 
 func (ec *executionContext) fieldContext_TreatmentScheduleDetail_notes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TreatmentScheduleDetail",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnshareProfileResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.UnshareProfileResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnshareProfileResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnshareProfileResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnshareProfileResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -16894,8 +18103,8 @@ func (ec *executionContext) fieldContext_User_points(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _User_created_at(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_created_at(ctx, field)
+func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16925,7 +18134,7 @@ func (ec *executionContext) _User_created_at(ctx context.Context, field graphql.
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -16938,8 +18147,8 @@ func (ec *executionContext) fieldContext_User_created_at(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_updated_at(ctx, field)
+func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -16969,7 +18178,7 @@ func (ec *executionContext) _User_updated_at(ctx context.Context, field graphql.
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_updated_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -16982,8 +18191,8 @@ func (ec *executionContext) fieldContext_User_updated_at(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_last_login(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_last_login(ctx, field)
+func (ec *executionContext) _User_lastLogin(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_lastLogin(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17013,7 +18222,7 @@ func (ec *executionContext) _User_last_login(ctx context.Context, field graphql.
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_last_login(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_lastLogin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -17158,8 +18367,8 @@ func (ec *executionContext) fieldContext_UserAchievement_id(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _UserAchievement_user_id(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserAchievement_user_id(ctx, field)
+func (ec *executionContext) _UserAchievement_userId(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAchievement_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17189,7 +18398,7 @@ func (ec *executionContext) _UserAchievement_user_id(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserAchievement_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserAchievement_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserAchievement",
 		Field:      field,
@@ -17202,8 +18411,8 @@ func (ec *executionContext) fieldContext_UserAchievement_user_id(_ context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _UserAchievement_badge_id(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserAchievement_badge_id(ctx, field)
+func (ec *executionContext) _UserAchievement_badgeId(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAchievement_badgeId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17233,7 +18442,7 @@ func (ec *executionContext) _UserAchievement_badge_id(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserAchievement_badge_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserAchievement_badgeId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserAchievement",
 		Field:      field,
@@ -17246,8 +18455,8 @@ func (ec *executionContext) fieldContext_UserAchievement_badge_id(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _UserAchievement_earned_at(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserAchievement_earned_at(ctx, field)
+func (ec *executionContext) _UserAchievement_earnedAt(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAchievement_earnedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17277,7 +18486,7 @@ func (ec *executionContext) _UserAchievement_earned_at(ctx context.Context, fiel
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserAchievement_earned_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserAchievement_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserAchievement",
 		Field:      field,
@@ -17290,8 +18499,8 @@ func (ec *executionContext) fieldContext_UserAchievement_earned_at(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _UserAchievement_created_at(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserAchievement_created_at(ctx, field)
+func (ec *executionContext) _UserAchievement_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.UserAchievement) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserAchievement_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17321,7 +18530,7 @@ func (ec *executionContext) _UserAchievement_created_at(ctx context.Context, fie
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserAchievement_created_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserAchievement_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserAchievement",
 		Field:      field,
@@ -17815,8 +19024,8 @@ func (ec *executionContext) fieldContext_UserPointRecord_id(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _UserPointRecord_user_id(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserPointRecord_user_id(ctx, field)
+func (ec *executionContext) _UserPointRecord_userId(ctx context.Context, field graphql.CollectedField, obj *model.UserPointRecord) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserPointRecord_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -17846,7 +19055,7 @@ func (ec *executionContext) _UserPointRecord_user_id(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserPointRecord_user_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserPointRecord_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserPointRecord",
 		Field:      field,
@@ -20137,13 +21346,13 @@ func (ec *executionContext) _AchievementBadge(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "icon_url":
-			out.Values[i] = ec._AchievementBadge_icon_url(ctx, field, obj)
+		case "iconUrl":
+			out.Values[i] = ec._AchievementBadge_iconUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._AchievementBadge_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._AchievementBadge_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -20201,8 +21410,8 @@ func (ec *executionContext) _AchievementBadgeDetail(ctx context.Context, sel ast
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._AchievementBadgeDetail_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._AchievementBadgeDetail_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -20245,8 +21454,8 @@ func (ec *executionContext) _ActivityLog(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._ActivityLog_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._ActivityLog_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21116,13 +22325,13 @@ func (ec *executionContext) _FamilyMember(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._FamilyMember_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._FamilyMember_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "patient_user_id":
-			out.Values[i] = ec._FamilyMember_patient_user_id(ctx, field, obj)
+		case "patient_userId":
+			out.Values[i] = ec._FamilyMember_patient_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21131,13 +22340,13 @@ func (ec *executionContext) _FamilyMember(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "access_level":
-			out.Values[i] = ec._FamilyMember_access_level(ctx, field, obj)
+		case "accessLevel":
+			out.Values[i] = ec._FamilyMember_accessLevel(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._FamilyMember_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._FamilyMember_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21381,13 +22590,13 @@ func (ec *executionContext) _HealthMetric(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._HealthMetric_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._HealthMetric_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "metric_type":
-			out.Values[i] = ec._HealthMetric_metric_type(ctx, field, obj)
+		case "metricType":
+			out.Values[i] = ec._HealthMetric_metricType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21401,13 +22610,13 @@ func (ec *executionContext) _HealthMetric(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "recorded_at":
-			out.Values[i] = ec._HealthMetric_recorded_at(ctx, field, obj)
+		case "recordedAt":
+			out.Values[i] = ec._HealthMetric_recordedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._HealthMetric_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._HealthMetric_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21555,18 +22764,18 @@ func (ec *executionContext) _HealthRiskAssessment(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._HealthRiskAssessment_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._HealthRiskAssessment_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "questionnaire_data":
-			out.Values[i] = ec._HealthRiskAssessment_questionnaire_data(ctx, field, obj)
+		case "questionnaireData":
+			out.Values[i] = ec._HealthRiskAssessment_questionnaireData(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "risk_level":
-			out.Values[i] = ec._HealthRiskAssessment_risk_level(ctx, field, obj)
+		case "riskLevel":
+			out.Values[i] = ec._HealthRiskAssessment_riskLevel(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21575,8 +22784,8 @@ func (ec *executionContext) _HealthRiskAssessment(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._HealthRiskAssessment_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._HealthRiskAssessment_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21727,13 +22936,13 @@ func (ec *executionContext) _MedicalRecord(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._MedicalRecord_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._MedicalRecord_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "record_type":
-			out.Values[i] = ec._MedicalRecord_record_type(ctx, field, obj)
+		case "recordType":
+			out.Values[i] = ec._MedicalRecord_recordType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21742,13 +22951,13 @@ func (ec *executionContext) _MedicalRecord(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._MedicalRecord_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._MedicalRecord_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updated_at":
-			out.Values[i] = ec._MedicalRecord_updated_at(ctx, field, obj)
+		case "updatedAt":
+			out.Values[i] = ec._MedicalRecord_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21870,18 +23079,18 @@ func (ec *executionContext) _Medication(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._Medication_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._Medication_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._Medication_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._Medication_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updated_at":
-			out.Values[i] = ec._Medication_updated_at(ctx, field, obj)
+		case "updatedAt":
+			out.Values[i] = ec._Medication_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -21988,28 +23197,28 @@ func (ec *executionContext) _MedicationReminder(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "medication_id":
-			out.Values[i] = ec._MedicationReminder_medication_id(ctx, field, obj)
+		case "medicationId":
+			out.Values[i] = ec._MedicationReminder_medicationId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._MedicationReminder_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._MedicationReminder_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "reminder_time":
-			out.Values[i] = ec._MedicationReminder_reminder_time(ctx, field, obj)
+		case "reminderTime":
+			out.Values[i] = ec._MedicationReminder_reminderTime(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "is_taken":
-			out.Values[i] = ec._MedicationReminder_is_taken(ctx, field, obj)
+		case "isTaken":
+			out.Values[i] = ec._MedicationReminder_isTaken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._MedicationReminder_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._MedicationReminder_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -22232,6 +23441,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_resetPassword(ctx, field)
 			})
+		case "shareProfile":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_shareProfile(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unshareProfile":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unshareProfile(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22342,6 +23565,65 @@ func (ec *executionContext) _PatientDetail(ctx context.Context, sel ast.Selectio
 			}
 		case "accessLevel":
 			out.Values[i] = ec._PatientDetail_accessLevel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var profileDetailImplementors = []string{"ProfileDetail"}
+
+func (ec *executionContext) _ProfileDetail(ctx context.Context, sel ast.SelectionSet, obj *model.ProfileDetail) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, profileDetailImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProfileDetail")
+		case "id":
+			out.Values[i] = ec._ProfileDetail_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._ProfileDetail_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "phoneNumber":
+			out.Values[i] = ec._ProfileDetail_phoneNumber(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "role":
+			out.Values[i] = ec._ProfileDetail_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._ProfileDetail_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -22805,6 +24087,120 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getProfiles":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProfiles(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedProfiles":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedProfiles(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedMedicalRecords":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedMedicalRecords(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedTreatmentSchedule":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedTreatmentSchedule(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedMedications":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedMedications(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSharedHealthMetrics":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSharedHealthMetrics(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -23048,6 +24444,45 @@ func (ec *executionContext) _ResetPasswordResponse(ctx context.Context, sel ast.
 	return out
 }
 
+var shareProfileResponseImplementors = []string{"ShareProfileResponse"}
+
+func (ec *executionContext) _ShareProfileResponse(ctx context.Context, sel ast.SelectionSet, obj *model.ShareProfileResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shareProfileResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShareProfileResponse")
+		case "message":
+			out.Values[i] = ec._ShareProfileResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var takeMedicationResponseImplementors = []string{"TakeMedicationResponse"}
 
 func (ec *executionContext) _TakeMedicationResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TakeMedicationResponse) graphql.Marshaler {
@@ -23182,8 +24617,8 @@ func (ec *executionContext) _TreatmentSchedule(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._TreatmentSchedule_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._TreatmentSchedule_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23260,6 +24695,45 @@ func (ec *executionContext) _TreatmentScheduleDetail(ctx context.Context, sel as
 			}
 		case "notes":
 			out.Values[i] = ec._TreatmentScheduleDetail_notes(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var unshareProfileResponseImplementors = []string{"UnshareProfileResponse"}
+
+func (ec *executionContext) _UnshareProfileResponse(ctx context.Context, sel ast.SelectionSet, obj *model.UnshareProfileResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unshareProfileResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnshareProfileResponse")
+		case "message":
+			out.Values[i] = ec._UnshareProfileResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23627,18 +25101,18 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._User_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "updated_at":
-			out.Values[i] = ec._User_updated_at(ctx, field, obj)
+		case "updatedAt":
+			out.Values[i] = ec._User_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "last_login":
-			out.Values[i] = ec._User_last_login(ctx, field, obj)
+		case "lastLogin":
+			out.Values[i] = ec._User_lastLogin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23691,23 +25165,23 @@ func (ec *executionContext) _UserAchievement(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._UserAchievement_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._UserAchievement_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "badge_id":
-			out.Values[i] = ec._UserAchievement_badge_id(ctx, field, obj)
+		case "badgeId":
+			out.Values[i] = ec._UserAchievement_badgeId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "earned_at":
-			out.Values[i] = ec._UserAchievement_earned_at(ctx, field, obj)
+		case "earnedAt":
+			out.Values[i] = ec._UserAchievement_earnedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "created_at":
-			out.Values[i] = ec._UserAchievement_created_at(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._UserAchievement_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23865,8 +25339,8 @@ func (ec *executionContext) _UserPointRecord(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "user_id":
-			out.Values[i] = ec._UserPointRecord_user_id(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._UserPointRecord_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -24581,6 +26055,20 @@ func (ec *executionContext) unmarshalNResponse2ᚖmeditraxᚋgraphᚋmodelᚐRes
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNShareProfileResponse2meditraxᚋgraphᚋmodelᚐShareProfileResponse(ctx context.Context, sel ast.SelectionSet, v model.ShareProfileResponse) graphql.Marshaler {
+	return ec._ShareProfileResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNShareProfileResponse2ᚖmeditraxᚋgraphᚋmodelᚐShareProfileResponse(ctx context.Context, sel ast.SelectionSet, v *model.ShareProfileResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ShareProfileResponse(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -24618,6 +26106,20 @@ func (ec *executionContext) marshalNToken2ᚖmeditraxᚋgraphᚋmodelᚐToken(ct
 		return graphql.Null
 	}
 	return ec._Token(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUnshareProfileResponse2meditraxᚋgraphᚋmodelᚐUnshareProfileResponse(ctx context.Context, sel ast.SelectionSet, v model.UnshareProfileResponse) graphql.Marshaler {
+	return ec._UnshareProfileResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUnshareProfileResponse2ᚖmeditraxᚋgraphᚋmodelᚐUnshareProfileResponse(ctx context.Context, sel ast.SelectionSet, v *model.UnshareProfileResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnshareProfileResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -25501,6 +27003,54 @@ func (ec *executionContext) marshalOPatientDetail2ᚖmeditraxᚋgraphᚋmodelᚐ
 		return graphql.Null
 	}
 	return ec._PatientDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProfileDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx context.Context, sel ast.SelectionSet, v []*model.ProfileDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOProfileDetail2ᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOProfileDetail2ᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx context.Context, sel ast.SelectionSet, v *model.ProfileDetail) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProfileDetail(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOQuestionnaireObject2ᚖmeditraxᚋgraphᚋmodelᚐQuestionnaireObject(ctx context.Context, sel ast.SelectionSet, v *model.QuestionnaireObject) graphql.Marshaler {

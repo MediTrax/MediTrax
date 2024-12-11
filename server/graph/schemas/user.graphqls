@@ -16,9 +16,9 @@ type User{
   password: String!
   name: String!
   points: Float!
-  created_at: DateTime!
-  updated_at: DateTime!
-  last_login: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
   status: Int!
   role: String!
 }
@@ -68,8 +68,31 @@ type ResetPasswordResponse {
   message: String!
 }
 
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+    message: String!
+}
+
+type UnshareProfileResponse {
+    message: String!
+}
+
 extend type Query{
   getUser: UserDetailResponse
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
 }
 
 extend type Mutation{
@@ -81,4 +104,7 @@ extend type Mutation{
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
   resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }
