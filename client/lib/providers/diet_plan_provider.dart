@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/diet_plan_provider.graphql.dart';
+import 'package:meditrax/models/diet_plan.dart';
 
 final foodSpecsProvider = StateNotifierProvider<FoodSpecsNotifier, AsyncValue<FoodSpecs?>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
@@ -194,37 +195,4 @@ class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommenda
       state = AsyncValue.error(error, stackTrace);
     }
   }
-}
-
-// Models
-class FoodSpecs {
-  final List<FoodSpec> specs;
-  final String howRecommend;
-
-  FoodSpecs({
-    required this.specs,
-    required this.howRecommend,
-  });
-}
-
-class FoodSpec {
-  final String name;
-  final String value;
-  final String unit;
-  final String howHigh;
-
-  FoodSpec({
-    required this.name,
-    required this.value,
-    required this.unit,
-    required this.howHigh,
-  });
-}
-
-class FoodRecommendation {
-  final String name;
-
-  FoodRecommendation({
-    required this.name,
-  });
 }

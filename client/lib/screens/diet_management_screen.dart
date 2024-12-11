@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/providers/diet_plan_provider.dart';
+import 'package:meditrax/models/diet_plan.dart';
 
 class DietManagementScreen extends ConsumerStatefulWidget {
   const DietManagementScreen({super.key});

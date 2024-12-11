@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:meditrax/providers/health_risk_provider.dart';
+import 'package:meditrax/models/health_risk_assessment.dart';
 import 'package:meditrax/screens/health_risk_report_screen.dart';
 
 class HealthRiskAssessmentScreen extends ConsumerStatefulWidget {
@@ -12,79 +13,92 @@ class HealthRiskAssessmentScreen extends ConsumerStatefulWidget {
 }
 
 class _HealthRiskAssessmentScreenState extends ConsumerState<HealthRiskAssessmentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize questionnaire after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(questionnaireProvider.notifier).fetchQuestionnaire();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final questionnaireState = ref.watch(questionnaireProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('健康风险评估')),
+      body: questionnaireState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+        data: (questionnaire) => questionnaire == null
+            ? const Center(child: Text('No questions available'))
+            : QuestionnaireWidget(questionnaire: questionnaire),
+      ),
+    );
+  }
+}
+
+class QuestionnaireWidget extends ConsumerStatefulWidget {
+  final QuestionnaireObject questionnaire;
+
+  const QuestionnaireWidget({
+    super.key,
+    required this.questionnaire,
+  });
+
+  @override
+  ConsumerState<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
+}
+
+class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
   int _currentQuestionIndex = 0;
   String? _selectedAnswer;
-  final Map<int, String> _answers = {};  // Store answers for each question
+  final Map<int, String> _answers = {};
 
-  // Update the questions structure to include IDs
-  final List<Map<String, dynamic>> _questions = [
-    {
-      'id': 'q1',
-      'question': '您最近是否经常感到疲劳？',
-      'options': ['从不', '偶尔', '经常', '总是'],
-    },
-    {
-      'id': 'q2',
-      'question': '您的睡眠质量如何？',
-      'options': ['很好', '一般', '较差', '很差'],
-    },
-    {
-      'id': 'q3',
-      'question': '您是否有规律运动的习惯？',
-      'options': ['每天', '每周3-4次', '偶尔', '从不'],
-    },
-  ];
-
-  String _getQuestionnaireData() {
-    final List<Map<String, dynamic>> questionnaireData = _questions.map((q) {
-      return {
-        'questionId': q['id'],
-        'question': q['question'],
-        'answer': _answers[_questions.indexOf(q)] ?? '',
-      };
-    }).toList();
-    return jsonEncode(questionnaireData);
+  List<HealthResponse> _getResponses() {
+    return _answers.entries.map((entry) => HealthResponse(
+      questionId: entry.key + 1,
+      choice: entry.value,
+      answer: null,
+    )).toList();
   }
 
   Future<void> _handleAnswerSelection(String? value) async {
     if (value == null) return;
-
     setState(() {
       _selectedAnswer = value;
       _answers[_currentQuestionIndex] = value;
     });
-
-    // If we have an existing assessment, update it
-    final currentAssessment = ref.read(healthRiskProvider).value;
-    if (currentAssessment != null) {
-      try {
-        await ref.read(healthRiskProvider.notifier).updateHealthRiskAssessment(
-          assessmentId: currentAssessment.assessmentId,
-          questionnaireData: _getQuestionnaireData(),
-        );
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('更新失败: $e')),
-          );
-        }
-      }
-    }
   }
 
   Future<void> _handleCompletion() async {
     try {
+      final responses = _getResponses();
       final success = await ref.read(healthRiskProvider.notifier)
-          .createHealthRiskAssessment(_getQuestionnaireData());
+          .evaluateHealthRiskAssessment(
+            questionnaireId: 1,
+            responses: responses,
+          );
 
       if (success && mounted) {
-        // Use push instead of pushReplacement
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HealthRiskReportScreen(),
-          ),
-        );
+        final assessmentData = ref.read(healthRiskProvider).value;
+        if (assessmentData != null) {
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HealthRiskReportScreen(),
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('获取评估结果失败，请重试')),
+            );
+          }
+        }
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('提交失败，请重试')),
@@ -100,7 +114,7 @@ class _HealthRiskAssessmentScreenState extends ConsumerState<HealthRiskAssessmen
   }
 
   void _handleNext() {
-    if (_currentQuestionIndex < _questions.length - 1) {
+    if (_currentQuestionIndex < widget.questionnaire.data.length - 1) {
       setState(() {
         _currentQuestionIndex++;
         _selectedAnswer = _answers[_currentQuestionIndex];
@@ -119,139 +133,125 @@ class _HealthRiskAssessmentScreenState extends ConsumerState<HealthRiskAssessmen
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final assessmentState = ref.watch(healthRiskProvider);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('健康风险评估'),
-      ),
-      body: assessmentState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('加载失败: $error'),
-              ElevatedButton(
-                onPressed: () {
-                  ref.read(healthRiskProvider.notifier).fetchHealthRiskAssessment();
-                },
-                child: const Text('重试'),
-              ),
-            ],
+  List<Widget> _buildOptions(List<String>? choices, int questionType) {
+    if (questionType == 2) {
+      return [
+        TextField(
+          decoration: const InputDecoration(
+            hintText: '请输入您的答案',
+            border: OutlineInputBorder(),
           ),
+          onChanged: _handleAnswerSelection,
         ),
-        data: (_) => SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '健康风险评估',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Text(
-                          '请回答以下问题，以帮助我们评估您的健康风险。',
-                          style: TextStyle(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Text(
-                          '问题 ${_currentQuestionIndex + 1} / ${_questions.length}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _questions[_currentQuestionIndex]['question'],
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ..._buildOptions(),
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (_currentQuestionIndex > 0)
-                              OutlinedButton(
-                                onPressed: _handlePrevious,
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size(120, 48),
-                                ),
-                                child: const Text('上一题'),
-                              )
-                            else
-                              const SizedBox(width: 120),
-                            ElevatedButton(
-                              onPressed: _selectedAnswer != null ? _handleNext : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(120, 48),
-                                disabledBackgroundColor: Colors.grey[300],
-                              ),
-                              child: Text(
-                                _currentQuestionIndex == _questions.length - 1
-                                    ? '完成'
-                                    : '下一题',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (_currentQuestionIndex == _questions.length - 1)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Text(
-                      '注意：完成所有问题后，系统将生成您的健康风险评估报告。',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+      ];
+    }
+
+    if (questionType == 1) {
+      return choices?.map((choice) => Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: CheckboxListTile(
+          title: Text(choice),
+          value: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false,
+          onChanged: (checked) {
+            if (checked == true) {
+              var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
+              currentAnswers.add(choice);
+              _handleAnswerSelection(currentAnswers.join(','));
+            } else {
+              var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
+              currentAnswers.remove(choice);
+              _handleAnswerSelection(currentAnswers.join(','));
+            }
+          },
+          activeColor: Colors.black,
+          contentPadding: EdgeInsets.zero,
         ),
+      )).toList() ?? [];
+    }
+
+    return choices?.map((choice) => Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: RadioListTile<String>(
+        title: Text(choice),
+        value: choice,
+        groupValue: _selectedAnswer,
+        onChanged: _handleAnswerSelection,
+        activeColor: Colors.black,
+        contentPadding: EdgeInsets.zero,
       ),
-    );
+    )).toList() ?? [];
   }
 
-  List<Widget> _buildOptions() {
-    return (_questions[_currentQuestionIndex]['options'] as List<String>)
-        .map((option) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: RadioListTile<String>(
-                title: Text(option),
-                value: option,
-                groupValue: _selectedAnswer,
-                onChanged: _handleAnswerSelection,
-                activeColor: Colors.black,
-                contentPadding: EdgeInsets.zero,
+  @override
+  Widget build(BuildContext context) {
+    final questions = widget.questionnaire.data;
+    final currentQuestion = questions[_currentQuestionIndex];
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '问题 ${_currentQuestionIndex + 1} / ${questions.length}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    currentQuestion.question,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ..._buildOptions(currentQuestion.choices, currentQuestion.questionType),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentQuestionIndex > 0)
+                        OutlinedButton(
+                          onPressed: _handlePrevious,
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(120, 48),
+                          ),
+                          child: const Text('上一题'),
+                        )
+                      else
+                        const SizedBox(width: 120),
+                      ElevatedButton(
+                        onPressed: _selectedAnswer != null ? _handleNext : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(120, 48),
+                          disabledBackgroundColor: Colors.grey[300],
+                        ),
+                        child: Text(
+                          _currentQuestionIndex == questions.length - 1
+                              ? '完成'
+                              : '下一题',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ))
-        .toList();
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

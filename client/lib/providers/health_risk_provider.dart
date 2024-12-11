@@ -2,16 +2,72 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/health_risk_provider.graphql.dart';
+import 'package:meditrax/models/health_risk_assessment.dart';
 
-final healthRiskProvider = StateNotifierProvider<HealthRiskNotifier, AsyncValue<HealthRiskAssessment?>>((ref) {
+final healthRiskProvider = StateNotifierProvider<HealthRiskNotifier, AsyncValue<List<HealthRiskAssessment>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
   return HealthRiskNotifier(client);
 });
 
-class HealthRiskNotifier extends StateNotifier<AsyncValue<HealthRiskAssessment?>> {
+final questionnaireProvider = StateNotifierProvider<QuestionnaireNotifier, AsyncValue<QuestionnaireObject?>>((ref) {
+  final client = ref.watch(graphQLServiceProvider);
+  return QuestionnaireNotifier(client);
+});
+
+class QuestionnaireNotifier extends StateNotifier<AsyncValue<QuestionnaireObject?>> {
   final GraphQLClient _client;
 
-  HealthRiskNotifier(this._client) : super(const AsyncValue.data(null));
+  QuestionnaireNotifier(this._client) : super(const AsyncValue.data(null));
+
+  Future<void> fetchQuestionnaire() async {
+    try {
+      state = const AsyncValue.loading();
+      final result = await _client.query$GetHealthRiskAssessmentQuestion(
+        Options$Query$GetHealthRiskAssessmentQuestion(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      final data = result.data?['getHealthRiskAssessmentQuestion'];
+      if (data == null) {
+        state = const AsyncValue.data(null);
+        return;
+      }
+
+      final questions = (data['data'] as List).map((q) => Question(
+        questionId: q['questionId'],
+        question: q['question'],
+        questionType: q['questionType'],
+        choices: q['choices']?.cast<String>(),
+      )).toList();
+
+      final questionnaire = QuestionnaireObject(
+        questionnaireId: data['questionnaireId'],
+        data: questions,
+      );
+
+      state = AsyncValue.data(questionnaire);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
+    }
+  }
+}
+
+class HealthRiskNotifier extends StateNotifier<AsyncValue<List<HealthRiskAssessment>>> {
+  final GraphQLClient _client;
+  HealthRiskAssessment? _selectedAssessment;
+
+  HealthRiskAssessment? get selectedAssessment => _selectedAssessment;
+
+  void setSelectedAssessment(HealthRiskAssessment assessment) {
+    _selectedAssessment = assessment;
+  }
+
+  HealthRiskNotifier(this._client) : super(const AsyncValue.data([]));
 
   Future<void> fetchHealthRiskAssessment() async {
     try {
@@ -26,67 +82,62 @@ class HealthRiskNotifier extends StateNotifier<AsyncValue<HealthRiskAssessment?>
         throw result.exception!;
       }
 
-      if (result.data?['getHealthRiskAssessment'] == null) {
-        state = const AsyncValue.data(null);
+      final data = result.data?['getHealthRiskAssessment'] as List?;
+      if (data == null) {
+        state = const AsyncValue.data([]);
         return;
       }
 
-      final assessment = HealthRiskAssessment(
-        assessmentId: result.data!['getHealthRiskAssessment']['assessmentId'],
-        questionnaireData: result.data!['getHealthRiskAssessment']['questionnaireData'],
-        riskLevel: result.data!['getHealthRiskAssessment']['riskLevel'],
-        recommendations: result.data!['getHealthRiskAssessment']['recommendations'],
-        createdAt: DateTime.parse(result.data!['getHealthRiskAssessment']['createdAt']),
-      );
+      final assessments = data.map((item) {
+        final responses = (item['questionnaireData'] as List).map((r) => HealthResponse(
+          questionId: r['questionId'],
+          choice: r['choice'],
+          answer: r['answer'],
+        )).toList();
 
-      state = AsyncValue.data(assessment);
+        return HealthRiskAssessment(
+          assessmentId: item['assessmentId'],
+          questionnaireData: responses,
+          riskLevel: item['riskLevel'],
+          recommendations: item['recommendations'],
+          createdAt: DateTime.parse(item['createdAt']),
+        );
+      }).toList();
+
+      assessments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      state = AsyncValue.data(assessments);
     } catch (error, stackTrace) {
-      print('Error in fetchHealthRiskAssessment: $error');
       state = AsyncValue.error(error, stackTrace);
     }
   }
 
-  Future<bool> createHealthRiskAssessment(String questionnaireData) async {
-    try {
-      final result = await _client.mutate$CreateHealthRiskAssessment(
-        Options$Mutation$CreateHealthRiskAssessment(
-          variables: Variables$Mutation$CreateHealthRiskAssessment(
-            questionnaireData: questionnaireData,
-          ),
-        ),
-      );
-
-      if (result.hasException) {
-        throw result.exception!;
-      }
-
-      final newAssessment = HealthRiskAssessment(
-        assessmentId: result.data!['createHealthRiskAssessment']['assessmentId'],
-        questionnaireData: questionnaireData,
-        riskLevel: result.data!['createHealthRiskAssessment']['riskLevel'],
-        recommendations: result.data!['createHealthRiskAssessment']['recommendations'],
-        createdAt: DateTime.now(),
-      );
-
-      state = AsyncValue.data(newAssessment);
-      return true;
-    } catch (e) {
-      print('Error in createHealthRiskAssessment: $e');
-      return false;
-    }
-  }
-
-  Future<bool> updateHealthRiskAssessment({
-    required String assessmentId,
-    required String questionnaireData,
+  Future<bool> evaluateHealthRiskAssessment({
+    required int questionnaireId,
+    required List<HealthResponse> responses,
   }) async {
     try {
-      final result = await _client.mutate$UpdateHealthRiskAssessment(
-        Options$Mutation$UpdateHealthRiskAssessment(
-          variables: Variables$Mutation$UpdateHealthRiskAssessment(
-            assessmentId: assessmentId,
-            questionnaireData: questionnaireData,
-          ),
+      final result = await _client.mutate(
+        MutationOptions(
+          document: gql('''
+            mutation EvaluateHealthRiskAssessment(\$filledQuestionnaire: FilledQuestionnaire!) {
+              evaluateHealthRiskAssessment(filledQuestionnaire: \$filledQuestionnaire) {
+                assessmentId
+                riskLevel
+                recommendations
+              }
+            }
+          '''),
+          variables: {
+            'filledQuestionnaire': {
+              'questionnaireId': questionnaireId,
+              'responses': responses.map((r) => {
+                'questionId': r.questionId,
+                'choice': r.choice,
+                'answer': r.answer,
+              }).toList(),
+            },
+          },
         ),
       );
 
@@ -94,36 +145,22 @@ class HealthRiskNotifier extends StateNotifier<AsyncValue<HealthRiskAssessment?>
         throw result.exception!;
       }
 
-      final updatedAssessment = HealthRiskAssessment(
-        assessmentId: result.data!['updateHealthRiskAssessment']['assessmentId'],
-        questionnaireData: questionnaireData,
-        riskLevel: result.data!['updateHealthRiskAssessment']['riskLevel'],
-        recommendations: result.data!['updateHealthRiskAssessment']['recommendations'],
-        createdAt: DateTime.now(),
-      );
+      final evaluationData = result.data?['evaluateHealthRiskAssessment'];
+      if (evaluationData != null) {
+        final newAssessment = HealthRiskAssessment(
+          assessmentId: evaluationData['assessmentId'],
+          questionnaireData: responses,
+          riskLevel: evaluationData['riskLevel'],
+          recommendations: evaluationData['recommendations'],
+          createdAt: DateTime.now(),
+        );
 
-      state = AsyncValue.data(updatedAssessment);
-      return true;
-    } catch (e) {
-      print('Error in updateHealthRiskAssessment: $e');
+        await fetchHealthRiskAssessment();
+        return true;
+      }
+      return false;
+    } catch (e, stackTrace) {
       return false;
     }
   }
-}
-
-// Models
-class HealthRiskAssessment {
-  final String assessmentId;
-  final String questionnaireData;
-  final String riskLevel;
-  final String recommendations;
-  final DateTime createdAt;
-
-  HealthRiskAssessment({
-    required this.assessmentId,
-    required this.questionnaireData,
-    required this.riskLevel,
-    required this.recommendations,
-    required this.createdAt,
-  });
 }

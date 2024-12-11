@@ -3,6 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../models/medication.dart';
 import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/medication_provider.graphql.dart';
+import 'package:meditrax/providers/medication_reminder_provider.graphql.dart';
 
 final medicationProvider = StateNotifierProvider<MedicationNotifier, AsyncValue<List<Medication>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
@@ -163,18 +164,56 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
     try {
       print('Starting deletion of medication with ID: $medicationId');
 
+      // First, get all reminders for this medication using generated query
+      final remindersResult = await _client.query$GetMedicationReminders(
+        Options$Query$GetMedicationReminders(
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (remindersResult.hasException) {
+        print('Error fetching reminders: ${remindersResult.exception}');
+        throw remindersResult.exception!;
+      }
+
+      // Get reminders for this medication
+      final reminders = ((remindersResult.data?['getMedicationReminders'] as List?) ?? [])
+          .map((item) => Query$GetMedicationReminders$getMedicationReminders.fromJson(item))
+          .where((reminder) => reminder.medicationId == medicationId)
+          .map((reminder) => reminder.reminderId)
+          .toList();
+
+      print('Found ${reminders.length} reminders to delete');
+
+      // Delete each reminder
+      for (final reminderId in reminders) {
+        final deleteReminderResult = await _client.mutate$DeleteMedicationReminder(
+          Options$Mutation$DeleteMedicationReminder(
+            variables: Variables$Mutation$DeleteMedicationReminder(
+              reminderId: reminderId,
+            ),
+          ),
+        );
+
+        if (deleteReminderResult.hasException) {
+          print('Error deleting reminder $reminderId: ${deleteReminderResult.exception}');
+          throw deleteReminderResult.exception!;
+        }
+      }
+
+      // Then delete the medication
       final result = await _client.mutate$DeleteMedication(
         Options$Mutation$DeleteMedication(
           variables: Variables$Mutation$DeleteMedication(
             medicationId: medicationId
-            )
           )
+        )
       );
 
-      print('Mutation result: ${result.data}');
-
+      print('Medication deletion result: ${result.data}');
+      
       if (result.hasException) {
-        print('Error executing mutation: ${result.exception.toString()}');
+        print('Error deleting medication: ${result.exception}');
         throw result.exception!;
       }
 
@@ -185,7 +224,10 @@ class MedicationNotifier extends StateNotifier<AsyncValue<List<Medication>>> {
       });
 
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Failed to delete medication:');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
       return false;
     }
   }

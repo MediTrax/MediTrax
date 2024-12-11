@@ -17,16 +17,15 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$HealthRiskAssessment {
   @HiveField(0)
-  String get id => throw _privateConstructorUsedError;
+  String get assessmentId => throw _privateConstructorUsedError;
   @HiveField(1)
-  String get userId => throw _privateConstructorUsedError;
+  List<HealthResponse> get questionnaireData =>
+      throw _privateConstructorUsedError;
   @HiveField(2)
-  Object get questionnaireData => throw _privateConstructorUsedError;
+  String get riskLevel => throw _privateConstructorUsedError;
   @HiveField(3)
-  int get riskLevel => throw _privateConstructorUsedError;
+  String get recommendations => throw _privateConstructorUsedError;
   @HiveField(4)
-  List<String> get recommendations => throw _privateConstructorUsedError;
-  @HiveField(5)
   DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of HealthRiskAssessment
@@ -43,12 +42,11 @@ abstract class $HealthRiskAssessmentCopyWith<$Res> {
       _$HealthRiskAssessmentCopyWithImpl<$Res, HealthRiskAssessment>;
   @useResult
   $Res call(
-      {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) Object questionnaireData,
-      @HiveField(3) int riskLevel,
-      @HiveField(4) List<String> recommendations,
-      @HiveField(5) DateTime createdAt});
+      {@HiveField(0) String assessmentId,
+      @HiveField(1) List<HealthResponse> questionnaireData,
+      @HiveField(2) String riskLevel,
+      @HiveField(3) String recommendations,
+      @HiveField(4) DateTime createdAt});
 }
 
 /// @nodoc
@@ -67,33 +65,29 @@ class _$HealthRiskAssessmentCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? userId = null,
+    Object? assessmentId = null,
     Object? questionnaireData = null,
     Object? riskLevel = null,
     Object? recommendations = null,
     Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
+      assessmentId: null == assessmentId
+          ? _value.assessmentId
+          : assessmentId // ignore: cast_nullable_to_non_nullable
               as String,
       questionnaireData: null == questionnaireData
           ? _value.questionnaireData
-          : questionnaireData,
+          : questionnaireData // ignore: cast_nullable_to_non_nullable
+              as List<HealthResponse>,
       riskLevel: null == riskLevel
           ? _value.riskLevel
           : riskLevel // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       recommendations: null == recommendations
           ? _value.recommendations
           : recommendations // ignore: cast_nullable_to_non_nullable
-              as List<String>,
+              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -111,12 +105,11 @@ abstract class _$$HealthRiskAssessmentImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@HiveField(0) String id,
-      @HiveField(1) String userId,
-      @HiveField(2) Object questionnaireData,
-      @HiveField(3) int riskLevel,
-      @HiveField(4) List<String> recommendations,
-      @HiveField(5) DateTime createdAt});
+      {@HiveField(0) String assessmentId,
+      @HiveField(1) List<HealthResponse> questionnaireData,
+      @HiveField(2) String riskLevel,
+      @HiveField(3) String recommendations,
+      @HiveField(4) DateTime createdAt});
 }
 
 /// @nodoc
@@ -132,33 +125,29 @@ class __$$HealthRiskAssessmentImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? userId = null,
+    Object? assessmentId = null,
     Object? questionnaireData = null,
     Object? riskLevel = null,
     Object? recommendations = null,
     Object? createdAt = null,
   }) {
     return _then(_$HealthRiskAssessmentImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
+      assessmentId: null == assessmentId
+          ? _value.assessmentId
+          : assessmentId // ignore: cast_nullable_to_non_nullable
               as String,
       questionnaireData: null == questionnaireData
-          ? _value.questionnaireData
-          : questionnaireData,
+          ? _value._questionnaireData
+          : questionnaireData // ignore: cast_nullable_to_non_nullable
+              as List<HealthResponse>,
       riskLevel: null == riskLevel
           ? _value.riskLevel
           : riskLevel // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       recommendations: null == recommendations
-          ? _value._recommendations
+          ? _value.recommendations
           : recommendations // ignore: cast_nullable_to_non_nullable
-              as List<String>,
+              as String,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -172,43 +161,40 @@ class __$$HealthRiskAssessmentImplCopyWithImpl<$Res>
 @HiveType(typeId: 3)
 class _$HealthRiskAssessmentImpl extends _HealthRiskAssessment {
   _$HealthRiskAssessmentImpl(
-      {@HiveField(0) required this.id,
-      @HiveField(1) required this.userId,
-      @HiveField(2) required this.questionnaireData,
-      @HiveField(3) required this.riskLevel,
-      @HiveField(4) required final List<String> recommendations,
-      @HiveField(5) required this.createdAt})
-      : _recommendations = recommendations,
+      {@HiveField(0) required this.assessmentId,
+      @HiveField(1) required final List<HealthResponse> questionnaireData,
+      @HiveField(2) required this.riskLevel,
+      @HiveField(3) required this.recommendations,
+      @HiveField(4) required this.createdAt})
+      : _questionnaireData = questionnaireData,
         super._();
 
   @override
   @HiveField(0)
-  final String id;
+  final String assessmentId;
+  final List<HealthResponse> _questionnaireData;
   @override
   @HiveField(1)
-  final String userId;
-  @override
-  @HiveField(2)
-  final Object questionnaireData;
-  @override
-  @HiveField(3)
-  final int riskLevel;
-  final List<String> _recommendations;
-  @override
-  @HiveField(4)
-  List<String> get recommendations {
-    if (_recommendations is EqualUnmodifiableListView) return _recommendations;
+  List<HealthResponse> get questionnaireData {
+    if (_questionnaireData is EqualUnmodifiableListView)
+      return _questionnaireData;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_recommendations);
+    return EqualUnmodifiableListView(_questionnaireData);
   }
 
   @override
-  @HiveField(5)
+  @HiveField(2)
+  final String riskLevel;
+  @override
+  @HiveField(3)
+  final String recommendations;
+  @override
+  @HiveField(4)
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'HealthRiskAssessment(id: $id, userId: $userId, questionnaireData: $questionnaireData, riskLevel: $riskLevel, recommendations: $recommendations, createdAt: $createdAt)';
+    return 'HealthRiskAssessment(assessmentId: $assessmentId, questionnaireData: $questionnaireData, riskLevel: $riskLevel, recommendations: $recommendations, createdAt: $createdAt)';
   }
 
   @override
@@ -216,14 +202,14 @@ class _$HealthRiskAssessmentImpl extends _HealthRiskAssessment {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$HealthRiskAssessmentImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.assessmentId, assessmentId) ||
+                other.assessmentId == assessmentId) &&
             const DeepCollectionEquality()
-                .equals(other.questionnaireData, questionnaireData) &&
+                .equals(other._questionnaireData, _questionnaireData) &&
             (identical(other.riskLevel, riskLevel) ||
                 other.riskLevel == riskLevel) &&
-            const DeepCollectionEquality()
-                .equals(other._recommendations, _recommendations) &&
+            (identical(other.recommendations, recommendations) ||
+                other.recommendations == recommendations) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -231,11 +217,10 @@ class _$HealthRiskAssessmentImpl extends _HealthRiskAssessment {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      id,
-      userId,
-      const DeepCollectionEquality().hash(questionnaireData),
+      assessmentId,
+      const DeepCollectionEquality().hash(_questionnaireData),
       riskLevel,
-      const DeepCollectionEquality().hash(_recommendations),
+      recommendations,
       createdAt);
 
   /// Create a copy of HealthRiskAssessment
@@ -251,32 +236,28 @@ class _$HealthRiskAssessmentImpl extends _HealthRiskAssessment {
 
 abstract class _HealthRiskAssessment extends HealthRiskAssessment {
   factory _HealthRiskAssessment(
-          {@HiveField(0) required final String id,
-          @HiveField(1) required final String userId,
-          @HiveField(2) required final Object questionnaireData,
-          @HiveField(3) required final int riskLevel,
-          @HiveField(4) required final List<String> recommendations,
-          @HiveField(5) required final DateTime createdAt}) =
+          {@HiveField(0) required final String assessmentId,
+          @HiveField(1) required final List<HealthResponse> questionnaireData,
+          @HiveField(2) required final String riskLevel,
+          @HiveField(3) required final String recommendations,
+          @HiveField(4) required final DateTime createdAt}) =
       _$HealthRiskAssessmentImpl;
   _HealthRiskAssessment._() : super._();
 
   @override
   @HiveField(0)
-  String get id;
+  String get assessmentId;
   @override
   @HiveField(1)
-  String get userId;
+  List<HealthResponse> get questionnaireData;
   @override
   @HiveField(2)
-  Object get questionnaireData;
+  String get riskLevel;
   @override
   @HiveField(3)
-  int get riskLevel;
+  String get recommendations;
   @override
   @HiveField(4)
-  List<String> get recommendations;
-  @override
-  @HiveField(5)
   DateTime get createdAt;
 
   /// Create a copy of HealthRiskAssessment
