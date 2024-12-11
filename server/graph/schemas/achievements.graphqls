@@ -2,37 +2,16 @@ type AchievementBadge{
   id: String!
   name: String!
   description: String!
-<<<<<<< HEAD
-  icon_url: String!
-  created_at: DateTime!
-=======
   iconUrl: String!
   createdAt: DateTime!
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type UserAchievement{
   id: String!
-<<<<<<< HEAD
-  user_id: String!
-  badge_id: String!
-  earned_at: DateTime!
-  created_at: DateTime!
-}
-
-type UpdateMedicalRecordResponse {
-  recordId: String!
-  message: String!
-}
-
-type DeleteMedicalRecordResponse {
-  message: String!
-=======
   userId: String!
   badgeId: String!
   earnedAt: DateTime!
   createdAt: DateTime!
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type CreateAchievementBadgeResponse {
@@ -45,11 +24,7 @@ type AchievementBadgeDetail {
   name: String!
   description: String!
   iconUrl: String!
-<<<<<<< HEAD
-  created_at: DateTime!
-=======
   createdAt: DateTime!
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type AwardAchievementResponse {
@@ -65,11 +40,7 @@ type UserAchievementDetail {
 
 type UserPointRecord{
   id: String!
-<<<<<<< HEAD
-  user_id: String!
-=======
   userId: String!
->>>>>>> 01096166741546756a9456fc584388602358902c
   pointsEarned: Float!
   reason: String!
   earnedAt: DateTime!

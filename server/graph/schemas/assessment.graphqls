@@ -1,34 +1,4 @@
 type Question{
-<<<<<<< HEAD
-  question: String!
-  questionType: Int!
-  choices: [String!]!
-  answer: String!
-}
-
-type QuestionnaireObject{
-  data: [Question!]!
-}
-
-type HealthRiskAssessment{
-  id: String!
-  user_id: String!
-  questionnaire_data: String!
-  risk_level: String!
-  recommendations: String!
-  created_at: DateTime!
-}
-
-type HealthRiskAssessmentResponse {
-  assessmentId: String!
-  riskLevel: String!
-  recommendations: String!
-}
-
-type HealthRiskAssessmentDetailResponse {
-  assessmentId: String!
-  questionnaireData: String!
-=======
   questionId: Int!
   question: String!
   questionchoiceType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
@@ -61,15 +31,11 @@ type HealthRiskAssessment{
   id: String!
   userId: String!
   questionnaireData: [HealthResponse!]!
->>>>>>> 01096166741546756a9456fc584388602358902c
   riskLevel: String!
   recommendations: String!
   createdAt: DateTime!
 }
 
-<<<<<<< HEAD
-type UpdateHealthRiskAssessmentResponse {
-=======
 type HealthRiskAssessmentDetailResponse {
   assessmentId: String!
   questionnaireData: [HealthResponse!]!
@@ -79,27 +45,16 @@ type HealthRiskAssessmentDetailResponse {
 }
 
 type EvaluateHealthRiskAssessmentResponse {
->>>>>>> 01096166741546756a9456fc584388602358902c
   assessmentId: String!
   riskLevel: String!
   recommendations: String!
 }
 
 extend type Query{
-<<<<<<< HEAD
-  getHealthRiskAssessment: HealthRiskAssessmentDetailResponse
-}
-
-extend type Mutation{
-  createHealthRiskAssessment(questionnaireData: String!): HealthRiskAssessmentResponse  
-  updateHealthRiskAssessment(assessmentId: String!, questionnaireData: String!): UpdateHealthRiskAssessmentResponse
-
-=======
   getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
   getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
 }
 
 extend type Mutation{
   evaluateHealthRiskAssessment(filledQuestionnaire: FilledQuestionnaire!): EvaluateHealthRiskAssessmentResponse #拿结果
->>>>>>> 01096166741546756a9456fc584388602358902c
 }

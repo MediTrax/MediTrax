@@ -10,11 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-<<<<<<< HEAD
-func TestCreationAndDelete(t *testing.T) {
-=======
 func TestUserFunctions(t *testing.T) {
->>>>>>> 01096166741546756a9456fc584388602358902c
 	c := client.New(NewServer())
 	var user TestUser
 
@@ -76,8 +72,6 @@ func TestUserFunctions(t *testing.T) {
 	user.PhoneNumber = phoneNumber
 	user.Username = username
 
-<<<<<<< HEAD
-=======
 	t.Run("Get User", func(t *testing.T) {
 		var response struct {
 			GetUser struct {
@@ -181,7 +175,6 @@ func TestUserFunctions(t *testing.T) {
 	// 	require.Equal(t, "Password reset successfully", response.ResetPassword.Message)
 	// })
 
->>>>>>> 01096166741546756a9456fc584388602358902c
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
 			DeleteUser struct {
@@ -197,8 +190,5 @@ func TestUserFunctions(t *testing.T) {
 
 		require.Equal(t, fmt.Sprintf("User %s with name %s deleted successfully", user.ID, user.Username), response.DeleteUser.Message)
 	})
-<<<<<<< HEAD
-=======
 
->>>>>>> 01096166741546756a9456fc584388602358902c
 }

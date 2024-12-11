@@ -26,11 +26,7 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
 		`CREATE ONLY achievement_badge:ulid() 
         SET name=$name,
             description=$description,
-<<<<<<< HEAD
-            icon_url=$iconUrl,
-=======
             iconUrl=$iconUrl,
->>>>>>> 01096166741546756a9456fc584388602358902c
             createdAt=time::now();`,
 		map[string]interface{}{
 			"name":        name,
@@ -85,21 +81,13 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 	createAchievementQuery := `
 		CREATE ONLY user_achievement:ulid()
 		SET 
-<<<<<<< HEAD
-			user_id = $user_id,
-=======
 			userId = $userId,
->>>>>>> 01096166741546756a9456fc584388602358902c
 			badgeID = $badgeID,
 			earnedAt = time::now(),
 			createdAt = time::now();
 	`
 	createResult, err := database.DB.Query(createAchievementQuery, map[string]interface{}{
-<<<<<<< HEAD
-		"user_id": user.ID,
-=======
 		"userId":  user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		"badgeID": badgeID,
 	})
 	if err != nil {
@@ -134,20 +122,12 @@ func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64,
 
 	result, err := database.DB.Query(
 		`CREATE ONLY point_record:ulid() 
-<<<<<<< HEAD
-        SET user_id=$user_id,
-=======
         SET userId=$userId,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		pointsEarned=$pointsEarned,
 		reason=$reason,
 		earnedAt=time::now();`,
 		map[string]interface{}{
-<<<<<<< HEAD
-			"user_id":      user.ID,
-=======
 			"userId":       user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 			"pointsEarned": pointsEarned,
 			"reason":       reason,
 		},
@@ -164,11 +144,7 @@ func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64,
 	result, err = database.DB.Query(`UPDATE ONLY $id 
 		SET points+=$pointsEarned;`,
 		map[string]interface{}{
-<<<<<<< HEAD
-			"id":           newRecord.ID,
-=======
 			"id":           user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 			"pointsEarned": pointsEarned,
 		})
 
@@ -196,11 +172,7 @@ func (r *queryResolver) GetAchievementBadges(ctx context.Context) ([]*model.Achi
 	}
 
 	// TODO: could mofify this
-<<<<<<< HEAD
-	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY created_at DESC`, nil)
-=======
 	result, err := database.DB.Query(`SELECT * FROM achievement_badge ORDER BY createdAt DESC`, nil)
->>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
@@ -233,11 +205,7 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	}
 
 	// Fetch treatment schedules for the user
-<<<<<<< HEAD
-	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE user_id=$userID ORDER BY earned_at DESC;`, map[string]interface{}{
-=======
 	result, err := database.DB.Query(`SELECT * FROM user_achievement WHERE userId=$userID ORDER BY earnedAt DESC;`, map[string]interface{}{
->>>>>>> 01096166741546756a9456fc584388602358902c
 		"userID": user.ID,
 	})
 	if err != nil {
@@ -271,15 +239,9 @@ func (r *queryResolver) GetUserPointRecords(ctx context.Context) ([]*model.UserP
 
 	// get all the medication reminders for the user
 	result, err := database.DB.Query(
-<<<<<<< HEAD
-		`SELECT * FROM point_record WHERE user_id = $user_id;`,
-		map[string]interface{}{
-			"user_id": user.ID,
-=======
 		`SELECT * FROM point_record WHERE userId = $userId;`,
 		map[string]interface{}{
 			"userId": user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {

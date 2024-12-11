@@ -5,10 +5,7 @@ go 1.23.1
 require (
 	github.com/99designs/gqlgen v0.17.55
 	github.com/ayush6624/go-chatgpt v0.3.0
-<<<<<<< HEAD
-=======
 	github.com/google/uuid v1.6.0
->>>>>>> 01096166741546756a9456fc584388602358902c
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.78
 	github.com/redis/go-redis/v9 v9.7.0

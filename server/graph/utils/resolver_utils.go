@@ -2,10 +2,6 @@ package utils
 
 import (
 	"fmt"
-<<<<<<< HEAD
-	"regexp"
-	"strconv"
-=======
 	"meditrax/graph/database"
 	"meditrax/graph/model"
 	"regexp"
@@ -13,14 +9,10 @@ import (
 	"time"
 
 	"github.com/surrealdb/surrealdb.go"
->>>>>>> 01096166741546756a9456fc584388602358902c
 )
 
 var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
 	"medication", "medication_reminder", "treatment_schedule", "health_metric",
-<<<<<<< HEAD
-	"medical_record", "family_member"}
-=======
 	"medical_record", "family_member", "activity_log"}
 
 type ChangeLog struct {
@@ -28,7 +20,6 @@ type ChangeLog struct {
 	From  string
 	To    string
 }
->>>>>>> 01096166741546756a9456fc584388602358902c
 
 func FrequencyParser(frequency string) (int, int, error) {
 	// Compile the regex pattern to match the expected format
@@ -64,21 +55,6 @@ func MatchID(id string, table string) bool {
 	}
 }
 
-<<<<<<< HEAD
-func EvaluateHealthRisk(questionnaireData string) (string, string) {
-	// TODO:假设这里是根据问卷数据进行风险评估和推荐生成的逻辑
-	var riskLevel, recommendations string
-	if questionnaireData == "" {
-		riskLevel = "Unknown"
-		recommendations = "Please complete the health questionnaire."
-	} else {
-		// 简单的例子，实际应根据数据分析
-		riskLevel = "Medium"
-		recommendations = "Monitor lifestyle and consult a healthcare provider."
-	}
-	return riskLevel, recommendations
-}
-=======
 func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 	// 假设我们根据响应的答案来进行风险评估
 	var riskLevel string
@@ -211,4 +187,3 @@ func GetUserByID(userID string) (*model.User, error) {
 
 	return &user, nil
 }
->>>>>>> 01096166741546756a9456fc584388602358902c

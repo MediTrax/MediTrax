@@ -10,8 +10,6 @@ import (
 )
 
 // TODO: write test for MedicalRecord
-<<<<<<< HEAD
-=======
 func TestMedicalRecord(t *testing.T) {
 	c := client.New(NewServer())
 	user := CreateUserAndLogin(t, c)
@@ -143,7 +141,6 @@ func TestMedicalRecord(t *testing.T) {
 
 	DeleteUser(t, c, user)
 }
->>>>>>> 01096166741546756a9456fc584388602358902c
 
 func TestHealthMetric(t *testing.T) {
 	c := client.New(NewServer())

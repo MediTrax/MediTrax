@@ -25,15 +25,9 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 
 	// check that there isn't already a metric entry for the user with the same type and record time
 	result, err := database.DB.Query(
-<<<<<<< HEAD
-		`SELECT * FROM health_metric WHERE user_id=$user_id AND recorded_at=$recordedAt AND metric_type=$metricType;`,
-		map[string]interface{}{
-			"user_id":    user.ID,
-=======
 		`SELECT * FROM health_metric WHERE userId=$userId AND recordedAt=$recordedAt AND metricType=$metricType;`,
 		map[string]interface{}{
 			"userId":     user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 			"recordedAt": recordedAt,
 			"metricType": metricType,
 		},
@@ -53,21 +47,6 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 	result, err = database.DB.Query(
 		`CREATE ONLY health_metric:ulid()
 		SET
-<<<<<<< HEAD
-		user_id=$user_id,
-		metric_type=$metric_type,
-		value=$value,
-		unit=$unit,
-		recorded_at=$recorded_at,
-		created_at=time::now();
-		`,
-		map[string]interface{}{
-			"user_id":     user.ID,
-			"metric_type": metricType,
-			"value":       value,
-			"unit":        unit,
-			"recorded_at": recordedAt,
-=======
 		userId=$userId,
 		metricType=$metricType,
 		value=$value,
@@ -81,7 +60,6 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 			"value":      value,
 			"unit":       unit,
 			"recordedAt": recordedAt,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -113,10 +91,6 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 		return nil, fmt.Errorf("illegal health metric id")
 	}
 
-<<<<<<< HEAD
-	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{"id": metricID, "user_id": user.ID}
-=======
 	result, err := database.DB.Query(
 		`SELECT * FROM ONLY $metricId WHERE userId=$userId;`,
 		map[string]interface{}{
@@ -136,34 +110,22 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	updateValues := map[string]interface{}{"id": metricID, "userId": user.ID}
 
 	var changeLog []utils.ChangeLog
->>>>>>> 01096166741546756a9456fc584388602358902c
 
 	// Prepare the fields to be updated
 	updateFields := []string{}
 	if value != nil {
 		updateValues["value"] = *value
 		updateFields = append(updateFields, "value = $value")
-<<<<<<< HEAD
-=======
 		change := utils.ChangeLog{
 			Field: "value",
 			From:  fmt.Sprintf("%f", original.Value),
 			To:    fmt.Sprintf("%f", *value),
 		}
 		changeLog = append(changeLog, change)
->>>>>>> 01096166741546756a9456fc584388602358902c
 	}
 	if unit != nil {
 		updateValues["unit"] = *unit
 		updateFields = append(updateFields, "unit = $unit")
-<<<<<<< HEAD
-	}
-
-	// write to the query
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id;", strings.Join(updateFields, ", "))
-	// send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
-=======
 		change := utils.ChangeLog{
 			Field: "unit",
 			From:  original.Unit,
@@ -176,7 +138,6 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
 	// send the UPDATE query
 	result, err = database.DB.Query(query, updateValues)
->>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
@@ -190,15 +151,12 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 		return nil, fmt.Errorf("invalid id, no user associated heath metric object found")
 	}
 
-<<<<<<< HEAD
-=======
 	// add to activity log
 	err = utils.AddActivityLogs(user.ID, "updateHealthMetric", "user updated specs of a health metric", metricID, changeLog)
 	if err != nil {
 		return nil, err
 	}
 
->>>>>>> 01096166741546756a9456fc584388602358902c
 	response := &model.UpdateHealthMetricResponse{
 		MetricID: results[0].ID,
 		Message:  "Health metric updated successfully",
@@ -221,17 +179,10 @@ func (r *mutationResolver) DeleteHealthMetric(ctx context.Context, metricID stri
 
 	// Execute the query, returning the entry before it is deleted
 	result, err := database.DB.Query(
-<<<<<<< HEAD
-		`DELETE $id WHERE user_id=$user_id RETURN BEFORE;`,
-		map[string]interface{}{
-			"id":      metricID,
-			"user_id": user.ID,
-=======
 		`DELETE $id WHERE userId=$userId RETURN BEFORE;`,
 		map[string]interface{}{
 			"id":     metricID,
 			"userId": user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
@@ -264,22 +215,13 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
 	// 插入新的医疗记录
 	result, err := database.DB.Query(
 		`CREATE ONLY medical_record:ulid() 
-<<<<<<< HEAD
-        SET user_id=$user_id,
-			record_type=$recordType,
-=======
         SET userId=$userId,
 			recordType=$recordType,
->>>>>>> 01096166741546756a9456fc584388602358902c
             content=$content,
             createdAt=time::now(),
             updatedAt=time::now();`,
 		map[string]interface{}{
-<<<<<<< HEAD
-			"user_id":    user.ID,
-=======
 			"userId":     user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 			"recordType": recordType,
 			"content":    content,
 		},
@@ -308,25 +250,6 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-<<<<<<< HEAD
-	// 构建更新查询
-	query := `UPDATE medical_record SET updatedAt=time::now()`
-	params := map[string]interface{}{}
-
-	if recordType != nil {
-		query += `, recordType=$recordType`
-		params["recordType"] = *recordType
-	}
-	if content != nil {
-		query += `, content=$content`
-		params["content"] = *content
-	}
-	query += ` WHERE id=$id;`
-	params["id"] = recordID
-
-	// 执行更新
-	_, err := database.DB.Query(query, params)
-=======
 	// check legality of the health metric id
 	if !utils.MatchID(recordID, "medical_record") {
 		return nil, fmt.Errorf("illegal medical record id")
@@ -394,17 +317,12 @@ func (r *mutationResolver) UpdateMedicalRecord(ctx context.Context, recordID str
 
 	// add to activity log
 	err = utils.AddActivityLogs(user.ID, "updateMedicalRecord", "user updated specs of a medical record", recordID, changeLog)
->>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
 
 	response := &model.UpdateMedicalRecordResponse{
-<<<<<<< HEAD
-		RecordID: recordID,
-=======
 		RecordID: results[0].ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		Message:  "Medical record updated successfully",
 	}
 
@@ -440,58 +358,7 @@ func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string,
 		return nil, fmt.Errorf("access denied")
 	}
 
-<<<<<<< HEAD
-	var result interface{}
-	var err error
-
-	// get all the health metric entries that is associated with the user
-	if metricType == nil {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id;`,
-			map[string]interface{}{
-				"user_id": user.ID,
-			},
-		)
-	} else {
-		result, err = database.DB.Query(
-			`SELECT * FROM health_metric WHERE user_id = $user_id AND metric_type=$metric_type;`,
-			map[string]interface{}{
-				"user_id":     user.ID,
-				"metric_type": *metricType,
-			},
-		)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	// unmarshal results into Go objects
-	metrics, err := surrealdb.SmartUnmarshal[[]model.HealthMetric](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// loop through the metrics, convert them into HealthMetricDetail, then return the converted list and nil
-	var metricDetails []*model.HealthMetricDetail
-	for _, metric := range metrics {
-		// check that the metric is within the record time constraints
-		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
-			metricDetail := &model.HealthMetricDetail{
-				MetricID:   metric.ID,
-				MetricType: metric.MetricType,
-				Value:      metric.Value,
-				RecordedAt: metric.RecordedAt,
-				Unit:       metric.Unit,
-			}
-			metricDetails = append(metricDetails, metricDetail)
-		}
-	}
-
-	return metricDetails, nil
-=======
 	return utils.GetHealthMetrics(*user, startDate, endDate, metricType)
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 // GetMedicalRecords is the resolver for the getMedicalRecords field.
@@ -501,34 +368,5 @@ func (r *queryResolver) GetMedicalRecords(ctx context.Context) ([]*model.Medical
 		return nil, fmt.Errorf("access denied")
 	}
 
-<<<<<<< HEAD
-	// Fetch treatment schedules for the user
-	result, err := database.DB.Query(`SELECT * FROM medical_record WHERE user_id=$userID;`, map[string]interface{}{
-		"userID": user.ID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: please modify this line as it may result in a bug
-	records, err := surrealdb.SmartUnmarshal[[]*model.MedicalRecord](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var record_details []*model.MedicalRecordDetail
-	for _, record := range records {
-		recordDetail := &model.MedicalRecordDetail{
-			RecordID:   record.ID,
-			RecordType: record.RecordType,
-			Content:    record.Content,
-			CreatedAt:  record.CreatedAt,
-		}
-		record_details = append(record_details, recordDetail)
-	}
-
-	return record_details, nil
-=======
 	return utils.GetMedicalRecords(*user)
->>>>>>> 01096166741546756a9456fc584388602358902c
 }

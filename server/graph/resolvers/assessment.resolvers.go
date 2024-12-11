@@ -11,17 +11,6 @@ import (
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
-<<<<<<< HEAD
-	"strings"
-	"time"
-
-	surrealdb "github.com/surrealdb/surrealdb.go"
-)
-
-// CreateHealthRiskAssessment is the resolver for the createHealthRiskAssessment field.
-func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, questionnaireData string) (*model.HealthRiskAssessmentResponse, error) {
-	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
-=======
 	"time"
 
 	"github.com/google/uuid"
@@ -31,29 +20,11 @@ func (r *mutationResolver) CreateHealthRiskAssessment(ctx context.Context, quest
 // EvaluateHealthRiskAssessment is the resolver for the evaluateHealthRiskAssessment field.
 func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, filledQuestionnaire model.FilledQuestionnaire) (*model.EvaluateHealthRiskAssessmentResponse, error) {
 	//panic(fmt.Errorf("not implemented: EvaluateHealthRiskAssessment - evaluateHealthRiskAssessment"))
->>>>>>> 01096166741546756a9456fc584388602358902c
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
-<<<<<<< HEAD
-	riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
-
-	result, err := database.DB.Query(
-		`CREATE ONLY health_risk_assessment:ulid()
-		    SET
-				user_id=$user_id,
-				questionnaire_data=$questionnaireData,
-		        risk_level=$riskLevel,
-		        recommendations=$recommendations,
-		        created_at=time::now();`,
-		map[string]interface{}{
-			"questionnaireData": questionnaireData,
-			"riskLevel":         riskLevel,
-			"recommendations":   recommendations,
-			"user_id":           user.ID,
-=======
 	riskLevel, recommendations := utils.EvaluateHealthRisk(filledQuestionnaire.Responses)
 	// create new HealthMetric record
 	result, err := database.DB.Query(
@@ -100,37 +71,17 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) ([]*model.H
 		`SELECT * FROM health_assessment WHERE userId = $userId;`,
 		map[string]interface{}{
 			"userId": user.ID,
->>>>>>> 01096166741546756a9456fc584388602358902c
 		},
 	)
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	newAssessment, err := surrealdb.SmartUnmarshal[model.HealthRiskAssessment](result, nil)
-=======
 	HealthRiskAssessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
->>>>>>> 01096166741546756a9456fc584388602358902c
 	if err != nil {
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	response := &model.HealthRiskAssessmentResponse{
-		AssessmentID:    newAssessment.ID,
-		RiskLevel:       newAssessment.RiskLevel,
-		Recommendations: newAssessment.Recommendations,
-	}
-
-	return response, nil
-}
-
-// UpdateHealthRiskAssessment is the resolver for the updateHealthRiskAssessment field.
-func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, assessmentID string, questionnaireData string) (*model.UpdateHealthRiskAssessmentResponse, error) {
-	//panic(fmt.Errorf("not implemented: UpdateHealthRiskAssessment - updateHealthRiskAssessment"))
-	//check if they are logged in correctly
-=======
 	// loop through the medications, convert them into MedicationDetails, then return the converted list and nil
 	var AssessmentDetails []*model.HealthRiskAssessmentDetailResponse
 	for _, ass := range HealthRiskAssessment {
@@ -149,103 +100,10 @@ func (r *mutationResolver) UpdateHealthRiskAssessment(ctx context.Context, asses
 
 // GetHealthRiskAssessmentQuestion is the resolver for the getHealthRiskAssessmentQuestion field.
 func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*model.QuestionnaireObject, error) {
->>>>>>> 01096166741546756a9456fc584388602358902c
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
-<<<<<<< HEAD
-	// check if id is legal
-	if !utils.MatchID(assessmentID, "health_risk_assessment") {
-		return nil, fmt.Errorf("illegal assessment id")
-	}
-	// Initialize a map to hold the update values
-	updateValues := map[string]interface{}{
-		"id":      assessmentID,
-		"user_id": user.ID,
-	}
-
-	// Prepare the fields to be updated
-	updateFields := []string{}
-
-	// Add questionnaire data if provided
-	if questionnaireData != "" {
-		updateValues["questionnaireData"] = questionnaireData
-		updateFields = append(updateFields, "questionnaire_data=$questionnaireData")
-
-		// Calculate new risk level and recommendations
-		riskLevel, recommendations := utils.EvaluateHealthRisk(questionnaireData)
-		updateValues["riskLevel"] = riskLevel
-		updateFields = append(updateFields, "risk_level=$riskLevel")
-		updateValues["recommendations"] = recommendations
-		updateFields = append(updateFields,
-			"recommendations = $recommendations",
-		)
-		// Add createdAt if needed
-		createdAt := time.Now().Format(time.RFC3339) // Use current time or your logic
-		updateValues["createdAt"] = createdAt
-		updateFields = append(updateFields, "created_at=$createdAt")
-	}
-
-	// Construct the final query
-	query := fmt.Sprintf("UPDATE $id SET %s WHERE user_id=$user_id RETURN *;",
-		strings.Join(updateFields, ", "))
-
-	// Send the UPDATE query
-	result, err := database.DB.Query(query, updateValues)
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal the results and check for errors
-	results, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(results) == 0 {
-		return nil, fmt.Errorf("invalid id. no associated assessment found")
-	}
-
-	// Create response
-	response := &model.UpdateHealthRiskAssessmentResponse{
-		AssessmentID:    results[0].ID,
-		RiskLevel:       results[0].RiskLevel,
-		Recommendations: results[0].Recommendations,
-	}
-
-	return response, nil
-}
-
-// GetHealthRiskAssessment is the resolver for the getHealthRiskAssessment field.
-func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.HealthRiskAssessmentDetailResponse, error) {
-	user := middlewares.ForContext(ctx)
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
-	}
-	// 查询最新的健康风险评估（假设根据创建时间或其他条件进行排序）
-	result, err := database.DB.Query(`SELECT * FROM health_risk_assessment ORDER BY created_at DESC LIMIT 1;`, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	assessment, err := surrealdb.SmartUnmarshal[[]model.HealthRiskAssessment](result, nil)
-	if err != nil {
-		return nil, err
-	}
-	if len(assessment) == 0 {
-		return nil, fmt.Errorf("invalid id. no associated assessment found")
-	}
-	detailResponse := &model.HealthRiskAssessmentDetailResponse{
-		AssessmentID:      assessment[0].ID,
-		QuestionnaireData: assessment[0].QuestionnaireData,
-		RiskLevel:         assessment[0].RiskLevel,
-		Recommendations:   assessment[0].Recommendations,
-		CreatedAt:         assessment[0].CreatedAt,
-	}
-
-	return detailResponse, nil
-}
-=======
 
 	questionnaireId := uuid.New().String()
 	// 返回完整的问卷问题
@@ -291,4 +149,3 @@ func (r *queryResolver) GetHealthRiskAssessment(ctx context.Context) (*model.Hea
 	// 返回问卷对象
 	return response, nil
 }
->>>>>>> 01096166741546756a9456fc584388602358902c

@@ -15,9 +15,6 @@ type AchievementBadgeDetail struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	IconURL     string `json:"iconUrl"`
-<<<<<<< HEAD
-	CreatedAt   string `json:"created_at"`
-=======
 	CreatedAt   string `json:"createdAt"`
 }
 
@@ -42,7 +39,6 @@ type ActivityLogDetail struct {
 	From          string `json:"from"`
 	To            string `json:"to"`
 	Timestamp     string `json:"timestamp"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type AddFamilyMemberResponse struct {
@@ -118,15 +114,12 @@ type DeleteUserResponse struct {
 	Message string `json:"message"`
 }
 
-<<<<<<< HEAD
-=======
 type EvaluateHealthRiskAssessmentResponse struct {
 	AssessmentID    string `json:"assessmentId"`
 	RiskLevel       string `json:"riskLevel"`
 	Recommendations string `json:"recommendations"`
 }
 
->>>>>>> 01096166741546756a9456fc584388602358902c
 type FamilyMember struct {
 	ID            string `json:"id"`
 	UserID        string `json:"userId"`
@@ -137,12 +130,6 @@ type FamilyMember struct {
 }
 
 type FamilyMemberDetail struct {
-<<<<<<< HEAD
-	MemberID      string `json:"memberId"`
-	RelatedUserID string `json:"relatedUserId"`
-	Relationship  string `json:"relationship"`
-	AccessLevel   int    `json:"accessLevel"`
-=======
 	MemberID     string `json:"memberId"`
 	FamilyID     string `json:"familyId"`
 	Name         string `json:"name"`
@@ -154,7 +141,6 @@ type FamilyMemberDetail struct {
 type FilledQuestionnaire struct {
 	QuestionnaireID int         `json:"questionnaireId"`
 	Responses       []*Response `json:"responses"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type FoodRecommendation struct {
@@ -175,21 +161,12 @@ type FoodSpecs struct {
 
 type HealthMetric struct {
 	ID         string  `json:"id"`
-<<<<<<< HEAD
-	UserID     string  `json:"user_id"`
-	MetricType string  `json:"metric_type"`
-	Value      float64 `json:"value"`
-	Unit       string  `json:"unit"`
-	RecordedAt string  `json:"recorded_at"`
-	CreatedAt  string  `json:"created_at"`
-=======
 	UserID     string  `json:"userId"`
 	MetricType string  `json:"metricType"`
 	Value      float64 `json:"value"`
 	Unit       string  `json:"unit"`
 	RecordedAt string  `json:"recordedAt"`
 	CreatedAt  string  `json:"createdAt"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type HealthMetricDetail struct {
@@ -207,21 +184,12 @@ type HealthResponse struct {
 }
 
 type HealthRiskAssessment struct {
-<<<<<<< HEAD
-	ID                string `json:"id"`
-	UserID            string `json:"user_id"`
-	QuestionnaireData string `json:"questionnaire_data"`
-	RiskLevel         string `json:"risk_level"`
-	Recommendations   string `json:"recommendations"`
-	CreatedAt         string `json:"created_at"`
-=======
 	ID                string            `json:"id"`
 	UserID            string            `json:"userId"`
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
 	RiskLevel         string            `json:"riskLevel"`
 	Recommendations   string            `json:"recommendations"`
 	CreatedAt         string            `json:"createdAt"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type HealthRiskAssessmentDetailResponse struct {
@@ -240,19 +208,11 @@ type LoginUserResponse struct {
 
 type MedicalRecord struct {
 	ID         string `json:"id"`
-<<<<<<< HEAD
-	UserID     string `json:"user_id"`
-	RecordType string `json:"record_type"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
-=======
 	UserID     string `json:"userId"`
 	RecordType string `json:"recordType"`
 	Content    string `json:"content"`
 	CreatedAt  string `json:"createdAt"`
 	UpdatedAt  string `json:"updatedAt"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type MedicalRecordDetail struct {
@@ -269,15 +229,9 @@ type Medication struct {
 	Unit      string  `json:"unit"`
 	Frequency string  `json:"frequency"`
 	Inventory float64 `json:"inventory"`
-<<<<<<< HEAD
-	UserID    string  `json:"user_id"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
-=======
 	UserID    string  `json:"userId"`
 	CreatedAt string  `json:"createdAt"`
 	UpdatedAt string  `json:"updatedAt"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type MedicationDetail struct {
@@ -335,17 +289,10 @@ type Query struct {
 }
 
 type Question struct {
-<<<<<<< HEAD
-	Question     string   `json:"question"`
-	QuestionType int      `json:"questionType"`
-	Choices      []string `json:"choices"`
-	Answer       string   `json:"answer"`
-=======
 	QuestionID   int      `json:"questionId"`
 	Question     string   `json:"question"`
 	QuestionType int      `json:"questionType"`
 	Choices      []string `json:"choices,omitempty"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type QuestionnaireObject struct {
@@ -393,9 +340,6 @@ type Token struct {
 
 type TreatmentSchedule struct {
 	ID            string  `json:"id"`
-<<<<<<< HEAD
-	UserID        string  `json:"user_id"`
-=======
 	UserID        string  `json:"userId"`
 	TreatmentType string  `json:"treatmentType"`
 	ScheduledTime string  `json:"scheduledTime"`
@@ -405,24 +349,14 @@ type TreatmentSchedule struct {
 
 type TreatmentScheduleDetail struct {
 	ScheduleID    string  `json:"scheduleId"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 	TreatmentType string  `json:"treatmentType"`
 	ScheduledTime string  `json:"scheduledTime"`
 	Location      string  `json:"location"`
 	Notes         *string `json:"notes,omitempty"`
 }
 
-<<<<<<< HEAD
-type TreatmentScheduleDetail struct {
-	ScheduleID    string  `json:"scheduleId"`
-	TreatmentType string  `json:"treatmentType"`
-	ScheduledTime string  `json:"scheduledTime"`
-	Location      string  `json:"location"`
-	Notes         *string `json:"notes,omitempty"`
-=======
 type UnshareProfileResponse struct {
 	Message string `json:"message"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 }
 
 type UpdateFamilyMemberResponse struct {
@@ -466,15 +400,9 @@ type User struct {
 	Password    string  `json:"password"`
 	Name        string  `json:"name"`
 	Points      float64 `json:"points"`
-<<<<<<< HEAD
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
-	LastLogin   string  `json:"last_login"`
-=======
 	CreatedAt   string  `json:"createdAt"`
 	UpdatedAt   string  `json:"updatedAt"`
 	LastLogin   string  `json:"lastLogin"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 	Status      int     `json:"status"`
 	Role        string  `json:"role"`
 }
@@ -505,11 +433,7 @@ type UserDetailResponse struct {
 
 type UserPointRecord struct {
 	ID           string  `json:"id"`
-<<<<<<< HEAD
-	UserID       string  `json:"user_id"`
-=======
 	UserID       string  `json:"userId"`
->>>>>>> 01096166741546756a9456fc584388602358902c
 	PointsEarned float64 `json:"pointsEarned"`
 	Reason       string  `json:"reason"`
 	EarnedAt     string  `json:"earnedAt"`

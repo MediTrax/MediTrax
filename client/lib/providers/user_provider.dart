@@ -41,9 +41,9 @@ class UserData extends _$UserData {
       password: '', // We don't store password in state
       role: userData.role,
       status: 1,
-      created_at: userData.createdAt,
-      updated_at: DateTime.now(),
-      last_login: userData.lastLogin ?? DateTime.now(),
+      createdAt: userData.createdAt,
+      updatedAt: DateTime.now(),
+      lastLogin: userData.lastLogin ?? DateTime.now(),
     );
   }
 

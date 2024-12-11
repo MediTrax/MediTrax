@@ -3,10 +3,7 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-=======
 	"math/rand"
->>>>>>> 01096166741546756a9456fc584388602358902c
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -151,11 +148,7 @@ func TestAchievement(t *testing.T) {
                 userAchievementId
                 message
             }
-<<<<<<< HEAD
-        }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badge_id"))
-=======
         }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badgeId"))
->>>>>>> 01096166741546756a9456fc584388602358902c
 
 		// 检查 err 是否为 nil
 		if err == nil {
@@ -176,8 +169,6 @@ func TestAchievement(t *testing.T) {
 
 	DeleteUser(t, c, user)
 }
-<<<<<<< HEAD
-=======
 
 func TestPoints(t *testing.T) {
 	c := client.New(NewServer())
@@ -296,4 +287,3 @@ func TestPoints(t *testing.T) {
 
 	DeleteUser(t, c, user)
 }
->>>>>>> 01096166741546756a9456fc584388602358902c
