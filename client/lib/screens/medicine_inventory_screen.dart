@@ -9,6 +9,7 @@ import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/widgets/add_reminder_dialog.dart';
 import 'package:meditrax/widgets/edit_reminder_dialog.dart';
 import 'package:flutter/services.dart';
+import 'package:meditrax/services/notification_service.dart';
 
 class MedicineInventoryScreen extends ConsumerStatefulWidget {
   const MedicineInventoryScreen({super.key});
@@ -89,7 +90,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null) {
         print("Fetching medications for user: ${userData.id}");
+<<<<<<< HEAD
         await ref.read(medicationNotifierProvider.notifier).fetchMedications();
+=======
+        await ref.read(medicationProviderProvider.notifier).fetchMedications();
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
       } else {
         print("No user data available");
       }
@@ -100,9 +105,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     final medicationsState = ref.watch(medicationNotifierProvider);
+=======
+    final currentUser = ref.read(userDataProvider).value;
+    final medicationsState = ref.watch(medicationProviderProvider);
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
     final selectedProfile = ref.watch(appStateProvider).selectedProfile;
-    final currentUser = ref.watch(userDataProvider).value;
 
     final bool canEdit =
         selectedProfile == null || selectedProfile == currentUser?.id;
@@ -217,7 +226,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
                             // Delete medication and its reminders
                             final success = await ref
-                                .read(medicationNotifierProvider.notifier)
+                                .read(medicationProviderProvider.notifier)
                                 .deleteMedication(medication.id);
 
                             // Refresh reminders after medication deletion
@@ -521,7 +530,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
     bool isDisposed = false;
 
-    // Function to dispose controllers
     void disposeControllers() {
       if (!isDisposed) {
         nameController.dispose();
@@ -534,41 +542,225 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       }
     }
 
+    void closeDialog(BuildContext dialogContext) {
+      // First dispose the controllers
+      disposeControllers();
+      
+      // Then check if we can pop the dialog
+      if (dialogContext.mounted) {
+        // Wrap the pop in a Future.delayed to avoid the framework assertion error
+        Future.delayed(Duration.zero, () {
+          if (dialogContext.mounted) {
+            Navigator.of(dialogContext).pop();
+          }
+        });
+      }
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return Dialog(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 500,
-              maxHeight: MediaQuery.of(dialogContext).size.height * 0.9,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.edit_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '编辑${medication.name}',
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+        return WillPopScope(
+          onWillPop: () async {
+            closeDialog(dialogContext);
+            return false;
+          },
+          child: Dialog(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 500,
+                maxHeight: MediaQuery.of(dialogContext).size.height * 0.9,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '编辑${medication.name}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => closeDialog(dialogContext),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    // Scrollable Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Medicine Name Section
+                              _buildFormField(
+                                controller: nameController,
+                                hintText: '输入药品名称',
+                                prefixIcon: Icons.medication_liquid_rounded,
+                                iconColor: Colors.green.shade300,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return '请输入药品名称';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Dosage and Unit Section
+                              _buildSectionHeader(
+                                title: '用药剂量',
+                                icon: Icons.scale_rounded,
+                                iconColor: Colors.blue.shade400,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: _buildFormField(
+                                      controller: dosageController,
+                                      hintText: '输入剂量数值',
+                                      prefixIcon: Icons.scale_rounded,
+                                      iconColor: Colors.blue.shade300,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return '请输入剂量';
+                                        }
+                                        final number = double.tryParse(value);
+                                        if (number == null || number <= 0) {
+                                          return '请输入有效的剂量';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildFormField(
+                                      controller: unitController,
+                                      hintText: '如: 片',
+                                      prefixIcon: Icons.straighten_rounded,
+                                      iconColor: Colors.blue.shade300,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return '请输入单位';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Frequency Section
+                              _buildSectionHeader(
+                                title: '服用频率',
+                                icon: Icons.calendar_month_rounded,
+                                iconColor: Colors.purple.shade400,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildFormField(
+                                      controller: timesController,
+                                      hintText: '几次',
+                                      prefixIcon: Icons.repeat_rounded,
+                                      iconColor: Colors.purple.shade300,
+                                      keyboardType: TextInputType.number,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return '请输入次数';
+                                        }
+                                        final times = int.tryParse(value);
+                                        if (times == null || times <= 0) {
+                                          return '请输入有效的次数';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _buildFormField(
+                                      controller: daysController,
+                                      hintText: '几天',
+                                      prefixIcon: Icons.calendar_today_rounded,
+                                      iconColor: Colors.purple.shade300,
+                                      keyboardType: TextInputType.number,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return '请输入天数';
+                                        }
+                                        final days = int.tryParse(value);
+                                        if (days == null || days <= 0) {
+                                          return '请输入有效的天数';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Inventory Section
+                              _buildSectionHeader(
+                                title: '库存信息',
+                                icon: Icons.inventory_2_rounded,
+                                iconColor: Colors.orange.shade400,
+                              ),
+                              const SizedBox(height: 8),
+                              _buildFormField(
+                                controller: inventoryController,
+                                hintText: '输入库存数量',
+                                prefixIcon: Icons.inventory_rounded,
+                                iconColor: Colors.orange.shade300,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return '请输入库���数量';
+                                  }
+                                  final number = double.tryParse(value);
+                                  if (number == null || number <= 0) {
+                                    return '请输入有效的库存数量';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),
+<<<<<<< HEAD
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () {
@@ -769,42 +961,73 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     inventory:
                                         double.parse(inventoryController.text),
                                   );
+=======
+                    ),
+                    const Divider(),
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => closeDialog(dialogContext),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                final success = await ref.read(medicationProviderProvider.notifier)
+                                    .updateMedication(
+                                      medicationId: medication.id,
+                                      name: nameController.text,
+                                      dosage: double.parse(dosageController.text),
+                                      unit: unitController.text,
+                                      frequency: '${timesController.text}/${daysController.text}', // Use split frequency
+                                      inventory: double.parse(inventoryController.text),
+                                    );
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
-                              if (success && dialogContext.mounted) {
-                                Navigator.of(dialogContext).pop();
-                                disposeControllers(); // Dispose controllers on save
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('药品信息已更新')),
-                                );
-                                await _fetchMedications();
-                              }
-                            } catch (e) {
-                              if (dialogContext.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('错误: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                if (success && dialogContext.mounted) {
+                                  closeDialog(dialogContext);
+                                  disposeControllers(); // Dispose controllers on save
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('药品信息已更新')),
+                                  );
+                                  await _fetchMedications();
+                                }
+                              } catch (e) {
+                                if (dialogContext.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('错误: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
-                      ),
-                    ],
-                  ),
-                ],
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
-    ).whenComplete(() {
-      disposeControllers(); // Ensure controllers are disposed when dialog is closed
+    ).then((_) {
+      // Ensure cleanup happens after dialog is fully closed
+      if (!isDisposed) {
+        disposeControllers();
+      }
     });
   }
+
 
   // Helper method to build form section headers
   Widget _buildSectionHeader({
@@ -943,7 +1166,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                 try {
                   final newInventory = medication.inventory + amount;
                   final success = await ref
+<<<<<<< HEAD
                       .read(medicationNotifierProvider.notifier)
+=======
+                      .read(medicationProviderProvider.notifier)
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
                       .updateMedication(
                         medicationId: medication.id,
                         inventory: newInventory,
@@ -989,7 +1216,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
               try {
                 // Restore the medication
                 final successRestore = await ref
-                    .read(medicationNotifierProvider.notifier)
+                    .read(medicationProviderProvider.notifier)
                     .addMedication(
                       name: deletedMedication.name,
                       dosage: deletedMedication.dosage,
@@ -1180,7 +1407,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                           return '请输入有效数字';
                         }
                         if (times <= 0) {
-                          return '次数必须大于0';
+                          return '次数必须��于0';
                         }
                         if (times > 24) {
                           return '次数不能超过24';
@@ -1234,6 +1461,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
   }
 
   Future<void> _addMedication() async {
+    final currentUser = ref.read(userDataProvider).value;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -1241,7 +1469,11 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
 
       try {
         // Watch the medication provider to get the current state
+<<<<<<< HEAD
         final medicationsState = ref.watch(medicationNotifierProvider);
+=======
+        final medicationsState = ref.watch(medicationProviderProvider);
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
         // Check if the medication already exists
         final medicationExists = medicationsState.maybeWhen(
@@ -1262,7 +1494,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
         } else {
           // Add the medication if it doesn't exist
           final success =
-              await ref.read(medicationNotifierProvider.notifier).addMedication(
+              await ref.read(medicationProviderProvider.notifier).addMedication(
                     name: nameController.text,
                     dosage: double.parse(dosageController.text),
                     unit: unitController.text,
@@ -1313,6 +1545,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.read(userDataProvider).value;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -1723,16 +1956,16 @@ class _ReminderTab extends ConsumerStatefulWidget {
 }
 
 class _ReminderTabState extends ConsumerState<_ReminderTab> {
-  // Add class fields
-  final List<TextEditingController> _controllers = [];
-  bool _isDisposed = false;
-
+  final NotificationService _notificationService = NotificationService();
+  
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _fetchReminders();
   }
 
+<<<<<<< HEAD
   Future<void> _fetchReminders() async {
     if (_isDisposed) return;
     try {
@@ -1749,36 +1982,386 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
         print("Stack trace: $stack"); // Debug stack trace
       }
     }
+=======
+  Future<void> _initializeNotifications() async {
+    await _notificationService.initialize();
+    // Set up notification response handler
+    await _notificationService.setOnNotificationResponse((String? payload) {
+      if (payload != null) {
+        _handleNotificationResponse(payload);
+      }
+    });
   }
 
-  @override
-  void dispose() {
-    _isDisposed = true;
-    // Simply dispose all controllers
-    for (final controller in _controllers) {
-      controller.dispose();
+  void _handleNotificationResponse(String reminderId) async {
+    // Show a dialog when notification is tapped
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.medication_rounded,
+                color: Colors.blue.shade400,
+              ),
+              const SizedBox(width: 8),
+              const Text('服药提醒'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('现在是您的服药时间'),
+              const SizedBox(height: 8),
+              Text(
+                '是否已经服用药物？',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('稍后提醒'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                // Mark reminder as taken
+                final success = await ref
+                    .read(medicationReminderProvider.notifier)
+                    .toggleReminderStatus(reminderId, true);
+
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('已标记为已服用')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('库存不足，无法标记为已服用。请及时补充库存。'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.check),
+              label: const Text('已服用'),
+            ),
+          ],
+        );
+      },
+    );
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
+  }
+
+  Widget _buildReminderCard({
+    required BuildContext context,
+    required MedicationReminder reminder,
+    required Medication medication,
+    required Function(bool) onToggle,
+  }) {
+    if (!reminder.isTaken) {
+      _notificationService.scheduleReminder(reminder, medication.name);
     }
-    _controllers.clear();
-    super.dispose();
+
+    final reminderTime = reminder.reminderTime.toLocal();
+    final now = DateTime.now();
+    final isToday = reminderTime.year == now.year &&
+                    reminderTime.month == now.month &&
+                    reminderTime.day == now.day;
+
+    return Dismissible(
+      key: Key(reminder.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: Colors.red.shade100,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.delete_outline,
+              color: Colors.red.shade700,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '删除',
+              style: TextStyle(
+                color: Colors.red.shade700,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.red.shade400,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('确认删除'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('确定要删除 ${medication.name} 的提醒吗？'),
+                  const SizedBox(height: 8),
+                  Text(
+                    '此操作无法撤销。',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // Don't delete
+                  },
+                  child: const Text('取消'),
+                ),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(true); // Confirm delete
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('删除'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      onDismissed: (_) async {
+        try {
+          final success = await ref
+              .read(medicationReminderProvider.notifier)
+              .deleteReminder(reminder.id);
+
+          if (success && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('提醒已删除'),
+              ),
+            );
+          } else if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('删除失败'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            await _fetchReminders();
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('错误: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            await _fetchReminders();
+          }
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _showEditReminderDialog(context, reminder, medication),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Time Display
+                Container(
+                  width: 100,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orange.shade300, Colors.orange.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.access_time_rounded, color: Colors.white, size: 24),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTime(reminder.reminderTime),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          isToday ? '今天' : '明天',
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                
+                // Medication Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        medication.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _buildTag(
+                            text: '${medication.dosage}${medication.unit}/次',
+                            backgroundColor: Colors.blue.shade50,
+                            textColor: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 8),
+                          _buildTag(
+                            text: _getFrequencyText(medication.frequency),
+                            backgroundColor: Colors.purple.shade50,
+                            textColor: Colors.purple.shade700,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Status Switch
+                Column(
+                  children: [
+                    Switch(
+                      value: reminder.isTaken,
+                      onChanged: onToggle,
+                    ),
+                    Text(
+                      reminder.isTaken ? '已服用' : '未服用',
+                      style: TextStyle(
+                        color: reminder.isTaken ? Colors.green : Colors.orange,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  TextEditingController _createController(String text) {
-    if (_isDisposed) return TextEditingController();
-    final controller = TextEditingController(text: text);
-    _controllers.add(controller);
-    return controller;
+  Widget _buildTag({
+    required String text,
+    required Color backgroundColor,
+    required Color textColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: textColor, fontSize: 12),
+      ),
+    );
+  }
+
+  String _getFrequencyText(String frequency) {
+    final parts = frequency.split('/');
+    final times = parts[0];
+    final days = parts.length > 1 ? parts[1] : '1';
+    return '每${days}天${times}次';
+  }
+
+  void _showEditReminderDialog(
+    BuildContext context,
+    MedicationReminder reminder,
+    Medication medication,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => EditReminderDialog(
+        reminder: reminder,
+        medicationName: medication.name,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final remindersState = ref.watch(medicationReminderProvider);
+<<<<<<< HEAD
     final medicationsState = ref.watch(medicationNotifierProvider);
 
+=======
+    final medicationsState = ref.watch(medicationProviderProvider);
+    
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header with Title and Add Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1799,28 +2382,20 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                   ),
                 ],
               ),
-              medicationsState.when(
-                loading: () => const SizedBox(),
-                error: (_, __) => const SizedBox(),
-                data: (medications) {
-                  if (medications.isEmpty) {
-                    return FilledButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('请先添加药品，然后再添加提醒。'),
-                            action: SnackBarAction(
-                              label: '关闭',
-                              onPressed: () {
-                                // Dismiss the snackbar
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.notification_important),
-                      label: const Text('添加提醒'),
+              FilledButton.icon(
+                onPressed: () {
+                  medicationsState.whenData((medications) {
+                    if (medications.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('请先添加药品，然后再添加提醒')),
+                      );
+                      return;
+                    }
+                    showDialog(
+                      context: context,
+                      builder: (context) => AddReminderDialog(medications: medications),
                     );
+<<<<<<< HEAD
                   }
                   return FilledButton.icon(
                     onPressed: () =>
@@ -1828,38 +2403,60 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     icon: const Icon(Icons.add),
                     label: const Text('添加提醒'),
                   );
+=======
+                  });
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
                 },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  minimumSize: const Size(120, 45),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('添加提醒'),
               ),
             ],
           ),
           const SizedBox(height: 24),
+          
+          // Reminders List
           Expanded(
             child: remindersState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('加载失败'),
-                    ElevatedButton(
-                      onPressed: _fetchReminders,
-                      child: const Text('重试'),
-                    ),
-                  ],
-                ),
-              ),
-              data: (reminders) {
-                if (reminders.isEmpty) {
-                  return const Center(
-                    child: Text('暂无提醒请添加'),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _fetchReminders,
-                  child: ListView.builder(
+              error: (error, _) => Center(child: Text('Error: $error')),
+              data: (reminders) => medicationsState.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('Error: $error')),
+                data: (medications) {
+                  if (reminders.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications_none_rounded,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '暂无提醒',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  return ListView.builder(
                     itemCount: reminders.length,
                     itemBuilder: (context, index) {
+<<<<<<< HEAD
                       final reminder = reminders[index];
                       return medicationsState.when(
                         loading: () =>
@@ -1991,11 +2588,22 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                             ),
                           );
                         },
+=======
+                      final medication = medications.firstWhere(
+                        (m) => m.id == reminders[index].medicationId,
+                        orElse: () => throw Exception('Medication not found'),
+                      );
+                      return _buildReminderCard(
+                        context: context,
+                        reminder: reminders[index],
+                        medication: medication,
+                        onToggle: (value) => _handleReminderToggle(reminders[index], value),
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
                       );
                     },
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -2003,6 +2611,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     );
   }
 
+<<<<<<< HEAD
   Widget _buildReminderCard({
     required BuildContext context,
     required MedicationReminder reminder,
@@ -2050,10 +2659,18 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
             nextReminder = nextReminder.add(Duration(days: daysInterval));
           }
         }
+=======
+  Future<void> _fetchReminders() async {
+    try {
+      final userData = await ref.read(userDataProvider.future);
+      if (userData != null) {
+        await ref.read(medicationReminderProvider.notifier).fetchReminders();
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
       }
-
-      return nextReminder;
+    } catch (e) {
+      print("Error fetching reminders: $e");
     }
+<<<<<<< HEAD
 
     // Update the formatNextReminder function to handle longer intervals better:
     String formatNextReminder(DateTime nextReminder) {
@@ -2352,23 +2969,147 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
         medicationName: medication.name,
       ),
     );
+=======
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
   }
 
   String _formatTime(DateTime time) {
-    // Ensure we're working with local time
     final localTime = time.toLocal();
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
   }
 
-  String getReminderFrequencyText(String frequency) {
-    final parts = frequency.split('/');
-    final times = parts.isNotEmpty ? parts[0] : '1';
-    final days = parts.length > 1 ? parts[1] : '1';
+  Future<void> _handleReminderToggle(MedicationReminder reminder, bool value) async {
+    // Only show confirmation dialog when marking as taken
+    if (value) {
+      final reminderDetails = await ref.read(medicationReminderProvider.notifier)
+          .getReminderDetails(reminder.id);
 
-    if (days == '1') {
-      return '每天提醒${times}次';
+      if (reminderDetails == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('无法获取药品信息'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (!mounted) return;
+
+      // Show confirmation dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          final medication = reminderDetails['medication'];
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  Icons.medication_rounded,
+                  color: Colors.blue.shade400,
+                ),
+                const SizedBox(width: 8),
+                const Text('确认服用药物'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('您确定要服用以下药物吗？'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade100),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${medication['name']}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '剂量: ${medication['dosage']}${medication['unit']}',
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                      if (medication['inventory'] != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '当前库存: ${medication['inventory']}${medication['unit']}',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('取消'),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(true),
+                icon: const Icon(Icons.check),
+                label: const Text('确认服用'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmed == true) {
+        final success = await ref.read(medicationReminderProvider.notifier)
+            .confirmAndTakeMedication(reminder.id);
+            
+        if (!success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('库存不足，无法标记为已服用。请及时补充库存。'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
     } else {
-      return '每$days天提醒${times}次';
+      // For marking as not taken, just update the reminder
+      final success = await ref.read(medicationReminderProvider.notifier)
+          .updateReminder(
+            reminderId: reminder.id,
+            reminderTime: reminder.reminderTime.toIso8601String(),
+            isTaken: false,
+          );
+          
+       print('ISO string: ${reminder.reminderTime.toIso8601String()}');
+       
+      if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('更新失败，请重试'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e

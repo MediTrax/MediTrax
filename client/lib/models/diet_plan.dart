@@ -4,6 +4,38 @@ import 'package:hive/hive.dart';
 part "diet_plan.freezed.dart";
 part "diet_plan.g.dart";
 
+class FoodSpec {
+  final String name;
+  final String value;
+  final String unit;
+  final String howHigh;
+
+  FoodSpec({
+    required this.name,
+    required this.value,
+    required this.unit,
+    required this.howHigh,
+  });
+}
+
+class FoodSpecs {
+  final List<FoodSpec> specs;
+  final String howRecommend;
+
+  FoodSpecs({
+    required this.specs,
+    required this.howRecommend,
+  });
+}
+
+class FoodRecommendation {
+  final String name;
+
+  FoodRecommendation({
+    required this.name,
+  });
+}
+
 @freezed
 class DietPlan extends HiveObject with _$DietPlan {
   DietPlan._();
@@ -36,5 +68,4 @@ class DietPlan extends HiveObject with _$DietPlan {
           : DateTime.now(), 
     );
   }
-
 }

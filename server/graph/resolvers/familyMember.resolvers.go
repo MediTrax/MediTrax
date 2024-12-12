@@ -42,6 +42,7 @@ func (r *mutationResolver) AddFamilyMember(ctx context.Context, memberPhoneNumbe
 	// }
 	// family := related_users[0]
 
+<<<<<<< HEAD
 	// // query database for family member entries with the same member
 	// result, err = database.DB.Query(
 	// 	`SELECT * FROM family_member WHERE userId=$userId AND patient_userId=$patient_userId;`,
@@ -80,6 +81,46 @@ func (r *mutationResolver) AddFamilyMember(ctx context.Context, memberPhoneNumbe
 	// if err != nil {
 	// 	return nil, err
 	// }
+=======
+	// query database for family member entries with the same member
+	result, err = database.DB.Query(
+		`SELECT * FROM family_member WHERE userId=$userId AND patient_userId=$patient_userId;`,
+		map[string]interface{}{
+			"userId":         family.ID,
+			"patient_userId": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	family_members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(family_members) > 0 {
+		return nil, fmt.Errorf("family member with same phone number has already been added for the user")
+	}
+
+	// finally, send the create family member query
+	result, err = database.DB.Query(
+		`CREATE ONLY family_member:ulid()
+		SET userId=$userId,
+		patient_userId=$patient_userId,
+		relationship=$relationship,
+		accessLevel=$accessLevel,
+		createdAt=time::now()
+		`,
+		map[string]interface{}{
+			"userId":         family.ID,
+			"patient_userId": user.ID,
+			"relationship":   relationship,
+			"accessLevel":    accessLevel,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
 	// // unmarshal the results of the CREATE query
 	// member, err := surrealdb.SmartUnmarshal[model.FamilyMember](result, nil)
@@ -108,6 +149,7 @@ func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID stri
 	// 	return nil, fmt.Errorf("illegal family member id")
 	// }
 
+<<<<<<< HEAD
 	// // Execute the query
 	// result, err := database.DB.Query(
 	// 	`DELETE $id WHERE patient_userId=$userId RETURN BEFORE;`,
@@ -119,6 +161,19 @@ func (r *mutationResolver) DeleteFamilyMember(ctx context.Context, memberID stri
 	// if err != nil {
 	// 	return nil, err // Return the error if the query fails
 	// }
+=======
+	// Execute the query
+	result, err := database.DB.Query(
+		`DELETE $id WHERE patient_userId=$userId RETURN BEFORE;`,
+		map[string]interface{}{
+			"id":     memberID,
+			"userId": user.ID,
+		},
+	)
+	if err != nil {
+		return nil, err // Return the error if the query fails
+	}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
 	// // unmarshal results and check for errors
 	// results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
@@ -151,6 +206,7 @@ func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID stri
 	// 	return nil, fmt.Errorf("illegal member id")
 	// }
 
+<<<<<<< HEAD
 	// // Initialize a map to hold the update values
 	// updateValues := map[string]interface{}{"id": memberID, "userId": user.ID}
 
@@ -173,6 +229,24 @@ func (r *mutationResolver) UpdateFamilyMember(ctx context.Context, memberID stri
 	// if err != nil {
 	// 	return nil, err
 	// }
+=======
+	// Initialize a map to hold the update values
+	updateValues := map[string]interface{}{"id": memberID, "userId": user.ID}
+
+	// Prepare the fields to be updated
+	updateFields := []string{}
+	if relationship != nil {
+		updateValues["relationship"] = *relationship
+		updateFields = append(updateFields, "relationship = $relationship")
+	}
+	if accessLevel != nil {
+		updateValues["accessLevel"] = *accessLevel
+		updateFields = append(updateFields, "accessLevel = $accessLevel")
+	}
+
+	// Construct the final query with the medicationID in quotes
+	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId=$userId;", strings.Join(updateFields, ", "))
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
 	// // unmarshal the results and check for errors
 	// results, err := surrealdb.SmartUnmarshal[[]model.FamilyMember](result, nil)
@@ -201,6 +275,7 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 	// 	return nil, fmt.Errorf("access denied")
 	// }
 
+<<<<<<< HEAD
 	// // Fetch family members (with shared access) of the user
 	// result, err := database.DB.Query(`SELECT * FROM family_member WHERE patient_userId=$userID;`, map[string]interface{}{
 	// 	"userID": user.ID,
@@ -208,6 +283,15 @@ func (r *queryResolver) GetFamilyMembers(ctx context.Context) ([]*model.FamilyMe
 	// if err != nil {
 	// 	return nil, err
 	// }
+=======
+	// Fetch family members (with shared access) of the user
+	result, err := database.DB.Query(`SELECT * FROM family_member WHERE patient_userId=$userID;`, map[string]interface{}{
+		"userID": user.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
 	// members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
 	// if err != nil {

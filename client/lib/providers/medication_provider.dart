@@ -10,7 +10,7 @@ import 'package:meditrax/providers/medication_provider.graphql.dart';
 part 'medication_provider.g.dart';
 
 @riverpod
-class MedicationNotifier extends _$MedicationNotifier {
+class MedicationProvider extends _$MedicationProvider {
   @override
   Future<List<Medication>> build() {
     return fetchMedications();
@@ -33,12 +33,13 @@ class MedicationNotifier extends _$MedicationNotifier {
 
       final medications = (result.parsedData!.getMedications ?? [])
           .map((item) => Medication(
-                id: item!.medicationId, // Use medicationId instead of id
+                id: item!.medicationId,
                 name: item.name,
                 dosage: item.dosage,
                 unit: item.unit,
                 frequency: item.frequency,
                 inventory: item.inventory,
+                userId: user?.id ?? '',
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ))
@@ -60,12 +61,13 @@ class MedicationNotifier extends _$MedicationNotifier {
       }
       final medications = (result.parsedData!.getSharedMedications ?? [])
           .map((item) => Medication(
-                id: item!.medicationId, // Use medicationId instead of id
+                id: item!.medicationId,
                 name: item.name,
                 dosage: item.dosage,
                 unit: item.unit,
                 frequency: item.frequency,
                 inventory: item.inventory,
+                userId: user?.id ?? '',
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ))
@@ -118,6 +120,7 @@ class MedicationNotifier extends _$MedicationNotifier {
         inventory:
             (result.data!['addMedication']['inventory'] as num?)?.toDouble() ??
                 0.0,
+        userId: '',
         createdAt: DateTime.parse(result.data!['addMedication']['createdAt'] ??
             DateTime.now().toIso8601String()),
         updatedAt: DateTime.parse(result.data!['addMedication']['updatedAt'] ??
@@ -176,6 +179,7 @@ class MedicationNotifier extends _$MedicationNotifier {
             unit: unit ?? originalMedication.unit,
             frequency: frequency ?? originalMedication.frequency,
             inventory: inventory ?? originalMedication.inventory,
+            userId: '',
             createdAt: originalMedication.createdAt,
             updatedAt: DateTime.now());
         final updatedList = medications
@@ -219,4 +223,8 @@ class MedicationNotifier extends _$MedicationNotifier {
       return false;
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
