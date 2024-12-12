@@ -66,12 +66,27 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 		if response.Choice == "是" {
 			score++
 		}
+		age, err := strconv.Atoi(*response.Answer)
+		if err != nil {
+			fmt.Println("Error converting string to int:", err)
+		}
+		if age <= 30 {
+			score++
+		} else if age >= 30 && age <= 45 {
+			score += 2
+		} else if age > 45 && age <= 60 {
+			score += 3
+		} else {
+			score += 4
+		}
 	}
 
-	// 简单示例：如果选择了超过5个“是”，则认为风险较高
-	if score > 5 {
+	if score > 9 {
 		riskLevel = "高风险"
-		recommendations = "请尽早就医，做肾功能检查。"
+		recommendations = "请立即就医，做肾功能检查。"
+	} else if score <= 9 && score >= 5 {
+		riskLevel = "中风险"
+		recommendations = "请尽快进行全面身体检查，排除隐患。"
 	} else {
 		riskLevel = "低风险"
 		recommendations = "保持健康饮食，定期体检。"

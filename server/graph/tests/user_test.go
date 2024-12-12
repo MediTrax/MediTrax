@@ -2,6 +2,7 @@ package tests
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"testing"
@@ -9,6 +10,128 @@ import (
 	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"
 )
+
+func TestToken(t *testing.T) {
+	c := client.New(NewServer())
+	num, _ := rand.Int(rand.Reader, big.NewInt(1000000000))
+	accessToken := fmt.Sprintf("%d", num.Int64())
+	refreshToken := fmt.Sprintf("%d", num.Int64())
+	//user := CreateUserAndLogin(t, c)
+	t.Run("Refresh Token", func(t *testing.T) {
+		var createResponse struct {
+			Token struct {
+				ID                 string
+				User               string
+				AccessToken        string
+				RefreshToken       string
+				AccessTokenExpiry  string
+				RefreshTokenExpiry string
+				Device             string
+				CreatedAt          string
+				UpdatedAt          string
+			}
+		}
+		err := c.Post(`mutation refresh_token($accessToken: String!, $refreshToken: String!){
+			refreshToken(
+				accessToken: $accessToken,
+				refreshToken: $refreshToken,
+				device: "PC"
+			) {
+				accessToken,
+				refreshToken,
+				device
+			}
+		}`, &createResponse, client.Var("accessToken", accessToken), client.Var("refreshToken", refreshToken))
+		if err != nil {
+			println("Errors:")
+			println(err.Error())
+			println("End of errors")
+		}
+		//require.NotEmpty(t, createResponse.Token.Device)
+
+		// Use the valid tokens to refresh the token
+		var newTokenResponse struct {
+			RefreshToken struct {
+				AccessToken  string
+				RefreshToken string
+			}
+		}
+
+		// Test invalid tokens (using tokens that don't exist in the database)
+		var errMsg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err = c.Post(`mutation refresh_token{
+			refreshToken(
+				accessToken: "invalid_access_token"
+				refreshToken: "invalid_refresh_token"
+				device: "test_device"
+			) {
+				accessToken
+				refreshToken
+			}
+		}`, &newTokenResponse, client.AddHeader("Authorization", newTokenResponse.RefreshToken.AccessToken))
+		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		require.Equal(t, "token not found", errMsg[0].Message)
+
+		// Test missing token parameters (both access and refresh tokens empty)
+		err = c.Post(`mutation refresh_token{
+			refreshToken(
+				accessToken: ""
+				refreshToken: ""
+				device: "test_device"
+			) {
+				accessToken
+				refreshToken
+			}
+		}`, &newTokenResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", newTokenResponse.RefreshToken.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		require.Equal(t, "token not found", errMsg[0].Message)
+		// Ensure that no duplicate tokens exist by checking the database or ensuring old token is deleted.
+	})
+	// t.Run("Refresh Token Logic", func(t *testing.T) {
+	// 	var refreshResponse struct {
+	// 		RefreshToken struct {
+	// 			AccessToken  string
+	// 			RefreshToken string
+	// 			Device       string
+	// 		}
+	// 	}
+
+	// 	// 调用 refreshToken 测试逻辑
+	// 	err := c.Post(`mutation refresh_token($accessToken: String!, $refreshToken: String!, $device: String!){
+	//         refreshToken(
+	//             accessToken: $accessToken,
+	//             refreshToken: $refreshToken,
+	//             device: $device
+	//         ) {
+	//             accessToken
+	//             refreshToken
+	//             device
+	//         }
+	//     }`, &refreshResponse,
+	// 		client.Var("accessToken", accessToken),
+	// 		client.Var("refreshToken", refreshToken),
+	// 		client.Var("device", "PC"),
+	// 	)
+	// 	require.NoError(t, err)
+
+	// 	// 检查新生成的 Token
+	// 	require.NotEmpty(t, refreshResponse.RefreshToken.AccessToken)
+	// 	require.NotEmpty(t, refreshResponse.RefreshToken.RefreshToken)
+	// 	require.Equal(t, "PC", refreshResponse.RefreshToken.Device)
+
+	// 	// 验证旧 Token 已被删除
+	// 	oldToken, err := database.DB.Query(`
+	//         SELECT * FROM token WHERE accessToken = $accessToken;
+	//     `, map[string]interface{}{
+	// 		"accessToken": accessToken,
+	// 	})
+	// 	require.NoError(t, err)
+	// 	require.Empty(t, oldToken)
+	// })
+}
 
 func TestUserFunctions(t *testing.T) {
 	c := client.New(NewServer())
@@ -39,7 +162,6 @@ func TestUserFunctions(t *testing.T) {
 				message
 			}
 		}`, &resp, client.Var("phoneNumber", phoneNumber), client.Var("password", password), client.Var("username", username))
-
 		if err != nil {
 			println("Errors:")
 			println(err.Error())
