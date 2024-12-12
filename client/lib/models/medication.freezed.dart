@@ -81,7 +81,6 @@ class _$MedicationCopyWithImpl<$Res, $Val extends Medication>
     Object? unit = null,
     Object? frequency = null,
     Object? inventory = null,
-    Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -165,7 +164,6 @@ class __$$MedicationImplCopyWithImpl<$Res>
     Object? unit = null,
     Object? frequency = null,
     Object? inventory = null,
-    Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
@@ -221,7 +219,6 @@ class _$MedicationImpl extends _Medication {
       @HiveField(3) required this.unit,
       @HiveField(4) required this.frequency,
       @HiveField(5) required this.inventory,
-      @HiveField(6) required this.userId,
       @HiveField(7) required this.createdAt,
       @HiveField(8) required this.updatedAt})
       : super._();
@@ -256,7 +253,7 @@ class _$MedicationImpl extends _Medication {
 
   @override
   String toString() {
-    return 'Medication(id: $id, name: $name, dosage: $dosage, unit: $unit, frequency: $frequency, inventory: $inventory, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Medication(id: $id, name: $name, dosage: $dosage, unit: $unit, frequency: $frequency, inventory: $inventory, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -272,7 +269,6 @@ class _$MedicationImpl extends _Medication {
                 other.frequency == frequency) &&
             (identical(other.inventory, inventory) ||
                 other.inventory == inventory) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -281,7 +277,7 @@ class _$MedicationImpl extends _Medication {
 
   @override
   int get hashCode => Object.hash(runtimeType, id, name, dosage, unit,
-      frequency, inventory, userId, createdAt, updatedAt);
+      frequency, inventory, createdAt, updatedAt);
 
   /// Create a copy of Medication
   /// with the given fields replaced by the non-null parameter values.

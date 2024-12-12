@@ -1,7 +1,9 @@
 import 'package:meditrax/models/health_metric.dart';
 import 'package:meditrax/models/treatment_schedule.dart';
+import 'package:meditrax/providers/app_state.dart';
 import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/health_metrics.graphql.dart';
+import 'package:meditrax/providers/user_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_metrics_provider.g.dart';
@@ -18,31 +20,62 @@ class HealthMetrics extends _$HealthMetrics {
     DateTime? endDate,
     String? metricType,
   }) async {
-    final result =
-        await ref.read(graphQLServiceProvider).query$GetHealthMetrics(
-              Options$Query$GetHealthMetrics(
-                variables: Variables$Query$GetHealthMetrics(
-                  startDate: startDate,
-                  endDate: endDate,
-                  metricType: metricType,
+    final patientId = ref.read(appStateProvider).selectedProfile;
+    final user = ref.read(userDataProvider).valueOrNull;
+    if (patientId == user?.id || patientId == null) {
+      final result =
+          await ref.read(graphQLServiceProvider).query$GetHealthMetrics(
+                Options$Query$GetHealthMetrics(
+                  variables: Variables$Query$GetHealthMetrics(
+                    startDate: startDate,
+                    endDate: endDate,
+                    metricType: metricType,
+                  ),
                 ),
-              ),
-            );
+              );
 
-    if (result.hasException) {
-      throw result.exception!;
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      return (result.parsedData!.getHealthMetrics ?? [])
+          .map((metric) => HealthMetric(
+                id: metric!.metricId,
+                metricType: metric.metricType,
+                value: metric.value,
+                unit: metric.unit,
+                recordedAt: metric.recordedAt,
+                createdAt: metric.recordedAt,
+              ))
+          .toList();
+    } else {
+      final result =
+          await ref.read(graphQLServiceProvider).query$GetSharedHealthMetrics(
+                Options$Query$GetSharedHealthMetrics(
+                  variables: Variables$Query$GetSharedHealthMetrics(
+                    patientId: patientId,
+                    startDate: startDate,
+                    endDate: endDate,
+                    metricType: metricType,
+                  ),
+                ),
+              );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      return (result.parsedData!.getSharedHealthMetrics ?? [])
+          .map((metric) => HealthMetric(
+                id: metric!.metricId,
+                metricType: metric.metricType,
+                value: metric.value,
+                unit: metric.unit,
+                recordedAt: metric.recordedAt,
+                createdAt: metric.recordedAt,
+              ))
+          .toList();
     }
-
-    return (result.parsedData!.getHealthMetrics ?? [])
-        .map((metric) => HealthMetric(
-              id: metric!.metricId,
-              metricType: metric.metricType,
-              value: metric.value,
-              unit: metric.unit,
-              recordedAt: metric.recordedAt,
-              createdAt: metric.recordedAt,
-            ))
-        .toList();
   }
 
   Future<void> addMetric({
@@ -119,24 +152,52 @@ class TreatmentSchedules extends _$TreatmentSchedules {
   }
 
   Future<List<TreatmentSchedule>> _fetchSchedules() async {
-    final result =
-        await ref.read(graphQLServiceProvider).query$GetTreatmentSchedules(
-              Options$Query$GetTreatmentSchedules(),
-            );
+    final patientId = ref.read(appStateProvider).selectedProfile;
+    final user = ref.read(userDataProvider).valueOrNull;
+    if (patientId == user?.id || patientId == null) {
+      final result =
+          await ref.read(graphQLServiceProvider).query$GetTreatmentSchedules(
+                Options$Query$GetTreatmentSchedules(),
+              );
 
-    if (result.hasException) {
-      throw result.exception!;
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      return result.parsedData!.getTreatmentSchedules!
+          .map((schedule) => TreatmentSchedule(
+                id: schedule!.scheduleId,
+                treatmentType: schedule.treatmentType,
+                scheduledTime: schedule.scheduledTime,
+                location: schedule.location,
+                notes: schedule.notes,
+              ))
+          .toList();
+    } else {
+      final result = await ref
+          .read(graphQLServiceProvider)
+          .query$GetSharedTreatmentSchedule(
+            Options$Query$GetSharedTreatmentSchedule(
+              variables: Variables$Query$GetSharedTreatmentSchedule(
+                patientId: patientId,
+              ),
+            ),
+          );
+
+      if (result.hasException) {
+        throw result.exception!;
+      }
+
+      return (result.parsedData!.getSharedTreatmentSchedule ?? [])
+          .map((schedule) => TreatmentSchedule(
+                id: schedule!.scheduleId,
+                treatmentType: schedule.treatmentType,
+                scheduledTime: schedule.scheduledTime,
+                location: schedule.location,
+                notes: schedule.notes,
+              ))
+          .toList();
     }
-
-    return result.parsedData!.getTreatmentSchedules!
-        .map((schedule) => TreatmentSchedule(
-              id: schedule!.scheduleId,
-              treatmentType: schedule.treatmentType,
-              scheduledTime: schedule.scheduledTime,
-              location: schedule.location,
-              notes: schedule.notes,
-            ))
-        .toList();
   }
 
   Future<void> addSchedule({

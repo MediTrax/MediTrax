@@ -1,6 +1,6 @@
 type ActivityLog {
     id: String!
-    user_id: String!
+    userId: String!
     activityType: String!
     description: String!
     changedObject: String!

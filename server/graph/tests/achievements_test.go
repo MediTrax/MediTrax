@@ -56,6 +56,7 @@ func TestAchievement(t *testing.T) {
 		badgeId2 = response.CreateAchievementBadge.BadgeID
 
 		require.NotEqual(t, badgeId1, badgeId2)
+
 	})
 
 	t.Run("Award Achievement", func(t *testing.T) {
@@ -105,10 +106,10 @@ func TestAchievement(t *testing.T) {
 			}
 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
-		require.Equal(t, badgeId1, response.GetAchievementBadges[len(response.GetAchievementBadges)-2].BadgeID)
-		require.Equal(t, "First Badge", response.GetAchievementBadges[len(response.GetAchievementBadges)-2].Name)
-		require.Equal(t, badgeId2, response.GetAchievementBadges[len(response.GetAchievementBadges)-1].BadgeID)
-		require.Equal(t, "Second Badge", response.GetAchievementBadges[len(response.GetAchievementBadges)-1].Name)
+		require.Equal(t, badgeId1, response.GetAchievementBadges[1].BadgeID)
+		require.Equal(t, "First Badge", response.GetAchievementBadges[1].Name)
+		require.Equal(t, badgeId2, response.GetAchievementBadges[0].BadgeID)
+		require.Equal(t, "Second Badge", response.GetAchievementBadges[0].Name)
 	})
 
 	t.Run("Get User Achievements", func(t *testing.T) {
@@ -127,8 +128,8 @@ func TestAchievement(t *testing.T) {
 			}
 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
-		require.Equal(t, assessmentId1, response.GetUserAchievements[0].BadgeID)
-		require.Equal(t, assessmentId2, response.GetUserAchievements[1].BadgeID)
+		require.Equal(t, assessmentId1, response.GetUserAchievements[1].BadgeID)
+		require.Equal(t, assessmentId2, response.GetUserAchievements[0].BadgeID)
 	})
 
 	t.Run("Invalid Award Achievement", func(t *testing.T) {
@@ -148,7 +149,7 @@ func TestAchievement(t *testing.T) {
                 userAchievementId
                 message
             }
-        }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badge_id"))
+        }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)), client.Var("badgeId", "invalid_badgeId"))
 
 		// 检查 err 是否为 nil
 		if err == nil {
@@ -283,7 +284,117 @@ func TestPoints(t *testing.T) {
 		}`, &response_query)
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "access denied", err_msg[0].Message)
+
+	})
+	t.Run("Award Achievement Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			CreateAchievementBadge struct {
+				BadgeID string
+				Message string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		// 无效令牌
+		err := c.Post(`mutation create_badge {
+			createAchievementBadge(
+				name: "First Badge",
+				description: "Awarded for completing the first task.",
+				iconUrl: "https://example.com/first_badge.png"
+			) {
+				badgeId,
+				message
+			}
+		}`, &deniedResponse, client.Var("First Badge", 1.0))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+	// AwardAchievement - Access Denied
+	t.Run("Award Achievement Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			AwardAchievement struct {
+				UserAchievementID string
+				Message           string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`mutation award_achievement($badgeId: String!) {
+			awardAchievement(badgeId: $badgeId) {
+				userAchievementId,
+				message
+			}
+			}`, &deniedResponse, client.Var("badgeId", 3.5))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+
+		err = c.Post(`mutation award_achievement($badgeId: String!) {
+		awardAchievement(badgeId: $badgeId) {
+			userAchievementId,
+			message
+		}
+		}`, &deniedResponse, client.Var("badgeId", 3.5),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "invalid badge ID", err_msg[0].Message)
 	})
 
+	// GetAchievementBadges - Access Denied
+	t.Run("Get Achievement Badges Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetAchievementBadges []struct {
+				BadgeID     string
+				Name        string
+				Description string
+				IconURL     string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		// 无效令牌
+		err := c.Post(`query{
+		getAchievementBadges {
+			badgeId
+			name
+			description
+			iconUrl
+		}
+	}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
+
+	// GetUserAchievements - Access Denied
+	t.Run("Get User Achievements Access Denied", func(t *testing.T) {
+		var deniedResponse struct {
+			GetUserAchievements []struct {
+				BadgeID           string
+				UserAchievementID string
+				EarnedAt          string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// 无效令牌
+		err := c.Post(`query{
+		getUserAchievements {
+			badgeId
+			userAchievementId
+			earnedAt
+		}
+	}`, &deniedResponse)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+	})
 	DeleteUser(t, c, user)
 }

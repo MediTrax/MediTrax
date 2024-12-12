@@ -66,12 +66,27 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 		if response.Choice == "是" {
 			score++
 		}
+		age, err := strconv.Atoi(*response.Answer)
+		if err != nil {
+			fmt.Println("Error converting string to int:", err)
+		}
+		if age <= 30 {
+			score++
+		} else if age >= 30 && age <= 45 {
+			score += 2
+		} else if age > 45 && age <= 60 {
+			score += 3
+		} else {
+			score += 4
+		}
 	}
 
-	// 简单示例：如果选择了超过5个“是”，则认为风险较高
-	if score > 5 {
+	if score > 9 {
 		riskLevel = "高风险"
-		recommendations = "请尽早就医，做肾功能检查。"
+		recommendations = "请立即就医，做肾功能检查。"
+	} else if score <= 9 && score >= 5 {
+		riskLevel = "中风险"
+		recommendations = "请尽快进行全面身体检查，排除隐患。"
 	} else {
 		riskLevel = "低风险"
 		recommendations = "保持健康饮食，定期体检。"
@@ -96,7 +111,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 	for _, change := range changes {
 		_, err := database.DB.Query(
 			`CREATE ONLY activity_log:ulid()
-			SET user_id=$user_id,
+			SET userId=$userId,
 			activityType=$activityType,
 			description=$description,
 			changedObject=$changedObject,
@@ -106,7 +121,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 			timestamp=$timestamp;
 			`,
 			map[string]interface{}{
-				"user_id":       userId,
+				"userId":        userId,
 				"activityType":  actType,
 				"description":   description,
 				"changedObject": objId,
@@ -127,7 +142,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 
 func IsFamilyMember(memberId string, patientId string) bool {
 	result, err := database.DB.Query(`SELECT * FROM family_member 
-	WHERE user_id=$userID AND patient_user_id=$patientId;`,
+	WHERE userId=$userID AND patient_userId=$patientId;`,
 		map[string]interface{}{
 			"userID":    memberId,
 			"patientId": patientId,
@@ -150,10 +165,31 @@ func IsFamilyMember(memberId string, patientId string) bool {
 	return false
 }
 
-func GetUserByID(userID string) (*model.User, error) {
-	result, err := database.DB.Query(`SELECT * FROM ONLY $user_id`,
+func IsProfileShared(from string, to string) bool {
+	result, err := database.DB.Query(`SELECT * FROM profile_access 
+	WHERE in=$from AND out=$to;`,
 		map[string]interface{}{
-			"user_id": userID,
+			"from": from,
+			"to":   to,
+		})
+	if err != nil {
+		return false
+	}
+
+	members, err := surrealdb.SmartUnmarshal[[]interface{}](result, nil)
+	if err != nil {
+		return false
+	}
+	if len(members) > 0 {
+		return true
+	}
+	return false
+}
+
+func GetUserByID(userID string) (*model.User, error) {
+	result, err := database.DB.Query(`SELECT * FROM ONLY $userId`,
+		map[string]interface{}{
+			"userId": userID,
 		})
 	if err != nil {
 		return nil, err

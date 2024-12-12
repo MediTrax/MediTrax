@@ -2,9 +2,16 @@ query GetMedicalRecords {
   getMedicalRecords {
     recordId
     recordType
-    content {
-      data
-    }
+    content
+    createdAt
+  }
+}
+
+query GetSharedMedicalRecords($patientId: String!) {
+  getSharedMedicalRecords(patientId: $patientId) {
+    recordId
+    recordType
+    content
     createdAt
   }
 }

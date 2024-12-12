@@ -32,7 +32,7 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
   @override
   void write(BinaryWriter writer, _$MedicationImpl obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -45,8 +45,6 @@ class MedicationImplAdapter extends TypeAdapter<_$MedicationImpl> {
       ..write(obj.frequency)
       ..writeByte(5)
       ..write(obj.inventory)
-      ..writeByte(6)
-      ..write(obj.userId)
       ..writeByte(7)
       ..write(obj.createdAt)
       ..writeByte(8)

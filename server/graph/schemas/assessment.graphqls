@@ -1,7 +1,7 @@
 type Question{
   questionId: Int!
   question: String!
-  questionchoiceType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
+  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, 3 = fill in the blank with figure etc.
   choices: [String!] # empty if it is fill in the blank
 }
 
@@ -12,7 +12,7 @@ type QuestionnaireObject{
 
 input Response{
   questionId: Int!
-  : String!#数字序号用，隔开
+  choice: String!#数字序号用，隔开
   answer: String
 }
 
@@ -29,11 +29,11 @@ input FilledQuestionnaire{
 
 type HealthRiskAssessment{
   id: String!
-  user_id: String!
-  questionnaire_data: [HealthResponse!]!
-  risk_level: String!
+  userId: String!
+  questionnaireData: [HealthResponse!]!
+  riskLevel: String!
   recommendations: String!
-  created_at: DateTime!
+  createdAt: DateTime!
 }
 
 type HealthRiskAssessmentDetailResponse {

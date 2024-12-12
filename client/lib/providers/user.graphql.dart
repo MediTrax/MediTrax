@@ -6391,3 +6391,2485 @@ class _CopyWithStubImpl$Mutation$DeleteFamilyMember$deleteFamilyMember<TRes>
   }) =>
       _res;
 }
+
+class Query$GetProfiles {
+  Query$GetProfiles({
+    this.getProfiles,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetProfiles.fromJson(Map<String, dynamic> json) {
+    final l$getProfiles = json['getProfiles'];
+    final l$$__typename = json['__typename'];
+    return Query$GetProfiles(
+      getProfiles: (l$getProfiles as List<dynamic>?)
+          ?.map((e) => e == null
+              ? null
+              : Query$GetProfiles$getProfiles.fromJson(
+                  (e as Map<String, dynamic>)))
+          .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetProfiles$getProfiles?>? getProfiles;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getProfiles = getProfiles;
+    _resultData['getProfiles'] =
+        l$getProfiles?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getProfiles = getProfiles;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getProfiles == null
+          ? null
+          : Object.hashAll(l$getProfiles.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetProfiles) || runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getProfiles = getProfiles;
+    final lOther$getProfiles = other.getProfiles;
+    if (l$getProfiles != null && lOther$getProfiles != null) {
+      if (l$getProfiles.length != lOther$getProfiles.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getProfiles.length; i++) {
+        final l$getProfiles$entry = l$getProfiles[i];
+        final lOther$getProfiles$entry = lOther$getProfiles[i];
+        if (l$getProfiles$entry != lOther$getProfiles$entry) {
+          return false;
+        }
+      }
+    } else if (l$getProfiles != lOther$getProfiles) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetProfiles on Query$GetProfiles {
+  CopyWith$Query$GetProfiles<Query$GetProfiles> get copyWith =>
+      CopyWith$Query$GetProfiles(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Query$GetProfiles<TRes> {
+  factory CopyWith$Query$GetProfiles(
+    Query$GetProfiles instance,
+    TRes Function(Query$GetProfiles) then,
+  ) = _CopyWithImpl$Query$GetProfiles;
+
+  factory CopyWith$Query$GetProfiles.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetProfiles;
+
+  TRes call({
+    List<Query$GetProfiles$getProfiles?>? getProfiles,
+    String? $__typename,
+  });
+  TRes getProfiles(
+      Iterable<Query$GetProfiles$getProfiles?>? Function(
+              Iterable<
+                  CopyWith$Query$GetProfiles$getProfiles<
+                      Query$GetProfiles$getProfiles>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetProfiles<TRes>
+    implements CopyWith$Query$GetProfiles<TRes> {
+  _CopyWithImpl$Query$GetProfiles(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetProfiles _instance;
+
+  final TRes Function(Query$GetProfiles) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getProfiles = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetProfiles(
+        getProfiles: getProfiles == _undefined
+            ? _instance.getProfiles
+            : (getProfiles as List<Query$GetProfiles$getProfiles?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getProfiles(
+          Iterable<Query$GetProfiles$getProfiles?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetProfiles$getProfiles<
+                          Query$GetProfiles$getProfiles>?>?)
+              _fn) =>
+      call(
+          getProfiles: _fn(_instance.getProfiles?.map((e) => e == null
+              ? null
+              : CopyWith$Query$GetProfiles$getProfiles(
+                  e,
+                  (i) => i,
+                )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetProfiles<TRes>
+    implements CopyWith$Query$GetProfiles<TRes> {
+  _CopyWithStubImpl$Query$GetProfiles(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetProfiles$getProfiles?>? getProfiles,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getProfiles(_fn) => _res;
+}
+
+const documentNodeQueryGetProfiles = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetProfiles'),
+    variableDefinitions: [],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getProfiles'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'id'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'phoneNumber'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'role'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'createdAt'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetProfiles _parserFn$Query$GetProfiles(Map<String, dynamic> data) =>
+    Query$GetProfiles.fromJson(data);
+typedef OnQueryComplete$Query$GetProfiles = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetProfiles?,
+);
+
+class Options$Query$GetProfiles
+    extends graphql.QueryOptions<Query$GetProfiles> {
+  Options$Query$GetProfiles({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetProfiles? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetProfiles? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null ? null : _parserFn$Query$GetProfiles(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetProfiles,
+          parserFn: _parserFn$Query$GetProfiles,
+        );
+
+  final OnQueryComplete$Query$GetProfiles? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetProfiles
+    extends graphql.WatchQueryOptions<Query$GetProfiles> {
+  WatchOptions$Query$GetProfiles({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetProfiles? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetProfiles,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetProfiles,
+        );
+}
+
+class FetchMoreOptions$Query$GetProfiles extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetProfiles({required graphql.UpdateQuery updateQuery})
+      : super(
+          updateQuery: updateQuery,
+          document: documentNodeQueryGetProfiles,
+        );
+}
+
+extension ClientExtension$Query$GetProfiles on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetProfiles>> query$GetProfiles(
+          [Options$Query$GetProfiles? options]) async =>
+      await this.query(options ?? Options$Query$GetProfiles());
+  graphql.ObservableQuery<Query$GetProfiles> watchQuery$GetProfiles(
+          [WatchOptions$Query$GetProfiles? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetProfiles());
+  void writeQuery$GetProfiles({
+    required Query$GetProfiles data,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+            operation:
+                graphql.Operation(document: documentNodeQueryGetProfiles)),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetProfiles? readQuery$GetProfiles({bool optimistic = true}) {
+    final result = this.readQuery(
+      graphql.Request(
+          operation: graphql.Operation(document: documentNodeQueryGetProfiles)),
+      optimistic: optimistic,
+    );
+    return result == null ? null : Query$GetProfiles.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetProfiles> useQuery$GetProfiles(
+        [Options$Query$GetProfiles? options]) =>
+    graphql_flutter.useQuery(options ?? Options$Query$GetProfiles());
+graphql.ObservableQuery<Query$GetProfiles> useWatchQuery$GetProfiles(
+        [WatchOptions$Query$GetProfiles? options]) =>
+    graphql_flutter.useWatchQuery(options ?? WatchOptions$Query$GetProfiles());
+
+class Query$GetProfiles$Widget
+    extends graphql_flutter.Query<Query$GetProfiles> {
+  Query$GetProfiles$Widget({
+    widgets.Key? key,
+    Options$Query$GetProfiles? options,
+    required graphql_flutter.QueryBuilder<Query$GetProfiles> builder,
+  }) : super(
+          key: key,
+          options: options ?? Options$Query$GetProfiles(),
+          builder: builder,
+        );
+}
+
+class Query$GetProfiles$getProfiles {
+  Query$GetProfiles$getProfiles({
+    required this.id,
+    required this.name,
+    required this.phoneNumber,
+    required this.role,
+    required this.createdAt,
+    this.$__typename = 'ProfileDetail',
+  });
+
+  factory Query$GetProfiles$getProfiles.fromJson(Map<String, dynamic> json) {
+    final l$id = json['id'];
+    final l$name = json['name'];
+    final l$phoneNumber = json['phoneNumber'];
+    final l$role = json['role'];
+    final l$createdAt = json['createdAt'];
+    final l$$__typename = json['__typename'];
+    return Query$GetProfiles$getProfiles(
+      id: (l$id as String),
+      name: (l$name as String),
+      phoneNumber: (l$phoneNumber as String),
+      role: (l$role as String),
+      createdAt: dateTimeFromJson(l$createdAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String id;
+
+  final String name;
+
+  final String phoneNumber;
+
+  final String role;
+
+  final DateTime createdAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$id = id;
+    _resultData['id'] = l$id;
+    final l$name = name;
+    _resultData['name'] = l$name;
+    final l$phoneNumber = phoneNumber;
+    _resultData['phoneNumber'] = l$phoneNumber;
+    final l$role = role;
+    _resultData['role'] = l$role;
+    final l$createdAt = createdAt;
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$id = id;
+    final l$name = name;
+    final l$phoneNumber = phoneNumber;
+    final l$role = role;
+    final l$createdAt = createdAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$id,
+      l$name,
+      l$phoneNumber,
+      l$role,
+      l$createdAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetProfiles$getProfiles) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$id = id;
+    final lOther$id = other.id;
+    if (l$id != lOther$id) {
+      return false;
+    }
+    final l$name = name;
+    final lOther$name = other.name;
+    if (l$name != lOther$name) {
+      return false;
+    }
+    final l$phoneNumber = phoneNumber;
+    final lOther$phoneNumber = other.phoneNumber;
+    if (l$phoneNumber != lOther$phoneNumber) {
+      return false;
+    }
+    final l$role = role;
+    final lOther$role = other.role;
+    if (l$role != lOther$role) {
+      return false;
+    }
+    final l$createdAt = createdAt;
+    final lOther$createdAt = other.createdAt;
+    if (l$createdAt != lOther$createdAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetProfiles$getProfiles
+    on Query$GetProfiles$getProfiles {
+  CopyWith$Query$GetProfiles$getProfiles<Query$GetProfiles$getProfiles>
+      get copyWith => CopyWith$Query$GetProfiles$getProfiles(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetProfiles$getProfiles<TRes> {
+  factory CopyWith$Query$GetProfiles$getProfiles(
+    Query$GetProfiles$getProfiles instance,
+    TRes Function(Query$GetProfiles$getProfiles) then,
+  ) = _CopyWithImpl$Query$GetProfiles$getProfiles;
+
+  factory CopyWith$Query$GetProfiles$getProfiles.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetProfiles$getProfiles;
+
+  TRes call({
+    String? id,
+    String? name,
+    String? phoneNumber,
+    String? role,
+    DateTime? createdAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetProfiles$getProfiles<TRes>
+    implements CopyWith$Query$GetProfiles$getProfiles<TRes> {
+  _CopyWithImpl$Query$GetProfiles$getProfiles(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetProfiles$getProfiles _instance;
+
+  final TRes Function(Query$GetProfiles$getProfiles) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? id = _undefined,
+    Object? name = _undefined,
+    Object? phoneNumber = _undefined,
+    Object? role = _undefined,
+    Object? createdAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetProfiles$getProfiles(
+        id: id == _undefined || id == null ? _instance.id : (id as String),
+        name: name == _undefined || name == null
+            ? _instance.name
+            : (name as String),
+        phoneNumber: phoneNumber == _undefined || phoneNumber == null
+            ? _instance.phoneNumber
+            : (phoneNumber as String),
+        role: role == _undefined || role == null
+            ? _instance.role
+            : (role as String),
+        createdAt: createdAt == _undefined || createdAt == null
+            ? _instance.createdAt
+            : (createdAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetProfiles$getProfiles<TRes>
+    implements CopyWith$Query$GetProfiles$getProfiles<TRes> {
+  _CopyWithStubImpl$Query$GetProfiles$getProfiles(this._res);
+
+  TRes _res;
+
+  call({
+    String? id,
+    String? name,
+    String? phoneNumber,
+    String? role,
+    DateTime? createdAt,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Query$GetSharedProfiles {
+  Query$GetSharedProfiles({
+    this.getSharedProfiles,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetSharedProfiles.fromJson(Map<String, dynamic> json) {
+    final l$getSharedProfiles = json['getSharedProfiles'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedProfiles(
+      getSharedProfiles: (l$getSharedProfiles as List<dynamic>?)
+          ?.map((e) => e == null
+              ? null
+              : Query$GetSharedProfiles$getSharedProfiles.fromJson(
+                  (e as Map<String, dynamic>)))
+          .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetSharedProfiles$getSharedProfiles?>? getSharedProfiles;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getSharedProfiles = getSharedProfiles;
+    _resultData['getSharedProfiles'] =
+        l$getSharedProfiles?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getSharedProfiles = getSharedProfiles;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getSharedProfiles == null
+          ? null
+          : Object.hashAll(l$getSharedProfiles.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedProfiles) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getSharedProfiles = getSharedProfiles;
+    final lOther$getSharedProfiles = other.getSharedProfiles;
+    if (l$getSharedProfiles != null && lOther$getSharedProfiles != null) {
+      if (l$getSharedProfiles.length != lOther$getSharedProfiles.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getSharedProfiles.length; i++) {
+        final l$getSharedProfiles$entry = l$getSharedProfiles[i];
+        final lOther$getSharedProfiles$entry = lOther$getSharedProfiles[i];
+        if (l$getSharedProfiles$entry != lOther$getSharedProfiles$entry) {
+          return false;
+        }
+      }
+    } else if (l$getSharedProfiles != lOther$getSharedProfiles) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedProfiles on Query$GetSharedProfiles {
+  CopyWith$Query$GetSharedProfiles<Query$GetSharedProfiles> get copyWith =>
+      CopyWith$Query$GetSharedProfiles(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Query$GetSharedProfiles<TRes> {
+  factory CopyWith$Query$GetSharedProfiles(
+    Query$GetSharedProfiles instance,
+    TRes Function(Query$GetSharedProfiles) then,
+  ) = _CopyWithImpl$Query$GetSharedProfiles;
+
+  factory CopyWith$Query$GetSharedProfiles.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetSharedProfiles;
+
+  TRes call({
+    List<Query$GetSharedProfiles$getSharedProfiles?>? getSharedProfiles,
+    String? $__typename,
+  });
+  TRes getSharedProfiles(
+      Iterable<Query$GetSharedProfiles$getSharedProfiles?>? Function(
+              Iterable<
+                  CopyWith$Query$GetSharedProfiles$getSharedProfiles<
+                      Query$GetSharedProfiles$getSharedProfiles>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetSharedProfiles<TRes>
+    implements CopyWith$Query$GetSharedProfiles<TRes> {
+  _CopyWithImpl$Query$GetSharedProfiles(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedProfiles _instance;
+
+  final TRes Function(Query$GetSharedProfiles) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getSharedProfiles = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedProfiles(
+        getSharedProfiles: getSharedProfiles == _undefined
+            ? _instance.getSharedProfiles
+            : (getSharedProfiles
+                as List<Query$GetSharedProfiles$getSharedProfiles?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getSharedProfiles(
+          Iterable<Query$GetSharedProfiles$getSharedProfiles?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetSharedProfiles$getSharedProfiles<
+                          Query$GetSharedProfiles$getSharedProfiles>?>?)
+              _fn) =>
+      call(
+          getSharedProfiles:
+              _fn(_instance.getSharedProfiles?.map((e) => e == null
+                  ? null
+                  : CopyWith$Query$GetSharedProfiles$getSharedProfiles(
+                      e,
+                      (i) => i,
+                    )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetSharedProfiles<TRes>
+    implements CopyWith$Query$GetSharedProfiles<TRes> {
+  _CopyWithStubImpl$Query$GetSharedProfiles(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetSharedProfiles$getSharedProfiles?>? getSharedProfiles,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getSharedProfiles(_fn) => _res;
+}
+
+const documentNodeQueryGetSharedProfiles = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetSharedProfiles'),
+    variableDefinitions: [],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getSharedProfiles'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'id'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'phoneNumber'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'role'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'createdAt'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetSharedProfiles _parserFn$Query$GetSharedProfiles(
+        Map<String, dynamic> data) =>
+    Query$GetSharedProfiles.fromJson(data);
+typedef OnQueryComplete$Query$GetSharedProfiles = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetSharedProfiles?,
+);
+
+class Options$Query$GetSharedProfiles
+    extends graphql.QueryOptions<Query$GetSharedProfiles> {
+  Options$Query$GetSharedProfiles({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedProfiles? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetSharedProfiles? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetSharedProfiles(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetSharedProfiles,
+          parserFn: _parserFn$Query$GetSharedProfiles,
+        );
+
+  final OnQueryComplete$Query$GetSharedProfiles? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetSharedProfiles
+    extends graphql.WatchQueryOptions<Query$GetSharedProfiles> {
+  WatchOptions$Query$GetSharedProfiles({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetSharedProfiles? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetSharedProfiles,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetSharedProfiles,
+        );
+}
+
+class FetchMoreOptions$Query$GetSharedProfiles
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetSharedProfiles(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
+          updateQuery: updateQuery,
+          document: documentNodeQueryGetSharedProfiles,
+        );
+}
+
+extension ClientExtension$Query$GetSharedProfiles on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetSharedProfiles>> query$GetSharedProfiles(
+          [Options$Query$GetSharedProfiles? options]) async =>
+      await this.query(options ?? Options$Query$GetSharedProfiles());
+  graphql.ObservableQuery<Query$GetSharedProfiles> watchQuery$GetSharedProfiles(
+          [WatchOptions$Query$GetSharedProfiles? options]) =>
+      this.watchQuery(options ?? WatchOptions$Query$GetSharedProfiles());
+  void writeQuery$GetSharedProfiles({
+    required Query$GetSharedProfiles data,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+            operation: graphql.Operation(
+                document: documentNodeQueryGetSharedProfiles)),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetSharedProfiles? readQuery$GetSharedProfiles(
+      {bool optimistic = true}) {
+    final result = this.readQuery(
+      graphql.Request(
+          operation:
+              graphql.Operation(document: documentNodeQueryGetSharedProfiles)),
+      optimistic: optimistic,
+    );
+    return result == null ? null : Query$GetSharedProfiles.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetSharedProfiles>
+    useQuery$GetSharedProfiles([Options$Query$GetSharedProfiles? options]) =>
+        graphql_flutter.useQuery(options ?? Options$Query$GetSharedProfiles());
+graphql.ObservableQuery<Query$GetSharedProfiles>
+    useWatchQuery$GetSharedProfiles(
+            [WatchOptions$Query$GetSharedProfiles? options]) =>
+        graphql_flutter
+            .useWatchQuery(options ?? WatchOptions$Query$GetSharedProfiles());
+
+class Query$GetSharedProfiles$Widget
+    extends graphql_flutter.Query<Query$GetSharedProfiles> {
+  Query$GetSharedProfiles$Widget({
+    widgets.Key? key,
+    Options$Query$GetSharedProfiles? options,
+    required graphql_flutter.QueryBuilder<Query$GetSharedProfiles> builder,
+  }) : super(
+          key: key,
+          options: options ?? Options$Query$GetSharedProfiles(),
+          builder: builder,
+        );
+}
+
+class Query$GetSharedProfiles$getSharedProfiles {
+  Query$GetSharedProfiles$getSharedProfiles({
+    required this.id,
+    required this.name,
+    required this.phoneNumber,
+    required this.role,
+    required this.createdAt,
+    this.$__typename = 'ProfileDetail',
+  });
+
+  factory Query$GetSharedProfiles$getSharedProfiles.fromJson(
+      Map<String, dynamic> json) {
+    final l$id = json['id'];
+    final l$name = json['name'];
+    final l$phoneNumber = json['phoneNumber'];
+    final l$role = json['role'];
+    final l$createdAt = json['createdAt'];
+    final l$$__typename = json['__typename'];
+    return Query$GetSharedProfiles$getSharedProfiles(
+      id: (l$id as String),
+      name: (l$name as String),
+      phoneNumber: (l$phoneNumber as String),
+      role: (l$role as String),
+      createdAt: dateTimeFromJson(l$createdAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String id;
+
+  final String name;
+
+  final String phoneNumber;
+
+  final String role;
+
+  final DateTime createdAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$id = id;
+    _resultData['id'] = l$id;
+    final l$name = name;
+    _resultData['name'] = l$name;
+    final l$phoneNumber = phoneNumber;
+    _resultData['phoneNumber'] = l$phoneNumber;
+    final l$role = role;
+    _resultData['role'] = l$role;
+    final l$createdAt = createdAt;
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$id = id;
+    final l$name = name;
+    final l$phoneNumber = phoneNumber;
+    final l$role = role;
+    final l$createdAt = createdAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$id,
+      l$name,
+      l$phoneNumber,
+      l$role,
+      l$createdAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Query$GetSharedProfiles$getSharedProfiles) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$id = id;
+    final lOther$id = other.id;
+    if (l$id != lOther$id) {
+      return false;
+    }
+    final l$name = name;
+    final lOther$name = other.name;
+    if (l$name != lOther$name) {
+      return false;
+    }
+    final l$phoneNumber = phoneNumber;
+    final lOther$phoneNumber = other.phoneNumber;
+    if (l$phoneNumber != lOther$phoneNumber) {
+      return false;
+    }
+    final l$role = role;
+    final lOther$role = other.role;
+    if (l$role != lOther$role) {
+      return false;
+    }
+    final l$createdAt = createdAt;
+    final lOther$createdAt = other.createdAt;
+    if (l$createdAt != lOther$createdAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetSharedProfiles$getSharedProfiles
+    on Query$GetSharedProfiles$getSharedProfiles {
+  CopyWith$Query$GetSharedProfiles$getSharedProfiles<
+          Query$GetSharedProfiles$getSharedProfiles>
+      get copyWith => CopyWith$Query$GetSharedProfiles$getSharedProfiles(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetSharedProfiles$getSharedProfiles<TRes> {
+  factory CopyWith$Query$GetSharedProfiles$getSharedProfiles(
+    Query$GetSharedProfiles$getSharedProfiles instance,
+    TRes Function(Query$GetSharedProfiles$getSharedProfiles) then,
+  ) = _CopyWithImpl$Query$GetSharedProfiles$getSharedProfiles;
+
+  factory CopyWith$Query$GetSharedProfiles$getSharedProfiles.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetSharedProfiles$getSharedProfiles;
+
+  TRes call({
+    String? id,
+    String? name,
+    String? phoneNumber,
+    String? role,
+    DateTime? createdAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetSharedProfiles$getSharedProfiles<TRes>
+    implements CopyWith$Query$GetSharedProfiles$getSharedProfiles<TRes> {
+  _CopyWithImpl$Query$GetSharedProfiles$getSharedProfiles(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetSharedProfiles$getSharedProfiles _instance;
+
+  final TRes Function(Query$GetSharedProfiles$getSharedProfiles) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? id = _undefined,
+    Object? name = _undefined,
+    Object? phoneNumber = _undefined,
+    Object? role = _undefined,
+    Object? createdAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetSharedProfiles$getSharedProfiles(
+        id: id == _undefined || id == null ? _instance.id : (id as String),
+        name: name == _undefined || name == null
+            ? _instance.name
+            : (name as String),
+        phoneNumber: phoneNumber == _undefined || phoneNumber == null
+            ? _instance.phoneNumber
+            : (phoneNumber as String),
+        role: role == _undefined || role == null
+            ? _instance.role
+            : (role as String),
+        createdAt: createdAt == _undefined || createdAt == null
+            ? _instance.createdAt
+            : (createdAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetSharedProfiles$getSharedProfiles<TRes>
+    implements CopyWith$Query$GetSharedProfiles$getSharedProfiles<TRes> {
+  _CopyWithStubImpl$Query$GetSharedProfiles$getSharedProfiles(this._res);
+
+  TRes _res;
+
+  call({
+    String? id,
+    String? name,
+    String? phoneNumber,
+    String? role,
+    DateTime? createdAt,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Variables$Mutation$ShareProfile {
+  factory Variables$Mutation$ShareProfile({
+    required String phoneNumber,
+    required String accessLevel,
+    required String remarks,
+  }) =>
+      Variables$Mutation$ShareProfile._({
+        r'phoneNumber': phoneNumber,
+        r'accessLevel': accessLevel,
+        r'remarks': remarks,
+      });
+
+  Variables$Mutation$ShareProfile._(this._$data);
+
+  factory Variables$Mutation$ShareProfile.fromJson(Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = data['phoneNumber'];
+    result$data['phoneNumber'] = (l$phoneNumber as String);
+    final l$accessLevel = data['accessLevel'];
+    result$data['accessLevel'] = (l$accessLevel as String);
+    final l$remarks = data['remarks'];
+    result$data['remarks'] = (l$remarks as String);
+    return Variables$Mutation$ShareProfile._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get phoneNumber => (_$data['phoneNumber'] as String);
+
+  String get accessLevel => (_$data['accessLevel'] as String);
+
+  String get remarks => (_$data['remarks'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = phoneNumber;
+    result$data['phoneNumber'] = l$phoneNumber;
+    final l$accessLevel = accessLevel;
+    result$data['accessLevel'] = l$accessLevel;
+    final l$remarks = remarks;
+    result$data['remarks'] = l$remarks;
+    return result$data;
+  }
+
+  CopyWith$Variables$Mutation$ShareProfile<Variables$Mutation$ShareProfile>
+      get copyWith => CopyWith$Variables$Mutation$ShareProfile(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Variables$Mutation$ShareProfile) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$phoneNumber = phoneNumber;
+    final lOther$phoneNumber = other.phoneNumber;
+    if (l$phoneNumber != lOther$phoneNumber) {
+      return false;
+    }
+    final l$accessLevel = accessLevel;
+    final lOther$accessLevel = other.accessLevel;
+    if (l$accessLevel != lOther$accessLevel) {
+      return false;
+    }
+    final l$remarks = remarks;
+    final lOther$remarks = other.remarks;
+    if (l$remarks != lOther$remarks) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$phoneNumber = phoneNumber;
+    final l$accessLevel = accessLevel;
+    final l$remarks = remarks;
+    return Object.hashAll([
+      l$phoneNumber,
+      l$accessLevel,
+      l$remarks,
+    ]);
+  }
+}
+
+abstract class CopyWith$Variables$Mutation$ShareProfile<TRes> {
+  factory CopyWith$Variables$Mutation$ShareProfile(
+    Variables$Mutation$ShareProfile instance,
+    TRes Function(Variables$Mutation$ShareProfile) then,
+  ) = _CopyWithImpl$Variables$Mutation$ShareProfile;
+
+  factory CopyWith$Variables$Mutation$ShareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$ShareProfile;
+
+  TRes call({
+    String? phoneNumber,
+    String? accessLevel,
+    String? remarks,
+  });
+}
+
+class _CopyWithImpl$Variables$Mutation$ShareProfile<TRes>
+    implements CopyWith$Variables$Mutation$ShareProfile<TRes> {
+  _CopyWithImpl$Variables$Mutation$ShareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Mutation$ShareProfile _instance;
+
+  final TRes Function(Variables$Mutation$ShareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? phoneNumber = _undefined,
+    Object? accessLevel = _undefined,
+    Object? remarks = _undefined,
+  }) =>
+      _then(Variables$Mutation$ShareProfile._({
+        ..._instance._$data,
+        if (phoneNumber != _undefined && phoneNumber != null)
+          'phoneNumber': (phoneNumber as String),
+        if (accessLevel != _undefined && accessLevel != null)
+          'accessLevel': (accessLevel as String),
+        if (remarks != _undefined && remarks != null)
+          'remarks': (remarks as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Mutation$ShareProfile<TRes>
+    implements CopyWith$Variables$Mutation$ShareProfile<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$ShareProfile(this._res);
+
+  TRes _res;
+
+  call({
+    String? phoneNumber,
+    String? accessLevel,
+    String? remarks,
+  }) =>
+      _res;
+}
+
+class Mutation$ShareProfile {
+  Mutation$ShareProfile({
+    required this.shareProfile,
+    this.$__typename = 'Mutation',
+  });
+
+  factory Mutation$ShareProfile.fromJson(Map<String, dynamic> json) {
+    final l$shareProfile = json['shareProfile'];
+    final l$$__typename = json['__typename'];
+    return Mutation$ShareProfile(
+      shareProfile: Mutation$ShareProfile$shareProfile.fromJson(
+          (l$shareProfile as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Mutation$ShareProfile$shareProfile shareProfile;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$shareProfile = shareProfile;
+    _resultData['shareProfile'] = l$shareProfile.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$shareProfile = shareProfile;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$shareProfile,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Mutation$ShareProfile) || runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$shareProfile = shareProfile;
+    final lOther$shareProfile = other.shareProfile;
+    if (l$shareProfile != lOther$shareProfile) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$ShareProfile on Mutation$ShareProfile {
+  CopyWith$Mutation$ShareProfile<Mutation$ShareProfile> get copyWith =>
+      CopyWith$Mutation$ShareProfile(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Mutation$ShareProfile<TRes> {
+  factory CopyWith$Mutation$ShareProfile(
+    Mutation$ShareProfile instance,
+    TRes Function(Mutation$ShareProfile) then,
+  ) = _CopyWithImpl$Mutation$ShareProfile;
+
+  factory CopyWith$Mutation$ShareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$ShareProfile;
+
+  TRes call({
+    Mutation$ShareProfile$shareProfile? shareProfile,
+    String? $__typename,
+  });
+  CopyWith$Mutation$ShareProfile$shareProfile<TRes> get shareProfile;
+}
+
+class _CopyWithImpl$Mutation$ShareProfile<TRes>
+    implements CopyWith$Mutation$ShareProfile<TRes> {
+  _CopyWithImpl$Mutation$ShareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$ShareProfile _instance;
+
+  final TRes Function(Mutation$ShareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? shareProfile = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$ShareProfile(
+        shareProfile: shareProfile == _undefined || shareProfile == null
+            ? _instance.shareProfile
+            : (shareProfile as Mutation$ShareProfile$shareProfile),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$ShareProfile$shareProfile<TRes> get shareProfile {
+    final local$shareProfile = _instance.shareProfile;
+    return CopyWith$Mutation$ShareProfile$shareProfile(
+        local$shareProfile, (e) => call(shareProfile: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$ShareProfile<TRes>
+    implements CopyWith$Mutation$ShareProfile<TRes> {
+  _CopyWithStubImpl$Mutation$ShareProfile(this._res);
+
+  TRes _res;
+
+  call({
+    Mutation$ShareProfile$shareProfile? shareProfile,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$ShareProfile$shareProfile<TRes> get shareProfile =>
+      CopyWith$Mutation$ShareProfile$shareProfile.stub(_res);
+}
+
+const documentNodeMutationShareProfile = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.mutation,
+    name: NameNode(value: 'ShareProfile'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'phoneNumber')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'accessLevel')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'remarks')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'shareProfile'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'phoneNumber'),
+            value: VariableNode(name: NameNode(value: 'phoneNumber')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'accessLevel'),
+            value: VariableNode(name: NameNode(value: 'accessLevel')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'remarks'),
+            value: VariableNode(name: NameNode(value: 'remarks')),
+          ),
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'message'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Mutation$ShareProfile _parserFn$Mutation$ShareProfile(
+        Map<String, dynamic> data) =>
+    Mutation$ShareProfile.fromJson(data);
+typedef OnMutationCompleted$Mutation$ShareProfile = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Mutation$ShareProfile?,
+);
+
+class Options$Mutation$ShareProfile
+    extends graphql.MutationOptions<Mutation$ShareProfile> {
+  Options$Mutation$ShareProfile({
+    String? operationName,
+    required Variables$Mutation$ShareProfile variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$ShareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$ShareProfile? onCompleted,
+    graphql.OnMutationUpdate<Mutation$ShareProfile>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null ? null : _parserFn$Mutation$ShareProfile(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationShareProfile,
+          parserFn: _parserFn$Mutation$ShareProfile,
+        );
+
+  final OnMutationCompleted$Mutation$ShareProfile? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+class WatchOptions$Mutation$ShareProfile
+    extends graphql.WatchQueryOptions<Mutation$ShareProfile> {
+  WatchOptions$Mutation$ShareProfile({
+    String? operationName,
+    required Variables$Mutation$ShareProfile variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$ShareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeMutationShareProfile,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Mutation$ShareProfile,
+        );
+}
+
+extension ClientExtension$Mutation$ShareProfile on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$ShareProfile>> mutate$ShareProfile(
+          Options$Mutation$ShareProfile options) async =>
+      await this.mutate(options);
+  graphql.ObservableQuery<Mutation$ShareProfile> watchMutation$ShareProfile(
+          WatchOptions$Mutation$ShareProfile options) =>
+      this.watchMutation(options);
+}
+
+class Mutation$ShareProfile$HookResult {
+  Mutation$ShareProfile$HookResult(
+    this.runMutation,
+    this.result,
+  );
+
+  final RunMutation$Mutation$ShareProfile runMutation;
+
+  final graphql.QueryResult<Mutation$ShareProfile> result;
+}
+
+Mutation$ShareProfile$HookResult useMutation$ShareProfile(
+    [WidgetOptions$Mutation$ShareProfile? options]) {
+  final result = graphql_flutter
+      .useMutation(options ?? WidgetOptions$Mutation$ShareProfile());
+  return Mutation$ShareProfile$HookResult(
+    (variables, {optimisticResult, typedOptimisticResult}) =>
+        result.runMutation(
+      variables.toJson(),
+      optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+    ),
+    result.result,
+  );
+}
+
+graphql.ObservableQuery<Mutation$ShareProfile> useWatchMutation$ShareProfile(
+        WatchOptions$Mutation$ShareProfile options) =>
+    graphql_flutter.useWatchMutation(options);
+
+class WidgetOptions$Mutation$ShareProfile
+    extends graphql.MutationOptions<Mutation$ShareProfile> {
+  WidgetOptions$Mutation$ShareProfile({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$ShareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$ShareProfile? onCompleted,
+    graphql.OnMutationUpdate<Mutation$ShareProfile>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null ? null : _parserFn$Mutation$ShareProfile(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationShareProfile,
+          parserFn: _parserFn$Mutation$ShareProfile,
+        );
+
+  final OnMutationCompleted$Mutation$ShareProfile? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+typedef RunMutation$Mutation$ShareProfile
+    = graphql.MultiSourceResult<Mutation$ShareProfile> Function(
+  Variables$Mutation$ShareProfile, {
+  Object? optimisticResult,
+  Mutation$ShareProfile? typedOptimisticResult,
+});
+typedef Builder$Mutation$ShareProfile = widgets.Widget Function(
+  RunMutation$Mutation$ShareProfile,
+  graphql.QueryResult<Mutation$ShareProfile>?,
+);
+
+class Mutation$ShareProfile$Widget
+    extends graphql_flutter.Mutation<Mutation$ShareProfile> {
+  Mutation$ShareProfile$Widget({
+    widgets.Key? key,
+    WidgetOptions$Mutation$ShareProfile? options,
+    required Builder$Mutation$ShareProfile builder,
+  }) : super(
+          key: key,
+          options: options ?? WidgetOptions$Mutation$ShareProfile(),
+          builder: (
+            run,
+            result,
+          ) =>
+              builder(
+            (
+              variables, {
+              optimisticResult,
+              typedOptimisticResult,
+            }) =>
+                run(
+              variables.toJson(),
+              optimisticResult:
+                  optimisticResult ?? typedOptimisticResult?.toJson(),
+            ),
+            result,
+          ),
+        );
+}
+
+class Mutation$ShareProfile$shareProfile {
+  Mutation$ShareProfile$shareProfile({
+    required this.message,
+    this.$__typename = 'ShareProfileResponse',
+  });
+
+  factory Mutation$ShareProfile$shareProfile.fromJson(
+      Map<String, dynamic> json) {
+    final l$message = json['message'];
+    final l$$__typename = json['__typename'];
+    return Mutation$ShareProfile$shareProfile(
+      message: (l$message as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String message;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$message = message;
+    _resultData['message'] = l$message;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$message = message;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$message,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Mutation$ShareProfile$shareProfile) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$message = message;
+    final lOther$message = other.message;
+    if (l$message != lOther$message) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$ShareProfile$shareProfile
+    on Mutation$ShareProfile$shareProfile {
+  CopyWith$Mutation$ShareProfile$shareProfile<
+          Mutation$ShareProfile$shareProfile>
+      get copyWith => CopyWith$Mutation$ShareProfile$shareProfile(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$ShareProfile$shareProfile<TRes> {
+  factory CopyWith$Mutation$ShareProfile$shareProfile(
+    Mutation$ShareProfile$shareProfile instance,
+    TRes Function(Mutation$ShareProfile$shareProfile) then,
+  ) = _CopyWithImpl$Mutation$ShareProfile$shareProfile;
+
+  factory CopyWith$Mutation$ShareProfile$shareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$ShareProfile$shareProfile;
+
+  TRes call({
+    String? message,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Mutation$ShareProfile$shareProfile<TRes>
+    implements CopyWith$Mutation$ShareProfile$shareProfile<TRes> {
+  _CopyWithImpl$Mutation$ShareProfile$shareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$ShareProfile$shareProfile _instance;
+
+  final TRes Function(Mutation$ShareProfile$shareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? message = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$ShareProfile$shareProfile(
+        message: message == _undefined || message == null
+            ? _instance.message
+            : (message as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Mutation$ShareProfile$shareProfile<TRes>
+    implements CopyWith$Mutation$ShareProfile$shareProfile<TRes> {
+  _CopyWithStubImpl$Mutation$ShareProfile$shareProfile(this._res);
+
+  TRes _res;
+
+  call({
+    String? message,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Variables$Mutation$UnshareProfile {
+  factory Variables$Mutation$UnshareProfile({required String targetUserId}) =>
+      Variables$Mutation$UnshareProfile._({
+        r'targetUserId': targetUserId,
+      });
+
+  Variables$Mutation$UnshareProfile._(this._$data);
+
+  factory Variables$Mutation$UnshareProfile.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$targetUserId = data['targetUserId'];
+    result$data['targetUserId'] = (l$targetUserId as String);
+    return Variables$Mutation$UnshareProfile._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get targetUserId => (_$data['targetUserId'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$targetUserId = targetUserId;
+    result$data['targetUserId'] = l$targetUserId;
+    return result$data;
+  }
+
+  CopyWith$Variables$Mutation$UnshareProfile<Variables$Mutation$UnshareProfile>
+      get copyWith => CopyWith$Variables$Mutation$UnshareProfile(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Variables$Mutation$UnshareProfile) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$targetUserId = targetUserId;
+    final lOther$targetUserId = other.targetUserId;
+    if (l$targetUserId != lOther$targetUserId) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$targetUserId = targetUserId;
+    return Object.hashAll([l$targetUserId]);
+  }
+}
+
+abstract class CopyWith$Variables$Mutation$UnshareProfile<TRes> {
+  factory CopyWith$Variables$Mutation$UnshareProfile(
+    Variables$Mutation$UnshareProfile instance,
+    TRes Function(Variables$Mutation$UnshareProfile) then,
+  ) = _CopyWithImpl$Variables$Mutation$UnshareProfile;
+
+  factory CopyWith$Variables$Mutation$UnshareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$UnshareProfile;
+
+  TRes call({String? targetUserId});
+}
+
+class _CopyWithImpl$Variables$Mutation$UnshareProfile<TRes>
+    implements CopyWith$Variables$Mutation$UnshareProfile<TRes> {
+  _CopyWithImpl$Variables$Mutation$UnshareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Mutation$UnshareProfile _instance;
+
+  final TRes Function(Variables$Mutation$UnshareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({Object? targetUserId = _undefined}) =>
+      _then(Variables$Mutation$UnshareProfile._({
+        ..._instance._$data,
+        if (targetUserId != _undefined && targetUserId != null)
+          'targetUserId': (targetUserId as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Mutation$UnshareProfile<TRes>
+    implements CopyWith$Variables$Mutation$UnshareProfile<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$UnshareProfile(this._res);
+
+  TRes _res;
+
+  call({String? targetUserId}) => _res;
+}
+
+class Mutation$UnshareProfile {
+  Mutation$UnshareProfile({
+    required this.unshareProfile,
+    this.$__typename = 'Mutation',
+  });
+
+  factory Mutation$UnshareProfile.fromJson(Map<String, dynamic> json) {
+    final l$unshareProfile = json['unshareProfile'];
+    final l$$__typename = json['__typename'];
+    return Mutation$UnshareProfile(
+      unshareProfile: Mutation$UnshareProfile$unshareProfile.fromJson(
+          (l$unshareProfile as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Mutation$UnshareProfile$unshareProfile unshareProfile;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$unshareProfile = unshareProfile;
+    _resultData['unshareProfile'] = l$unshareProfile.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$unshareProfile = unshareProfile;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$unshareProfile,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Mutation$UnshareProfile) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$unshareProfile = unshareProfile;
+    final lOther$unshareProfile = other.unshareProfile;
+    if (l$unshareProfile != lOther$unshareProfile) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$UnshareProfile on Mutation$UnshareProfile {
+  CopyWith$Mutation$UnshareProfile<Mutation$UnshareProfile> get copyWith =>
+      CopyWith$Mutation$UnshareProfile(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Mutation$UnshareProfile<TRes> {
+  factory CopyWith$Mutation$UnshareProfile(
+    Mutation$UnshareProfile instance,
+    TRes Function(Mutation$UnshareProfile) then,
+  ) = _CopyWithImpl$Mutation$UnshareProfile;
+
+  factory CopyWith$Mutation$UnshareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$UnshareProfile;
+
+  TRes call({
+    Mutation$UnshareProfile$unshareProfile? unshareProfile,
+    String? $__typename,
+  });
+  CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> get unshareProfile;
+}
+
+class _CopyWithImpl$Mutation$UnshareProfile<TRes>
+    implements CopyWith$Mutation$UnshareProfile<TRes> {
+  _CopyWithImpl$Mutation$UnshareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$UnshareProfile _instance;
+
+  final TRes Function(Mutation$UnshareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? unshareProfile = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$UnshareProfile(
+        unshareProfile: unshareProfile == _undefined || unshareProfile == null
+            ? _instance.unshareProfile
+            : (unshareProfile as Mutation$UnshareProfile$unshareProfile),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> get unshareProfile {
+    final local$unshareProfile = _instance.unshareProfile;
+    return CopyWith$Mutation$UnshareProfile$unshareProfile(
+        local$unshareProfile, (e) => call(unshareProfile: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$UnshareProfile<TRes>
+    implements CopyWith$Mutation$UnshareProfile<TRes> {
+  _CopyWithStubImpl$Mutation$UnshareProfile(this._res);
+
+  TRes _res;
+
+  call({
+    Mutation$UnshareProfile$unshareProfile? unshareProfile,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> get unshareProfile =>
+      CopyWith$Mutation$UnshareProfile$unshareProfile.stub(_res);
+}
+
+const documentNodeMutationUnshareProfile = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.mutation,
+    name: NameNode(value: 'UnshareProfile'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'targetUserId')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      )
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'unshareProfile'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'targetUserId'),
+            value: VariableNode(name: NameNode(value: 'targetUserId')),
+          )
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'message'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Mutation$UnshareProfile _parserFn$Mutation$UnshareProfile(
+        Map<String, dynamic> data) =>
+    Mutation$UnshareProfile.fromJson(data);
+typedef OnMutationCompleted$Mutation$UnshareProfile = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Mutation$UnshareProfile?,
+);
+
+class Options$Mutation$UnshareProfile
+    extends graphql.MutationOptions<Mutation$UnshareProfile> {
+  Options$Mutation$UnshareProfile({
+    String? operationName,
+    required Variables$Mutation$UnshareProfile variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$UnshareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$UnshareProfile? onCompleted,
+    graphql.OnMutationUpdate<Mutation$UnshareProfile>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$UnshareProfile(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationUnshareProfile,
+          parserFn: _parserFn$Mutation$UnshareProfile,
+        );
+
+  final OnMutationCompleted$Mutation$UnshareProfile? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+class WatchOptions$Mutation$UnshareProfile
+    extends graphql.WatchQueryOptions<Mutation$UnshareProfile> {
+  WatchOptions$Mutation$UnshareProfile({
+    String? operationName,
+    required Variables$Mutation$UnshareProfile variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$UnshareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeMutationUnshareProfile,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Mutation$UnshareProfile,
+        );
+}
+
+extension ClientExtension$Mutation$UnshareProfile on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$UnshareProfile>> mutate$UnshareProfile(
+          Options$Mutation$UnshareProfile options) async =>
+      await this.mutate(options);
+  graphql.ObservableQuery<Mutation$UnshareProfile> watchMutation$UnshareProfile(
+          WatchOptions$Mutation$UnshareProfile options) =>
+      this.watchMutation(options);
+}
+
+class Mutation$UnshareProfile$HookResult {
+  Mutation$UnshareProfile$HookResult(
+    this.runMutation,
+    this.result,
+  );
+
+  final RunMutation$Mutation$UnshareProfile runMutation;
+
+  final graphql.QueryResult<Mutation$UnshareProfile> result;
+}
+
+Mutation$UnshareProfile$HookResult useMutation$UnshareProfile(
+    [WidgetOptions$Mutation$UnshareProfile? options]) {
+  final result = graphql_flutter
+      .useMutation(options ?? WidgetOptions$Mutation$UnshareProfile());
+  return Mutation$UnshareProfile$HookResult(
+    (variables, {optimisticResult, typedOptimisticResult}) =>
+        result.runMutation(
+      variables.toJson(),
+      optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+    ),
+    result.result,
+  );
+}
+
+graphql.ObservableQuery<Mutation$UnshareProfile>
+    useWatchMutation$UnshareProfile(
+            WatchOptions$Mutation$UnshareProfile options) =>
+        graphql_flutter.useWatchMutation(options);
+
+class WidgetOptions$Mutation$UnshareProfile
+    extends graphql.MutationOptions<Mutation$UnshareProfile> {
+  WidgetOptions$Mutation$UnshareProfile({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$UnshareProfile? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$UnshareProfile? onCompleted,
+    graphql.OnMutationUpdate<Mutation$UnshareProfile>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$UnshareProfile(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationUnshareProfile,
+          parserFn: _parserFn$Mutation$UnshareProfile,
+        );
+
+  final OnMutationCompleted$Mutation$UnshareProfile? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+typedef RunMutation$Mutation$UnshareProfile
+    = graphql.MultiSourceResult<Mutation$UnshareProfile> Function(
+  Variables$Mutation$UnshareProfile, {
+  Object? optimisticResult,
+  Mutation$UnshareProfile? typedOptimisticResult,
+});
+typedef Builder$Mutation$UnshareProfile = widgets.Widget Function(
+  RunMutation$Mutation$UnshareProfile,
+  graphql.QueryResult<Mutation$UnshareProfile>?,
+);
+
+class Mutation$UnshareProfile$Widget
+    extends graphql_flutter.Mutation<Mutation$UnshareProfile> {
+  Mutation$UnshareProfile$Widget({
+    widgets.Key? key,
+    WidgetOptions$Mutation$UnshareProfile? options,
+    required Builder$Mutation$UnshareProfile builder,
+  }) : super(
+          key: key,
+          options: options ?? WidgetOptions$Mutation$UnshareProfile(),
+          builder: (
+            run,
+            result,
+          ) =>
+              builder(
+            (
+              variables, {
+              optimisticResult,
+              typedOptimisticResult,
+            }) =>
+                run(
+              variables.toJson(),
+              optimisticResult:
+                  optimisticResult ?? typedOptimisticResult?.toJson(),
+            ),
+            result,
+          ),
+        );
+}
+
+class Mutation$UnshareProfile$unshareProfile {
+  Mutation$UnshareProfile$unshareProfile({
+    required this.message,
+    this.$__typename = 'UnshareProfileResponse',
+  });
+
+  factory Mutation$UnshareProfile$unshareProfile.fromJson(
+      Map<String, dynamic> json) {
+    final l$message = json['message'];
+    final l$$__typename = json['__typename'];
+    return Mutation$UnshareProfile$unshareProfile(
+      message: (l$message as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String message;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$message = message;
+    _resultData['message'] = l$message;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$message = message;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$message,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (!(other is Mutation$UnshareProfile$unshareProfile) ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$message = message;
+    final lOther$message = other.message;
+    if (l$message != lOther$message) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$UnshareProfile$unshareProfile
+    on Mutation$UnshareProfile$unshareProfile {
+  CopyWith$Mutation$UnshareProfile$unshareProfile<
+          Mutation$UnshareProfile$unshareProfile>
+      get copyWith => CopyWith$Mutation$UnshareProfile$unshareProfile(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> {
+  factory CopyWith$Mutation$UnshareProfile$unshareProfile(
+    Mutation$UnshareProfile$unshareProfile instance,
+    TRes Function(Mutation$UnshareProfile$unshareProfile) then,
+  ) = _CopyWithImpl$Mutation$UnshareProfile$unshareProfile;
+
+  factory CopyWith$Mutation$UnshareProfile$unshareProfile.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$UnshareProfile$unshareProfile;
+
+  TRes call({
+    String? message,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Mutation$UnshareProfile$unshareProfile<TRes>
+    implements CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> {
+  _CopyWithImpl$Mutation$UnshareProfile$unshareProfile(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$UnshareProfile$unshareProfile _instance;
+
+  final TRes Function(Mutation$UnshareProfile$unshareProfile) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? message = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$UnshareProfile$unshareProfile(
+        message: message == _undefined || message == null
+            ? _instance.message
+            : (message as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Mutation$UnshareProfile$unshareProfile<TRes>
+    implements CopyWith$Mutation$UnshareProfile$unshareProfile<TRes> {
+  _CopyWithStubImpl$Mutation$UnshareProfile$unshareProfile(this._res);
+
+  TRes _res;
+
+  call({
+    String? message,
+    String? $__typename,
+  }) =>
+      _res;
+}

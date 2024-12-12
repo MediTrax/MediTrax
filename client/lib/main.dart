@@ -114,7 +114,8 @@ class RouterNotifier extends ChangeNotifier {
       return 2;
     } else if (location.startsWith('/medical-records')) {
       return 3;
-    } else if (location.startsWith('/profile')) {
+    } else if (location.startsWith('/profile') ||
+        location.startsWith('/profile-sharing')) {
       return 4;
     }
     // Check if the route is a sub-route of any main routes
@@ -179,6 +180,10 @@ class RouterNotifier extends ChangeNotifier {
             GoRoute(
               path: '/diet-management',
               builder: (context, state) => const DietManagementScreen(),
+            ),
+            GoRoute(
+              path: '/profile-sharing',
+              builder: (context, state) => const ProfileSharingScreen(),
             ),
             GoRoute(
               path: '/family-collaboration',
