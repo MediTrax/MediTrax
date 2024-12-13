@@ -6,22 +6,22 @@ part of 'medication_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$medicationNotifierHash() =>
-    r'3710f15dd4cbea90cbc14ca2c5af66db5f025f4a';
+String _$medicationProviderHash() =>
+    r'4310a7937f413ceb3915eddfae06a076d77e6e70';
 
-/// See also [MedicationNotifier].
-@ProviderFor(MedicationNotifier)
-final medicationNotifierProvider = AutoDisposeAsyncNotifierProvider<
-    MedicationNotifier, List<Medication>>.internal(
-  MedicationNotifier.new,
-  name: r'medicationNotifierProvider',
+/// See also [MedicationProvider].
+@ProviderFor(MedicationProvider)
+final medicationProviderProvider = AutoDisposeAsyncNotifierProvider<
+    MedicationProvider, List<Medication>>.internal(
+  MedicationProvider.new,
+  name: r'medicationProviderProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$medicationNotifierHash,
+      : _$medicationProviderHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$MedicationNotifier = AutoDisposeAsyncNotifier<List<Medication>>;
+typedef _$MedicationProvider = AutoDisposeAsyncNotifier<List<Medication>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

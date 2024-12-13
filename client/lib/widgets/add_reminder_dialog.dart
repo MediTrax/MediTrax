@@ -67,6 +67,9 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
               initialTime: _selectedTimes[index],
             );
             if (picked != null && picked != _selectedTimes[index]) {
+              print('\n=== Time Picker Debug Info ===');
+              print('Selected time: ${picked.format(context)}');
+              print('Hour: ${picked.hour}, Minute: ${picked.minute}');
               setState(() {
                 _selectedTimes[index] = picked;
               });
@@ -161,9 +164,16 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
             if (_formKey.currentState!.validate()) {
               bool allSuccess = true;
               
+              print('\n=== Add Reminder Dialog Debug Info ===');
+              print('Selected Date: $_selectedDate');
+              print('Selected Times:');
+              for (final time in _selectedTimes) {
+                print('- Time of Day: ${time.hour}:${time.minute}');
+              }
+              
               // Add a reminder for each selected time
               for (final time in _selectedTimes) {
-                // Create DateTime in local timezone
+                // Create DateTime in local timezone and preserve it
                 final reminderTime = DateTime(
                   _selectedDate.year,
                   _selectedDate.month,
@@ -172,19 +182,32 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                   time.minute,
                 );
 
-                // Convert to UTC for storage
-                final utcReminderTime = reminderTime.toUtc();
+                print('\nCreating reminder for time slot:');
+                print('TimeOfDay: ${time.format(context)}');
+                print('Selected hour: ${time.hour}, minute: ${time.minute}');
+                print('Created DateTime: $reminderTime');
+
+                // Format without Z
+                final formattedTime = '${reminderTime.year}-'
+                    '${reminderTime.month.toString().padLeft(2, '0')}-'
+                    '${reminderTime.day.toString().padLeft(2, '0')}T'
+                    '${time.hour.toString().padLeft(2, '0')}:'
+                    '${time.minute.toString().padLeft(2, '0')}:00.000';
                 
+                print('Formatted without Z: $formattedTime');
+
                 final success = await ref.read(medicationReminderProvider.notifier).addReminder(
                   medicationId: _selectedMedicationId!,
-                  reminderTime: utcReminderTime.toIso8601String(),
+                  reminderTime: formattedTime,
                 );
                 
                 if (!success) {
+                  print('Failed to add reminder for time: ${time.format(context)}');
                   allSuccess = false;
                   break;
                 }
               }
+              print('===============================\n');
 
               if (allSuccess) {
                 await ref.read(medicationReminderProvider.notifier).fetchReminders();

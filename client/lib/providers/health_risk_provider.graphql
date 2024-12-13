@@ -1,23 +1,31 @@
-query GetHealthRiskAssessment() {
-  getHealthRiskAssessment() {
+query GetHealthRiskAssessment {
+  getHealthRiskAssessment {
     assessmentId
-    questionnaireData
+    questionnaireData {
+      questionId
+      choice
+      answer
+    }
     riskLevel
     recommendations
     createdAt
   }
 }
 
-mutation CreateHealthRiskAssessment($questionnaireData: String!) {
-  createHealthRiskAssessment(questionnaireData: $questionnaireData) {
-    assessmentId
-    riskLevel
-    recommendations
+query GetHealthRiskAssessmentQuestion {
+  getHealthRiskAssessmentQuestion {
+    questionnaireId
+    data {
+      questionId
+      question
+      questionType
+      choices
+    }
   }
 }
 
-mutation UpdateHealthRiskAssessment($assessmentId: String!, $questionnaireData: String!) {
-  updateHealthRiskAssessment(assessmentId: $assessmentId, questionnaireData: $questionnaireData) {
+mutation EvaluateHealthRiskAssessment($filledQuestionnaire: FilledQuestionnaire!) {
+  evaluateHealthRiskAssessment(filledQuestionnaire: $filledQuestionnaire) {
     assessmentId
     riskLevel
     recommendations

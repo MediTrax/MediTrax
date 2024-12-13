@@ -52,4 +52,8 @@ class Medication extends HiveObject with _$Medication {
           : DateTime.now(),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
