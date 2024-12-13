@@ -2,48 +2,47 @@
 
 package model
 
+import (
+	"time"
+)
+
 type AchievementBadge struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IconURL     string `json:"iconUrl"`
-	CreatedAt   string `json:"createdAt"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	IconURL     string    `json:"iconUrl"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type AchievementBadgeDetail struct {
-	BadgeID     string `json:"badgeId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IconURL     string `json:"iconUrl"`
-	CreatedAt   string `json:"createdAt"`
+	BadgeID     string    `json:"badgeId"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	IconURL     string    `json:"iconUrl"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type ActivityLog struct {
-	ID            string `json:"id"`
-	UserID        string `json:"userId"`
-	ActivityType  string `json:"activityType"`
-	Description   string `json:"description"`
-	ChangedObject string `json:"changedObject"`
-	ChangedField  string `json:"changedField"`
-	From          string `json:"from"`
-	To            string `json:"to"`
-	Timestamp     string `json:"timestamp"`
+	ID            string    `json:"id"`
+	UserID        string    `json:"userId"`
+	ActivityType  string    `json:"activityType"`
+	Description   string    `json:"description"`
+	ChangedObject string    `json:"changedObject"`
+	ChangedField  string    `json:"changedField"`
+	From          string    `json:"from"`
+	To            string    `json:"to"`
+	Timestamp     time.Time `json:"timestamp"`
 }
 
 type ActivityLogDetail struct {
-	LogID         string `json:"logId"`
-	ActivityType  string `json:"activityType"`
-	Description   string `json:"description"`
-	ChangedObject string `json:"changedObject"`
-	ChangedField  string `json:"changedField"`
-	From          string `json:"from"`
-	To            string `json:"to"`
-	Timestamp     string `json:"timestamp"`
-}
-
-type AddFamilyMemberResponse struct {
-	MemberID string `json:"memberId"`
-	Message  string `json:"message"`
+	LogID         string    `json:"logId"`
+	ActivityType  string    `json:"activityType"`
+	Description   string    `json:"description"`
+	ChangedObject string    `json:"changedObject"`
+	ChangedField  string    `json:"changedField"`
+	From          string    `json:"from"`
+	To            string    `json:"to"`
+	Timestamp     time.Time `json:"timestamp"`
 }
 
 type AddHealthMetricResponse struct {
@@ -86,10 +85,6 @@ type CreateUserResponse struct {
 	Message string `json:"message"`
 }
 
-type DeleteFamilyMemberResponse struct {
-	Message string `json:"message"`
-}
-
 type DeleteHealthMetricResponse struct {
 	Message string `json:"message"`
 }
@@ -120,24 +115,6 @@ type EvaluateHealthRiskAssessmentResponse struct {
 	Recommendations string `json:"recommendations"`
 }
 
-type FamilyMember struct {
-	ID            string `json:"id"`
-	UserID        string `json:"userId"`
-	PatientUserID string `json:"patient_userId"`
-	Relationship  string `json:"relationship"`
-	AccessLevel   int    `json:"accessLevel"`
-	CreatedAt     string `json:"createdAt"`
-}
-
-type FamilyMemberDetail struct {
-	MemberID     string `json:"memberId"`
-	FamilyID     string `json:"familyId"`
-	Name         string `json:"name"`
-	PhoneNumber  string `json:"phoneNumber"`
-	Relationship string `json:"relationship"`
-	AccessLevel  int    `json:"accessLevel"`
-}
-
 type FilledQuestionnaire struct {
 	QuestionnaireID int         `json:"questionnaireId"`
 	Responses       []*Response `json:"responses"`
@@ -160,21 +137,21 @@ type FoodSpecs struct {
 }
 
 type HealthMetric struct {
-	ID         string  `json:"id"`
-	UserID     string  `json:"userId"`
-	MetricType string  `json:"metricType"`
-	Value      float64 `json:"value"`
-	Unit       string  `json:"unit"`
-	RecordedAt string  `json:"recordedAt"`
-	CreatedAt  string  `json:"createdAt"`
+	ID         string    `json:"id"`
+	UserID     string    `json:"userId"`
+	MetricType string    `json:"metricType"`
+	Value      float64   `json:"value"`
+	Unit       string    `json:"unit"`
+	RecordedAt time.Time `json:"recordedAt"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type HealthMetricDetail struct {
-	MetricID   string  `json:"metricId"`
-	MetricType string  `json:"metricType"`
-	Value      float64 `json:"value"`
-	Unit       string  `json:"unit"`
-	RecordedAt string  `json:"recordedAt"`
+	MetricID   string    `json:"metricId"`
+	MetricType string    `json:"metricType"`
+	Value      float64   `json:"value"`
+	Unit       string    `json:"unit"`
+	RecordedAt time.Time `json:"recordedAt"`
 }
 
 type HealthResponse struct {
@@ -189,7 +166,7 @@ type HealthRiskAssessment struct {
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
 	RiskLevel         string            `json:"riskLevel"`
 	Recommendations   string            `json:"recommendations"`
-	CreatedAt         string            `json:"createdAt"`
+	CreatedAt         time.Time         `json:"createdAt"`
 }
 
 type HealthRiskAssessmentDetailResponse struct {
@@ -197,7 +174,7 @@ type HealthRiskAssessmentDetailResponse struct {
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
 	RiskLevel         string            `json:"riskLevel"`
 	Recommendations   string            `json:"recommendations"`
-	CreatedAt         string            `json:"createdAt"`
+	CreatedAt         time.Time         `json:"createdAt"`
 }
 
 type LoginUserResponse struct {
@@ -207,31 +184,31 @@ type LoginUserResponse struct {
 }
 
 type MedicalRecord struct {
-	ID         string `json:"id"`
-	UserID     string `json:"userId"`
-	RecordType string `json:"recordType"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"createdAt"`
-	UpdatedAt  string `json:"updatedAt"`
+	ID         string    `json:"id"`
+	UserID     string    `json:"userId"`
+	RecordType string    `json:"recordType"`
+	Content    string    `json:"content"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type MedicalRecordDetail struct {
-	RecordID   string `json:"recordId"`
-	RecordType string `json:"recordType"`
-	Content    string `json:"content"`
-	CreatedAt  string `json:"createdAt"`
+	RecordID   string    `json:"recordId"`
+	RecordType string    `json:"recordType"`
+	Content    string    `json:"content"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type Medication struct {
-	ID        string  `json:"id"`
-	Name      string  `json:"name"`
-	Dosage    float64 `json:"dosage"`
-	Unit      string  `json:"unit"`
-	Frequency string  `json:"frequency"`
-	Inventory float64 `json:"inventory"`
-	UserID    string  `json:"userId"`
-	CreatedAt string  `json:"createdAt"`
-	UpdatedAt string  `json:"updatedAt"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Dosage    float64   `json:"dosage"`
+	Unit      string    `json:"unit"`
+	Frequency string    `json:"frequency"`
+	Inventory float64   `json:"inventory"`
+	UserID    string    `json:"userId"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type MedicationDetail struct {
@@ -244,45 +221,37 @@ type MedicationDetail struct {
 }
 
 type MedicationReminder struct {
-	ID           string `json:"id"`
-	MedicationID string `json:"medicationId"`
-	UserID       string `json:"userId"`
-	ReminderTime string `json:"reminderTime"`
-	IsTaken      bool   `json:"isTaken"`
-	CreatedAt    string `json:"createdAt"`
+	ID           string    `json:"id"`
+	MedicationID string    `json:"medicationId"`
+	UserID       string    `json:"userId"`
+	ReminderTime time.Time `json:"reminderTime"`
+	IsTaken      bool      `json:"isTaken"`
+	CreatedAt    time.Time `json:"createdAt"`
 }
 
 type MedicationReminderDetail struct {
-	ReminderID   string `json:"reminderId"`
-	MedicationID string `json:"medicationId"`
-	ReminderTime string `json:"reminderTime"`
-	IsTaken      bool   `json:"isTaken"`
+	ReminderID   string    `json:"reminderId"`
+	MedicationID string    `json:"medicationId"`
+	ReminderTime time.Time `json:"reminderTime"`
+	IsTaken      bool      `json:"isTaken"`
 }
 
 type Mutation struct {
 }
 
 type PasswordChange struct {
-	ID        string `json:"id"`
-	User      string `json:"user"`
-	Token     string `json:"token"`
-	CreatedAt string `json:"createdAt"`
-}
-
-type PatientDetail struct {
-	PatientID    string `json:"patientId"`
-	Name         string `json:"name"`
-	PhoneNumber  string `json:"phoneNumber"`
-	Relationship string `json:"relationship"`
-	AccessLevel  int    `json:"accessLevel"`
+	ID        string    `json:"id"`
+	User      string    `json:"user"`
+	Token     string    `json:"token"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type ProfileDetail struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phoneNumber"`
-	Role        string `json:"role"`
-	CreatedAt   string `json:"createdAt"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	PhoneNumber string    `json:"phoneNumber"`
+	Role        string    `json:"role"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Query struct {
@@ -327,41 +296,36 @@ type TakeMedicationResponse struct {
 }
 
 type Token struct {
-	ID                 string `json:"id"`
-	User               string `json:"user"`
-	AccessToken        string `json:"accessToken"`
-	RefreshToken       string `json:"refreshToken"`
-	AccessTokenExpiry  string `json:"accessTokenExpiry"`
-	RefreshTokenExpiry string `json:"refreshTokenExpiry"`
-	Device             string `json:"device"`
-	CreatedAt          string `json:"createdAt"`
-	UpdatedAt          string `json:"updatedAt"`
+	ID                 string    `json:"id"`
+	User               string    `json:"user"`
+	AccessToken        string    `json:"accessToken"`
+	RefreshToken       string    `json:"refreshToken"`
+	AccessTokenExpiry  time.Time `json:"accessTokenExpiry"`
+	RefreshTokenExpiry time.Time `json:"refreshTokenExpiry"`
+	Device             string    `json:"device"`
+	CreatedAt          time.Time `json:"createdAt"`
+	UpdatedAt          time.Time `json:"updatedAt"`
 }
 
 type TreatmentSchedule struct {
-	ID            string  `json:"id"`
-	UserID        string  `json:"userId"`
-	TreatmentType string  `json:"treatmentType"`
-	ScheduledTime string  `json:"scheduledTime"`
-	Location      string  `json:"location"`
-	Notes         *string `json:"notes,omitempty"`
+	ID            string    `json:"id"`
+	UserID        string    `json:"userId"`
+	TreatmentType string    `json:"treatmentType"`
+	ScheduledTime time.Time `json:"scheduledTime"`
+	Location      string    `json:"location"`
+	Notes         *string   `json:"notes,omitempty"`
 }
 
 type TreatmentScheduleDetail struct {
-	ScheduleID    string  `json:"scheduleId"`
-	TreatmentType string  `json:"treatmentType"`
-	ScheduledTime string  `json:"scheduledTime"`
-	Location      string  `json:"location"`
-	Notes         *string `json:"notes,omitempty"`
+	ScheduleID    string    `json:"scheduleId"`
+	TreatmentType string    `json:"treatmentType"`
+	ScheduledTime time.Time `json:"scheduledTime"`
+	Location      string    `json:"location"`
+	Notes         *string   `json:"notes,omitempty"`
 }
 
 type UnshareProfileResponse struct {
 	Message string `json:"message"`
-}
-
-type UpdateFamilyMemberResponse struct {
-	MemberID string `json:"memberId"`
-	Message  string `json:"message"`
 }
 
 type UpdateHealthMetricResponse struct {
@@ -395,55 +359,55 @@ type UpdateUserResponse struct {
 }
 
 type User struct {
-	ID          string  `json:"id"`
-	PhoneNumber string  `json:"phoneNumber"`
-	Password    string  `json:"password"`
-	Name        string  `json:"name"`
-	Points      float64 `json:"points"`
-	CreatedAt   string  `json:"createdAt"`
-	UpdatedAt   string  `json:"updatedAt"`
-	LastLogin   string  `json:"lastLogin"`
-	Status      int     `json:"status"`
-	Role        string  `json:"role"`
+	ID          string    `json:"id"`
+	PhoneNumber string    `json:"phoneNumber"`
+	Password    string    `json:"password"`
+	Name        string    `json:"name"`
+	Points      float64   `json:"points"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	LastLogin   time.Time `json:"lastLogin"`
+	Status      int       `json:"status"`
+	Role        string    `json:"role"`
 }
 
 type UserAchievement struct {
-	ID        string `json:"id"`
-	UserID    string `json:"userId"`
-	BadgeID   string `json:"badgeId"`
-	EarnedAt  string `json:"earnedAt"`
-	CreatedAt string `json:"createdAt"`
+	ID        string    `json:"id"`
+	UserID    string    `json:"userId"`
+	BadgeID   string    `json:"badgeId"`
+	EarnedAt  time.Time `json:"earnedAt"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type UserAchievementDetail struct {
-	UserAchievementID string `json:"userAchievementId"`
-	BadgeID           string `json:"badgeId"`
-	EarnedAt          string `json:"earnedAt"`
+	UserAchievementID string    `json:"userAchievementId"`
+	BadgeID           string    `json:"badgeId"`
+	EarnedAt          time.Time `json:"earnedAt"`
 }
 
 type UserDetailResponse struct {
-	UserID      string  `json:"userId"`
-	PhoneNumber string  `json:"phoneNumber"`
-	Name        string  `json:"name"`
-	Points      float64 `json:"points"`
-	Role        string  `json:"role"`
-	CreatedAt   string  `json:"createdAt"`
-	LastLogin   *string `json:"lastLogin,omitempty"`
+	UserID      string     `json:"userId"`
+	PhoneNumber string     `json:"phoneNumber"`
+	Name        string     `json:"name"`
+	Points      float64    `json:"points"`
+	Role        string     `json:"role"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	LastLogin   *time.Time `json:"lastLogin,omitempty"`
 }
 
 type UserPointRecord struct {
-	ID           string  `json:"id"`
-	UserID       string  `json:"userId"`
-	PointsEarned float64 `json:"pointsEarned"`
-	Reason       string  `json:"reason"`
-	EarnedAt     string  `json:"earnedAt"`
+	ID           string    `json:"id"`
+	UserID       string    `json:"userId"`
+	PointsEarned float64   `json:"pointsEarned"`
+	Reason       string    `json:"reason"`
+	EarnedAt     time.Time `json:"earnedAt"`
 }
 
 type UserPointRecordDetail struct {
-	RecordID     string  `json:"recordId"`
-	PointsEarned float64 `json:"pointsEarned"`
-	Reason       string  `json:"reason"`
-	EarnedAt     string  `json:"earnedAt"`
+	RecordID     string    `json:"recordId"`
+	PointsEarned float64   `json:"pointsEarned"`
+	Reason       string    `json:"reason"`
+	EarnedAt     time.Time `json:"earnedAt"`
 }
 
 type EarnPointsResponse struct {

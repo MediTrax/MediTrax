@@ -21,7 +21,22 @@ func MarshalDateTime(t time.Time) graphql.Marshaler {
 
 func UnmarshalDateTime(v interface{}) (time.Time, error) {
 	if tmpStr, ok := v.(string); ok {
-		return time.Parse("2006-01-02T15:04:05.000", tmpStr)
+		result, err := time.Parse("2006-01-02T15:04:05.000", tmpStr)
+		if err == nil {
+			return result, err
+		}
+
+		result, err = time.Parse("2006-01-02T15:04:05.000Z", tmpStr)
+		if err == nil {
+			return result, err
+		}
+
+		result, err = time.Parse(time.RFC3339, tmpStr)
+		if err == nil {
+			return result, err
+		}
+
+		return result, err
 	}
-	return time.Time{}, errors.New("time should be RFC3339Nano formatted string")
+	return time.Time{}, errors.New("time should follow the proper format")
 }

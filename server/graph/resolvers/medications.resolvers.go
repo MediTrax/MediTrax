@@ -7,7 +7,6 @@ package graph
 import (
 	"context"
 	"fmt"
-	"meditrax/graph/custom"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
@@ -61,8 +60,8 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 		frequency=$frequency,
 		inventory=$inventory,
 		userId=$userId,
-		createdAt=time::now(),
-		updatedAt=time::now();
+		createdAt=<datetime>$now,
+		updatedAt=<datetime>$now;
 		`,
 		map[string]interface{}{
 			"name":      name,
@@ -71,6 +70,7 @@ func (r *mutationResolver) AddMedication(ctx context.Context, name string, dosag
 			"frequency": frequency,
 			"inventory": inventory,
 			"userId":    user.ID,
+			"now":       time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -268,7 +268,7 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 }
 
 // CreateMedicationReminder is the resolver for the createMedicationReminder field.
-func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error) {
+func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime time.Time) (*model.CreateMedicationReminderResponse, error) {
 	// check legality of both user and medication id
 	user := middlewares.ForContext(ctx)
 	if user == nil {
@@ -288,11 +288,13 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		},
 	)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return nil, fmt.Errorf("medication query failed: %s", err.Error())
 	}
 	medications, err := surrealdb.SmartUnmarshal[[]model.Medication](result, nil)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return nil, fmt.Errorf("unmarshaling of medication query results failed: %s", err.Error())
 	}
 	if len(medications) < 1 {
 		return nil, fmt.Errorf("invalid medication id or medication id not associated with user")
@@ -301,7 +303,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 	// query database for medications with the same reminder time
 	result, err = database.DB.Query(
 		`SELECT * FROM medication_reminder 
-		WHERE medicationId=$medicationId AND userId=$userId AND reminderTime=$reminderTime;`,
+		WHERE medicationId=$medicationId AND userId=$userId AND reminderTime=<datetime>$reminderTime;`,
 		map[string]interface{}{
 			"medicationId": medicationID,
 			"userId":       user.ID,
@@ -309,11 +311,12 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		},
 	)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return nil, fmt.Errorf("reminder query results failed: %s", err.Error())
 	}
 	reminders, err := surrealdb.SmartUnmarshal[[]model.MedicationReminder](result, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshaling of reminder query results failed: %s", err.Error())
 	}
 	if len(reminders) > 0 {
 		return nil, fmt.Errorf("identical medication reminder for the user already exists")
@@ -324,24 +327,26 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 		`CREATE ONLY medication_reminder:ulid()
 		SET medicationId=$medicationId,
 		userId=$userId,
-		reminderTime=$reminderTime,
+		reminderTime=<datetime>$reminderTime,
 		isTaken=false,
-		createdAt=time::now()
+		createdAt=<datetime>$now;
 		`,
 		map[string]interface{}{
 			"medicationId": medicationID,
 			"userId":       user.ID,
-			"reminderTime": reminderTime,
+			"reminderTime": reminderTime.UTC(),
+			"now":          time.Now().UTC(),
 		},
 	)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return nil, fmt.Errorf("create query failed: %s", err.Error())
 	}
 
 	// unmarshal the results of the CREATE query
 	newReminder, err := surrealdb.SmartUnmarshal[model.MedicationReminder](result, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshaling of create query results failed: %s", err.Error())
 	}
 
 	// create response
@@ -353,7 +358,7 @@ func (r *mutationResolver) CreateMedicationReminder(ctx context.Context, medicat
 }
 
 // UpdateMedicationReminder is the resolver for the updateMedicationReminder field.
-func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error) {
+func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *time.Time, isTaken *bool) (*model.UpdateMedicationReminderResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -453,11 +458,11 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 	updateFields := []string{}
 	if reminderTime != nil {
 		updateValues["reminderTime"] = *reminderTime
-		updateFields = append(updateFields, "reminderTime = $reminderTime")
+		updateFields = append(updateFields, "reminderTime = <datetime>$reminderTime")
 		change := utils.ChangeLog{
 			Field: "reminderTime",
-			From:  remBefore.ReminderTime,
-			To:    *reminderTime,
+			From:  remBefore.ReminderTime.Format(time.RFC3339Nano),
+			To:    (*reminderTime).Format(time.RFC3339Nano),
 		}
 		changeLog = append(changeLog, change)
 	}
@@ -592,19 +597,15 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 
 	/* Update the reminder itself */
 	// calculate next reminder time
-	current_time, err := custom.UnmarshalDateTime(reminder.ReminderTime)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshaling reminder time: %e", err)
-	}
 	_, days, err := utils.FrequencyParser(medications[0].Frequency)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing frequency of medication: %e", err)
 	}
-	next_reminder_time := time.Time.Add(current_time, time.Hour*time.Duration(24*days))
+	next_reminder_time := time.Time.Add(reminder.ReminderTime, time.Hour*time.Duration(24*days))
 
 	// update reminder
 	_, err = database.DB.Query(`
-		UPDATE $id SET reminderTime=$reminderTime;`,
+		UPDATE $id SET reminderTime=<datetime>$reminderTime;`,
 		map[string]interface{}{
 			"id":           *reminderID,
 			"reminderTime": next_reminder_time.Format("2006-01-02T15:04:05.000"),
@@ -618,7 +619,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 		[]utils.ChangeLog{
 			{
 				Field: "reminderTime",
-				From:  reminder.ReminderTime,
+				From:  reminder.ReminderTime.Format(time.RFC3339Nano),
 				To:    next_reminder_time.Format("2006-01-02T15:04:05.000"),
 			},
 		})
@@ -676,7 +677,7 @@ func (r *mutationResolver) DeleteMedicationReminder(ctx context.Context, reminde
 }
 
 // CreateTreatmentSchedule is the resolver for the createTreatmentSchedule field.
-func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
+func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime time.Time, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error) {
 	// 验证用户权限
 	user := middlewares.ForContext(ctx)
 	if user == nil {
@@ -689,18 +690,19 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 	result, err := database.DB.Query(
 		`CREATE ONLY treatment_schedule:ulid()
         SET treatmentType=$treatmentType,
-        scheduledTime=$scheduledTime,
+        scheduledTime=<datetime>$scheduledTime,
         location=$location,
         notes=$notes,
         userId=$userId,
-        createdAt=time::now(),
-        updatedAt=time::now();`,
+        createdAt=<datetime>$now,
+        updatedAt=<datetime>$now;`,
 		map[string]interface{}{
 			"treatmentType": treatmentType,
 			"scheduledTime": scheduledTime,
 			"location":      location,
 			"notes":         notes,
 			"userId":        user.ID,
+			"now":           time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -721,7 +723,7 @@ func (r *mutationResolver) CreateTreatmentSchedule(ctx context.Context, treatmen
 }
 
 // UpdateTreatmentSchedule is the resolver for the updateTreatmentSchedule field.
-func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
+func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *time.Time, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -767,11 +769,11 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 	if scheduledTime != nil {
 		updateValues["scheduledTime"] = *scheduledTime
-		updateFields = append(updateFields, "scheduledTime = $scheduledTime")
+		updateFields = append(updateFields, "scheduledTime = <datetime>$scheduledTime")
 		change := utils.ChangeLog{
 			Field: "scheduledTime",
-			From:  original.ScheduledTime,
-			To:    *scheduledTime,
+			From:  original.ScheduledTime.Format(time.RFC3339Nano),
+			To:    (*scheduledTime).Format(time.RFC3339Nano),
 		}
 		changeLog = append(changeLog, change)
 	}
@@ -798,7 +800,8 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 		}
 		changeLog = append(changeLog, change)
 	}
-	updateFields = append(updateFields, "updatedAt = time::now()")
+	updateFields = append(updateFields, "updatedAt = <datetime>$now")
+	updateValues["now"] = time.Now().UTC()
 
 	// 构建并执行更新查询
 	query := fmt.Sprintf("UPDATE $id SET %s WHERE userId = $userId;", strings.Join(updateFields, ", "))

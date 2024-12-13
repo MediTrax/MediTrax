@@ -7,11 +7,13 @@ package graph
 import (
 	"context"
 	"fmt"
+	"meditrax/graph/custom"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
+	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
@@ -84,12 +86,14 @@ func (r *mutationResolver) CreateUser(ctx context.Context, phoneNumber string, p
 		password=crypto::argon2::generate($password),
 		role=$role,
 		points=0.0,
-		createdAt=time::now(),
-		updatedAt=time::now();`, map[string]interface{}{
+		createdAt=<datetime>$now,
+		updatedAt=<datetime>$now;
+		`, map[string]interface{}{
 			"username":    username,
 			"phoneNumber": phoneNumber,
 			"password":    password,
 			"role":        role,
+			"now":         time.Now().UTC(),
 		})
 	if err != nil {
 		return nil, err
@@ -145,8 +149,9 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 	}
 
 	_, err = database.DB.Query(
-		`UPDATE $userId SET lastLogin=time::now();`, map[string]interface{}{
+		`UPDATE $userId SET lastLogin=<datetime>$now;`, map[string]interface{}{
 			"userId": user.ID,
+			"now":    time.Now().UTC(),
 		})
 	if err != nil {
 		return nil, err
@@ -259,27 +264,15 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 			return nil, fmt.Errorf("failed to delete related data from table %s: %w", tableName, err)
 		}
 	}
-	// delete family member entries where user is the patient.
+	// delete shared profile entries
 	_, err = database.DB.Query(
-		`DELETE family_member WHERE patient_userId = $id;`,
+		`DELETE profile_access WHERE to = $id OR from = $id;`,
 		map[string]interface{}{
 			"id": user.ID,
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to delete from table family_member where user is patient")
-	}
-
-	// detete family members that relate to this user
-	_, err = database.DB.Query(
-		`DELETE $table_name WHERE relatedUserId = $id;`,
-		map[string]interface{}{
-			"table_name": "family_member",
-			"id":         user.ID,
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to delete related data from table family member related to user: %w", err)
+		return nil, fmt.Errorf("failed to delete from table profile_access where user is patient")
 	}
 
 	// 创建响应
@@ -412,19 +405,20 @@ func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string,
                 out = $to,
                 accessLevel = $accessLevel,
                 remarks = $remarks,
-                createdAt = time::now();
+                createdAt = <datetime>$now;
         END;
     `, map[string]interface{}{
 		"from":        user.ID,
 		"to":          targetUser.ID,
 		"accessLevel": accessLevel,
 		"remarks":     remarks,
+		"now":         time.Now().UTC(),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("profile shared successfully with", targetUser.Name, result)
+	// fmt.Println("profile shared successfully with", targetUser.Name, result)
 	return &model.ShareProfileResponse{
 		Message: fmt.Sprintf("Profile shared successfully with %s", targetUser.Name),
 	}, nil
@@ -482,6 +476,8 @@ func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail
 		return nil, fmt.Errorf("access denied")
 	}
 
+	// println("getting all profiles shares with the current user...")
+
 	// Get all profiles shared with the current user (incoming edges)
 	result, err := database.DB.Query(`
         SELECT in.* FROM profile_access 
@@ -513,12 +509,17 @@ func (r *queryResolver) GetProfiles(ctx context.Context) ([]*model.ProfileDetail
 	// Add all profiles shared with the current user
 	for _, result := range results {
 		user := result["in"].(map[string]interface{})
+		createdAt, err := custom.UnmarshalDateTime(user["createdAt"].(string))
+		if err != nil {
+			println("there was an error unmarshaling createdAt, skipping: %s", err.Error())
+			continue
+		}
 		profiles = append(profiles, &model.ProfileDetail{
 			ID:          user["id"].(string),
 			Name:        user["name"].(string),
 			PhoneNumber: user["phoneNumber"].(string),
 			Role:        user["role"].(string),
-			CreatedAt:   user["createdAt"].(string),
+			CreatedAt:   createdAt,
 		})
 	}
 
@@ -563,12 +564,17 @@ func (r *queryResolver) GetSharedProfiles(ctx context.Context) ([]*model.Profile
 	// Add all profiles shared with the current user
 	for _, result := range results {
 		user := result["out"].(map[string]interface{})
+		createdAt, err := custom.UnmarshalDateTime(user["createdAt"].(string))
+		if err != nil {
+			println("there was an error unmarshaling createdAt, skipping: %s", err.Error())
+			continue
+		}
 		profiles = append(profiles, &model.ProfileDetail{
 			ID:          user["id"].(string),
 			Name:        user["name"].(string),
 			PhoneNumber: user["phoneNumber"].(string),
 			Role:        user["role"].(string),
-			CreatedAt:   user["createdAt"].(string),
+			CreatedAt:   createdAt,
 		})
 	}
 
@@ -630,7 +636,7 @@ func (r *queryResolver) GetSharedMedications(ctx context.Context, patientID stri
 }
 
 // GetSharedHealthMetrics is the resolver for the getSharedHealthMetrics field.
-func (r *queryResolver) GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
+func (r *queryResolver) GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *time.Time, endDate *time.Time, metricType *string) ([]*model.HealthMetricDetail, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")

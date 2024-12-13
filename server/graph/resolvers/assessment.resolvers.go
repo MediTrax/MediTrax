@@ -34,13 +34,14 @@ func (r *mutationResolver) EvaluateHealthRiskAssessment(ctx context.Context, fil
 		questionnaireData=$questionnaireData,
 		riskLevel=$riskLevel,
 		recommendations=$recommendations,
-		createdAt=time::now();
+		createdAt=<datetime>$now;
 		`,
 		map[string]interface{}{
 			"userId":            user.ID,
 			"questionnaireData": filledQuestionnaire.Responses,
 			"riskLevel":         riskLevel,
 			"recommendations":   recommendations,
+			"now":               time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -126,11 +127,11 @@ func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*m
 		SET
 		questionnaireId=$questionnaireId,
 		data=$data,
-		createdAt=time::now();`,
+		createdAt=$createdAt;`,
 		map[string]interface{}{
 			"questionnaire_id": questionnaireId,
 			"data":             questions,
-			"createdAt":        time.Now(),
+			"createdAt":        time.Now().UTC(),
 		},
 	)
 	if err != nil {
