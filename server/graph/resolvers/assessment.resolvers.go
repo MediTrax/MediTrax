@@ -112,13 +112,14 @@ func (r *queryResolver) GetHealthRiskAssessmentQuestion(ctx context.Context) (*m
 		{QuestionID: 1, Question: "您是否有高血压病史？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 2, Question: "您是否有糖尿病病史？", QuestionType: 0, Choices: []string{"是", "否"}},
 		{QuestionID: 3, Question: "您是否有家族肾病史？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 4, Question: "您的年龄是多少？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 5, Question: "您是否有水肿、尿频、尿急等排尿异常症状？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 6, Question: "您的体重是否过重（BMI大于25）？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 7, Question: "您是否有长期使用肾毒性药物的历史？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 8, Question: "您最近一次的尿检结果是否显示尿蛋白或血尿？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 9, Question: "您是否经常感到疲劳、虚弱？", QuestionType: 0, Choices: []string{"是", "否"}},
-		{QuestionID: 10, Question: "您是否有过肾功能衰竭或其他严重肾脏问题的诊断记录？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 4, Question: "您的年龄为", QuestionType: 3, Choices: []string{}},
+		{QuestionID: 5, Question: "您的休息情况是否正常？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 6, Question: "您是否有水肿、尿频、尿急等排尿异常症状？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 7, Question: "您的体重是否过重（BMI大于25）？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 8, Question: "您是否有长期使用肾毒性药物的历史？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 9, Question: "您最近一次的尿检结果是否显示尿蛋白或血尿？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 10, Question: "您是否经常感到疲劳、虚弱？", QuestionType: 0, Choices: []string{"是", "否"}},
+		{QuestionID: 11, Question: "您是否有过肾功能衰竭或其他严重肾脏问题的诊断记录？", QuestionType: 0, Choices: []string{"是", "否"}},
 	}
 
 	result, err := database.DB.Query(
