@@ -13,7 +13,7 @@ import (
 
 var UserRelatedTables = []string{"user_achievement", "point_record", "health_risk_assessment",
 	"medication", "medication_reminder", "treatment_schedule", "health_metric",
-	"medical_record", "family_member", "activity_log"}
+	"medical_record", "profile_access", "activity_log"}
 
 type ChangeLog struct {
 	Field string
@@ -90,7 +90,7 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 //     */
 func AddActivityLogs(userId string, actType string, description string, objId string, changes []ChangeLog) error {
 	// get current time and convert to string
-	timestamp := time.Now().Format("2006-01-02T15:04:05.000")
+	timestamp := time.Now()
 
 	// go through changes and add them one by one to the database
 	for _, change := range changes {
@@ -103,7 +103,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 			changedField=$changedField,
 			from=$from,
 			to=$to,
-			timestamp=$timestamp;
+			timestamp=<datetime>$timestamp;
 			`,
 			map[string]interface{}{
 				"userId":        userId,
@@ -123,31 +123,6 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 
 	// added succcesfully without errors
 	return nil
-}
-
-func IsFamilyMember(memberId string, patientId string) bool {
-	result, err := database.DB.Query(`SELECT * FROM family_member 
-	WHERE userId=$userID AND patient_userId=$patientId;`,
-		map[string]interface{}{
-			"userID":    memberId,
-			"patientId": patientId,
-		})
-	if err != nil {
-		return false
-	}
-
-	members, err := surrealdb.SmartUnmarshal[[]*model.FamilyMember](result, nil)
-	if err != nil {
-		return false
-	}
-	if len(members) < 1 {
-		return false
-	}
-
-	if members[0].UserID == memberId && members[0].PatientUserID == patientId {
-		return true
-	}
-	return false
 }
 
 func IsProfileShared(from string, to string) bool {

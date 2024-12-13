@@ -34,7 +34,8 @@ func (r *queryResolver) GetActivityLog(ctx context.Context) ([]*model.ActivityLo
 
 	activities, err := surrealdb.SmartUnmarshal[[]model.ActivityLog](result, nil)
 	if err != nil {
-		return nil, err
+		println("unmarshaling of timestamp failed")
+		return nil, fmt.Errorf("unmarshaling of timestamp failed: %s", err.Error())
 	}
 
 	var activityDetails []*model.ActivityLogDetail
