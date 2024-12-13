@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"meditrax/graph/custom"
+	"meditrax/graph/model"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -311,4 +313,126 @@ func TestUserFunctions(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("User %s with name %s deleted successfully", user.ID, user.Username), response.DeleteUser.Message)
 	})
 
+}
+
+func TestSharedProfiles(t *testing.T) {
+	c := client.New(NewServer())
+	user1 := CreateUserAndLogin(t, c)
+	user2 := CreateUserAndLogin(t, c)
+
+	t.Run("Share Profile", func(t *testing.T) {
+		var response struct {
+			ShareProfile struct {
+				Message string
+			}
+		}
+
+		c.MustPost(`mutation ($phoneNumber: String!){
+			shareProfile(phoneNumber:$phoneNumber, accessLevel:"1", remarks:"no remarks"){
+				message
+			}
+		}`, &response,
+			client.Var("phoneNumber", user2.PhoneNumber),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, fmt.Sprintf("Profile shared successfully with %s", user2.Username), response.ShareProfile.Message)
+	})
+
+	t.Run("Get Profiles", func(t *testing.T) {
+		var response struct {
+			Get []struct {
+				ID          string
+				Name        string
+				PhoneNumber string
+				Role        string
+				CreatedAt   string
+			}
+		}
+
+		c.MustPost(`query {
+			get:getProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user2.AccessToken)))
+		require.Equal(t, 2, len(response.Get))
+		require.Equal(t, user1.Username, response.Get[1].Name)
+		require.Equal(t, user1.ID, response.Get[1].ID)
+		require.Equal(t, user1.PhoneNumber, response.Get[1].PhoneNumber)
+		_, err := custom.UnmarshalDateTime(response.Get[1].CreatedAt)
+		require.Nil(t, err)
+
+		c.MustPost(`query {
+			get:getSharedProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, 2, len(response.Get))
+		require.Equal(t, user2.Username, response.Get[1].Name)
+		require.Equal(t, user2.ID, response.Get[1].ID)
+		require.Equal(t, user2.PhoneNumber, response.Get[1].PhoneNumber)
+		_, err = custom.UnmarshalDateTime(response.Get[1].CreatedAt)
+		require.Nil(t, err)
+	})
+
+	t.Run("Unshare profile", func(t *testing.T) {
+		var response struct {
+			UnshareProfile model.UnshareProfileResponse
+		}
+
+		c.MustPost(`mutation($targetUserId:String!){
+			unshareProfile(targetUserId:$targetUserId){
+				message
+			}
+		}`, &response, client.Var("targetUserId", user2.ID),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, fmt.Sprintf("Profile access removed for user %s", user2.ID), response.UnshareProfile.Message)
+
+		var getResponse struct {
+			Get []struct {
+				ID          string
+				Name        string
+				PhoneNumber string
+				Role        string
+				CreatedAt   string
+			}
+		}
+
+		c.MustPost(`query {
+			get:getProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &getResponse,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user2.AccessToken)))
+		require.Equal(t, 1, len(getResponse.Get))
+		require.Equal(t, user2.ID, getResponse.Get[0].ID)
+
+		c.MustPost(`query {
+			get:getSharedProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &getResponse,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, 1, len(getResponse.Get))
+		require.Equal(t, user1.ID, getResponse.Get[0].ID)
+	})
+
+	DeleteUser(t, c, user1)
+	DeleteUser(t, c, user2)
 }

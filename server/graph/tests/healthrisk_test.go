@@ -28,18 +28,19 @@ func TestEvaluateHealthRiskAssessment(t *testing.T) {
 			}
 		}
 
+		age := "70"
 		// 创建评估填充问卷数据
 		filledQuestionnaire := model.FilledQuestionnaire{
 			QuestionnaireID: questionnaireId,
 			Responses: []*model.Response{
 				{QuestionID: 1, Choice: "是"},
-				{QuestionID: 2, Choice: "否"},
-				{QuestionID: 3, Choice: "是"},
-				{QuestionID: 4, Choice: "是"},
-				{QuestionID: 5, Choice: "是"},
-				{QuestionID: 6, Choice: "否"},
+				{QuestionID: 2, Choice: "是"},
+				{QuestionID: 3, Choice: "否"},
+				{QuestionID: 4, Choice: "", Answer: &age},
+				{QuestionID: 5, Choice: "否"},
+				{QuestionID: 6, Choice: "是"},
 				{QuestionID: 7, Choice: "是"},
-				{QuestionID: 8, Choice: "否"},
+				{QuestionID: 8, Choice: "是"},
 				{QuestionID: 9, Choice: "是"},
 				{QuestionID: 10, Choice: "否"},
 			},

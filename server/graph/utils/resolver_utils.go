@@ -56,6 +56,7 @@ func MatchID(id string, table string) bool {
 }
 
 func EvaluateHealthRisk(responses []*model.Response) (string, string) {
+	println("Evaluation health risk...")
 	// 假设我们根据响应的答案来进行风险评估
 	var riskLevel string
 	var recommendations string
@@ -63,27 +64,31 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 	// 基于一些问题回答进行简单评估
 	score := 0
 	for _, response := range responses {
-		if response.Choice == "是" {
-			score++
-		}
-		age, err := strconv.Atoi(*response.Answer)
-		if err != nil {
-			fmt.Println("Error converting string to int:", err)
-		}
-		if age <= 30 {
-			score++
-		} else if age >= 30 && age <= 45 {
-			score += 2
-		} else if age > 45 && age <= 60 {
-			score += 3
+		// if answer is null, evaluate based on choice
+		if response.Answer == nil {
+			if response.Choice == "是" {
+				score++
+			}
 		} else {
-			score += 4
+			age, err := strconv.Atoi(*response.Answer)
+			if err != nil {
+				fmt.Println("Error converting string to int:", err)
+			}
+			if age <= 30 {
+				score++
+			} else if age >= 30 && age <= 45 {
+				score += 2
+			} else if age > 45 && age <= 60 {
+				score += 3
+			} else {
+				score += 4
+			}
 		}
 	}
 
 	if score > 9 {
 		riskLevel = "高风险"
-		recommendations = "请立即就医，做肾功能检查。"
+		recommendations = "请尽早就医，做肾功能检查。"
 	} else if score <= 9 && score >= 5 {
 		riskLevel = "中风险"
 		recommendations = "请尽快进行全面身体检查，排除隐患。"
@@ -91,6 +96,7 @@ func EvaluateHealthRisk(responses []*model.Response) (string, string) {
 		riskLevel = "低风险"
 		recommendations = "保持健康饮食，定期体检。"
 	}
+	println("finished evaluating health risk...")
 
 	return riskLevel, recommendations
 }
