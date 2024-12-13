@@ -286,7 +286,6 @@ func TestUserFunctions(t *testing.T) {
 			}
 		}
 
-<<<<<<< HEAD
 		query := fmt.Sprintf(`
 			mutation {
 				resetPassword(token: "%s", newPassword: "%s") {
@@ -297,20 +296,6 @@ func TestUserFunctions(t *testing.T) {
 		c.MustPost(query, &response)
 		require.Equal(t, "Password reset successfully", response.ResetPassword.Message)
 	})
-=======
-	// 	query := fmt.Sprintf(`
-	// 		mutation {
-	// 			resetPassword(token: "%s", newPassword: "%s") {
-	// 				message
-	// 			}
-	// 		}
-	// 	`, resetToken, newPassword)
-
-	// 	c.MustPost(query, &response)
-
-	// 	require.Equal(t, "Password reset successfully", response.ResetPassword.Message)
-	// })
->>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
