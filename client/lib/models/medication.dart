@@ -20,18 +20,22 @@ class Medication extends HiveObject with _$Medication {
     @HiveField(7) required DateTime createdAt,
     @HiveField(8) required DateTime updatedAt,
   }) = _Medication;
-  
+
   factory Medication.fromJson(Map<String, dynamic> json) {
     return Medication(
-      id: json['id'] ?? '', 
-      name: json['name'] ?? 'Unnamed',  
-      dosage: (json['dosage'] ?? 0.0).toDouble(),  
-      unit: json['unit'] ?? 'Unknown',  
-      frequency: json['frequency'] ?? 'Unknown', 
-      inventory: (json['inventory'] ?? 0.0).toDouble(),  
-      userId: json['userId'] ?? '',  
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),  
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),  
+      id: json['id'] ?? '',
+      name: json['name'] ?? 'Unnamed',
+      dosage: (json['dosage'] ?? 0.0).toDouble(),
+      unit: json['unit'] ?? 'Unknown',
+      frequency: json['frequency'] ?? 'Unknown',
+      inventory: (json['inventory'] ?? 0.0).toDouble(),
+      userId: json['userId'] ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 
@@ -44,16 +48,12 @@ class Medication extends HiveObject with _$Medication {
       frequency: json['frequency'] ?? '',
       inventory: (json['inventory'] as num?)?.toDouble() ?? 0.0,
       userId: json['userId'] ?? '',
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt']) 
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e

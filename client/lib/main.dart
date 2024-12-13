@@ -16,10 +16,7 @@ import 'package:meditrax/models/treatment_schedule.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/models/user_achievement.dart';
 import 'package:meditrax/screens/profile.dart';
-<<<<<<< HEAD
-=======
 import 'package:meditrax/screens/profile_sharing_screen.dart';
->>>>>>> 8d154f5fa93bd51fe88e75cc84b96ee2ef3edb9e
 import 'package:meditrax/screens/splash_screen.dart';
 
 // Import all screens
@@ -48,13 +45,13 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize notifications through the provider
     final notificationService = NotificationService();
     if (notificationService.isSupported) {
       await notificationService.initialize();
     }
-    
+
     await Hive.initFlutter();
     Hive.registerAdapter(AppStateDataImplAdapter());
     Hive.registerAdapter(TokenAdapter());
@@ -70,7 +67,7 @@ void main() async {
     Hive.registerAdapter(AchievementBadgeImplAdapter());
     Hive.registerAdapter(UserAchievementImplAdapter());
     await Hive.openBox<AppStateData>('appState');
-    
+
     runApp(
       ProviderScope(
         overrides: [
