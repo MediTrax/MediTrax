@@ -242,7 +242,7 @@ type Mutation struct {
 type PasswordChange struct {
 	ID        string    `json:"id"`
 	User      string    `json:"user"`
-	Token     string    `json:"token"`
+	ResetCode string    `json:"resetCode"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

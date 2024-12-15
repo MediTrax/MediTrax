@@ -6,7 +6,10 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
 	"meditrax/graph/custom"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
@@ -15,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
@@ -286,9 +290,9 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error) {
 	result, err := database.DB.Query(`
-    SELECT * FROM user WHERE phone_number=$phone_number;`,
+    SELECT * FROM user WHERE phoneNumber=$phoneNumber;`,
 		map[string]interface{}{
-			"phone_number": phoneNumber,
+			"phoneNumber": phoneNumber,
 		})
 	if err != nil {
 		return nil, err
@@ -319,35 +323,118 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 
 	// 获取重置码
 	resetCode := strings.Split(results2.ID, ":")[1]
+	log.Printf(resetCode)
+	// 使用提取部分的长度作为种子（确保每次生成不同）
+	rand.Seed(time.Now().UnixNano() + int64(len(resetCode)))
 
-	// TODO: 在这里实现发送短信的逻辑
-	// 暂时只返回成功消息，实际项目中需要集成短信服务
+	// 生成一个随机的 6 位数字验证码
+	numericResetCode := fmt.Sprintf("%06d", rand.Intn(1000000)) // 0-999999
+
+	// 更新数据库中的 resetCode 字段为生成的 6 位验证码
+	_, err = database.DB.Query(
+		`UPDATE $id SET resetCode=$resetCode;`,
+		map[string]interface{}{
+			"id":        results2.ID,
+			"resetCode": numericResetCode,
+		})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update resetCode: %v", err)
+	}
+	resetCode = numericResetCode
+
+	// 阿里云短信服务的凭证
+	accessKeyId := "LTAI5tLD94gG1JJBs3GRGw5Q"           // 替换为你从阿里云获取的 AccessKeyId
+	accessKeySecret := "8AdXowtI5gzvY7WHKxb5ebbw0FaWiZ" // 替换为你从阿里云获取的 AccessKeySecret
+
+	// 创建阿里云短信客户端
+	client, err := dysmsapi.NewClientWithAccessKey("cn-hangzhou", accessKeyId, accessKeySecret)
+	if err != nil {
+		log.Printf("Failed to create client: %v", err)
+		return nil, err
+	}
+
+	// 创建短信请求参数
+	request := dysmsapi.CreateSendSmsRequest()
+	request.Scheme = "https"
+	request.PhoneNumbers = phoneNumber                              // 接收短信的手机号码
+	request.SignName = "Meditrax验证码"                                // 替换短信签名
+	request.TemplateCode = "SMS_476405140"                          // 替换短信模板ID
+	request.TemplateParam = fmt.Sprintf(`{"code":"%s"}`, resetCode) // 填入模板参数，代码作为示例
+
+	// 发送短信
+	response, err := client.SendSms(request)
+	if err != nil {
+		log.Printf("Failed to send SMS: %v", err)
+		return nil, err
+	}
+
+	// 打印返回结果（可以根据需要进行日志记录）
+	if response.Code != "OK" {
+		log.Printf("Failed to send SMS: %s", response.Message)
+		return nil, fmt.Errorf("SMS sending failed: %s", response.Message)
+	}
+
+	log.Printf("SMS sent successfully, requestId: %s", response.RequestId)
 
 	// 创建响应
-	response := &model.RequestPasswordResetResponse{
+	responseMsg := &model.RequestPasswordResetResponse{
 		Message: fmt.Sprintf("Password reset code %s has been sent to your phone %s", resetCode, phoneNumber),
 	}
 
-	return response, nil
+	return responseMsg, nil
 }
 
 // ResetPassword is the resolver for the resetPassword field.
-func (r *mutationResolver) ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error) {
-	// Retrieve password reset request using the token
-	data, err := database.DB.Select("passwordChange:" + token)
-	if err != nil {
-		// Token not found or an error occurred
-		return nil, fmt.Errorf("invalid or expired token")
+func (r *mutationResolver) ResetPassword(ctx context.Context, resetCode string, newPassword string) (*model.ResetPasswordResponse, error) {
+	// Retrieve password reset request using the resetCode
+	result, err := database.DB.Query(`
+    SELECT * FROM passwordChange WHERE resetCode = $resetCode;`,
+		map[string]interface{}{
+			"resetCode": resetCode,
+		})
+	if err != nil || result == nil {
+		return nil, fmt.Errorf("invalid or expired resetcode")
 	}
-	passwordReset, err := surrealdb.SmartUnmarshal[model.PasswordChange](data, nil)
+
+	// 确保 queryResult 是 []interface{} 类型
+	rawResults, ok := result.([]interface{})
+	if !ok || len(rawResults) == 0 {
+		return nil, fmt.Errorf("invalid or expired resetcode")
+	}
+
+	// 获取第一条记录（rawResults[0] 是 map）
+	rawRecord, ok := rawResults[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid or expired resetcode")
+	}
+
+	// 从记录中提取 "result" 字段
+	rawData, ok := rawRecord["result"].([]interface{})
+	if !ok || len(rawData) == 0 {
+		return nil, fmt.Errorf("invalid or expired resetcode")
+	}
+
+	// 获取结果数组中的第一条记录
+	recordData, ok := rawData[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid or expired resetcode")
+	}
+
+	// 将第一条记录反序列化为 PasswordChange
+	recordJSON, err := json.Marshal(recordData)
 	if err != nil {
-		// Unmarshal error, invalid data
-		return nil, fmt.Errorf("invalid token data")
+		return nil, fmt.Errorf("failed to process resetcode data")
+	}
+
+	var passwordChange model.PasswordChange
+	err = json.Unmarshal(recordJSON, &passwordChange)
+	if err != nil {
+		return nil, fmt.Errorf("invalid resetcode format")
 	}
 
 	// Update the user's password in the database
 	_, err = database.DB.Query("UPDATE $id SET password=crypto::argon2::generate($password);", map[string]interface{}{
-		"id":       passwordReset.User,
+		"id":       passwordChange.User,
 		"password": newPassword,
 	})
 	if err != nil {

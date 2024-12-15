@@ -26,7 +26,7 @@ type User{
 type PasswordChange {
   id: String!
   user: String!
-  token: String!
+  resetCode: String!
   createdAt: DateTime!
 }
 
@@ -103,7 +103,7 @@ extend type Mutation{
   updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
   deleteUser: DeleteUserResponse
   requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
-  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  resetPassword(resetCode: String!, newPassword: String!): ResetPasswordResponse
   
   shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
   unshareProfile(targetUserId: String!): UnshareProfileResponse!
