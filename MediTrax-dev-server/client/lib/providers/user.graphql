@@ -1,0 +1,104 @@
+query GetUser {
+  getUser {
+    userId
+    phoneNumber
+    name
+    role
+    createdAt
+    lastLogin
+  }
+}
+
+query GetUserAchievements {
+  getUserAchievements {
+    userAchievementId
+    badgeId
+    earnedAt
+  }
+}
+
+query GetFamilyMembers {
+  getFamilyMembers {
+    memberId
+    relatedUserId
+    relationship
+    accessLevel
+  }
+}
+
+mutation UpdateUser($name: String, $phoneNumber: String, $password: String) {
+  updateUser(name: $name, phoneNumber: $phoneNumber, password: $password) {
+    userId
+    message
+  }
+}
+
+mutation DeleteUser {
+  deleteUser {
+    message
+  }
+}
+
+mutation RequestPasswordReset($phoneNumber: String!) {
+  requestPasswordReset(phoneNumber: $phoneNumber) {
+    message
+  }
+}
+
+mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword) {
+    message
+  }
+}
+
+mutation AddFamilyMember($relatedUserId: String!, $relationship: String!, $accessLevel: String!) {
+  addFamilyMember(relatedUserId: $relatedUserId, relationship: $relationship, accessLevel: $accessLevel) {
+    memberId
+    message
+  }
+}
+
+mutation UpdateFamilyMember($memberId: String!, $relationship: String, $accessLevel: String) {
+  updateFamilyMember(memberId: $memberId, relationship: $relationship, accessLevel: $accessLevel) {
+    memberId
+    message
+  }
+}
+
+mutation DeleteFamilyMember($memberId: String!) {
+  deleteFamilyMember(memberId: $memberId) {
+    message
+  }
+} 
+
+query GetProfiles {
+  getProfiles {
+    id
+    name
+    phoneNumber
+    role
+    createdAt
+  }
+}
+
+query GetSharedProfiles {
+  getSharedProfiles {
+    id
+    name
+    phoneNumber
+    role
+    createdAt
+  }
+}
+
+mutation ShareProfile($phoneNumber: String!, $accessLevel: String!, $remarks: String!) {
+  shareProfile(phoneNumber: $phoneNumber, accessLevel: $accessLevel, remarks: $remarks) {
+    message
+  }
+}
+
+mutation UnshareProfile($targetUserId: String!) {
+  unshareProfile(targetUserId: $targetUserId) {
+    message
+  }
+}

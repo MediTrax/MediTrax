@@ -1,0 +1,37 @@
+query GetMedicalRecords {
+  getMedicalRecords {
+    recordId
+    recordType
+    content
+    createdAt
+  }
+}
+
+query GetSharedMedicalRecords($patientId: String!) {
+  getSharedMedicalRecords(patientId: $patientId) {
+    recordId
+    recordType
+    content
+    createdAt
+  }
+}
+
+mutation AddMedicalRecord($recordType: String!, $content: String!) {
+  addMedicalRecord(recordType: $recordType, content: $content) {
+    recordId
+    message
+  }
+}
+
+mutation UpdateMedicalRecord($recordId: String!, $recordType: String, $content: String) {
+  updateMedicalRecord(recordId: $recordId, recordType: $recordType, content: $content) {
+    recordId
+    message
+  }
+}
+
+mutation DeleteMedicalRecord($recordId: String!) {
+  deleteMedicalRecord(recordId: $recordId) {
+    message
+  }
+} 
