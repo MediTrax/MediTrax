@@ -365,7 +365,8 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 	response, err := client.SendSms(request)
 	if err != nil {
 		log.Printf("Failed to send SMS: %v", err)
-		return nil, err
+	} else {
+		log.Printf("SMS API Response: %+v", response)
 	}
 
 	// 打印返回结果（可以根据需要进行日志记录）
