@@ -520,42 +520,14 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final daysController = TextEditingController(
         text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
 
-    bool isDisposed = false;
-
-    void disposeControllers() {
-      if (!isDisposed) {
-        nameController.dispose();
-        dosageController.dispose();
-        unitController.dispose();
-        timesController.dispose();
-        daysController.dispose();
-        inventoryController.dispose();
-        isDisposed = true;
-      }
-    }
-
-    void closeDialog(BuildContext dialogContext) {
-      // First dispose the controllers
-      disposeControllers();
-      
-      // Then check if we can pop the dialog
-      if (dialogContext.mounted) {
-        // Wrap the pop in a Future.delayed to avoid the framework assertion error
-        Future.delayed(Duration.zero, () {
-          if (dialogContext.mounted) {
-            Navigator.of(dialogContext).pop();
-          }
-        });
-      }
-    }
-
+    // Move disposal to after dialog is completely closed
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return WillPopScope(
           onWillPop: () async {
-            closeDialog(dialogContext);
+            Navigator.of(dialogContext).pop();
             return false;
           },
           child: Dialog(
@@ -591,7 +563,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => closeDialog(dialogContext),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
@@ -642,7 +614,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return '请输入剂量';
+                                          return '��输入剂量';
                                         }
                                         final number = double.tryParse(value);
                                         if (number == null || number <= 0) {
@@ -739,7 +711,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return '请输入库���数量';
+                                    return '请输入库存数量';
                                   }
                                   final number = double.tryParse(value);
                                   if (number == null || number <= 0) {
@@ -759,7 +731,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: () => closeDialog(dialogContext),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
                           child: const Text('取消'),
                         ),
                         const SizedBox(width: 8),
@@ -778,8 +750,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     );
 
                                 if (success && dialogContext.mounted) {
-                                  closeDialog(dialogContext);
-                                  disposeControllers(); // Dispose controllers on save
+                                  Navigator.of(dialogContext).pop();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('药品信息已更新')),
                                   );
@@ -810,13 +781,15 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
         );
       },
     ).then((_) {
-      // Ensure cleanup happens after dialog is fully closed
-      if (!isDisposed) {
-        disposeControllers();
-      }
+      // Dispose controllers only after dialog is fully closed
+      nameController.dispose();
+      dosageController.dispose();
+      unitController.dispose();
+      timesController.dispose();
+      daysController.dispose();
+      inventoryController.dispose();
     });
   }
-
 
   // Helper method to build form section headers
   Widget _buildSectionHeader({
@@ -1192,7 +1165,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                           return '请输入有效数字';
                         }
                         if (times <= 0) {
-                          return '次数必须��于0';
+                          return '次数必须大于0';
                         }
                         if (times > 24) {
                           return '次数不能超过24';
@@ -2354,7 +2327,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       final success = await ref.read(medicationReminderProvider.notifier)
           .updateReminder(
             reminderId: reminder.id,
-            reminderTime: reminder.reminderTime.toIso8601String(),
+            reminderTime: reminder.reminderTime,
             isTaken: false,
           );
           

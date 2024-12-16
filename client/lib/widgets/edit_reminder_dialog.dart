@@ -24,10 +24,9 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
   @override
   void initState() {
     super.initState();
-    final reminderLocalTime = widget.reminder.reminderTime.toLocal();
     selectedTime = TimeOfDay(
-      hour: reminderLocalTime.hour,
-      minute: reminderLocalTime.minute,
+      hour: widget.reminder.reminderTime.hour,
+      minute: widget.reminder.reminderTime.minute,
     );
   }
 
@@ -70,29 +69,13 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                 now.day,
                 selectedTime.hour,
                 selectedTime.minute,
-              ).toLocal();
-
-              print('\n=== Edit Reminder Debug Info ===');
-              print('Selected time: ${selectedTime.format(context)}');
-              print('Created DateTime: $reminderTime');
-              print('Hour: ${reminderTime.hour}, Minute: ${reminderTime.minute}');
+              );
 
               final adjustedReminderTime = reminderTime.isBefore(now)
                   ? reminderTime.add(const Duration(days: 1))
                   : reminderTime;
 
-              print('\n=== Edit Reminder Debug Info ===');
-              print('Selected time: ${selectedTime.format(context)}');
-              print('Created DateTime: $reminderTime');
-              print('Hour: ${reminderTime.hour}, Minute: ${reminderTime.minute}');
-
-              final formattedTimeString = '${adjustedReminderTime.year}-'
-                  '${adjustedReminderTime.month.toString().padLeft(2, '0')}-'
-                  '${adjustedReminderTime.day.toString().padLeft(2, '0')}T'
-                  '${adjustedReminderTime.hour.toString().padLeft(2, '0')}:'
-                  '${adjustedReminderTime.minute.toString().padLeft(2, '0')}:00.000';
-
-              print('Adjusted DateTime: $formattedTimeString');
+              print('Adjusted DateTime: $adjustedReminderTime');
 
               final notificationService = NotificationService();
               await notificationService.cancelReminder(widget.reminder.id);
@@ -100,7 +83,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               final success = await ref.read(medicationReminderProvider.notifier)
                   .updateReminder(
                     reminderId: widget.reminder.id,
-                    reminderTime: formattedTimeString,
+                    reminderTime: adjustedReminderTime,
                     isTaken: widget.reminder.isTaken,
                   );
 
@@ -113,8 +96,6 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                     medicationId: widget.reminder.medicationId,
                     reminderTime: adjustedReminderTime,
                     isTaken: widget.reminder.isTaken,
-                    userId: widget.reminder.userId,
-                    createdAt: widget.reminder.createdAt,
                   ),
                   widget.medicationName,
                 );
