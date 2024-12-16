@@ -72,8 +72,8 @@ extend type Query{
 }
 
 extend type Mutation{
-  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: String!): AddHealthMetricResponse 
-  updateHealthMetric(metricId: String!, value: Float, unit: String): UpdateHealthMetricResponse
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: DateTime!): AddHealthMetricResponse 
+  updateHealthMetric(metricId: String!, value: Float, unit: String, recordedAt:DateTime): UpdateHealthMetricResponse
   deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
    
   addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse

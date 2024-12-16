@@ -12,12 +12,13 @@ import (
 	"meditrax/graph/model"
 	"meditrax/graph/utils"
 	"strings"
+	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
 // AddHealthMetric is the resolver for the addHealthMetric field.
-func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error) {
+func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt time.Time) (*model.AddHealthMetricResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -25,7 +26,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 
 	// check that there isn't already a metric entry for the user with the same type and record time
 	result, err := database.DB.Query(
-		`SELECT * FROM health_metric WHERE userId=$userId AND recordedAt=$recordedAt AND metricType=$metricType;`,
+		`SELECT * FROM health_metric WHERE userId=$userId AND recordedAt=<datetime>$recordedAt AND metricType=$metricType;`,
 		map[string]interface{}{
 			"userId":     user.ID,
 			"recordedAt": recordedAt,
@@ -51,8 +52,8 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 		metricType=$metricType,
 		value=$value,
 		unit=$unit,
-		recordedAt=$recordedAt,
-		createdAt=time::now();
+		recordedAt=<datetime>$recordedAt,
+		createdAt=<datetime>$now;
 		`,
 		map[string]interface{}{
 			"userId":     user.ID,
@@ -60,6 +61,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 			"value":      value,
 			"unit":       unit,
 			"recordedAt": recordedAt,
+			"now":        time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -80,7 +82,7 @@ func (r *mutationResolver) AddHealthMetric(ctx context.Context, metricType strin
 }
 
 // UpdateHealthMetric is the resolver for the updateHealthMetric field.
-func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error) {
+func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string, recordedAt *time.Time) (*model.UpdateHealthMetricResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
@@ -130,6 +132,16 @@ func (r *mutationResolver) UpdateHealthMetric(ctx context.Context, metricID stri
 			Field: "unit",
 			From:  original.Unit,
 			To:    *unit,
+		}
+		changeLog = append(changeLog, change)
+	}
+	if recordedAt != nil {
+		updateValues["recordedAt"] = *recordedAt
+		updateFields = append(updateFields, "recordedAt = <datetime>$recordedAt")
+		change := utils.ChangeLog{
+			Field: "recordedAt",
+			From:  original.RecordedAt.Format("2006-01-02T15:04:05.000"),
+			To:    (*recordedAt).Format("2006-01-02T15:04:05.000"),
 		}
 		changeLog = append(changeLog, change)
 	}
@@ -218,12 +230,13 @@ func (r *mutationResolver) AddMedicalRecord(ctx context.Context, recordType stri
         SET userId=$userId,
 			recordType=$recordType,
             content=$content,
-            createdAt=time::now(),
-            updatedAt=time::now();`,
+            createdAt=<datetime>$now,
+            updatedAt=<datetime>$now;`,
 		map[string]interface{}{
 			"userId":     user.ID,
 			"recordType": recordType,
 			"content":    content,
+			"now":        time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -352,7 +365,7 @@ func (r *mutationResolver) DeleteMedicalRecord(ctx context.Context, recordID str
 }
 
 // GetHealthMetrics is the resolver for the getHealthMetrics field.
-func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
+func (r *queryResolver) GetHealthMetrics(ctx context.Context, startDate *time.Time, endDate *time.Time, metricType *string) ([]*model.HealthMetricDetail, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")

@@ -45,13 +45,13 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize notifications through the provider
     final notificationService = NotificationService();
     if (notificationService.isSupported) {
       await notificationService.initialize();
     }
-    
+
     await Hive.initFlutter();
     Hive.registerAdapter(AppStateDataImplAdapter());
     Hive.registerAdapter(TokenAdapter());
@@ -67,7 +67,7 @@ void main() async {
     Hive.registerAdapter(AchievementBadgeImplAdapter());
     Hive.registerAdapter(UserAchievementImplAdapter());
     await Hive.openBox<AppStateData>('appState');
-    
+
     runApp(
       ProviderScope(
         overrides: [
