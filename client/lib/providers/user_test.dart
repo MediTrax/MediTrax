@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/user.dart';
 import 'package:meditrax/providers/user_provider.dart';
 
@@ -56,5 +57,20 @@ class UserTest extends UserData {
   Future<void> resetPassword(String token, String newPassword) async {
     // Simulate successful password reset
     return;
+  }
+}
+
+class AchievementsTest extends Achievements {
+  @override
+  Future<List<AchievementBadge>> build() async {
+    return [
+      AchievementBadge(
+        id: '1',
+        name: '首次登录',
+        description: '首次成功登录系统',
+        iconUrl: 'https://example.com/achievement1.png',
+        createdAt: DateTime.now(),
+      ),
+    ];
   }
 }
