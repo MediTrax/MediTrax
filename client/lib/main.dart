@@ -25,7 +25,6 @@ import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/ai_helper_screen.dart';
 import 'screens/diet_management_screen.dart';
-import 'screens/family_collaboration_screen.dart';
 import 'screens/health_risk_entry_screen.dart';
 import 'screens/health_risk_report_screen.dart';
 import 'screens/medical_records_screen.dart';
@@ -213,10 +212,6 @@ class RouterNotifier extends ChangeNotifier {
               builder: (context, state) => const ProfileSharingScreen(),
             ),
             GoRoute(
-              path: '/family-collaboration',
-              builder: (context, state) => const FamilyCollaborationScreen(),
-            ),
-            GoRoute(
               path: '/health-risk-assessment',
               builder: (context, state) => const HealthRiskEntryScreen(),
             ),
@@ -249,6 +244,7 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         textTheme: GoogleFonts.notoSerifTextTheme(),
+        hintColor: Color.fromRGBO(245, 245, 245, 0.2),
         useMaterial3: true,
       ),
       routerConfig: router,

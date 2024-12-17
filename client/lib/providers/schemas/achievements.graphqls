@@ -1,0 +1,71 @@
+type AchievementBadge{
+  id: String!
+  name: String!
+  description: String!
+  iconUrl: String!
+  createdAt: DateTime!
+}
+
+type UserAchievement{
+  id: String!
+  userId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+  createdAt: DateTime!
+}
+
+type CreateAchievementBadgeResponse {
+  badgeId: String!
+  message: String!
+}
+
+type AchievementBadgeDetail {
+  badgeId: String!
+  name: String!
+  description: String!
+  iconUrl: String!
+  createdAt: DateTime!
+}
+
+type AwardAchievementResponse {
+  userAchievementId: String!
+  message: String!
+}
+
+type UserAchievementDetail {
+  userAchievementId: String!
+  badgeId: String!
+  earnedAt: DateTime!
+}
+
+type UserPointRecord{
+  id: String!
+  userId: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type UserPointRecordDetail{
+  recordId: String!
+  pointsEarned: Float!
+  reason: String!
+  earnedAt: DateTime!
+}
+
+type earnPointsResponse{
+  updatedPoints: Float!
+  message: String!
+}
+
+extend type Query{
+  getAchievementBadges: [AchievementBadgeDetail]
+  getUserAchievements: [UserAchievementDetail]
+  getUserPointRecords: [UserPointRecordDetail]
+}
+
+extend type Mutation{
+  createAchievementBadge(name: String!, description: String!, iconUrl: String!): CreateAchievementBadgeResponse
+  awardAchievement(badgeId: String!): AwardAchievementResponse  
+  earnPoints(pointsEarned: Float!, reason:String!) : earnPointsResponse
+}

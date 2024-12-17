@@ -35,6 +35,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    _formKey.currentState!.save();
 
     if (!_useOTP && _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,7 +51,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         throw UnimplementedError('OTP login not implemented yet');
       } else {
         await ref.read(appStateProvider.notifier).loginWithPhoneNumberPassword(
-              _phoneController.text,
+              _phoneNumber.phoneNumber!,
               _passwordController.text,
               '', // captcha parameter
             );
@@ -74,14 +75,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    _formKey.currentState!.save();
 
     setState(() => _isLoading = true);
 
     try {
       await ref.read(appStateProvider.notifier).signupWithPhone(
-            phone: _phoneController.text,
+            phone: _phoneNumber.phoneNumber!,
             password: _passwordController.text,
-            username: _phoneController.text,
+            username: _phoneNumber.phoneNumber!,
           );
     } catch (e) {
       if (mounted) {

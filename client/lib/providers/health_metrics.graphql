@@ -18,7 +18,7 @@ query GetSharedHealthMetrics($patientId: String!, $startDate: DateTime, $endDate
   }
 }
 
-mutation AddHealthMetric($metricType: String!, $value: Float!, $unit: String!, $recordedAt: String!) {
+mutation AddHealthMetric($metricType: String!, $value: Float!, $unit: String!, $recordedAt: DateTime!) {
   addHealthMetric(metricType: $metricType, value: $value, unit: $unit, recordedAt: $recordedAt) {
     metricId
     message

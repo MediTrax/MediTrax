@@ -68,7 +68,7 @@ class Variables$Mutation$CreateUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$CreateUser) ||
+    if (other is! Variables$Mutation$CreateUser ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -219,7 +219,7 @@ class Mutation$CreateUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateUser) || runtimeType != other.runtimeType) {
+    if (other is! Mutation$CreateUser || runtimeType != other.runtimeType) {
       return false;
     }
     final l$createUser = createUser;
@@ -670,7 +670,7 @@ class Mutation$CreateUser$createUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateUser$createUser) ||
+    if (other is! Mutation$CreateUser$createUser ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -810,7 +810,7 @@ class Variables$Mutation$LoginUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$LoginUser) ||
+    if (other is! Variables$Mutation$LoginUser ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -938,7 +938,7 @@ class Mutation$LoginUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$LoginUser) || runtimeType != other.runtimeType) {
+    if (other is! Mutation$LoginUser || runtimeType != other.runtimeType) {
       return false;
     }
     final l$loginUser = loginUser;
@@ -1451,7 +1451,7 @@ class Mutation$LoginUser$loginUser {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$LoginUser$loginUser) ||
+    if (other is! Mutation$LoginUser$loginUser ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1681,7 +1681,7 @@ class Mutation$LoginUser$loginUser$token {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$LoginUser$loginUser$token) ||
+    if (other is! Mutation$LoginUser$loginUser$token ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1907,7 +1907,7 @@ class Variables$Mutation$RefreshToken {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$RefreshToken) ||
+    if (other is! Variables$Mutation$RefreshToken ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2047,7 +2047,7 @@ class Mutation$RefreshToken {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$RefreshToken) || runtimeType != other.runtimeType) {
+    if (other is! Mutation$RefreshToken || runtimeType != other.runtimeType) {
       return false;
     }
     final l$refreshToken = refreshToken;
@@ -2599,7 +2599,7 @@ class Mutation$RefreshToken$refreshToken {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$RefreshToken$refreshToken) ||
+    if (other is! Mutation$RefreshToken$refreshToken ||
         runtimeType != other.runtimeType) {
       return false;
     }
