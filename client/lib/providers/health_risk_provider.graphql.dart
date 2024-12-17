@@ -4,7 +4,7 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart' as graphql;
 import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
 import 'package:meditrax/scalar.dart';
-import 'schema.graphql.dart';
+import 'schemas/assessment.graphqls.dart';
 
 class Query$GetHealthRiskAssessment {
   Query$GetHealthRiskAssessment({
@@ -58,7 +58,7 @@ class Query$GetHealthRiskAssessment {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetHealthRiskAssessment) ||
+    if (other is! Query$GetHealthRiskAssessment ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -518,7 +518,7 @@ class Query$GetHealthRiskAssessment$getHealthRiskAssessment {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetHealthRiskAssessment$getHealthRiskAssessment) ||
+    if (other is! Query$GetHealthRiskAssessment$getHealthRiskAssessment ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -748,8 +748,8 @@ class Query$GetHealthRiskAssessment$getHealthRiskAssessment$questionnaireData {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Query$GetHealthRiskAssessment$getHealthRiskAssessment$questionnaireData) ||
+    if (other
+            is! Query$GetHealthRiskAssessment$getHealthRiskAssessment$questionnaireData ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -920,7 +920,7 @@ class Query$GetHealthRiskAssessmentQuestion {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetHealthRiskAssessmentQuestion) ||
+    if (other is! Query$GetHealthRiskAssessmentQuestion ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1330,8 +1330,8 @@ class Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion) ||
+    if (other
+            is! Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1546,8 +1546,8 @@ class Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion$data
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion$data) ||
+    if (other
+            is! Query$GetHealthRiskAssessmentQuestion$getHealthRiskAssessmentQuestion$data ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1733,7 +1733,7 @@ class Variables$Mutation$EvaluateHealthRiskAssessment {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$EvaluateHealthRiskAssessment) ||
+    if (other is! Variables$Mutation$EvaluateHealthRiskAssessment ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1846,7 +1846,7 @@ class Mutation$EvaluateHealthRiskAssessment {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$EvaluateHealthRiskAssessment) ||
+    if (other is! Mutation$EvaluateHealthRiskAssessment ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2306,8 +2306,8 @@ class Mutation$EvaluateHealthRiskAssessment$evaluateHealthRiskAssessment {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$EvaluateHealthRiskAssessment$evaluateHealthRiskAssessment) ||
+    if (other
+            is! Mutation$EvaluateHealthRiskAssessment$evaluateHealthRiskAssessment ||
         runtimeType != other.runtimeType) {
       return false;
     }

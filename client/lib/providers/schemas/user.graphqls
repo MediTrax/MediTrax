@@ -1,0 +1,110 @@
+type Token {
+  id: String!
+  user: String!
+  accessToken: String!
+  refreshToken: String!
+  accessTokenExpiry: DateTime!
+  refreshTokenExpiry: DateTime!
+  device: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User{
+  id: String!
+  phoneNumber: String!
+  password: String!
+  name: String!
+  points: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLogin: DateTime!
+  status: Int!
+  role: String!
+}
+
+type PasswordChange {
+  id: String!
+  user: String!
+  token: String!
+  createdAt: DateTime!
+}
+
+type CreateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type LoginUserResponse {
+  userId: String!
+  token: Token!
+  message: String!
+}
+
+type UserDetailResponse {
+  userId: String!
+  phoneNumber: String!
+  name: String!
+  points: Float!
+  role: String!
+  createdAt: DateTime!
+  lastLogin: DateTime
+}
+
+type UpdateUserResponse {
+  userId: String!
+  message: String!
+}
+
+type DeleteUserResponse {
+  message: String!
+}
+
+type RequestPasswordResetResponse {
+  message: String!
+}
+
+type ResetPasswordResponse {
+  message: String!
+}
+
+type ProfileDetail {
+  id: String!
+  name: String!
+  phoneNumber: String!
+  role: String!
+  createdAt: DateTime!
+}
+
+type ShareProfileResponse {
+    message: String!
+}
+
+type UnshareProfileResponse {
+    message: String!
+}
+
+extend type Query{
+  getUser: UserDetailResponse
+  getProfiles: [ProfileDetail]
+  getSharedProfiles: [ProfileDetail]
+
+  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
+  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
+  getSharedMedications(patientId: String!): [MedicationDetail]
+  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+}
+
+extend type Mutation{
+  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+
+  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
+  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
+  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+  deleteUser: DeleteUserResponse
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
+  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+  
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
+}

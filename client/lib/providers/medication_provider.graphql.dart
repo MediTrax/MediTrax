@@ -55,7 +55,7 @@ class Query$GetMedications {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedications) || runtimeType != other.runtimeType) {
+    if (other is! Query$GetMedications || runtimeType != other.runtimeType) {
       return false;
     }
     final l$getMedications = getMedications;
@@ -472,7 +472,7 @@ class Query$GetMedications$getMedications {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedications$getMedications) ||
+    if (other is! Query$GetMedications$getMedications ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -649,7 +649,7 @@ class Variables$Query$GetSharedMedications {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetSharedMedications) ||
+    if (other is! Variables$Query$GetSharedMedications ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -762,7 +762,7 @@ class Query$GetSharedMedications {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedMedications) ||
+    if (other is! Query$GetSharedMedications ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1220,7 +1220,7 @@ class Query$GetSharedMedications$getSharedMedications {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedMedications$getSharedMedications) ||
+    if (other is! Query$GetSharedMedications$getSharedMedications ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1430,7 +1430,7 @@ class Variables$Mutation$AddMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$AddMedication) ||
+    if (other is! Variables$Mutation$AddMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1592,8 +1592,7 @@ class Mutation$AddMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddMedication) ||
-        runtimeType != other.runtimeType) {
+    if (other is! Mutation$AddMedication || runtimeType != other.runtimeType) {
       return false;
     }
     final l$addMedication = addMedication;
@@ -2063,7 +2062,7 @@ class Mutation$AddMedication$addMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddMedication$addMedication) ||
+    if (other is! Mutation$AddMedication$addMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2258,7 +2257,7 @@ class Variables$Mutation$UpdateMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateMedication) ||
+    if (other is! Variables$Mutation$UpdateMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2446,7 +2445,7 @@ class Mutation$UpdateMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedication) ||
+    if (other is! Mutation$UpdateMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2938,7 +2937,7 @@ class Mutation$UpdateMedication$updateMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedication$updateMedication) ||
+    if (other is! Mutation$UpdateMedication$updateMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3071,7 +3070,7 @@ class Variables$Mutation$DeleteMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteMedication) ||
+    if (other is! Variables$Mutation$DeleteMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3178,7 +3177,7 @@ class Mutation$DeleteMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedication) ||
+    if (other is! Mutation$DeleteMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3589,7 +3588,7 @@ class Mutation$DeleteMedication$deleteMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedication$deleteMedication) ||
+    if (other is! Mutation$DeleteMedication$deleteMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }

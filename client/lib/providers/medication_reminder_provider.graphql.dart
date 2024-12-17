@@ -57,7 +57,7 @@ class Query$GetMedicationReminders {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicationReminders) ||
+    if (other is! Query$GetMedicationReminders ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -464,7 +464,7 @@ class Query$GetMedicationReminders$getMedicationReminders {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicationReminders$getMedicationReminders) ||
+    if (other is! Query$GetMedicationReminders$getMedicationReminders ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -637,7 +637,7 @@ class Variables$Mutation$CreateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$CreateMedicationReminder) ||
+    if (other is! Variables$Mutation$CreateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -768,7 +768,7 @@ class Mutation$CreateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateMedicationReminder) ||
+    if (other is! Mutation$CreateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1218,8 +1218,7 @@ class Mutation$CreateMedicationReminder$createMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$CreateMedicationReminder$createMedicationReminder) ||
+    if (other is! Mutation$CreateMedicationReminder$createMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1392,7 +1391,7 @@ class Variables$Mutation$UpdateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateMedicationReminder) ||
+    if (other is! Variables$Mutation$UpdateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1541,7 +1540,7 @@ class Mutation$UpdateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedicationReminder) ||
+    if (other is! Mutation$UpdateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2004,8 +2003,7 @@ class Mutation$UpdateMedicationReminder$updateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$UpdateMedicationReminder$updateMedicationReminder) ||
+    if (other is! Mutation$UpdateMedicationReminder$updateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2151,7 +2149,7 @@ class Variables$Mutation$DeleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteMedicationReminder) ||
+    if (other is! Variables$Mutation$DeleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2261,7 +2259,7 @@ class Mutation$DeleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedicationReminder) ||
+    if (other is! Mutation$DeleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2682,8 +2680,7 @@ class Mutation$DeleteMedicationReminder$deleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$DeleteMedicationReminder$deleteMedicationReminder) ||
+    if (other is! Mutation$DeleteMedicationReminder$deleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2816,7 +2813,7 @@ class Variables$Mutation$TakeMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$TakeMedication) ||
+    if (other is! Variables$Mutation$TakeMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2921,8 +2918,7 @@ class Mutation$TakeMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$TakeMedication) ||
-        runtimeType != other.runtimeType) {
+    if (other is! Mutation$TakeMedication || runtimeType != other.runtimeType) {
       return false;
     }
     final l$takeMedication = takeMedication;
@@ -3323,7 +3319,7 @@ class Mutation$TakeMedication$takeMedication {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$TakeMedication$takeMedication) ||
+    if (other is! Mutation$TakeMedication$takeMedication ||
         runtimeType != other.runtimeType) {
       return false;
     }
