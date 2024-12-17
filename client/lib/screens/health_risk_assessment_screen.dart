@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:meditrax/providers/health_risk_provider.dart';
 import 'package:meditrax/models/health_risk_assessment.dart';
 import 'package:meditrax/screens/health_risk_report_screen.dart';
+import 'package:flutter/services.dart';
 
 class HealthRiskAssessmentScreen extends ConsumerStatefulWidget {
   const HealthRiskAssessmentScreen({super.key});
@@ -134,6 +135,28 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
   }
 
   List<Widget> _buildOptions(List<String>? choices, int questionType) {
+    // Handle numeric input (type 3)
+    if (questionType == 3) {
+      return [
+        TextField(
+          decoration: const InputDecoration(
+            hintText: '请输入数字',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+          ],
+          onChanged: (value) {
+            if (value.isEmpty || double.tryParse(value) != null) {
+              _handleAnswerSelection(value);
+            }
+          },
+        ),
+      ];
+    }
+
+    // Handle text input (type 2)
     if (questionType == 2) {
       return [
         TextField(
@@ -146,6 +169,7 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
       ];
     }
 
+    // Handle multiple choice (type 1)
     if (questionType == 1) {
       return choices?.map((choice) => Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
@@ -169,6 +193,7 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
       )).toList() ?? [];
     }
 
+    // Handle single choice (type 0)
     return choices?.map((choice) => Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: RadioListTile<String>(

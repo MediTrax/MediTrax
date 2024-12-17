@@ -33,44 +33,18 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         throw result.exception!;
       }
 
-      final List<dynamic> remindersData = result.data?['getMedicationReminders'] ?? [];
+      final remindersData = result.parsedData!.getMedicationReminders ?? [];
       
       print('\n=== Fetched Reminders Debug Info ===');
       final reminders = remindersData.map((item) {
-        print('\nReminder ID: ${item['reminderId']}');
-        print('Raw reminderTime from backend: ${item['reminderTime']}');
-        
-        // Parse the time and preserve local hours
-        final rawTime = item['reminderTime'] as String;
-        // Remove the 'Z' from the end if it exists
-        final timeString = rawTime.endsWith('Z') 
-            ? rawTime.substring(0, rawTime.length - 1) 
-            : rawTime;
-            
-        final parsedTime = DateTime.parse(timeString);
-        print('Parsed DateTime without Z: $parsedTime');
-        
-        // Create DateTime preserving the hours
-        final localTime = DateTime(
-          parsedTime.year,
-          parsedTime.month,
-          parsedTime.day,
-          parsedTime.hour,
-          parsedTime.minute,
-        );
-        
-        print('Local time: $localTime');
-        print('Hour: ${localTime.hour}, Minute: ${localTime.minute}');
+        print('\nReminder ID: ${item!.reminderId}');
+        print('Raw reminderTime from backend: ${item.reminderTime}');
 
         return MedicationReminder(
-          id: item['reminderId'] ?? '',
-          medicationId: item['medicationId'] ?? '',
-          userId: item['userId'] ?? '',  
-          reminderTime: localTime,
-          isTaken: item['isTaken'] ?? false, 
-          createdAt: item['createdAt'] != null
-              ? DateTime.parse(item['createdAt'])
-              : DateTime.now(),  
+          id: item.reminderId,
+          medicationId: item.medicationId,
+          reminderTime: item.reminderTime,
+          isTaken: item.isTaken, 
         );
       }).toList();
       print('===============================\n');
@@ -85,7 +59,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> addReminder({
     required String medicationId,
-    required String reminderTime,
+    required DateTime reminderTime,
     String? frequency,
     int? intervalDays,
     String? dayOfWeek,
@@ -93,29 +67,13 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     try {
       print('\n=== Add Reminder Debug Info ===');
       print('Medication ID: $medicationId');
-      print('Original reminderTime string: $reminderTime');
-      
-      // Parse the time and keep it in local timezone
-      final DateTime parsedTime = DateTime.parse(reminderTime).toLocal();
-      print('Parsed local time: $parsedTime');
-      
-      // Create formatted time while preserving the local hours
-      final formattedTime = DateTime(
-        parsedTime.year,
-        parsedTime.month,
-        parsedTime.day,
-        parsedTime.hour,
-        parsedTime.minute,
-      );
-      
-      print('Formatted DateTime: $formattedTime');
-      print('Hour: ${formattedTime.hour}, Minute: ${formattedTime.minute}');
+      print('Original reminderTime: $reminderTime');
       
       final result = await _client.mutate$CreateMedicationReminder(
         Options$Mutation$CreateMedicationReminder(
           variables: Variables$Mutation$CreateMedicationReminder(
             medicationId: medicationId, 
-            reminderTime: formattedTime,
+            reminderTime: reminderTime,
           )
         )
       );
@@ -142,36 +100,18 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> updateReminder({
     required String reminderId,
-    required String reminderTime,
+    required DateTime reminderTime,
     required bool isTaken,
   }) async {
     try {
       print('\n=== Update Reminder Debug Info ===');
-      print('Original reminderTime string: $reminderTime');
-      
-      // Parse the time and keep it in local timezone
-      final DateTime parsedTime = DateTime.parse(reminderTime).toLocal();
-      print('Parsed local time: $parsedTime');
-      
-      // Create formatted time while preserving the local hours
-      final formattedTime = DateTime(
-        parsedTime.year,
-        parsedTime.month,
-        parsedTime.day,
-        parsedTime.hour,
-        parsedTime.minute,
-      );
-
-      print('Updating reminder:');
-      print('Original time: $reminderTime');
-      print('Formatted time: $formattedTime');
-      print('Hour: ${formattedTime.hour}, Minute: ${formattedTime.minute}');
+      print('Original reminderTime: $reminderTime');
 
       final result = await _client.mutate$UpdateMedicationReminder(
         Options$Mutation$UpdateMedicationReminder(
           variables: Variables$Mutation$UpdateMedicationReminder(
             reminderId: reminderId,
-            reminderTime: formattedTime,
+            reminderTime: reminderTime,
             isTaken: isTaken,
           ),
         ),

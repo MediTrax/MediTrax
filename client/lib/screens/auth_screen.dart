@@ -83,7 +83,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       await ref.read(appStateProvider.notifier).signupWithPhone(
             phone: _phoneNumber.phoneNumber!,
             password: _passwordController.text,
-            username: _phoneController.text,
+            username: _phoneNumber.phoneNumber!,
           );
     } catch (e) {
       if (mounted) {

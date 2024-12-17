@@ -78,6 +78,8 @@ class _InventoryTab extends ConsumerStatefulWidget {
 }
 
 class _InventoryTabState extends ConsumerState<_InventoryTab> {
+  final List<String> _unitOptions = ['片', '毫升'];
+
   @override
   void initState() {
     super.initState();
@@ -520,42 +522,14 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final daysController = TextEditingController(
         text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
 
-    bool isDisposed = false;
-
-    void disposeControllers() {
-      if (!isDisposed) {
-        nameController.dispose();
-        dosageController.dispose();
-        unitController.dispose();
-        timesController.dispose();
-        daysController.dispose();
-        inventoryController.dispose();
-        isDisposed = true;
-      }
-    }
-
-    void closeDialog(BuildContext dialogContext) {
-      // First dispose the controllers
-      disposeControllers();
-
-      // Then check if we can pop the dialog
-      if (dialogContext.mounted) {
-        // Wrap the pop in a Future.delayed to avoid the framework assertion error
-        Future.delayed(Duration.zero, () {
-          if (dialogContext.mounted) {
-            Navigator.of(dialogContext).pop();
-          }
-        });
-      }
-    }
-
+    // Move disposal to after dialog is completely closed
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return WillPopScope(
           onWillPop: () async {
-            closeDialog(dialogContext);
+            Navigator.of(dialogContext).pop();
             return false;
           },
           child: Dialog(
@@ -591,7 +565,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => closeDialog(dialogContext),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
@@ -657,16 +631,33 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     flex: 2,
-                                    child: _buildFormField(
-                                      controller: unitController,
-                                      hintText: '如: 片',
-                                      prefixIcon: Icons.straighten_rounded,
-                                      iconColor: Colors.blue.shade300,
+                                    child: DropdownButtonFormField<String>(
+                                      value: unitController.text.isEmpty ? null : unitController.text,
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.straighten_rounded,
+                                          color: Colors.blue.shade300,
+                                        ),
+                                        border: const OutlineInputBorder(),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      ),
+                                      hint: const Text('单位'),
+                                      items: _unitOptions.map((String unit) {
+                                        return DropdownMenuItem<String>(
+                                          value: unit,
+                                          child: Text(unit),
+                                        );
+                                      }).toList(),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return '请输入单位';
+                                          return '请选择单位';
                                         }
                                         return null;
+                                      },
+                                      onChanged: (String? newValue) {
+                                        if (newValue != null) {
+                                          unitController.text = newValue;
+                                        }
                                       },
                                     ),
                                   ),
@@ -735,7 +726,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                               const SizedBox(height: 8),
                               _buildFormField(
                                 controller: inventoryController,
-                                hintText: '输入库存数量',
+                                hintText: '输入库存数量（单位：片）',
                                 prefixIcon: Icons.inventory_rounded,
                                 iconColor: Colors.orange.shade300,
                                 keyboardType:
@@ -743,7 +734,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                         decimal: true),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return '请输入库���数量';
+                                    return '请输入库存数量';
                                   }
                                   final number = double.tryParse(value);
                                   if (number == null || number <= 0) {
@@ -763,7 +754,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: () => closeDialog(dialogContext),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
                           child: const Text('取消'),
                         ),
                         const SizedBox(width: 8),
@@ -786,8 +777,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     );
 
                                 if (success && dialogContext.mounted) {
-                                  closeDialog(dialogContext);
-                                  disposeControllers(); // Dispose controllers on save
+                                  Navigator.of(dialogContext).pop();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('药品信息已更新')),
                                   );
@@ -818,10 +808,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
         );
       },
     ).then((_) {
-      // Ensure cleanup happens after dialog is fully closed
-      if (!isDisposed) {
-        disposeControllers();
-      }
+      // Dispose controllers only after dialog is fully closed
+      nameController.dispose();
+      dosageController.dispose();
+      unitController.dispose();
+      timesController.dispose();
+      daysController.dispose();
+      inventoryController.dispose();
     });
   }
 
@@ -1079,11 +1072,16 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
   final dosageController = TextEditingController();
   final unitController = TextEditingController();
   final inventoryController = TextEditingController();
-  int _timesPerPeriod = 1; // Default to 1 time
-  int _periodInDays = 1; // Default to 1 day
+  int _timesPerPeriod = 1;
+  int _periodInDays = 1;
   bool _isLoading = false;
 
+  final List<String> _unitOptions = ['片', '毫升'];
+
   String get formattedFrequency => '$_timesPerPeriod/$_periodInDays';
+
+  // Add a state variable to track selected unit
+  String? _selectedUnit;
 
   Widget _buildFrequencySelector() {
     return Padding(
@@ -1199,7 +1197,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                           return '请输入有效数字';
                         }
                         if (times <= 0) {
-                          return '次数必须��于0';
+                          return '次数必须大于0';
                         }
                         if (times > 24) {
                           return '次数不能超过24';
@@ -1373,89 +1371,78 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
               title: '用药剂量',
               icon: Icons.scale_rounded,
               iconColor: Colors.blue.shade400,
-              child: Column(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildFieldLabel(
-                              icon: Icons.straighten_rounded,
-                              label: '剂量',
-                              color: Colors.blue.shade400,
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: dosageController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.scale_rounded,
-                                  color: Colors.blue.shade300,
-                                ),
-                                hintText: '输入剂量值',
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*')),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return '请输入剂量';
-                                }
-                                final number = double.tryParse(value);
-                                if (number == null || number <= 0) {
-                                  return '请输入有效的剂量';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
+                  // Dosage Input
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: dosageController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildFieldLabel(
-                              icon: Icons.straighten_rounded,
-                              label: '单位',
-                              color: Colors.blue.shade400,
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: unitController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.straighten_rounded,
-                                  color: Colors.blue.shade300,
-                                ),
-                                hintText: '如: 片',
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return '请输入单位';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
+                        prefixIcon: Icon(
+                          Icons.scale_rounded,
+                          color: Colors.blue.shade300,
                         ),
+                        hintText: '输入剂量值',
+                        // Add suffix text showing selected unit
+                        suffixText: _selectedUnit,
                       ),
-                    ],
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入剂量';
+                        }
+                        final number = double.tryParse(value);
+                        if (number == null || number <= 0) {
+                          return '请输入有效的剂量';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Unit Dropdown
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedUnit,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(
+                          Icons.straighten_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                      hint: const Text('单位'),
+                      items: _unitOptions.map((String unit) {
+                        return DropdownMenuItem<String>(
+                          value: unit,
+                          child: Text(unit),
+                        );
+                      }).toList(),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请选择单位';
+                        }
+                        return null;
+                      },
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedUnit = newValue;
+                            unitController.text = newValue;
+                          });
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -1628,10 +1615,9 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                     Icons.inventory_rounded,
                     color: Colors.orange.shade300,
                   ),
-                  hintText: '输入库存数量',
+                  hintText: '输入库存数量${_selectedUnit != null ? '(单位：$_selectedUnit)' : ''}',
                 ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
@@ -2013,9 +1999,11 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          isToday ? '今天' : '明天',
+                          _formatReminderDate(reminder.reminderTime),
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 12),
+                            color: Colors.white, 
+                            fontSize: 12
+                          ),
                         ),
                       ),
                     ],
@@ -2252,6 +2240,25 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
   }
 
+  String _formatReminderDate(DateTime reminderTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final reminderDate = DateTime(
+      reminderTime.year, 
+      reminderTime.month, 
+      reminderTime.day
+    );
+
+    if (reminderDate == today) {
+      return '今天';
+    } else if (reminderDate == tomorrow) {
+      return '明天';
+    } else {
+      return '${reminderDate.day}/${reminderDate.month}';
+    }
+  }
+
   Future<void> _handleReminderToggle(
       MedicationReminder reminder, bool value) async {
     // Only show confirmation dialog when marking as taken
@@ -2366,15 +2373,15 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       }
     } else {
       // For marking as not taken, just update the reminder
-      final success =
-          await ref.read(medicationReminderProvider.notifier).updateReminder(
-                reminderId: reminder.id,
-                reminderTime: reminder.reminderTime.toIso8601String(),
-                isTaken: false,
-              );
-
-      print('ISO string: ${reminder.reminderTime.toIso8601String()}');
-
+      final success = await ref.read(medicationReminderProvider.notifier)
+          .updateReminder(
+            reminderId: reminder.id,
+            reminderTime: reminder.reminderTime,
+            isTaken: false,
+          );
+          
+       print('ISO string: ${reminder.reminderTime.toIso8601String()}');
+       
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

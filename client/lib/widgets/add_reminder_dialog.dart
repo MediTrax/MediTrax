@@ -186,19 +186,10 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                 print('TimeOfDay: ${time.format(context)}');
                 print('Selected hour: ${time.hour}, minute: ${time.minute}');
                 print('Created DateTime: $reminderTime');
-
-                // Format without Z
-                final formattedTime = '${reminderTime.year}-'
-                    '${reminderTime.month.toString().padLeft(2, '0')}-'
-                    '${reminderTime.day.toString().padLeft(2, '0')}T'
-                    '${time.hour.toString().padLeft(2, '0')}:'
-                    '${time.minute.toString().padLeft(2, '0')}:00.000';
                 
-                print('Formatted without Z: $formattedTime');
-
                 final success = await ref.read(medicationReminderProvider.notifier).addReminder(
                   medicationId: _selectedMedicationId!,
-                  reminderTime: formattedTime,
+                  reminderTime: reminderTime,
                 );
                 
                 if (!success) {
