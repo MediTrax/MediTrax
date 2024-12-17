@@ -350,6 +350,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  key: const Key('logout_button'),
                   onPressed: () async {
                     try {
                       await ref.read(appStateProvider.notifier).logout();

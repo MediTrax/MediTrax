@@ -3,11 +3,12 @@ package utils
 import (
 	"meditrax/graph/database"
 	"meditrax/graph/model"
+	"time"
 
 	"github.com/surrealdb/surrealdb.go"
 )
 
-func GetHealthMetrics(user model.User, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error) {
+func GetHealthMetrics(user model.User, startDate *time.Time, endDate *time.Time, metricType *string) ([]*model.HealthMetricDetail, error) {
 	var result interface{}
 	var err error
 
@@ -42,8 +43,9 @@ func GetHealthMetrics(user model.User, startDate *string, endDate *string, metri
 	// loop through the metrics, convert them into HealthMetricDetail, then return the converted list and nil
 	var metricDetails []*model.HealthMetricDetail
 	for _, metric := range metrics {
+		// fmt.Printf("%s", metric.RecordedAt.Format("2006-01-02T15:04:05.000"))
 		// check that the metric is within the record time constraints
-		if !((startDate != nil && metric.RecordedAt < *startDate) || (endDate != nil && metric.RecordedAt > *endDate)) {
+		if !((startDate != nil && metric.RecordedAt.Before(*startDate)) || (endDate != nil && metric.RecordedAt.After(*endDate))) {
 			metricDetail := &model.HealthMetricDetail{
 				MetricID:   metric.ID,
 				MetricType: metric.MetricType,

@@ -611,7 +611,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                       hintText: '输入剂量数值',
                                       prefixIcon: Icons.scale_rounded,
                                       iconColor: Colors.blue.shade300,
-                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return '��输入剂量';
@@ -708,7 +710,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                 hintText: '输入库存数量',
                                 prefixIcon: Icons.inventory_rounded,
                                 iconColor: Colors.orange.shade300,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return '请输入库存数量';
@@ -739,14 +743,18 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                           onPressed: () async {
                             if (formKey.currentState!.validate()) {
                               try {
-                                final success = await ref.read(medicationProviderProvider.notifier)
+                                final success = await ref
+                                    .read(medicationProviderProvider.notifier)
                                     .updateMedication(
                                       medicationId: medication.id,
                                       name: nameController.text,
-                                      dosage: double.parse(dosageController.text),
+                                      dosage:
+                                          double.parse(dosageController.text),
                                       unit: unitController.text,
-                                      frequency: '${timesController.text}/${daysController.text}', // Use split frequency
-                                      inventory: double.parse(inventoryController.text),
+                                      frequency:
+                                          '${timesController.text}/${daysController.text}', // Use split frequency
+                                      inventory: double.parse(
+                                          inventoryController.text),
                                     );
 
                                 if (success && dialogContext.mounted) {
@@ -1711,7 +1719,7 @@ class _ReminderTab extends ConsumerStatefulWidget {
 
 class _ReminderTabState extends ConsumerState<_ReminderTab> {
   final NotificationService _notificationService = NotificationService();
-  
+
   @override
   void initState() {
     super.initState();
@@ -1732,7 +1740,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
   void _handleNotificationResponse(String reminderId) async {
     // Show a dialog when notification is tapped
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1779,7 +1787,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
 
                 if (mounted) {
                   Navigator.of(context).pop();
-                  
+
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('已标记为已服用')),
@@ -1816,8 +1824,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     final reminderTime = reminder.reminderTime.toLocal();
     final now = DateTime.now();
     final isToday = reminderTime.year == now.year &&
-                    reminderTime.month == now.month &&
-                    reminderTime.day == now.day;
+        reminderTime.month == now.month &&
+        reminderTime.day == now.day;
 
     return Dismissible(
       key: Key(reminder.id),
@@ -1959,7 +1967,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.access_time_rounded, color: Colors.white, size: 24),
+                      const Icon(Icons.access_time_rounded,
+                          color: Colors.white, size: 24),
                       const SizedBox(height: 4),
                       Text(
                         _formatTime(reminder.reminderTime),
@@ -1971,21 +1980,23 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                       ),
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           isToday ? '今天' : '明天',
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 16),
-                
+
                 // Medication Info
                 Expanded(
                   child: Column(
@@ -2017,7 +2028,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     ],
                   ),
                 ),
-                
+
                 // Status Switch
                 Column(
                   children: [
@@ -2085,7 +2096,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
   Widget build(BuildContext context) {
     final remindersState = ref.watch(medicationReminderProvider);
     final medicationsState = ref.watch(medicationProviderProvider);
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -2123,7 +2134,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     }
                     showDialog(
                       context: context,
-                      builder: (context) => AddReminderDialog(medications: medications),
+                      builder: (context) =>
+                          AddReminderDialog(medications: medications),
                     );
                   });
                 },
@@ -2140,7 +2152,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Reminders List
           Expanded(
             child: remindersState.when(
@@ -2172,7 +2184,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                       ),
                     );
                   }
-                  
+
                   return ListView.builder(
                     itemCount: reminders.length,
                     itemBuilder: (context, index) {
@@ -2184,7 +2196,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                         context: context,
                         reminder: reminders[index],
                         medication: medication,
-                        onToggle: (value) => _handleReminderToggle(reminders[index], value),
+                        onToggle: (value) =>
+                            _handleReminderToggle(reminders[index], value),
                       );
                     },
                   );
@@ -2213,10 +2226,12 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     return '${localTime.hour.toString().padLeft(2, '0')}:${localTime.minute.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _handleReminderToggle(MedicationReminder reminder, bool value) async {
+  Future<void> _handleReminderToggle(
+      MedicationReminder reminder, bool value) async {
     // Only show confirmation dialog when marking as taken
     if (value) {
-      final reminderDetails = await ref.read(medicationReminderProvider.notifier)
+      final reminderDetails = await ref
+          .read(medicationReminderProvider.notifier)
           .getReminderDetails(reminder.id);
 
       if (reminderDetails == null) {
@@ -2310,9 +2325,10 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       );
 
       if (confirmed == true) {
-        final success = await ref.read(medicationReminderProvider.notifier)
+        final success = await ref
+            .read(medicationReminderProvider.notifier)
             .confirmAndTakeMedication(reminder.id);
-            
+
         if (!success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

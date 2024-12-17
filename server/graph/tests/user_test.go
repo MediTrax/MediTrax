@@ -2,13 +2,138 @@ package tests
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"math/big"
+	"meditrax/graph/custom"
+	"meditrax/graph/model"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"
 )
+
+func TestToken(t *testing.T) {
+	c := client.New(NewServer())
+	num, _ := rand.Int(rand.Reader, big.NewInt(1000000000))
+	accessToken := fmt.Sprintf("%d", num.Int64())
+	refreshToken := fmt.Sprintf("%d", num.Int64())
+	//user := CreateUserAndLogin(t, c)
+	t.Run("Refresh Token", func(t *testing.T) {
+		var createResponse struct {
+			Token struct {
+				ID                 string
+				User               string
+				AccessToken        string
+				RefreshToken       string
+				AccessTokenExpiry  string
+				RefreshTokenExpiry string
+				Device             string
+				CreatedAt          string
+				UpdatedAt          string
+			}
+		}
+		err := c.Post(`mutation refresh_token($accessToken: String!, $refreshToken: String!){
+			refreshToken(
+				accessToken: $accessToken,
+				refreshToken: $refreshToken,
+				device: "PC"
+			) {
+				accessToken,
+				refreshToken,
+				device
+			}
+		}`, &createResponse, client.Var("accessToken", accessToken), client.Var("refreshToken", refreshToken))
+		if err != nil {
+			println("Errors:")
+			println(err.Error())
+			println("End of errors")
+		}
+		//require.NotEmpty(t, createResponse.Token.Device)
+
+		// Use the valid tokens to refresh the token
+		var newTokenResponse struct {
+			RefreshToken struct {
+				AccessToken  string
+				RefreshToken string
+			}
+		}
+
+		// Test invalid tokens (using tokens that don't exist in the database)
+		var errMsg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err = c.Post(`mutation refresh_token{
+			refreshToken(
+				accessToken: "invalid_access_token"
+				refreshToken: "invalid_refresh_token"
+				device: "test_device"
+			) {
+				accessToken
+				refreshToken
+			}
+		}`, &newTokenResponse, client.AddHeader("Authorization", newTokenResponse.RefreshToken.AccessToken))
+		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		require.Equal(t, "token not found", errMsg[0].Message)
+
+		// Test missing token parameters (both access and refresh tokens empty)
+		err = c.Post(`mutation refresh_token{
+			refreshToken(
+				accessToken: ""
+				refreshToken: ""
+				device: "test_device"
+			) {
+				accessToken
+				refreshToken
+			}
+		}`, &newTokenResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", newTokenResponse.RefreshToken.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
+		require.Equal(t, "token not found", errMsg[0].Message)
+		// Ensure that no duplicate tokens exist by checking the database or ensuring old token is deleted.
+	})
+	// t.Run("Refresh Token Logic", func(t *testing.T) {
+	// 	var refreshResponse struct {
+	// 		RefreshToken struct {
+	// 			AccessToken  string
+	// 			RefreshToken string
+	// 			Device       string
+	// 		}
+	// 	}
+
+	// 	// 调用 refreshToken 测试逻辑
+	// 	err := c.Post(`mutation refresh_token($accessToken: String!, $refreshToken: String!, $device: String!){
+	//         refreshToken(
+	//             accessToken: $accessToken,
+	//             refreshToken: $refreshToken,
+	//             device: $device
+	//         ) {
+	//             accessToken
+	//             refreshToken
+	//             device
+	//         }
+	//     }`, &refreshResponse,
+	// 		client.Var("accessToken", accessToken),
+	// 		client.Var("refreshToken", refreshToken),
+	// 		client.Var("device", "PC"),
+	// 	)
+	// 	require.NoError(t, err)
+
+	// 	// 检查新生成的 Token
+	// 	require.NotEmpty(t, refreshResponse.RefreshToken.AccessToken)
+	// 	require.NotEmpty(t, refreshResponse.RefreshToken.RefreshToken)
+	// 	require.Equal(t, "PC", refreshResponse.RefreshToken.Device)
+
+	// 	// 验证旧 Token 已被删除
+	// 	oldToken, err := database.DB.Query(`
+	//         SELECT * FROM token WHERE accessToken = $accessToken;
+	//     `, map[string]interface{}{
+	// 		"accessToken": accessToken,
+	// 	})
+	// 	require.NoError(t, err)
+	// 	require.Empty(t, oldToken)
+	// })
+}
 
 func TestUserFunctions(t *testing.T) {
 	c := client.New(NewServer())
@@ -39,7 +164,6 @@ func TestUserFunctions(t *testing.T) {
 				message
 			}
 		}`, &resp, client.Var("phoneNumber", phoneNumber), client.Var("password", password), client.Var("username", username))
-
 		if err != nil {
 			println("Errors:")
 			println(err.Error())
@@ -152,28 +276,26 @@ func TestUserFunctions(t *testing.T) {
 		require.Contains(t, response.RequestPasswordReset.Message, "has been sent to your phone")
 	})
 
-	// t.Run("Reset Password", func(t *testing.T) {
-	// 	// 模拟生成的重置 token 和新密码
-	// 	resetToken := "mocked_reset_token"
-	// 	newPassword := "secure_password"
-	// 	var response struct {
-	// 		ResetPassword struct {
-	// 			Message string
-	// 		}
-	// 	}
+	t.Run("Reset Password", func(t *testing.T) {
+		// 模拟生成的重置 token 和新密码
+		resetToken := "01JEST4WS17BKM8SNJPRWWQ1B2"
+		newPassword := "secure_password"
+		var response struct {
+			ResetPassword struct {
+				Message string
+			}
+		}
 
-	// 	query := fmt.Sprintf(`
-	// 		mutation {
-	// 			resetPassword(token: "%s", newPassword: "%s") {
-	// 				message
-	// 			}
-	// 		}
-	// 	`, resetToken, newPassword)
-
-	// 	c.MustPost(query, &response)
-
-	// 	require.Equal(t, "Password reset successfully", response.ResetPassword.Message)
-	// })
+		query := fmt.Sprintf(`
+			mutation {
+				resetPassword(token: "%s", newPassword: "%s") {
+					message
+				}
+			}
+		`, resetToken, newPassword)
+		c.MustPost(query, &response)
+		require.Equal(t, "Password reset successfully", response.ResetPassword.Message)
+	})
 
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
@@ -191,4 +313,126 @@ func TestUserFunctions(t *testing.T) {
 		require.Equal(t, fmt.Sprintf("User %s with name %s deleted successfully", user.ID, user.Username), response.DeleteUser.Message)
 	})
 
+}
+
+func TestSharedProfiles(t *testing.T) {
+	c := client.New(NewServer())
+	user1 := CreateUserAndLogin(t, c)
+	user2 := CreateUserAndLogin(t, c)
+
+	t.Run("Share Profile", func(t *testing.T) {
+		var response struct {
+			ShareProfile struct {
+				Message string
+			}
+		}
+
+		c.MustPost(`mutation ($phoneNumber: String!){
+			shareProfile(phoneNumber:$phoneNumber, accessLevel:"1", remarks:"no remarks"){
+				message
+			}
+		}`, &response,
+			client.Var("phoneNumber", user2.PhoneNumber),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, fmt.Sprintf("Profile shared successfully with %s", user2.Username), response.ShareProfile.Message)
+	})
+
+	t.Run("Get Profiles", func(t *testing.T) {
+		var response struct {
+			Get []struct {
+				ID          string
+				Name        string
+				PhoneNumber string
+				Role        string
+				CreatedAt   string
+			}
+		}
+
+		c.MustPost(`query {
+			get:getProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user2.AccessToken)))
+		require.Equal(t, 2, len(response.Get))
+		require.Equal(t, user1.Username, response.Get[1].Name)
+		require.Equal(t, user1.ID, response.Get[1].ID)
+		require.Equal(t, user1.PhoneNumber, response.Get[1].PhoneNumber)
+		_, err := custom.UnmarshalDateTime(response.Get[1].CreatedAt)
+		require.Nil(t, err)
+
+		c.MustPost(`query {
+			get:getSharedProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, 2, len(response.Get))
+		require.Equal(t, user2.Username, response.Get[1].Name)
+		require.Equal(t, user2.ID, response.Get[1].ID)
+		require.Equal(t, user2.PhoneNumber, response.Get[1].PhoneNumber)
+		_, err = custom.UnmarshalDateTime(response.Get[1].CreatedAt)
+		require.Nil(t, err)
+	})
+
+	t.Run("Unshare profile", func(t *testing.T) {
+		var response struct {
+			UnshareProfile model.UnshareProfileResponse
+		}
+
+		c.MustPost(`mutation($targetUserId:String!){
+			unshareProfile(targetUserId:$targetUserId){
+				message
+			}
+		}`, &response, client.Var("targetUserId", user2.ID),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, fmt.Sprintf("Profile access removed for user %s", user2.ID), response.UnshareProfile.Message)
+
+		var getResponse struct {
+			Get []struct {
+				ID          string
+				Name        string
+				PhoneNumber string
+				Role        string
+				CreatedAt   string
+			}
+		}
+
+		c.MustPost(`query {
+			get:getProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &getResponse,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user2.AccessToken)))
+		require.Equal(t, 1, len(getResponse.Get))
+		require.Equal(t, user2.ID, getResponse.Get[0].ID)
+
+		c.MustPost(`query {
+			get:getSharedProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &getResponse,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		require.Equal(t, 1, len(getResponse.Get))
+		require.Equal(t, user1.ID, getResponse.Get[0].ID)
+	})
+
+	DeleteUser(t, c, user1)
+	DeleteUser(t, c, user2)
 }

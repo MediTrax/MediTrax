@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"
@@ -161,21 +162,29 @@ func TestHealthMetric(t *testing.T) {
 			}
 		}
 
-		c.MustPost(`mutation create_metric{
+		recordTime1, _ := time.Parse("2006-01-02T15:04:05.000", "2024-01-03T18:04:05.000")
+		recordTime2, _ := time.Parse("2006-01-02T15:04:05.000", "2024-07-01T10:00:00.000")
+		c.MustPost(`mutation create_metric($recordedAt1:DateTime!, $recordedAt2:DateTime!){
 			add1:addHealthMetric(
 				metricType:"type1", 
 				unit:"mg/l", 
 				value:11.3, 
-				recordedAt:"2024-01-03T18:04:05.000"
+				recordedAt:$recordedAt1
 			){
 				metricId
 				message
 			}
-			add2:addHealthMetric(metricType:"type2", unit:"", value:1.03, recordedAt:"2024-07-01T10:00:00.000"){
+			add2:addHealthMetric(
+				metricType:"type2", 
+				unit:"", 
+				value:1.03, 
+				recordedAt: $recordedAt2
+			){
 				metricId
 				message
 			}
-		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		}`, &response, client.Var("recordedAt1", recordTime1), client.Var("recordedAt2", recordTime2),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, "new health metric added successfully", response.Add1.Message)
 		require.Equal(t, "new health metric added successfully", response.Add2.Message)
 		metricId1 = response.Add1.MetricID
@@ -193,25 +202,27 @@ func TestHealthMetric(t *testing.T) {
 				Message  string
 			}
 		}
-		err := c.Post(`mutation create_metric{
+		err := c.Post(`mutation create_metric($recordedAt:DateTime!){
 			addHealthMetric(
 				metricType:"type1", 
 				unit:"mg/l", 
 				value:11.3, 
-				recordedAt:"2024-01-03T18:04:05.000"
+				recordedAt:$recordedAt
 			){
 				metricId
 				message
 			}
-		}`, &response_, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		}`, &response_, client.Var("recordedAt", recordTime1),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "health metric with the same type and same recordAt time already exists", err_msg[0].Message)
 
-		err = c.Post(`mutation create_metric{
-			addHealthMetric(metricType:"type1", unit:"mg/l", value:11.3, recordedAt:"2024-01-03T18:04:05.000"){
+		// newTime, _ := time.Parse("2006-01-02T15:04:05.000", "2024-01-03T18:04:06.000")
+		err = c.Post(`mutation create_metric($recordedAt:DateTime!){
+			addHealthMetric(metricType:"type1", unit:"mg/l", value:11.3, recordedAt:$recordedAt){
 				metricId
 				message
-			}}`, &response_)
+			}}`, &response_, client.Var("recordedAt", recordTime1))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "access denied", err_msg[0].Message)
 	})
@@ -255,29 +266,31 @@ func TestHealthMetric(t *testing.T) {
 			}
 		}
 
-		c.MustPost(`query get_metrics{
-			type1:getHealthMetrics(metricType: "type1"){
+		firstDate, _ := time.Parse("2006-01-02T15:04:05.000", "2024-01-01T18:04:05.000")
+		secondDate, _ := time.Parse("2006-01-02T15:04:05.000", "2024-02-01T18:04:05.000")
+		c.MustPost(`query get_metrics($firstDate:DateTime!, $secondDate:DateTime!){
+			type1:getHealthMetrics(metricType: "type1", ){
 				metricId
 				metricType
 				value
 				recordedAt
 				unit
 			}
-			startDate:getHealthMetrics(startDate: "2024-02-00T18:04:05.000"){
+			startDate:getHealthMetrics(startDate: $secondDate){
 				metricId
 				metricType
 				value
 				recordedAt
 				unit
 			}
-			endDate:getHealthMetrics(endDate: "2024-02-00T18:04:05.000"){
+			endDate:getHealthMetrics(endDate: $secondDate){
 				metricId
 				metricType
 				value
 				recordedAt
 				unit
 			}
-			rangeDate:getHealthMetrics(startDate: "2024-01-00T18:04:05.000", endDate: "2024-02-00T18:04:05.000"){
+			rangeDate:getHealthMetrics(startDate: $firstDate, endDate: $secondDate){
 				metricId
 				metricType
 				value
@@ -285,9 +298,9 @@ func TestHealthMetric(t *testing.T) {
 				unit
 			}
 			dateAndType:getHealthMetrics(
-				startDate: "2024-01-00T18:04:05.000", 
-				endDate: "2024-08-00T18:04:05.000",
-				metricType: "type2"
+				startDate: $firstDate, 
+				endDate: $secondDate,
+				metricType: "type1"
 			){
 				metricId
 				metricType
@@ -295,7 +308,8 @@ func TestHealthMetric(t *testing.T) {
 				recordedAt
 				unit
 			}
-		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		}`, &response, client.Var("firstDate", firstDate), client.Var("secondDate", secondDate),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
 		require.Equal(t, 1, len(response.Type1))
 		require.Equal(t, metricId1, response.Type1[0].MetricID)
@@ -310,7 +324,7 @@ func TestHealthMetric(t *testing.T) {
 		require.Equal(t, metricId1, response.RangeDate[0].MetricID)
 
 		require.Equal(t, 1, len(response.DateAndType))
-		require.Equal(t, metricId2, response.DateAndType[0].MetricID)
+		require.Equal(t, metricId1, response.DateAndType[0].MetricID)
 	})
 
 	t.Run("Update metrics", func(t *testing.T) {

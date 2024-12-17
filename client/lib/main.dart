@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/app_state.dart';
@@ -45,13 +46,13 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize notifications through the provider
     final notificationService = NotificationService();
     if (notificationService.isSupported) {
       await notificationService.initialize();
     }
-    
+
     await Hive.initFlutter();
     Hive.registerAdapter(AppStateDataImplAdapter());
     Hive.registerAdapter(TokenAdapter());
@@ -67,7 +68,7 @@ void main() async {
     Hive.registerAdapter(AchievementBadgeImplAdapter());
     Hive.registerAdapter(UserAchievementImplAdapter());
     await Hive.openBox<AppStateData>('appState');
-    
+
     runApp(
       ProviderScope(
         overrides: [
@@ -247,6 +248,7 @@ class MyApp extends ConsumerWidget {
       title: 'Health Care App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        textTheme: GoogleFonts.notoSerifTextTheme(),
         useMaterial3: true,
       ),
       routerConfig: router,
