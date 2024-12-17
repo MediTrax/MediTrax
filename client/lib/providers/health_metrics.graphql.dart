@@ -76,7 +76,7 @@ class Variables$Query$GetHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetHealthMetrics) ||
+    if (other is! Variables$Query$GetHealthMetrics ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -229,8 +229,7 @@ class Query$GetHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetHealthMetrics) ||
-        runtimeType != other.runtimeType) {
+    if (other is! Query$GetHealthMetrics || runtimeType != other.runtimeType) {
       return false;
     }
     final l$getHealthMetrics = getHealthMetrics;
@@ -689,7 +688,7 @@ class Query$GetHealthMetrics$getHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetHealthMetrics$getHealthMetrics) ||
+    if (other is! Query$GetHealthMetrics$getHealthMetrics ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -897,7 +896,7 @@ class Variables$Query$GetSharedHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetSharedHealthMetrics) ||
+    if (other is! Variables$Query$GetSharedHealthMetrics ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1063,7 +1062,7 @@ class Query$GetSharedHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedHealthMetrics) ||
+    if (other is! Query$GetSharedHealthMetrics ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1551,7 +1550,7 @@ class Query$GetSharedHealthMetrics$getSharedHealthMetrics {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedHealthMetrics$getSharedHealthMetrics) ||
+    if (other is! Query$GetSharedHealthMetrics$getSharedHealthMetrics ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1691,7 +1690,7 @@ class Variables$Mutation$AddHealthMetric {
     required String metricType,
     required double value,
     required String unit,
-    required String recordedAt,
+    required DateTime recordedAt,
   }) =>
       Variables$Mutation$AddHealthMetric._({
         r'metricType': metricType,
@@ -1712,7 +1711,7 @@ class Variables$Mutation$AddHealthMetric {
     final l$unit = data['unit'];
     result$data['unit'] = (l$unit as String);
     final l$recordedAt = data['recordedAt'];
-    result$data['recordedAt'] = (l$recordedAt as String);
+    result$data['recordedAt'] = dateTimeFromJson(l$recordedAt);
     return Variables$Mutation$AddHealthMetric._(result$data);
   }
 
@@ -1724,7 +1723,7 @@ class Variables$Mutation$AddHealthMetric {
 
   String get unit => (_$data['unit'] as String);
 
-  String get recordedAt => (_$data['recordedAt'] as String);
+  DateTime get recordedAt => (_$data['recordedAt'] as DateTime);
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
@@ -1735,7 +1734,7 @@ class Variables$Mutation$AddHealthMetric {
     final l$unit = unit;
     result$data['unit'] = l$unit;
     final l$recordedAt = recordedAt;
-    result$data['recordedAt'] = l$recordedAt;
+    result$data['recordedAt'] = dateTimeToJson(l$recordedAt);
     return result$data;
   }
 
@@ -1751,7 +1750,7 @@ class Variables$Mutation$AddHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$AddHealthMetric) ||
+    if (other is! Variables$Mutation$AddHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1806,7 +1805,7 @@ abstract class CopyWith$Variables$Mutation$AddHealthMetric<TRes> {
     String? metricType,
     double? value,
     String? unit,
-    String? recordedAt,
+    DateTime? recordedAt,
   });
 }
 
@@ -1836,7 +1835,7 @@ class _CopyWithImpl$Variables$Mutation$AddHealthMetric<TRes>
         if (value != _undefined && value != null) 'value': (value as double),
         if (unit != _undefined && unit != null) 'unit': (unit as String),
         if (recordedAt != _undefined && recordedAt != null)
-          'recordedAt': (recordedAt as String),
+          'recordedAt': (recordedAt as DateTime),
       }));
 }
 
@@ -1850,7 +1849,7 @@ class _CopyWithStubImpl$Variables$Mutation$AddHealthMetric<TRes>
     String? metricType,
     double? value,
     String? unit,
-    String? recordedAt,
+    DateTime? recordedAt,
   }) =>
       _res;
 }
@@ -1901,7 +1900,7 @@ class Mutation$AddHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddHealthMetric) ||
+    if (other is! Mutation$AddHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2031,7 +2030,7 @@ const documentNodeMutationAddHealthMetric = DocumentNode(definitions: [
       VariableDefinitionNode(
         variable: VariableNode(name: NameNode(value: 'recordedAt')),
         type: NamedTypeNode(
-          name: NameNode(value: 'String'),
+          name: NameNode(value: 'DateTime'),
           isNonNull: true,
         ),
         defaultValue: DefaultValueNode(value: null),
@@ -2363,7 +2362,7 @@ class Mutation$AddHealthMetric$addHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddHealthMetric$addHealthMetric) ||
+    if (other is! Mutation$AddHealthMetric$addHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2522,7 +2521,7 @@ class Variables$Mutation$UpdateHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateHealthMetric) ||
+    if (other is! Variables$Mutation$UpdateHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2666,7 +2665,7 @@ class Mutation$UpdateHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateHealthMetric) ||
+    if (other is! Mutation$UpdateHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3121,7 +3120,7 @@ class Mutation$UpdateHealthMetric$updateHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateHealthMetric$updateHealthMetric) ||
+    if (other is! Mutation$UpdateHealthMetric$updateHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3255,7 +3254,7 @@ class Variables$Mutation$DeleteHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteHealthMetric) ||
+    if (other is! Variables$Mutation$DeleteHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3362,7 +3361,7 @@ class Mutation$DeleteHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteHealthMetric) ||
+    if (other is! Mutation$DeleteHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3775,7 +3774,7 @@ class Mutation$DeleteHealthMetric$deleteHealthMetric {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteHealthMetric$deleteHealthMetric) ||
+    if (other is! Mutation$DeleteHealthMetric$deleteHealthMetric ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3911,7 +3910,7 @@ class Query$GetTreatmentSchedules {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetTreatmentSchedules) ||
+    if (other is! Query$GetTreatmentSchedules ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -4331,7 +4330,7 @@ class Query$GetTreatmentSchedules$getTreatmentSchedules {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetTreatmentSchedules$getTreatmentSchedules) ||
+    if (other is! Query$GetTreatmentSchedules$getTreatmentSchedules ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -4502,7 +4501,7 @@ class Variables$Query$GetSharedTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetSharedTreatmentSchedule) ||
+    if (other is! Variables$Query$GetSharedTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -4616,7 +4615,7 @@ class Query$GetSharedTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedTreatmentSchedule) ||
+    if (other is! Query$GetSharedTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -5069,8 +5068,7 @@ class Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule) ||
+    if (other is! Query$GetSharedTreatmentSchedule$getSharedTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -5276,7 +5274,7 @@ class Variables$Mutation$CreateTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$CreateTreatmentSchedule) ||
+    if (other is! Variables$Mutation$CreateTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -5432,7 +5430,7 @@ class Mutation$CreateTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateTreatmentSchedule) ||
+    if (other is! Mutation$CreateTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -5907,7 +5905,7 @@ class Mutation$CreateTreatmentSchedule$createTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateTreatmentSchedule$createTreatmentSchedule) ||
+    if (other is! Mutation$CreateTreatmentSchedule$createTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -6104,7 +6102,7 @@ class Variables$Mutation$UpdateTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateTreatmentSchedule) ||
+    if (other is! Variables$Mutation$UpdateTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -6283,7 +6281,7 @@ class Mutation$UpdateTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateTreatmentSchedule) ||
+    if (other is! Mutation$UpdateTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -6771,7 +6769,7 @@ class Mutation$UpdateTreatmentSchedule$updateTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateTreatmentSchedule$updateTreatmentSchedule) ||
+    if (other is! Mutation$UpdateTreatmentSchedule$updateTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -6917,7 +6915,7 @@ class Variables$Mutation$DeleteTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteTreatmentSchedule) ||
+    if (other is! Variables$Mutation$DeleteTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -7026,7 +7024,7 @@ class Mutation$DeleteTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteTreatmentSchedule) ||
+    if (other is! Mutation$DeleteTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -7446,7 +7444,7 @@ class Mutation$DeleteTreatmentSchedule$deleteTreatmentSchedule {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteTreatmentSchedule$deleteTreatmentSchedule) ||
+    if (other is! Mutation$DeleteTreatmentSchedule$deleteTreatmentSchedule ||
         runtimeType != other.runtimeType) {
       return false;
     }

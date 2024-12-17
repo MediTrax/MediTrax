@@ -91,7 +91,7 @@ class HealthMetrics extends _$HealthMetrics {
                   metricType: metricType,
                   value: value,
                   unit: unit,
-                  recordedAt: recordedAt.toIso8601String(),
+                  recordedAt: recordedAt,
                 ),
               ),
             );
@@ -164,7 +164,7 @@ class TreatmentSchedules extends _$TreatmentSchedules {
         throw result.exception!;
       }
 
-      return result.parsedData!.getTreatmentSchedules!
+      return (result.parsedData!.getTreatmentSchedules ?? [])
           .map((schedule) => TreatmentSchedule(
                 id: schedule!.scheduleId,
                 treatmentType: schedule.treatmentType,

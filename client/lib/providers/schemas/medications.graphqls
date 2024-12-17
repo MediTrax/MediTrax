@@ -1,0 +1,120 @@
+type Medication{
+  id: String!
+  name: String!
+  dosage: Float!
+  unit: String!
+  frequency: String!
+  inventory: Float!
+  userId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MedicationReminder{
+  id: String!
+  medicationId: String!
+  userId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+  createdAt: DateTime!
+}
+
+type AddMedicationResponse {
+  medicationId: String!
+  message: String!
+}
+
+type MedicationDetail {
+  medicationId: String!
+  name: String!
+  dosage: Float!
+  unit: String!
+  frequency: String!
+  inventory: Float!
+}
+
+type UpdateMedicationResponse {
+  medicationId: String!
+  message: String!
+}
+
+type DeleteMedicationResponse {
+  message: String!
+}
+
+type CreateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
+}
+
+type UpdateMedicationReminderResponse {
+  reminderId: String!
+  message: String!
+}
+
+type MedicationReminderDetail {
+  reminderId: String!
+  medicationId: String!
+  reminderTime: DateTime!
+  isTaken: Boolean!
+}
+
+type TreatmentSchedule{
+  id: String!
+  userId: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
+}
+
+type DeleteMedicationReminderResponse{
+  message: String!
+}
+
+type CreateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
+}
+
+type TreatmentScheduleDetail {
+  scheduleId: String!
+  treatmentType: String!
+  scheduledTime: DateTime!
+  location: String!
+  notes: String
+}
+
+type UpdateTreatmentScheduleResponse {
+  scheduleId: String!
+  message: String!
+}
+
+type DeleteTreatmentScheduleResponse {
+  message: String!
+}
+
+type TakeMedicationResponse{
+  message: String!
+}
+
+extend type Query{
+  getMedications: [MedicationDetail]
+  getMedicationReminders: [MedicationReminderDetail]
+  getTreatmentSchedules: [TreatmentScheduleDetail]
+}
+
+extend type Mutation{
+  addMedication(name: String!, dosage: Float!, unit: String!, frequency: String!, inventory: Float!): AddMedicationResponse
+  updateMedication(medicationId: String!, name: String, dosage: Float, unit: String, frequency: String, inventory: Float): UpdateMedicationResponse
+  deleteMedication(medicationId: String!): DeleteMedicationResponse
+  
+  createMedicationReminder(medicationId: String!, reminderTime: DateTime!): CreateMedicationReminderResponse
+  updateMedicationReminder(reminderId: String!, reminderTime: DateTime, isTaken: Boolean): UpdateMedicationReminderResponse
+  takeMedication(reminderId: String) : TakeMedicationResponse!
+  deleteMedicationReminder(reminderId: String!) : DeleteMedicationReminderResponse
+  
+  createTreatmentSchedule(treatmentType: String!, scheduledTime: DateTime!, location: String!, notes: String): CreateTreatmentScheduleResponse
+  updateTreatmentSchedule(scheduleId: String!, treatmentType: String, scheduledTime: DateTime, location: String, notes: String): UpdateTreatmentScheduleResponse
+  deleteTreatmentSchedule(scheduleId: String!): DeleteTreatmentScheduleResponse
+}

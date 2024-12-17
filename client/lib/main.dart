@@ -24,7 +24,6 @@ import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/ai_helper_screen.dart';
 import 'screens/diet_management_screen.dart';
-import 'screens/family_collaboration_screen.dart';
 import 'screens/health_risk_entry_screen.dart';
 import 'screens/health_risk_report_screen.dart';
 import 'screens/medical_records_screen.dart';
@@ -210,10 +209,6 @@ class RouterNotifier extends ChangeNotifier {
             GoRoute(
               path: '/profile-sharing',
               builder: (context, state) => const ProfileSharingScreen(),
-            ),
-            GoRoute(
-              path: '/family-collaboration',
-              builder: (context, state) => const FamilyCollaborationScreen(),
             ),
             GoRoute(
               path: '/health-risk-assessment',
