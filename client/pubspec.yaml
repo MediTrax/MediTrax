@@ -57,6 +57,7 @@ dependencies:
   flutter_timezone: ^1.0.8
   intl_phone_number_input: ^0.7.4
   fl_chart: ^0.69.2
+  flutter_libphonenumber_ios: ^1.4.0
 
 dev_dependencies:
   flutter_test:
