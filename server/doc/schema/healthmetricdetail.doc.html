@@ -110,11 +110,6 @@
                 ActivityLogDetail
             </a>
         </li>
-        <li  title="AddFamilyMemberResponse">
-            <a href="addfamilymemberresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                AddFamilyMemberResponse
-            </a>
-        </li>
         <li  title="AddHealthMetricResponse">
             <a href="addhealthmetricresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
                 AddHealthMetricResponse
@@ -155,11 +150,6 @@
                 CreateUserResponse
             </a>
         </li>
-        <li  title="DeleteFamilyMemberResponse">
-            <a href="deletefamilymemberresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                DeleteFamilyMemberResponse
-            </a>
-        </li>
         <li  title="DeleteHealthMetricResponse">
             <a href="deletehealthmetricresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
                 DeleteHealthMetricResponse
@@ -198,16 +188,6 @@
         <li  title="EvaluateHealthRiskAssessmentResponse">
             <a href="evaluatehealthriskassessmentresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
                 EvaluateHealthRiskAssessmentResponse
-            </a>
-        </li>
-        <li  title="FamilyMember">
-            <a href="familymember.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                FamilyMember
-            </a>
-        </li>
-        <li  title="FamilyMemberDetail">
-            <a href="familymemberdetail.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                FamilyMemberDetail
             </a>
         </li>
         <li  title="FoodRecommendation">
@@ -290,11 +270,6 @@
                 PasswordChange
             </a>
         </li>
-        <li  title="PatientDetail">
-            <a href="patientdetail.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                PatientDetail
-            </a>
-        </li>
         <li  title="ProfileDetail">
             <a href="profiledetail.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
                 ProfileDetail
@@ -353,11 +328,6 @@
         <li  title="UnshareProfileResponse">
             <a href="unshareprofileresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
                 UnshareProfileResponse
-            </a>
-        </li>
-        <li  title="UpdateFamilyMemberResponse">
-            <a href="updatefamilymemberresponse.doc.html" class="slds-navigation-list--vertical__action slds-text-link--reset slds-truncate">
-                UpdateFamilyMemberResponse
             </a>
         </li>
         <li  title="UpdateHealthMetricResponse">
@@ -524,7 +494,7 @@
             </a>
             GraphQL Schema definition
         </h2>
-        <code class="highlight"><ul class="code" style="padding-left:42px"><li><span class="keyword operator ts">type</span> <span class="identifier">HealthMetricDetail</span> {</li><li></li><li><span class="tab"><span class="meta">metricId</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="meta">metricType</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="meta">value</span>: <a class="support type" href="float.doc.html">Float</a>! </span></li><li></li><li><span class="tab"><span class="meta">unit</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="meta">recordedAt</span>: <a class="support type" href="datetime.doc.html">DateTime</a>! </span></li><li>}</li></ul></code>
+        <code class="highlight"><ul class="code" style="padding-left:42px"><li><span class="keyword operator ts">type</span> <span class="identifier">HealthMetricDetail</span> {</li><li></li><li><span class="tab"><span class="comment line">#   The ID of the health metric.</span></span></li><li><span class="tab"><span class="meta">metricId</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="comment line">#   The type of the health metric.</span></span></li><li><span class="tab"><span class="meta">metricType</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="comment line">#   The value of the health metric.</span></span></li><li><span class="tab"><span class="meta">value</span>: <a class="support type" href="float.doc.html">Float</a>! </span></li><li></li><li><span class="tab"><span class="comment line">#   The unit of measurement for the health metric.</span></span></li><li><span class="tab"><span class="meta">unit</span>: <a class="support type" href="string.doc.html">String</a>! </span></li><li></li><li><span class="tab"><span class="comment line">#   The date and time when the health metric was recorded.</span></span></li><li><span class="tab"><span class="meta">recordedAt</span>: <a class="support type" href="datetime.doc.html">DateTime</a>! </span></li><li>}</li></ul></code>
     </div>
 </section>
 <section>
