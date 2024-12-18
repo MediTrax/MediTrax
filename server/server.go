@@ -58,6 +58,11 @@ func main() {
 	})
 	mux := http.NewServeMux()
 	mux.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+
+	// Serve the documentation
+	fs := http.FileServer(http.Dir("./doc/schema"))
+	mux.Handle("/doc/", http.StripPrefix("/doc/", fs))
+
 	mux.Handle("/graphql", middlewares.Middleware(srv))
 	// mux.Handle("/files/", middlewares.Middleware(MinioHandler()))
 	corsConfig := cors.New(cors.Options{
@@ -68,6 +73,7 @@ func main() {
 	})
 	handler := corsConfig.Handler(mux)
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/doc/ for GraphQL documentation", port)
 
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

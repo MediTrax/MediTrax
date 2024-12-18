@@ -1,24 +1,81 @@
-type FoodSpec{
+"""
+Represents the specification of a food item.
+"""
+type FoodSpec {
+  """
+  The name of the food specification.
+  """
   name: String!
+
+  """
+  The value of the food specification.
+  """
   value: Float!
+
+  """
+  The unit of measurement for the food specification.
+  """
   unit: String!
+
+  """
+  A measure of how high the specification value is compared to a standard.
+  """
   howHigh: Float!
 }
 
-type FoodRecommendation{
+"""
+Represents a recommendation for a food item.
+"""
+type FoodRecommendation {
+  """
+  The name of the recommended food item.
+  """
   name: String!
 }
 
-type FoodSpecs{
+"""
+Represents a collection of food specifications.
+"""
+type FoodSpecs {
+  """
+  The list of food specifications.
+  """
   specs: [FoodSpec!]!
+
+  """
+  A measure of how recommended the food item is.
+  """
   howRecommend: Float!
 }
 
-extend type Query{
-  getFoodSpecs(food: String!) : FoodSpecs
-  getMockFoodSpecs(food: String!) : FoodSpecs  
+extend type Query {
+  """
+  Retrieves the specifications for a given food item.
+  """
+  getFoodSpecs(
+    """
+    The name of the food item.
+    """
+    food: String!
+  ): FoodSpecs
 
-  # add endpoint for recommending ONE food
-  getFoodRecommendation : FoodRecommendation
-  getMockFoodRecommendation : FoodRecommendation
+  """
+  Retrieves mock specifications for a given food item.
+  """
+  getMockFoodSpecs(
+    """
+    The name of the food item.
+    """
+    food: String!
+  ): FoodSpecs
+
+  """
+  Retrieves a recommendation for a food item.
+  """
+  getFoodRecommendation: FoodRecommendation
+
+  """
+  Retrieves a mock recommendation for a food item.
+  """
+  getMockFoodRecommendation: FoodRecommendation
 }
