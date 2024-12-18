@@ -17,14 +17,6 @@ query GetUserAchievements {
   }
 }
 
-query GetFamilyMembers {
-  getFamilyMembers {
-    memberId
-    relatedUserId
-    relationship
-    accessLevel
-  }
-}
 
 mutation UpdateUser($name: String, $phoneNumber: String, $password: String) {
   updateUser(name: $name, phoneNumber: $phoneNumber, password: $password) {
@@ -50,26 +42,6 @@ mutation ResetPassword($token: String!, $newPassword: String!) {
     message
   }
 }
-
-mutation AddFamilyMember($relatedUserId: String!, $relationship: String!, $accessLevel: String!) {
-  addFamilyMember(relatedUserId: $relatedUserId, relationship: $relationship, accessLevel: $accessLevel) {
-    memberId
-    message
-  }
-}
-
-mutation UpdateFamilyMember($memberId: String!, $relationship: String, $accessLevel: String) {
-  updateFamilyMember(memberId: $memberId, relationship: $relationship, accessLevel: $accessLevel) {
-    memberId
-    message
-  }
-}
-
-mutation DeleteFamilyMember($memberId: String!) {
-  deleteFamilyMember(memberId: $memberId) {
-    message
-  }
-} 
 
 query GetProfiles {
   getProfiles {

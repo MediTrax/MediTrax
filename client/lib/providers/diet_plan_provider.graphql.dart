@@ -41,7 +41,7 @@ class Variables$Query$GetFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetFoodSpecs) ||
+    if (other is! Variables$Query$GetFoodSpecs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -147,7 +147,7 @@ class Query$GetFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetFoodSpecs) || runtimeType != other.runtimeType) {
+    if (other is! Query$GetFoodSpecs || runtimeType != other.runtimeType) {
       return false;
     }
     final l$getFoodSpecs = getFoodSpecs;
@@ -542,7 +542,7 @@ class Query$GetFoodSpecs$getFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetFoodSpecs$getFoodSpecs) ||
+    if (other is! Query$GetFoodSpecs$getFoodSpecs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -734,7 +734,7 @@ class Query$GetFoodSpecs$getFoodSpecs$specs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetFoodSpecs$getFoodSpecs$specs) ||
+    if (other is! Query$GetFoodSpecs$getFoodSpecs$specs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -887,7 +887,7 @@ class Variables$Query$GetMockFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetMockFoodSpecs) ||
+    if (other is! Variables$Query$GetMockFoodSpecs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -993,8 +993,7 @@ class Query$GetMockFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMockFoodSpecs) ||
-        runtimeType != other.runtimeType) {
+    if (other is! Query$GetMockFoodSpecs || runtimeType != other.runtimeType) {
       return false;
     }
     final l$getMockFoodSpecs = getMockFoodSpecs;
@@ -1396,7 +1395,7 @@ class Query$GetMockFoodSpecs$getMockFoodSpecs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMockFoodSpecs$getMockFoodSpecs) ||
+    if (other is! Query$GetMockFoodSpecs$getMockFoodSpecs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1589,7 +1588,7 @@ class Query$GetMockFoodSpecs$getMockFoodSpecs$specs {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMockFoodSpecs$getMockFoodSpecs$specs) ||
+    if (other is! Query$GetMockFoodSpecs$getMockFoodSpecs$specs ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1753,7 +1752,7 @@ class Query$GetFoodRecommendation {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetFoodRecommendation) ||
+    if (other is! Query$GetFoodRecommendation ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2085,7 +2084,7 @@ class Query$GetFoodRecommendation$getFoodRecommendation {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetFoodRecommendation$getFoodRecommendation) ||
+    if (other is! Query$GetFoodRecommendation$getFoodRecommendation ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2222,7 +2221,7 @@ class Query$GetMockFoodRecommendation {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMockFoodRecommendation) ||
+    if (other is! Query$GetMockFoodRecommendation ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2565,7 +2564,7 @@ class Query$GetMockFoodRecommendation$getMockFoodRecommendation {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMockFoodRecommendation$getMockFoodRecommendation) ||
+    if (other is! Query$GetMockFoodRecommendation$getMockFoodRecommendation ||
         runtimeType != other.runtimeType) {
       return false;
     }

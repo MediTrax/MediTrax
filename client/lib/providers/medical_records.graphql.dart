@@ -56,8 +56,7 @@ class Query$GetMedicalRecords {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicalRecords) ||
-        runtimeType != other.runtimeType) {
+    if (other is! Query$GetMedicalRecords || runtimeType != other.runtimeType) {
       return false;
     }
     final l$getMedicalRecords = getMedicalRecords;
@@ -449,7 +448,7 @@ class Query$GetMedicalRecords$getMedicalRecords {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicalRecords$getMedicalRecords) ||
+    if (other is! Query$GetMedicalRecords$getMedicalRecords ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -605,7 +604,7 @@ class Variables$Query$GetSharedMedicalRecords {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Query$GetSharedMedicalRecords) ||
+    if (other is! Variables$Query$GetSharedMedicalRecords ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -718,7 +717,7 @@ class Query$GetSharedMedicalRecords {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedMedicalRecords) ||
+    if (other is! Query$GetSharedMedicalRecords ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1152,7 +1151,7 @@ class Query$GetSharedMedicalRecords$getSharedMedicalRecords {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetSharedMedicalRecords$getSharedMedicalRecords) ||
+    if (other is! Query$GetSharedMedicalRecords$getSharedMedicalRecords ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1325,7 +1324,7 @@ class Variables$Mutation$AddMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$AddMedicalRecord) ||
+    if (other is! Variables$Mutation$AddMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1453,7 +1452,7 @@ class Mutation$AddMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddMedicalRecord) ||
+    if (other is! Mutation$AddMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1893,7 +1892,7 @@ class Mutation$AddMedicalRecord$addMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$AddMedicalRecord$addMedicalRecord) ||
+    if (other is! Mutation$AddMedicalRecord$addMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2052,7 +2051,7 @@ class Variables$Mutation$UpdateMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateMedicalRecord) ||
+    if (other is! Variables$Mutation$UpdateMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2197,7 +2196,7 @@ class Mutation$UpdateMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedicalRecord) ||
+    if (other is! Mutation$UpdateMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2653,7 +2652,7 @@ class Mutation$UpdateMedicalRecord$updateMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedicalRecord$updateMedicalRecord) ||
+    if (other is! Mutation$UpdateMedicalRecord$updateMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2787,7 +2786,7 @@ class Variables$Mutation$DeleteMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteMedicalRecord) ||
+    if (other is! Variables$Mutation$DeleteMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2894,7 +2893,7 @@ class Mutation$DeleteMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedicalRecord) ||
+    if (other is! Mutation$DeleteMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -3308,7 +3307,7 @@ class Mutation$DeleteMedicalRecord$deleteMedicalRecord {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedicalRecord$deleteMedicalRecord) ||
+    if (other is! Mutation$DeleteMedicalRecord$deleteMedicalRecord ||
         runtimeType != other.runtimeType) {
       return false;
     }

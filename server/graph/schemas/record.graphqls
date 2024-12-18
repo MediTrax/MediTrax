@@ -245,104 +245,12 @@ extend type Query {
   getMedicalRecords: [MedicalRecordDetail]
 }
 
-extend type Mutation {
-  """
-  Adds a new health metric.
-  """
-  addHealthMetric(
-    """
-    The type of the health metric.
-    """
-    metricType: String!
-
-    """
-    The value of the health metric.
-    """
-    value: Float!
-
-    """
-    The unit of measurement for the health metric.
-    """
-    unit: String!
-
-    """
-    The date and time when the health metric was recorded.
-    """
-    recordedAt: String!
-  ): AddHealthMetricResponse
-
-  """
-  Updates an existing health metric.
-  """
-  updateHealthMetric(
-    """
-    The ID of the health metric to be updated.
-    """
-    metricId: String!
-
-    """
-    The new value of the health metric.
-    """
-    value: Float
-
-    """
-    The new unit of measurement for the health metric.
-    """
-    unit: String
-  ): UpdateHealthMetricResponse
-
-  """
-  Deletes a health metric.
-  """
-  deleteHealthMetric(
-    """
-    The ID of the health metric to be deleted.
-    """
-    metricId: String!
-  ): DeleteHealthMetricResponse
-
-  """
-  Adds a new medical record.
-  """
-  addMedicalRecord(
-    """
-    The type of the medical record.
-    """
-    recordType: String!
-
-    """
-    The content of the medical record.
-    """
-    content: String!
-  ): AddMedicalRecordResponse
-
-  """
-  Updates an existing medical record.
-  """
-  updateMedicalRecord(
-    """
-    The ID of the medical record to be updated.
-    """
-    recordId: String!
-
-    """
-    The new type of the medical record.
-    """
-    recordType: String
-
-    """
-    The new content of the medical record.
-    """
-    content: String
-  ): UpdateMedicalRecordResponse
-
-  """
-  Deletes a medical record.
-  """
-  deleteMedicalRecord(
-    """
-    The ID of the medical record to be deleted.
-    """
-    recordId: String!
-  ): DeleteMedicalRecordResponse
+extend type Mutation{
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: DateTime!): AddHealthMetricResponse 
+  updateHealthMetric(metricId: String!, value: Float, unit: String, recordedAt:DateTime): UpdateHealthMetricResponse
+  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
+   
+  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
+  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
+  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
 }

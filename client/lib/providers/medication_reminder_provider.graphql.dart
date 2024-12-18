@@ -57,7 +57,7 @@ class Query$GetMedicationReminders {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicationReminders) ||
+    if (other is! Query$GetMedicationReminders ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -464,7 +464,7 @@ class Query$GetMedicationReminders$getMedicationReminders {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Query$GetMedicationReminders$getMedicationReminders) ||
+    if (other is! Query$GetMedicationReminders$getMedicationReminders ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -637,7 +637,7 @@ class Variables$Mutation$CreateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$CreateMedicationReminder) ||
+    if (other is! Variables$Mutation$CreateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -768,7 +768,7 @@ class Mutation$CreateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$CreateMedicationReminder) ||
+    if (other is! Mutation$CreateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1218,8 +1218,7 @@ class Mutation$CreateMedicationReminder$createMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$CreateMedicationReminder$createMedicationReminder) ||
+    if (other is! Mutation$CreateMedicationReminder$createMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1392,7 +1391,7 @@ class Variables$Mutation$UpdateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$UpdateMedicationReminder) ||
+    if (other is! Variables$Mutation$UpdateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -1541,7 +1540,7 @@ class Mutation$UpdateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$UpdateMedicationReminder) ||
+    if (other is! Mutation$UpdateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2004,8 +2003,7 @@ class Mutation$UpdateMedicationReminder$updateMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$UpdateMedicationReminder$updateMedicationReminder) ||
+    if (other is! Mutation$UpdateMedicationReminder$updateMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2151,7 +2149,7 @@ class Variables$Mutation$DeleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Variables$Mutation$DeleteMedicationReminder) ||
+    if (other is! Variables$Mutation$DeleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2261,7 +2259,7 @@ class Mutation$DeleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other is Mutation$DeleteMedicationReminder) ||
+    if (other is! Mutation$DeleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2682,8 +2680,7 @@ class Mutation$DeleteMedicationReminder$deleteMedicationReminder {
     if (identical(this, other)) {
       return true;
     }
-    if (!(other
-            is Mutation$DeleteMedicationReminder$deleteMedicationReminder) ||
+    if (other is! Mutation$DeleteMedicationReminder$deleteMedicationReminder ||
         runtimeType != other.runtimeType) {
       return false;
     }
@@ -2768,6 +2765,633 @@ class _CopyWithStubImpl$Mutation$DeleteMedicationReminder$deleteMedicationRemind
             TRes> {
   _CopyWithStubImpl$Mutation$DeleteMedicationReminder$deleteMedicationReminder(
       this._res);
+
+  TRes _res;
+
+  call({
+    String? message,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Variables$Mutation$TakeMedication {
+  factory Variables$Mutation$TakeMedication({required String reminderId}) =>
+      Variables$Mutation$TakeMedication._({
+        r'reminderId': reminderId,
+      });
+
+  Variables$Mutation$TakeMedication._(this._$data);
+
+  factory Variables$Mutation$TakeMedication.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$reminderId = data['reminderId'];
+    result$data['reminderId'] = (l$reminderId as String);
+    return Variables$Mutation$TakeMedication._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get reminderId => (_$data['reminderId'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$reminderId = reminderId;
+    result$data['reminderId'] = l$reminderId;
+    return result$data;
+  }
+
+  CopyWith$Variables$Mutation$TakeMedication<Variables$Mutation$TakeMedication>
+      get copyWith => CopyWith$Variables$Mutation$TakeMedication(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Variables$Mutation$TakeMedication ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$reminderId = reminderId;
+    final lOther$reminderId = other.reminderId;
+    if (l$reminderId != lOther$reminderId) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$reminderId = reminderId;
+    return Object.hashAll([l$reminderId]);
+  }
+}
+
+abstract class CopyWith$Variables$Mutation$TakeMedication<TRes> {
+  factory CopyWith$Variables$Mutation$TakeMedication(
+    Variables$Mutation$TakeMedication instance,
+    TRes Function(Variables$Mutation$TakeMedication) then,
+  ) = _CopyWithImpl$Variables$Mutation$TakeMedication;
+
+  factory CopyWith$Variables$Mutation$TakeMedication.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$TakeMedication;
+
+  TRes call({String? reminderId});
+}
+
+class _CopyWithImpl$Variables$Mutation$TakeMedication<TRes>
+    implements CopyWith$Variables$Mutation$TakeMedication<TRes> {
+  _CopyWithImpl$Variables$Mutation$TakeMedication(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Mutation$TakeMedication _instance;
+
+  final TRes Function(Variables$Mutation$TakeMedication) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({Object? reminderId = _undefined}) =>
+      _then(Variables$Mutation$TakeMedication._({
+        ..._instance._$data,
+        if (reminderId != _undefined && reminderId != null)
+          'reminderId': (reminderId as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Mutation$TakeMedication<TRes>
+    implements CopyWith$Variables$Mutation$TakeMedication<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$TakeMedication(this._res);
+
+  TRes _res;
+
+  call({String? reminderId}) => _res;
+}
+
+class Mutation$TakeMedication {
+  Mutation$TakeMedication({
+    required this.takeMedication,
+    this.$__typename = 'Mutation',
+  });
+
+  factory Mutation$TakeMedication.fromJson(Map<String, dynamic> json) {
+    final l$takeMedication = json['takeMedication'];
+    final l$$__typename = json['__typename'];
+    return Mutation$TakeMedication(
+      takeMedication: Mutation$TakeMedication$takeMedication.fromJson(
+          (l$takeMedication as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Mutation$TakeMedication$takeMedication takeMedication;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$takeMedication = takeMedication;
+    _resultData['takeMedication'] = l$takeMedication.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$takeMedication = takeMedication;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$takeMedication,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$TakeMedication || runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$takeMedication = takeMedication;
+    final lOther$takeMedication = other.takeMedication;
+    if (l$takeMedication != lOther$takeMedication) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$TakeMedication on Mutation$TakeMedication {
+  CopyWith$Mutation$TakeMedication<Mutation$TakeMedication> get copyWith =>
+      CopyWith$Mutation$TakeMedication(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Mutation$TakeMedication<TRes> {
+  factory CopyWith$Mutation$TakeMedication(
+    Mutation$TakeMedication instance,
+    TRes Function(Mutation$TakeMedication) then,
+  ) = _CopyWithImpl$Mutation$TakeMedication;
+
+  factory CopyWith$Mutation$TakeMedication.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$TakeMedication;
+
+  TRes call({
+    Mutation$TakeMedication$takeMedication? takeMedication,
+    String? $__typename,
+  });
+  CopyWith$Mutation$TakeMedication$takeMedication<TRes> get takeMedication;
+}
+
+class _CopyWithImpl$Mutation$TakeMedication<TRes>
+    implements CopyWith$Mutation$TakeMedication<TRes> {
+  _CopyWithImpl$Mutation$TakeMedication(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$TakeMedication _instance;
+
+  final TRes Function(Mutation$TakeMedication) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? takeMedication = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$TakeMedication(
+        takeMedication: takeMedication == _undefined || takeMedication == null
+            ? _instance.takeMedication
+            : (takeMedication as Mutation$TakeMedication$takeMedication),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$TakeMedication$takeMedication<TRes> get takeMedication {
+    final local$takeMedication = _instance.takeMedication;
+    return CopyWith$Mutation$TakeMedication$takeMedication(
+        local$takeMedication, (e) => call(takeMedication: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$TakeMedication<TRes>
+    implements CopyWith$Mutation$TakeMedication<TRes> {
+  _CopyWithStubImpl$Mutation$TakeMedication(this._res);
+
+  TRes _res;
+
+  call({
+    Mutation$TakeMedication$takeMedication? takeMedication,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$TakeMedication$takeMedication<TRes> get takeMedication =>
+      CopyWith$Mutation$TakeMedication$takeMedication.stub(_res);
+}
+
+const documentNodeMutationTakeMedication = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.mutation,
+    name: NameNode(value: 'TakeMedication'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'reminderId')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      )
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'takeMedication'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'reminderId'),
+            value: VariableNode(name: NameNode(value: 'reminderId')),
+          )
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'message'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Mutation$TakeMedication _parserFn$Mutation$TakeMedication(
+        Map<String, dynamic> data) =>
+    Mutation$TakeMedication.fromJson(data);
+typedef OnMutationCompleted$Mutation$TakeMedication = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Mutation$TakeMedication?,
+);
+
+class Options$Mutation$TakeMedication
+    extends graphql.MutationOptions<Mutation$TakeMedication> {
+  Options$Mutation$TakeMedication({
+    String? operationName,
+    required Variables$Mutation$TakeMedication variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$TakeMedication? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$TakeMedication? onCompleted,
+    graphql.OnMutationUpdate<Mutation$TakeMedication>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$TakeMedication(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationTakeMedication,
+          parserFn: _parserFn$Mutation$TakeMedication,
+        );
+
+  final OnMutationCompleted$Mutation$TakeMedication? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+class WatchOptions$Mutation$TakeMedication
+    extends graphql.WatchQueryOptions<Mutation$TakeMedication> {
+  WatchOptions$Mutation$TakeMedication({
+    String? operationName,
+    required Variables$Mutation$TakeMedication variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$TakeMedication? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeMutationTakeMedication,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Mutation$TakeMedication,
+        );
+}
+
+extension ClientExtension$Mutation$TakeMedication on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$TakeMedication>> mutate$TakeMedication(
+          Options$Mutation$TakeMedication options) async =>
+      await this.mutate(options);
+  graphql.ObservableQuery<Mutation$TakeMedication> watchMutation$TakeMedication(
+          WatchOptions$Mutation$TakeMedication options) =>
+      this.watchMutation(options);
+}
+
+class Mutation$TakeMedication$HookResult {
+  Mutation$TakeMedication$HookResult(
+    this.runMutation,
+    this.result,
+  );
+
+  final RunMutation$Mutation$TakeMedication runMutation;
+
+  final graphql.QueryResult<Mutation$TakeMedication> result;
+}
+
+Mutation$TakeMedication$HookResult useMutation$TakeMedication(
+    [WidgetOptions$Mutation$TakeMedication? options]) {
+  final result = graphql_flutter
+      .useMutation(options ?? WidgetOptions$Mutation$TakeMedication());
+  return Mutation$TakeMedication$HookResult(
+    (variables, {optimisticResult, typedOptimisticResult}) =>
+        result.runMutation(
+      variables.toJson(),
+      optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+    ),
+    result.result,
+  );
+}
+
+graphql.ObservableQuery<Mutation$TakeMedication>
+    useWatchMutation$TakeMedication(
+            WatchOptions$Mutation$TakeMedication options) =>
+        graphql_flutter.useWatchMutation(options);
+
+class WidgetOptions$Mutation$TakeMedication
+    extends graphql.MutationOptions<Mutation$TakeMedication> {
+  WidgetOptions$Mutation$TakeMedication({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$TakeMedication? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$TakeMedication? onCompleted,
+    graphql.OnMutationUpdate<Mutation$TakeMedication>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$TakeMedication(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationTakeMedication,
+          parserFn: _parserFn$Mutation$TakeMedication,
+        );
+
+  final OnMutationCompleted$Mutation$TakeMedication? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+typedef RunMutation$Mutation$TakeMedication
+    = graphql.MultiSourceResult<Mutation$TakeMedication> Function(
+  Variables$Mutation$TakeMedication, {
+  Object? optimisticResult,
+  Mutation$TakeMedication? typedOptimisticResult,
+});
+typedef Builder$Mutation$TakeMedication = widgets.Widget Function(
+  RunMutation$Mutation$TakeMedication,
+  graphql.QueryResult<Mutation$TakeMedication>?,
+);
+
+class Mutation$TakeMedication$Widget
+    extends graphql_flutter.Mutation<Mutation$TakeMedication> {
+  Mutation$TakeMedication$Widget({
+    widgets.Key? key,
+    WidgetOptions$Mutation$TakeMedication? options,
+    required Builder$Mutation$TakeMedication builder,
+  }) : super(
+          key: key,
+          options: options ?? WidgetOptions$Mutation$TakeMedication(),
+          builder: (
+            run,
+            result,
+          ) =>
+              builder(
+            (
+              variables, {
+              optimisticResult,
+              typedOptimisticResult,
+            }) =>
+                run(
+              variables.toJson(),
+              optimisticResult:
+                  optimisticResult ?? typedOptimisticResult?.toJson(),
+            ),
+            result,
+          ),
+        );
+}
+
+class Mutation$TakeMedication$takeMedication {
+  Mutation$TakeMedication$takeMedication({
+    required this.message,
+    this.$__typename = 'TakeMedicationResponse',
+  });
+
+  factory Mutation$TakeMedication$takeMedication.fromJson(
+      Map<String, dynamic> json) {
+    final l$message = json['message'];
+    final l$$__typename = json['__typename'];
+    return Mutation$TakeMedication$takeMedication(
+      message: (l$message as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String message;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$message = message;
+    _resultData['message'] = l$message;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$message = message;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$message,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$TakeMedication$takeMedication ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$message = message;
+    final lOther$message = other.message;
+    if (l$message != lOther$message) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$TakeMedication$takeMedication
+    on Mutation$TakeMedication$takeMedication {
+  CopyWith$Mutation$TakeMedication$takeMedication<
+          Mutation$TakeMedication$takeMedication>
+      get copyWith => CopyWith$Mutation$TakeMedication$takeMedication(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$TakeMedication$takeMedication<TRes> {
+  factory CopyWith$Mutation$TakeMedication$takeMedication(
+    Mutation$TakeMedication$takeMedication instance,
+    TRes Function(Mutation$TakeMedication$takeMedication) then,
+  ) = _CopyWithImpl$Mutation$TakeMedication$takeMedication;
+
+  factory CopyWith$Mutation$TakeMedication$takeMedication.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$TakeMedication$takeMedication;
+
+  TRes call({
+    String? message,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Mutation$TakeMedication$takeMedication<TRes>
+    implements CopyWith$Mutation$TakeMedication$takeMedication<TRes> {
+  _CopyWithImpl$Mutation$TakeMedication$takeMedication(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$TakeMedication$takeMedication _instance;
+
+  final TRes Function(Mutation$TakeMedication$takeMedication) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? message = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$TakeMedication$takeMedication(
+        message: message == _undefined || message == null
+            ? _instance.message
+            : (message as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Mutation$TakeMedication$takeMedication<TRes>
+    implements CopyWith$Mutation$TakeMedication$takeMedication<TRes> {
+  _CopyWithStubImpl$Mutation$TakeMedication$takeMedication(this._res);
 
   TRes _res;
 

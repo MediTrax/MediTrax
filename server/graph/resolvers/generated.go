@@ -7,10 +7,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"meditrax/graph/custom"
 	"meditrax/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -85,11 +87,6 @@ type ComplexityRoot struct {
 		To            func(childComplexity int) int
 	}
 
-	AddFamilyMemberResponse struct {
-		MemberID func(childComplexity int) int
-		Message  func(childComplexity int) int
-	}
-
 	AddHealthMetricResponse struct {
 		Message  func(childComplexity int) int
 		MetricID func(childComplexity int) int
@@ -130,10 +127,6 @@ type ComplexityRoot struct {
 		UserID  func(childComplexity int) int
 	}
 
-	DeleteFamilyMemberResponse struct {
-		Message func(childComplexity int) int
-	}
-
 	DeleteHealthMetricResponse struct {
 		Message func(childComplexity int) int
 	}
@@ -162,24 +155,6 @@ type ComplexityRoot struct {
 		AssessmentID    func(childComplexity int) int
 		Recommendations func(childComplexity int) int
 		RiskLevel       func(childComplexity int) int
-	}
-
-	FamilyMember struct {
-		AccessLevel   func(childComplexity int) int
-		CreatedAt     func(childComplexity int) int
-		ID            func(childComplexity int) int
-		PatientUserID func(childComplexity int) int
-		Relationship  func(childComplexity int) int
-		UserID        func(childComplexity int) int
-	}
-
-	FamilyMemberDetail struct {
-		AccessLevel  func(childComplexity int) int
-		FamilyID     func(childComplexity int) int
-		MemberID     func(childComplexity int) int
-		Name         func(childComplexity int) int
-		PhoneNumber  func(childComplexity int) int
-		Relationship func(childComplexity int) int
 	}
 
 	FoodRecommendation struct {
@@ -299,16 +274,14 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddFamilyMember              func(childComplexity int, memberPhoneNumber string, relationship string, accessLevel int) int
-		AddHealthMetric              func(childComplexity int, metricType string, value float64, unit string, recordedAt string) int
+		AddHealthMetric              func(childComplexity int, metricType string, value float64, unit string, recordedAt time.Time) int
 		AddMedicalRecord             func(childComplexity int, recordType string, content string) int
 		AddMedication                func(childComplexity int, name string, dosage float64, unit string, frequency string, inventory float64) int
 		AwardAchievement             func(childComplexity int, badgeID string) int
 		CreateAchievementBadge       func(childComplexity int, name string, description string, iconURL string) int
-		CreateMedicationReminder     func(childComplexity int, medicationID string, reminderTime string) int
-		CreateTreatmentSchedule      func(childComplexity int, treatmentType string, scheduledTime string, location string, notes *string) int
+		CreateMedicationReminder     func(childComplexity int, medicationID string, reminderTime time.Time) int
+		CreateTreatmentSchedule      func(childComplexity int, treatmentType string, scheduledTime time.Time, location string, notes *string) int
 		CreateUser                   func(childComplexity int, phoneNumber string, password string, username string, role string) int
-		DeleteFamilyMember           func(childComplexity int, memberID string) int
 		DeleteHealthMetric           func(childComplexity int, metricID string) int
 		DeleteMedicalRecord          func(childComplexity int, recordID string) int
 		DeleteMedication             func(childComplexity int, medicationID string) int
@@ -324,12 +297,11 @@ type ComplexityRoot struct {
 		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
 		TakeMedication               func(childComplexity int, reminderID *string) int
 		UnshareProfile               func(childComplexity int, targetUserID string) int
-		UpdateFamilyMember           func(childComplexity int, memberID string, relationship *string, accessLevel *string) int
-		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string) int
+		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string, recordedAt *time.Time) int
 		UpdateMedicalRecord          func(childComplexity int, recordID string, recordType *string, content *string) int
 		UpdateMedication             func(childComplexity int, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) int
-		UpdateMedicationReminder     func(childComplexity int, reminderID string, reminderTime *string, isTaken *bool) int
-		UpdateTreatmentSchedule      func(childComplexity int, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) int
+		UpdateMedicationReminder     func(childComplexity int, reminderID string, reminderTime *time.Time, isTaken *bool) int
+		UpdateTreatmentSchedule      func(childComplexity int, scheduleID string, treatmentType *string, scheduledTime *time.Time, location *string, notes *string) int
 		UpdateUser                   func(childComplexity int, name *string, phoneNumber *string, password *string) int
 	}
 
@@ -338,14 +310,6 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Token     func(childComplexity int) int
 		User      func(childComplexity int) int
-	}
-
-	PatientDetail struct {
-		AccessLevel  func(childComplexity int) int
-		Name         func(childComplexity int) int
-		PatientID    func(childComplexity int) int
-		PhoneNumber  func(childComplexity int) int
-		Relationship func(childComplexity int) int
 	}
 
 	ProfileDetail struct {
@@ -359,10 +323,9 @@ type ComplexityRoot struct {
 	Query struct {
 		GetAchievementBadges            func(childComplexity int) int
 		GetActivityLog                  func(childComplexity int) int
-		GetFamilyMembers                func(childComplexity int) int
 		GetFoodRecommendation           func(childComplexity int) int
 		GetFoodSpecs                    func(childComplexity int, food string) int
-		GetHealthMetrics                func(childComplexity int, startDate *string, endDate *string, metricType *string) int
+		GetHealthMetrics                func(childComplexity int, startDate *time.Time, endDate *time.Time, metricType *string) int
 		GetHealthRiskAssessment         func(childComplexity int) int
 		GetHealthRiskAssessmentQuestion func(childComplexity int) int
 		GetMedicalRecords               func(childComplexity int) int
@@ -370,13 +333,8 @@ type ComplexityRoot struct {
 		GetMedications                  func(childComplexity int) int
 		GetMockFoodRecommendation       func(childComplexity int) int
 		GetMockFoodSpecs                func(childComplexity int, food string) int
-		GetPatientHealthMetrics         func(childComplexity int, patientID string, startDate *string, endDate *string, metricType *string) int
-		GetPatientMedicalRecords        func(childComplexity int, patientID string) int
-		GetPatientMedications           func(childComplexity int, patientID string) int
-		GetPatientTreatmentSchedule     func(childComplexity int, patientID string) int
 		GetProfiles                     func(childComplexity int) int
-		GetRelatedPatients              func(childComplexity int) int
-		GetSharedHealthMetrics          func(childComplexity int, patientID string, startDate *string, endDate *string, metricType *string) int
+		GetSharedHealthMetrics          func(childComplexity int, patientID string, startDate *time.Time, endDate *time.Time, metricType *string) int
 		GetSharedMedicalRecords         func(childComplexity int, patientID string) int
 		GetSharedMedications            func(childComplexity int, patientID string) int
 		GetSharedProfiles               func(childComplexity int) int
@@ -450,11 +408,6 @@ type ComplexityRoot struct {
 
 	UnshareProfileResponse struct {
 		Message func(childComplexity int) int
-	}
-
-	UpdateFamilyMemberResponse struct {
-		MemberID func(childComplexity int) int
-		Message  func(childComplexity int) int
 	}
 
 	UpdateHealthMetricResponse struct {
@@ -550,21 +503,18 @@ type MutationResolver interface {
 	AwardAchievement(ctx context.Context, badgeID string) (*model.AwardAchievementResponse, error)
 	EarnPoints(ctx context.Context, pointsEarned float64, reason string) (*model.EarnPointsResponse, error)
 	EvaluateHealthRiskAssessment(ctx context.Context, filledQuestionnaire model.FilledQuestionnaire) (*model.EvaluateHealthRiskAssessmentResponse, error)
-	AddFamilyMember(ctx context.Context, memberPhoneNumber string, relationship string, accessLevel int) (*model.AddFamilyMemberResponse, error)
-	DeleteFamilyMember(ctx context.Context, memberID string) (*model.DeleteFamilyMemberResponse, error)
-	UpdateFamilyMember(ctx context.Context, memberID string, relationship *string, accessLevel *string) (*model.UpdateFamilyMemberResponse, error)
 	AddMedication(ctx context.Context, name string, dosage float64, unit string, frequency string, inventory float64) (*model.AddMedicationResponse, error)
 	UpdateMedication(ctx context.Context, medicationID string, name *string, dosage *float64, unit *string, frequency *string, inventory *float64) (*model.UpdateMedicationResponse, error)
 	DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error)
-	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime string) (*model.CreateMedicationReminderResponse, error)
-	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *string, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
+	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime time.Time) (*model.CreateMedicationReminderResponse, error)
+	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *time.Time, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
 	TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error)
 	DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error)
-	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime string, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
-	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *string, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
+	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime time.Time, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
+	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *time.Time, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
 	DeleteTreatmentSchedule(ctx context.Context, scheduleID string) (*model.DeleteTreatmentScheduleResponse, error)
-	AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt string) (*model.AddHealthMetricResponse, error)
-	UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string) (*model.UpdateHealthMetricResponse, error)
+	AddHealthMetric(ctx context.Context, metricType string, value float64, unit string, recordedAt time.Time) (*model.AddHealthMetricResponse, error)
+	UpdateHealthMetric(ctx context.Context, metricID string, value *float64, unit *string, recordedAt *time.Time) (*model.UpdateHealthMetricResponse, error)
 	DeleteHealthMetric(ctx context.Context, metricID string) (*model.DeleteHealthMetricResponse, error)
 	AddMedicalRecord(ctx context.Context, recordType string, content string) (*model.AddMedicalRecordResponse, error)
 	UpdateMedicalRecord(ctx context.Context, recordID string, recordType *string, content *string) (*model.UpdateMedicalRecordResponse, error)
@@ -586,12 +536,6 @@ type QueryResolver interface {
 	GetActivityLog(ctx context.Context) ([]*model.ActivityLogDetail, error)
 	GetHealthRiskAssessment(ctx context.Context) ([]*model.HealthRiskAssessmentDetailResponse, error)
 	GetHealthRiskAssessmentQuestion(ctx context.Context) (*model.QuestionnaireObject, error)
-	GetFamilyMembers(ctx context.Context) ([]*model.FamilyMemberDetail, error)
-	GetRelatedPatients(ctx context.Context) ([]*model.PatientDetail, error)
-	GetPatientMedicalRecords(ctx context.Context, patientID string) ([]*model.MedicalRecordDetail, error)
-	GetPatientTreatmentSchedule(ctx context.Context, patientID string) ([]*model.TreatmentScheduleDetail, error)
-	GetPatientMedications(ctx context.Context, patientID string) ([]*model.MedicationDetail, error)
-	GetPatientHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
 	GetFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetMockFoodSpecs(ctx context.Context, food string) (*model.FoodSpecs, error)
 	GetFoodRecommendation(ctx context.Context) (*model.FoodRecommendation, error)
@@ -599,7 +543,7 @@ type QueryResolver interface {
 	GetMedications(ctx context.Context) ([]*model.MedicationDetail, error)
 	GetMedicationReminders(ctx context.Context) ([]*model.MedicationReminderDetail, error)
 	GetTreatmentSchedules(ctx context.Context) ([]*model.TreatmentScheduleDetail, error)
-	GetHealthMetrics(ctx context.Context, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
+	GetHealthMetrics(ctx context.Context, startDate *time.Time, endDate *time.Time, metricType *string) ([]*model.HealthMetricDetail, error)
 	GetMedicalRecords(ctx context.Context) ([]*model.MedicalRecordDetail, error)
 	GetUser(ctx context.Context) (*model.UserDetailResponse, error)
 	GetProfiles(ctx context.Context) ([]*model.ProfileDetail, error)
@@ -607,7 +551,7 @@ type QueryResolver interface {
 	GetSharedMedicalRecords(ctx context.Context, patientID string) ([]*model.MedicalRecordDetail, error)
 	GetSharedTreatmentSchedule(ctx context.Context, patientID string) ([]*model.TreatmentScheduleDetail, error)
 	GetSharedMedications(ctx context.Context, patientID string) ([]*model.MedicationDetail, error)
-	GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *string, endDate *string, metricType *string) ([]*model.HealthMetricDetail, error)
+	GetSharedHealthMetrics(ctx context.Context, patientID string, startDate *time.Time, endDate *time.Time, metricType *string) ([]*model.HealthMetricDetail, error)
 }
 
 type executableSchema struct {
@@ -818,20 +762,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ActivityLogDetail.To(childComplexity), true
 
-	case "AddFamilyMemberResponse.memberId":
-		if e.complexity.AddFamilyMemberResponse.MemberID == nil {
-			break
-		}
-
-		return e.complexity.AddFamilyMemberResponse.MemberID(childComplexity), true
-
-	case "AddFamilyMemberResponse.message":
-		if e.complexity.AddFamilyMemberResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.AddFamilyMemberResponse.Message(childComplexity), true
-
 	case "AddHealthMetricResponse.message":
 		if e.complexity.AddHealthMetricResponse.Message == nil {
 			break
@@ -944,13 +874,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateUserResponse.UserID(childComplexity), true
 
-	case "DeleteFamilyMemberResponse.message":
-		if e.complexity.DeleteFamilyMemberResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.DeleteFamilyMemberResponse.Message(childComplexity), true
-
 	case "DeleteHealthMetricResponse.message":
 		if e.complexity.DeleteHealthMetricResponse.Message == nil {
 			break
@@ -1013,90 +936,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EvaluateHealthRiskAssessmentResponse.RiskLevel(childComplexity), true
-
-	case "FamilyMember.accessLevel":
-		if e.complexity.FamilyMember.AccessLevel == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.AccessLevel(childComplexity), true
-
-	case "FamilyMember.createdAt":
-		if e.complexity.FamilyMember.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.CreatedAt(childComplexity), true
-
-	case "FamilyMember.id":
-		if e.complexity.FamilyMember.ID == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.ID(childComplexity), true
-
-	case "FamilyMember.patient_userId":
-		if e.complexity.FamilyMember.PatientUserID == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.PatientUserID(childComplexity), true
-
-	case "FamilyMember.relationship":
-		if e.complexity.FamilyMember.Relationship == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.Relationship(childComplexity), true
-
-	case "FamilyMember.userId":
-		if e.complexity.FamilyMember.UserID == nil {
-			break
-		}
-
-		return e.complexity.FamilyMember.UserID(childComplexity), true
-
-	case "FamilyMemberDetail.accessLevel":
-		if e.complexity.FamilyMemberDetail.AccessLevel == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.AccessLevel(childComplexity), true
-
-	case "FamilyMemberDetail.familyId":
-		if e.complexity.FamilyMemberDetail.FamilyID == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.FamilyID(childComplexity), true
-
-	case "FamilyMemberDetail.memberId":
-		if e.complexity.FamilyMemberDetail.MemberID == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.MemberID(childComplexity), true
-
-	case "FamilyMemberDetail.name":
-		if e.complexity.FamilyMemberDetail.Name == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.Name(childComplexity), true
-
-	case "FamilyMemberDetail.phoneNumber":
-		if e.complexity.FamilyMemberDetail.PhoneNumber == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.PhoneNumber(childComplexity), true
-
-	case "FamilyMemberDetail.relationship":
-		if e.complexity.FamilyMemberDetail.Relationship == nil {
-			break
-		}
-
-		return e.complexity.FamilyMemberDetail.Relationship(childComplexity), true
 
 	case "FoodRecommendation.name":
 		if e.complexity.FoodRecommendation.Name == nil {
@@ -1595,18 +1434,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.MedicationReminderDetail.ReminderTime(childComplexity), true
 
-	case "Mutation.addFamilyMember":
-		if e.complexity.Mutation.AddFamilyMember == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addFamilyMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AddFamilyMember(childComplexity, args["memberPhoneNumber"].(string), args["relationship"].(string), args["accessLevel"].(int)), true
-
 	case "Mutation.addHealthMetric":
 		if e.complexity.Mutation.AddHealthMetric == nil {
 			break
@@ -1617,7 +1444,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddHealthMetric(childComplexity, args["metricType"].(string), args["value"].(float64), args["unit"].(string), args["recordedAt"].(string)), true
+		return e.complexity.Mutation.AddHealthMetric(childComplexity, args["metricType"].(string), args["value"].(float64), args["unit"].(string), args["recordedAt"].(time.Time)), true
 
 	case "Mutation.addMedicalRecord":
 		if e.complexity.Mutation.AddMedicalRecord == nil {
@@ -1677,7 +1504,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateMedicationReminder(childComplexity, args["medicationId"].(string), args["reminderTime"].(string)), true
+		return e.complexity.Mutation.CreateMedicationReminder(childComplexity, args["medicationId"].(string), args["reminderTime"].(time.Time)), true
 
 	case "Mutation.createTreatmentSchedule":
 		if e.complexity.Mutation.CreateTreatmentSchedule == nil {
@@ -1689,7 +1516,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTreatmentSchedule(childComplexity, args["treatmentType"].(string), args["scheduledTime"].(string), args["location"].(string), args["notes"].(*string)), true
+		return e.complexity.Mutation.CreateTreatmentSchedule(childComplexity, args["treatmentType"].(string), args["scheduledTime"].(time.Time), args["location"].(string), args["notes"].(*string)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -1702,18 +1529,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["phoneNumber"].(string), args["password"].(string), args["username"].(string), args["role"].(string)), true
-
-	case "Mutation.deleteFamilyMember":
-		if e.complexity.Mutation.DeleteFamilyMember == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteFamilyMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteFamilyMember(childComplexity, args["memberId"].(string)), true
 
 	case "Mutation.deleteHealthMetric":
 		if e.complexity.Mutation.DeleteHealthMetric == nil {
@@ -1890,18 +1705,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UnshareProfile(childComplexity, args["targetUserId"].(string)), true
 
-	case "Mutation.updateFamilyMember":
-		if e.complexity.Mutation.UpdateFamilyMember == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateFamilyMember_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateFamilyMember(childComplexity, args["memberId"].(string), args["relationship"].(*string), args["accessLevel"].(*string)), true
-
 	case "Mutation.updateHealthMetric":
 		if e.complexity.Mutation.UpdateHealthMetric == nil {
 			break
@@ -1912,7 +1715,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateHealthMetric(childComplexity, args["metricId"].(string), args["value"].(*float64), args["unit"].(*string)), true
+		return e.complexity.Mutation.UpdateHealthMetric(childComplexity, args["metricId"].(string), args["value"].(*float64), args["unit"].(*string), args["recordedAt"].(*time.Time)), true
 
 	case "Mutation.updateMedicalRecord":
 		if e.complexity.Mutation.UpdateMedicalRecord == nil {
@@ -1948,7 +1751,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateMedicationReminder(childComplexity, args["reminderId"].(string), args["reminderTime"].(*string), args["isTaken"].(*bool)), true
+		return e.complexity.Mutation.UpdateMedicationReminder(childComplexity, args["reminderId"].(string), args["reminderTime"].(*time.Time), args["isTaken"].(*bool)), true
 
 	case "Mutation.updateTreatmentSchedule":
 		if e.complexity.Mutation.UpdateTreatmentSchedule == nil {
@@ -1960,7 +1763,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTreatmentSchedule(childComplexity, args["scheduleId"].(string), args["treatmentType"].(*string), args["scheduledTime"].(*string), args["location"].(*string), args["notes"].(*string)), true
+		return e.complexity.Mutation.UpdateTreatmentSchedule(childComplexity, args["scheduleId"].(string), args["treatmentType"].(*string), args["scheduledTime"].(*time.Time), args["location"].(*string), args["notes"].(*string)), true
 
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
@@ -2001,41 +1804,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PasswordChange.User(childComplexity), true
-
-	case "PatientDetail.accessLevel":
-		if e.complexity.PatientDetail.AccessLevel == nil {
-			break
-		}
-
-		return e.complexity.PatientDetail.AccessLevel(childComplexity), true
-
-	case "PatientDetail.name":
-		if e.complexity.PatientDetail.Name == nil {
-			break
-		}
-
-		return e.complexity.PatientDetail.Name(childComplexity), true
-
-	case "PatientDetail.patientId":
-		if e.complexity.PatientDetail.PatientID == nil {
-			break
-		}
-
-		return e.complexity.PatientDetail.PatientID(childComplexity), true
-
-	case "PatientDetail.phoneNumber":
-		if e.complexity.PatientDetail.PhoneNumber == nil {
-			break
-		}
-
-		return e.complexity.PatientDetail.PhoneNumber(childComplexity), true
-
-	case "PatientDetail.relationship":
-		if e.complexity.PatientDetail.Relationship == nil {
-			break
-		}
-
-		return e.complexity.PatientDetail.Relationship(childComplexity), true
 
 	case "ProfileDetail.createdAt":
 		if e.complexity.ProfileDetail.CreatedAt == nil {
@@ -2086,13 +1854,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetActivityLog(childComplexity), true
 
-	case "Query.getFamilyMembers":
-		if e.complexity.Query.GetFamilyMembers == nil {
-			break
-		}
-
-		return e.complexity.Query.GetFamilyMembers(childComplexity), true
-
 	case "Query.getFoodRecommendation":
 		if e.complexity.Query.GetFoodRecommendation == nil {
 			break
@@ -2122,7 +1883,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetHealthMetrics(childComplexity, args["startDate"].(*string), args["endDate"].(*string), args["metricType"].(*string)), true
+		return e.complexity.Query.GetHealthMetrics(childComplexity, args["startDate"].(*time.Time), args["endDate"].(*time.Time), args["metricType"].(*string)), true
 
 	case "Query.getHealthRiskAssessment":
 		if e.complexity.Query.GetHealthRiskAssessment == nil {
@@ -2178,67 +1939,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetMockFoodSpecs(childComplexity, args["food"].(string)), true
 
-	case "Query.getPatientHealthMetrics":
-		if e.complexity.Query.GetPatientHealthMetrics == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getPatientHealthMetrics_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetPatientHealthMetrics(childComplexity, args["patientId"].(string), args["startDate"].(*string), args["endDate"].(*string), args["metricType"].(*string)), true
-
-	case "Query.getPatientMedicalRecords":
-		if e.complexity.Query.GetPatientMedicalRecords == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getPatientMedicalRecords_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetPatientMedicalRecords(childComplexity, args["patientId"].(string)), true
-
-	case "Query.getPatientMedications":
-		if e.complexity.Query.GetPatientMedications == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getPatientMedications_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetPatientMedications(childComplexity, args["patientId"].(string)), true
-
-	case "Query.getPatientTreatmentSchedule":
-		if e.complexity.Query.GetPatientTreatmentSchedule == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getPatientTreatmentSchedule_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetPatientTreatmentSchedule(childComplexity, args["patientId"].(string)), true
-
 	case "Query.getProfiles":
 		if e.complexity.Query.GetProfiles == nil {
 			break
 		}
 
 		return e.complexity.Query.GetProfiles(childComplexity), true
-
-	case "Query.getRelatedPatients":
-		if e.complexity.Query.GetRelatedPatients == nil {
-			break
-		}
-
-		return e.complexity.Query.GetRelatedPatients(childComplexity), true
 
 	case "Query.getSharedHealthMetrics":
 		if e.complexity.Query.GetSharedHealthMetrics == nil {
@@ -2250,7 +1956,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetSharedHealthMetrics(childComplexity, args["patientId"].(string), args["startDate"].(*string), args["endDate"].(*string), args["metricType"].(*string)), true
+		return e.complexity.Query.GetSharedHealthMetrics(childComplexity, args["patientId"].(string), args["startDate"].(*time.Time), args["endDate"].(*time.Time), args["metricType"].(*string)), true
 
 	case "Query.getSharedMedicalRecords":
 		if e.complexity.Query.GetSharedMedicalRecords == nil {
@@ -2546,20 +2252,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UnshareProfileResponse.Message(childComplexity), true
-
-	case "UpdateFamilyMemberResponse.memberId":
-		if e.complexity.UpdateFamilyMemberResponse.MemberID == nil {
-			break
-		}
-
-		return e.complexity.UpdateFamilyMemberResponse.MemberID(childComplexity), true
-
-	case "UpdateFamilyMemberResponse.message":
-		if e.complexity.UpdateFamilyMemberResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.UpdateFamilyMemberResponse.Message(childComplexity), true
 
 	case "UpdateHealthMetricResponse.message":
 		if e.complexity.UpdateHealthMetricResponse.Message == nil {
@@ -3038,19 +2730,29 @@ type AchievementBadge{
 Represents a user's achievement, linking a user to a badge.
 """
 type UserAchievement{
-  # The unique identifier of the user achievement.
+  """
+  The unique identifier of the user achievement.
+  """
   id: String!
 
-  # The ID of the user who earned the achievement.
+  """
+  The ID of the user who earned the achievement.
+  """
   userId: String!
 
-  # The ID of the badge that was earned.
+  """
+  The ID of the badge that was earned.
+  """
   badgeId: String!
 
-  # The date and time when the achievement was earned.
+  """
+  The date and time when the achievement was earned.
+  """
   earnedAt: DateTime!
 
-  # The date and time when the user achievement was created.
+  """
+  The date and time when the user achievement was created.
+  """
   createdAt: DateTime!
 }
 
@@ -3058,10 +2760,14 @@ type UserAchievement{
 Response type for creating an achievement badge.
 """
 type CreateAchievementBadgeResponse {
-  # The ID of the newly created achievement badge.
+  """
+  The ID of the newly created achievement badge.
+  """
   badgeId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -3069,19 +2775,29 @@ type CreateAchievementBadgeResponse {
 Detailed information about an achievement badge.
 """
 type AchievementBadgeDetail {
-  # The ID of the achievement badge.
+  """
+  The ID of the achievement badge.
+  """
   badgeId: String!
 
-  # The name of the achievement badge.
+  """
+  The name of the achievement badge.
+  """
   name: String!
 
-  # A description of the achievement badge.
+  """
+  A description of the achievement badge.
+  """
   description: String!
 
-  # The URL of the icon representing the achievement badge.
+  """
+  The URL of the icon representing the achievement badge.
+  """
   iconUrl: String!
 
-  # The date and time when the achievement badge was created.
+  """
+  The date and time when the achievement badge was created.
+  """
   createdAt: DateTime!
 }
 
@@ -3089,10 +2805,14 @@ type AchievementBadgeDetail {
 Response type for awarding an achievement to a user.
 """
 type AwardAchievementResponse {
-  # The ID of the user achievement that was awarded.
+  """
+  The ID of the user achievement that was awarded.
+  """
   userAchievementId: String!
 
-  # A message indicating the result of the award operation.
+  """
+  A message indicating the result of the award operation.
+  """
   message: String!
 }
 
@@ -3100,13 +2820,19 @@ type AwardAchievementResponse {
 Detailed information about a user's achievement.
 """
 type UserAchievementDetail {
-  # The ID of the user achievement.
+  """
+  The ID of the user achievement.
+  """
   userAchievementId: String!
 
-  # The ID of the badge that was earned.
+  """
+  The ID of the badge that was earned.
+  """
   badgeId: String!
 
-  # The date and time when the achievement was earned.
+  """
+  The date and time when the achievement was earned.
+  """
   earnedAt: DateTime!
 }
 
@@ -3114,19 +2840,29 @@ type UserAchievementDetail {
 Represents a record of points earned by a user.
 """
 type UserPointRecord{
-  # The unique identifier of the point record.
+  """
+  The unique identifier of the point record.
+  """
   id: String!
 
-  # The ID of the user who earned the points.
+  """
+  The ID of the user who earned the points.
+  """
   userId: String!
 
-  # The number of points earned.
+  """
+  The number of points earned.
+  """
   pointsEarned: Float!
 
-  # The reason for earning the points.
+  """
+  The reason for earning the points.
+  """
   reason: String!
 
-  # The date and time when the points were earned.
+  """
+  The date and time when the points were earned.
+  """
   earnedAt: DateTime!
 }
 
@@ -3134,16 +2870,24 @@ type UserPointRecord{
 Detailed information about a user's point record.
 """
 type UserPointRecordDetail{
-  # The ID of the point record.
+  """
+  The ID of the point record.
+  """
   recordId: String!
 
-  # The number of points earned.
+  """
+  The number of points earned.
+  """
   pointsEarned: Float!
 
-  # The reason for earning the points.
+  """
+  The reason for earning the points.
+  """
   reason: String!
 
-  # The date and time when the points were earned.
+  """
+  The date and time when the points were earned.
+  """
   earnedAt: DateTime!
 }
 
@@ -3151,21 +2895,31 @@ type UserPointRecordDetail{
 Response type for earning points.
 """
 type earnPointsResponse{
-  # The updated total points of the user.
+  """
+  The updated total points of the user.
+  """
   updatedPoints: Float!
 
-  # A message indicating the result of the points earning operation.
+  """
+  A message indicating the result of the points earning operation.
+  """
   message: String!
 }
 
 extend type Query{
-  # Retrieves a list of achievement badges.
+  """
+  Retrieves a list of achievement badges.
+  """
   getAchievementBadges: [AchievementBadgeDetail]
 
-  # Retrieves a list of achievements earned by the user.
+  """
+  Retrieves a list of achievements earned by the user.
+  """
   getUserAchievements: [UserAchievementDetail]
 
-  # Retrieves a list of point records for the user.
+  """
+  Retrieves a list of point records for the user.
+  """
   getUserPointRecords: [UserPointRecordDetail]
 }
 
@@ -3174,13 +2928,19 @@ extend type Mutation{
   Creates a new achievement badge.
   """
   createAchievementBadge(
-    # The name of the achievement badge.
+    """
+    The name of the achievement badge.
+    """
     name: String!
 
-    # A description of the achievement badge.
+    """
+    A description of the achievement badge.
+    """
     description: String!
 
-    # The URL of the icon representing the achievement badge.
+    """
+    The URL of the icon representing the achievement badge.
+    """
     iconUrl: String!
   ): CreateAchievementBadgeResponse
 
@@ -3188,7 +2948,9 @@ extend type Mutation{
   Awards an achievement badge to a user.
   """
   awardAchievement(
-    # The ID of the badge to be awarded.
+    """
+    The ID of the badge to be awarded.
+    """
     badgeId: String!
   ): AwardAchievementResponse  
 
@@ -3196,10 +2958,14 @@ extend type Mutation{
   Records points earned by a user.
   """
   earnPoints(
-    # The number of points earned.
+    """
+    The number of points earned.
+    """
     pointsEarned: Float!
 
-    # The reason for earning the points.
+    """
+    The reason for earning the points.
+    """
     reason: String!
   ): earnPointsResponse
 }`, BuiltIn: false},
@@ -3207,31 +2973,49 @@ extend type Mutation{
 Represents an activity log entry for a user.
 """
 type ActivityLog {
-    # The unique identifier of the activity log entry.
+    """
+    The unique identifier of the activity log entry.
+    """
     id: String!
 
-    # The ID of the user associated with the activity.
+    """
+    The ID of the user associated with the activity.
+    """
     userId: String!
 
-    # The type of activity performed.
+    """
+    The type of activity performed.
+    """
     activityType: String!
 
-    # A description of the activity.
+    """
+    A description of the activity.
+    """
     description: String!
 
-    # The object that was changed during the activity.
+    """
+    The object that was changed during the activity.
+    """
     changedObject: String!
 
-    # The field of the object that was changed.
+    """
+    The field of the object that was changed.
+    """
     changedField: String!
 
-    # The original value before the change.
+    """
+    The original value before the change.
+    """
     from: String!
 
-    # The new value after the change.
+    """
+    The new value after the change.
+    """
     to: String!
 
-    # The timestamp when the activity occurred.
+    """
+    The timestamp when the activity occurred.
+    """
     timestamp: DateTime!
 }
 
@@ -3239,122 +3023,180 @@ type ActivityLog {
 Detailed information about an activity log entry.
 """
 type ActivityLogDetail{
-    # The ID of the activity log entry.
+    """
+    The ID of the activity log entry.
+    """
     logId: String!
 
-    # The type of activity performed.
+    """
+    The type of activity performed.
+    """
     activityType: String!
 
-    # A description of the activity.
+    """
+    A description of the activity.
+    """
     description: String!
 
-    # The object that was changed during the activity.
+    """
+    The object that was changed during the activity.
+    """
     changedObject: String!
 
-    # The field of the object that was changed.
+    """
+    The field of the object that was changed.
+    """
     changedField: String!
 
-    # The original value before the change.
+    """
+    The original value before the change.
+    """
     from: String!
 
-    # The new value after the change.
+    """
+    The new value after the change.
+    """
     to: String!
 
-    # The timestamp when the activity occurred.
+    """
+    The timestamp when the activity occurred.
+    """
     timestamp: DateTime!
 }
 
 extend type Query{
-    # Retrieves a list of activity logs for the user.
+    """
+    Retrieves a list of activity logs for the user.
+    """
     getActivityLog: [ActivityLogDetail]
 }`, BuiltIn: false},
 	{Name: "../schemas/assessment.graphqls", Input: `"""
 Represents a question in a health risk assessment questionnaire.
 """
-type Question{
-  # The unique identifier of the question.
+type Question {
+  """
+  The unique identifier of the question.
+  """
   questionId: Int!
 
-  # The text of the question.
+  """
+  The text of the question.
+  """
   question: String!
 
-  # The type of choice available for the question (e.g., single choice, multiple choice).
+  """
+  The type of choice available for the question (e.g., single choice, multiple choice).
+  """
   questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
 
-  # The list of choices available for the question.
+  """
+  The list of choices available for the question.
+  """
   choices: [String!] # empty if it is fill in the blank
 }
 
 """
 Represents a questionnaire object containing multiple questions.
 """
-type QuestionnaireObject{
-  # The unique identifier of the questionnaire.
+type QuestionnaireObject {
+  """
+  The unique identifier of the questionnaire.
+  """
   questionnaireId: Int!
 
-  # The list of questions in the questionnaire.
+  """
+  The list of questions in the questionnaire.
+  """
   data: [Question!]!
 }
 
 """
 Input type for a response to a questionnaire.
 """
-input Response{
-  # The ID of the question being answered.
+input Response {
+  """
+  The ID of the question being answered.
+  """
   questionId: Int!
 
-  # The choice selected for the question.
-  choice: String!#数字序号用，隔开
+  """
+  The choice selected for the question.
+  """
+  choice: String! #数字序号用，隔开
 
-  # The answer provided for the question, if applicable.
+  """
+  The answer provided for the question, if applicable.
+  """
   answer: String
 }
 
 """
 Represents a health response in a risk assessment.
 """
-type HealthResponse{
-  # The ID of the question being answered.
+type HealthResponse {
+  """
+  The ID of the question being answered.
+  """
   questionId: Int!
 
-  # The choice selected for the question.
-  choice: String!#数字序号用，隔开
+  """
+  The choice selected for the question.
+  """
+  choice: String! #数字序号用，隔开
 
-  # The answer provided for the question, if applicable.
+  """
+  The answer provided for the question, if applicable.
+  """
   answer: String
 }
 
 """
 Input type for a filled questionnaire.
 """
-input FilledQuestionnaire{
-  # The ID of the questionnaire being filled.
+input FilledQuestionnaire {
+  """
+  The ID of the questionnaire being filled.
+  """
   questionnaireId: Int!  # 第几套测试题
 
-  # The list of responses to the questionnaire.
+  """
+  The list of responses to the questionnaire.
+  """
   responses: [Response!]!
 }
 
 """
 Represents a health risk assessment for a user.
 """
-type HealthRiskAssessment{
-  # The unique identifier of the health risk assessment.
+type HealthRiskAssessment {
+  """
+  The unique identifier of the health risk assessment.
+  """
   id: String!
 
-  # The ID of the user who completed the assessment.
+  """
+  The ID of the user who completed the assessment.
+  """
   userId: String!
 
-  # The data from the completed questionnaire.
+  """
+  The data from the completed questionnaire.
+  """
   questionnaireData: [HealthResponse!]!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 
-  # The date and time when the assessment was created.
+  """
+  The date and time when the assessment was created.
+  """
   createdAt: DateTime!
 }
 
@@ -3362,19 +3204,29 @@ type HealthRiskAssessment{
 Detailed response for a health risk assessment.
 """
 type HealthRiskAssessmentDetailResponse {
-  # The ID of the health risk assessment.
+  """
+  The ID of the health risk assessment.
+  """
   assessmentId: String!
 
-  # The data from the completed questionnaire.
+  """
+  The data from the completed questionnaire.
+  """
   questionnaireData: [HealthResponse!]!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 
-  # The date and time when the assessment was created.
+  """
+  The date and time when the assessment was created.
+  """
   createdAt: DateTime!
 }
 
@@ -3382,191 +3234,67 @@ type HealthRiskAssessmentDetailResponse {
 Response type for evaluating a health risk assessment.
 """
 type EvaluateHealthRiskAssessmentResponse {
-  # The ID of the health risk assessment.
+  """
+  The ID of the health risk assessment.
+  """
   assessmentId: String!
 
-  # The risk level determined from the assessment.
+  """
+  The risk level determined from the assessment.
+  """
   riskLevel: String!
 
-  # Recommendations based on the assessment results.
+  """
+  Recommendations based on the assessment results.
+  """
   recommendations: String!
 }
 
-extend type Query{
-  # Retrieves previous health risk assessments for the user.
+extend type Query {
+  """
+  Retrieves previous health risk assessments for the user.
+  """
   getHealthRiskAssessment: [HealthRiskAssessmentDetailResponse] # 不做题目能拿到之前的结果
-  # Retrieves the questions for a health risk assessment.
+
+  """
+  Retrieves the questions for a health risk assessment.
+  """
   getHealthRiskAssessmentQuestion: QuestionnaireObject #拿题目
 }
 
-extend type Mutation{
-  # Evaluates a health risk assessment based on the filled questionnaire.
+extend type Mutation {
+  """
+  Evaluates a health risk assessment based on the filled questionnaire.
+  """
   evaluateHealthRiskAssessment(
-    # The filled questionnaire to be evaluated.
+    """
+    The filled questionnaire to be evaluated.
+    """
     filledQuestionnaire: FilledQuestionnaire!
   ): EvaluateHealthRiskAssessmentResponse #拿结果
-}`, BuiltIn: false},
-	{Name: "../schemas/familyMember.graphqls", Input: `"""
-Represents a family member linked to a user.
-"""
-type FamilyMember{
-  # The unique identifier of the family member entry.
-  id: String!
-
-  # The ID of the user who added the family member.
-  userId: String!
-
-  # The ID of the patient user linked to the family member.
-  patient_userId: String!
-
-  # The relationship of the family member to the user.
-  relationship: String! # deprecated
-
-  # The access level granted to the family member.
-  accessLevel: Int!    # deprecated
-
-  # The date and time when the family member was added.
-  createdAt: DateTime!
-}
-
-"""
-Response type for adding a family member.
-"""
-type AddFamilyMemberResponse {
-  # The ID of the newly added family member.
-  memberId: String!
-
-  # A message indicating the result of the addition operation.
-  message: String!
-}
-
-"""
-Detailed information about a family member.
-"""
-type FamilyMemberDetail {
-  # The ID of the family member entry.
-  memberId: String!
-
-  # The user ID of the related family member.
-  familyId: String!
-
-  # The name of the family member.
-  name: String!
-
-  # The phone number of the family member.
-  phoneNumber: String!
-
-  # The relationship of the family member to the user.
-  relationship: String!
-
-  # The access level granted to the family member.
-  accessLevel: Int!
-}
-
-"""
-Detailed information about a patient.
-"""
-type PatientDetail{
-    # The ID of the patient.
-    patientId: String!
-
-    # The name of the patient.
-    name: String!
-
-    # The phone number of the patient.
-    phoneNumber: String!
-
-    # The relationship of the patient to the user.
-    relationship: String!
-
-    # The access level granted to the user.
-    accessLevel: Int!
-}
-
-"""
-Response type for updating a family member.
-"""
-type UpdateFamilyMemberResponse {
-  # The ID of the updated family member.
-  memberId: String!
-
-  # A message indicating the result of the update operation.
-  message: String!
-}
-
-"""
-Response type for deleting a family member.
-"""
-type DeleteFamilyMemberResponse {
-  # A message indicating the result of the deletion operation.
-  message: String!
-}
-
-extend type Query{
-    # Retrieves a list of family members for the user.
-    getFamilyMembers: [FamilyMemberDetail]
-
-    # Retrieves a list of related patients for the user.
-    getRelatedPatients: [PatientDetail]
-
-    # Retrieves medical records for a specific patient.
-    getPatientMedicalRecords(patientId: String!): [MedicalRecordDetail]
-
-    # Retrieves treatment schedules for a specific patient.
-    getPatientTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
-
-    # Retrieves medications for a specific patient.
-    getPatientMedications(patientId: String!): [MedicationDetail]
-
-    # Retrieves health metrics for a specific patient.
-    getPatientHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
-}
-
-extend type Mutation{
-    # Adds a new family member.
-    addFamilyMember(
-      # The phone number of the family member.
-      memberPhoneNumber: String!
-
-      # The relationship of the family member to the user.
-      relationship: String!
-
-      # The access level granted to the family member.
-      accessLevel: Int!
-    ): AddFamilyMemberResponse
-
-    # Deletes a family member.
-    deleteFamilyMember(
-      # The ID of the family member to be deleted.
-      memberId: String!
-    ): DeleteFamilyMemberResponse
-
-    # Updates a family member. (deprecated)
-    updateFamilyMember(
-      # The ID of the family member to be updated.
-      memberId: String!
-
-      # The new relationship of the family member to the user.
-      relationship: String
-
-      # The new access level granted to the family member.
-      accessLevel: String
-    ): UpdateFamilyMemberResponse
 }`, BuiltIn: false},
 	{Name: "../schemas/foodspec.graphqls", Input: `"""
 Represents the specification of a food item.
 """
 type FoodSpec {
-  # The name of the food specification.
+  """
+  The name of the food specification.
+  """
   name: String!
 
-  # The value of the food specification.
+  """
+  The value of the food specification.
+  """
   value: Float!
 
-  # The unit of measurement for the food specification.
+  """
+  The unit of measurement for the food specification.
+  """
   unit: String!
 
-  # A measure of how high the specification value is compared to a standard.
+  """
+  A measure of how high the specification value is compared to a standard.
+  """
   howHigh: Float!
 }
 
@@ -3574,7 +3302,9 @@ type FoodSpec {
 Represents a recommendation for a food item.
 """
 type FoodRecommendation {
-  # The name of the recommended food item.
+  """
+  The name of the recommended food item.
+  """
   name: String!
 }
 
@@ -3582,61 +3312,95 @@ type FoodRecommendation {
 Represents a collection of food specifications.
 """
 type FoodSpecs {
-  # The list of food specifications.
+  """
+  The list of food specifications.
+  """
   specs: [FoodSpec!]!
 
-  # A measure of how recommended the food item is.
+  """
+  A measure of how recommended the food item is.
+  """
   howRecommend: Float!
 }
 
 extend type Query {
-  # Retrieves the specifications for a given food item.
+  """
+  Retrieves the specifications for a given food item.
+  """
   getFoodSpecs(
-    # The name of the food item.
+    """
+    The name of the food item.
+    """
     food: String!
   ): FoodSpecs
 
-  # Retrieves mock specifications for a given food item.
+  """
+  Retrieves mock specifications for a given food item.
+  """
   getMockFoodSpecs(
-    # The name of the food item.
+    """
+    The name of the food item.
+    """
     food: String!
   ): FoodSpecs
 
-  # Retrieves a recommendation for a food item.
+  """
+  Retrieves a recommendation for a food item.
+  """
   getFoodRecommendation: FoodRecommendation
 
-  # Retrieves a mock recommendation for a food item.
+  """
+  Retrieves a mock recommendation for a food item.
+  """
   getMockFoodRecommendation: FoodRecommendation
 }`, BuiltIn: false},
 	{Name: "../schemas/medications.graphqls", Input: `"""
 Represents a medication prescribed to a user.
 """
 type Medication {
-  # The unique identifier of the medication.
+  """
+  The unique identifier of the medication.
+  """
   id: String!
 
-  # The name of the medication.
+  """
+  The name of the medication.
+  """
   name: String!
 
-  # The dosage of the medication.
+  """
+  The dosage of the medication.
+  """
   dosage: Float!
 
-  # The unit of measurement for the dosage.
+  """
+  The unit of measurement for the dosage.
+  """
   unit: String!
 
-  # The frequency at which the medication should be taken.
+  """
+  The frequency at which the medication should be taken.
+  """
   frequency: String!
 
-  # The inventory count of the medication.
+  """
+  The inventory count of the medication.
+  """
   inventory: Float!
 
-  # The ID of the user who is prescribed the medication.
+  """
+  The ID of the user who is prescribed the medication.
+  """
   userId: String!
 
-  # The date and time when the medication was created.
+  """
+  The date and time when the medication was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the medication was last updated.
+  """
+  The date and time when the medication was last updated.
+  """
   updatedAt: DateTime!
 }
 
@@ -3644,22 +3408,34 @@ type Medication {
 Represents a reminder for taking a medication.
 """
 type MedicationReminder {
-  # The unique identifier of the medication reminder.
+  """
+  The unique identifier of the medication reminder.
+  """
   id: String!
 
-  # The ID of the medication associated with the reminder.
+  """
+  The ID of the medication associated with the reminder.
+  """
   medicationId: String!
 
-  # The ID of the user who set the reminder.
+  """
+  The ID of the user who set the reminder.
+  """
   userId: String!
 
-  # The time at which the reminder is set.
+  """
+  The time at which the reminder is set.
+  """
   reminderTime: DateTime!
 
-  # Indicates whether the medication has been taken.
+  """
+  Indicates whether the medication has been taken.
+  """
   isTaken: Boolean!
 
-  # The date and time when the reminder was created.
+  """
+  The date and time when the reminder was created.
+  """
   createdAt: DateTime!
 }
 
@@ -3667,10 +3443,14 @@ type MedicationReminder {
 Response type for adding a medication.
 """
 type AddMedicationResponse {
-  # The ID of the newly added medication.
+  """
+  The ID of the newly added medication.
+  """
   medicationId: String!
 
-  # A message indicating the result of the addition operation.
+  """
+  A message indicating the result of the addition operation.
+  """
   message: String!
 }
 
@@ -3678,22 +3458,34 @@ type AddMedicationResponse {
 Detailed information about a medication.
 """
 type MedicationDetail {
-  # The ID of the medication.
+  """
+  The ID of the medication.
+  """
   medicationId: String!
 
-  # The name of the medication.
+  """
+  The name of the medication.
+  """
   name: String!
 
-  # The dosage of the medication.
+  """
+  The dosage of the medication.
+  """
   dosage: Float!
 
-  # The unit of measurement for the dosage.
+  """
+  The unit of measurement for the dosage.
+  """
   unit: String!
 
-  # The frequency at which the medication should be taken.
+  """
+  The frequency at which the medication should be taken.
+  """
   frequency: String!
 
-  # The inventory count of the medication.
+  """
+  The inventory count of the medication.
+  """
   inventory: Float!
 }
 
@@ -3701,10 +3493,14 @@ type MedicationDetail {
 Response type for updating a medication.
 """
 type UpdateMedicationResponse {
-  # The ID of the updated medication.
+  """
+  The ID of the updated medication.
+  """
   medicationId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -3712,7 +3508,9 @@ type UpdateMedicationResponse {
 Response type for deleting a medication.
 """
 type DeleteMedicationResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -3720,10 +3518,14 @@ type DeleteMedicationResponse {
 Response type for creating a medication reminder.
 """
 type CreateMedicationReminderResponse {
-  # The ID of the newly created medication reminder.
+  """
+  The ID of the newly created medication reminder.
+  """
   reminderId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -3731,10 +3533,14 @@ type CreateMedicationReminderResponse {
 Response type for updating a medication reminder.
 """
 type UpdateMedicationReminderResponse {
-  # The ID of the updated medication reminder.
+  """
+  The ID of the updated medication reminder.
+  """
   reminderId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -3742,16 +3548,24 @@ type UpdateMedicationReminderResponse {
 Detailed information about a medication reminder.
 """
 type MedicationReminderDetail {
-  # The ID of the medication reminder.
+  """
+  The ID of the medication reminder.
+  """
   reminderId: String!
 
-  # The ID of the medication associated with the reminder.
+  """
+  The ID of the medication associated with the reminder.
+  """
   medicationId: String!
 
-  # The time at which the reminder is set.
+  """
+  The time at which the reminder is set.
+  """
   reminderTime: DateTime!
 
-  # Indicates whether the medication has been taken.
+  """
+  Indicates whether the medication has been taken.
+  """
   isTaken: Boolean!
 }
 
@@ -3759,22 +3573,34 @@ type MedicationReminderDetail {
 Represents a treatment schedule for a user.
 """
 type TreatmentSchedule {
-  # The unique identifier of the treatment schedule.
+  """
+  The unique identifier of the treatment schedule.
+  """
   id: String!
 
-  # The ID of the user who is scheduled for the treatment.
+  """
+  The ID of the user who is scheduled for the treatment.
+  """
   userId: String!
 
-  # The type of treatment scheduled.
+  """
+  The type of treatment scheduled.
+  """
   treatmentType: String!
 
-  # The time at which the treatment is scheduled.
+  """
+  The time at which the treatment is scheduled.
+  """
   scheduledTime: DateTime!
 
-  # The location where the treatment is scheduled.
+  """
+  The location where the treatment is scheduled.
+  """
   location: String!
 
-  # Additional notes about the treatment.
+  """
+  Additional notes about the treatment.
+  """
   notes: String
 }
 
@@ -3782,7 +3608,9 @@ type TreatmentSchedule {
 Response type for deleting a medication reminder.
 """
 type DeleteMedicationReminderResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -3790,10 +3618,14 @@ type DeleteMedicationReminderResponse {
 Response type for creating a treatment schedule.
 """
 type CreateTreatmentScheduleResponse {
-  # The ID of the newly created treatment schedule.
+  """
+  The ID of the newly created treatment schedule.
+  """
   scheduleId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -3801,19 +3633,29 @@ type CreateTreatmentScheduleResponse {
 Detailed information about a treatment schedule.
 """
 type TreatmentScheduleDetail {
-  # The ID of the treatment schedule.
+  """
+  The ID of the treatment schedule.
+  """
   scheduleId: String!
 
-  # The type of treatment scheduled.
+  """
+  The type of treatment scheduled.
+  """
   treatmentType: String!
 
-  # The time at which the treatment is scheduled.
+  """
+  The time at which the treatment is scheduled.
+  """
   scheduledTime: DateTime!
 
-  # The location where the treatment is scheduled.
+  """
+  The location where the treatment is scheduled.
+  """
   location: String!
 
-  # Additional notes about the treatment.
+  """
+  Additional notes about the treatment.
+  """
   notes: String
 }
 
@@ -3821,10 +3663,14 @@ type TreatmentScheduleDetail {
 Response type for updating a treatment schedule.
 """
 type UpdateTreatmentScheduleResponse {
-  # The ID of the updated treatment schedule.
+  """
+  The ID of the updated treatment schedule.
+  """
   scheduleId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -3832,7 +3678,9 @@ type UpdateTreatmentScheduleResponse {
 Response type for deleting a treatment schedule.
 """
 type DeleteTreatmentScheduleResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -3840,136 +3688,222 @@ type DeleteTreatmentScheduleResponse {
 Response type for taking a medication.
 """
 type TakeMedicationResponse {
-  # A message indicating the result of the medication taking operation.
+  """
+  A message indicating the result of the medication taking operation.
+  """
   message: String!
 }
 
 extend type Query {
-  # Retrieves a list of medications for the user.
+  """
+  Retrieves a list of medications for the user.
+  """
   getMedications: [MedicationDetail]
 
-  # Retrieves a list of medication reminders for the user.
+  """
+  Retrieves a list of medication reminders for the user.
+  """
   getMedicationReminders: [MedicationReminderDetail]
 
-  # Retrieves a list of treatment schedules for the user.
+  """
+  Retrieves a list of treatment schedules for the user.
+  """
   getTreatmentSchedules: [TreatmentScheduleDetail]
 }
 
 extend type Mutation {
-  # Adds a new medication.
+  """
+  Adds a new medication.
+  """
   addMedication(
-    # The name of the medication.
+    """
+    The name of the medication.
+    """
     name: String!
 
-    # The dosage of the medication.
+    """
+    The dosage of the medication.
+    """
     dosage: Float!
 
-    # The unit of measurement for the dosage.
+    """
+    The unit of measurement for the dosage.
+    """
     unit: String!
 
-    # The frequency at which the medication should be taken.
+    """
+    The frequency at which the medication should be taken.
+    """
     frequency: String!
 
-    # The inventory count of the medication.
+    """
+    The inventory count of the medication.
+    """
     inventory: Float!
   ): AddMedicationResponse
 
-  # Updates an existing medication.
+  """
+  Updates an existing medication.
+  """
   updateMedication(
-    # The ID of the medication to be updated.
+    """
+    The ID of the medication to be updated.
+    """
     medicationId: String!
 
-    # The new name of the medication.
+    """
+    The new name of the medication.
+    """
     name: String
 
-    # The new dosage of the medication.
+    """
+    The new dosage of the medication.
+    """
     dosage: Float
 
-    # The new unit of measurement for the dosage.
+    """
+    The new unit of measurement for the dosage.
+    """
     unit: String
 
-    # The new frequency at which the medication should be taken.
+    """
+    The new frequency at which the medication should be taken.
+    """
     frequency: String
 
-    # The new inventory count of the medication.
+    """
+    The new inventory count of the medication.
+    """
     inventory: Float
   ): UpdateMedicationResponse
 
-  # Deletes a medication.
+  """
+  Deletes a medication.
+  """
   deleteMedication(
-    # The ID of the medication to be deleted.
+    """
+    The ID of the medication to be deleted.
+    """
     medicationId: String!
   ): DeleteMedicationResponse
 
-  # Creates a new medication reminder.
+  """
+  Creates a new medication reminder.
+  """
   createMedicationReminder(
-    # The ID of the medication associated with the reminder.
+    """
+    The ID of the medication associated with the reminder.
+    """
     medicationId: String!
 
-    # The time at which the reminder is set.
+    """
+    The time at which the reminder is set.
+    """
     reminderTime: DateTime!
   ): CreateMedicationReminderResponse
 
-  # Updates an existing medication reminder.
+  """
+  Updates an existing medication reminder.
+  """
   updateMedicationReminder(
-    # The ID of the medication reminder to be updated.
+    """
+    The ID of the medication reminder to be updated.
+    """
     reminderId: String!
 
-    # The new time at which the reminder is set.
+    """
+    The new time at which the reminder is set.
+    """
     reminderTime: DateTime
 
-    # Indicates whether the medication has been taken.
+    """
+    Indicates whether the medication has been taken.
+    """
     isTaken: Boolean
   ): UpdateMedicationReminderResponse
 
-  # Marks a medication as taken.
+  """
+  Marks a medication as taken.
+  """
   takeMedication(
-    # The ID of the medication reminder.
+    """
+    The ID of the medication reminder.
+    """
     reminderId: String
   ): TakeMedicationResponse!
 
-  # Deletes a medication reminder.
+  """
+  Deletes a medication reminder.
+  """
   deleteMedicationReminder(
-    # The ID of the medication reminder to be deleted.
+    """
+    The ID of the medication reminder to be deleted.
+    """
     reminderId: String!
   ): DeleteMedicationReminderResponse
 
-  # Creates a new treatment schedule.
+  """
+  Creates a new treatment schedule.
+  """
   createTreatmentSchedule(
-    # The type of treatment scheduled.
+    """
+    The type of treatment scheduled.
+    """
     treatmentType: String!
 
-    # The time at which the treatment is scheduled.
+    """
+    The time at which the treatment is scheduled.
+    """
     scheduledTime: DateTime!
 
-    # The location where the treatment is scheduled.
+    """
+    The location where the treatment is scheduled.
+    """
     location: String!
 
-    # Additional notes about the treatment.
+    """
+    Additional notes about the treatment.
+    """
     notes: String
   ): CreateTreatmentScheduleResponse
 
-  # Updates an existing treatment schedule.
+  """
+  Updates an existing treatment schedule.
+  """
   updateTreatmentSchedule(
-    # The ID of the treatment schedule to be updated.
+    """
+    The ID of the treatment schedule to be updated.
+    """
     scheduleId: String!
 
-    # The new type of treatment scheduled.
+    """
+    The new type of treatment scheduled.
+    """
     treatmentType: String
 
-    # The new time at which the treatment is scheduled.
+    """
+    The new time at which the treatment is scheduled.
+    """
     scheduledTime: DateTime
 
-    # The new location where the treatment is scheduled.
+    """
+    The new location where the treatment is scheduled.
+    """
     location: String
 
-    # Additional notes about the treatment.
+    """
+    Additional notes about the treatment.
+    """
     notes: String
   ): UpdateTreatmentScheduleResponse
 
-  # Deletes a treatment schedule.
+  """
+  Deletes a treatment schedule.
+  """
   deleteTreatmentSchedule(
-    # The ID of the treatment schedule to be deleted.
+    """
+    The ID of the treatment schedule to be deleted.
+    """
     scheduleId: String!
   ): DeleteTreatmentScheduleResponse
 }
@@ -3978,22 +3912,34 @@ extend type Mutation {
 Represents a medical record for a user.
 """
 type MedicalRecord {
-  # The unique identifier of the medical record.
+  """
+  The unique identifier of the medical record.
+  """
   id: String!
 
-  # The ID of the user associated with the medical record.
+  """
+  The ID of the user associated with the medical record.
+  """
   userId: String!
 
-  # The type of the medical record.
+  """
+  The type of the medical record.
+  """
   recordType: String!
 
-  # The content of the medical record.
+  """
+  The content of the medical record.
+  """
   content: String!
 
-  # The date and time when the medical record was created.
+  """
+  The date and time when the medical record was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the medical record was last updated.
+  """
+  The date and time when the medical record was last updated.
+  """
   updatedAt: DateTime!
 }
 
@@ -4001,25 +3947,39 @@ type MedicalRecord {
 Represents a health metric recorded for a user.
 """
 type HealthMetric {
-  # The unique identifier of the health metric.
+  """
+  The unique identifier of the health metric.
+  """
   id: String!
 
-  # The ID of the user associated with the health metric.
+  """
+  The ID of the user associated with the health metric.
+  """
   userId: String!
 
-  # The type of the health metric.
+  """
+  The type of the health metric.
+  """
   metricType: String!
 
-  # The value of the health metric.
+  """
+  The value of the health metric.
+  """
   value: Float!
 
-  # The unit of measurement for the health metric.
+  """
+  The unit of measurement for the health metric.
+  """
   unit: String!
 
-  # The date and time when the health metric was recorded.
+  """
+  The date and time when the health metric was recorded.
+  """
   recordedAt: DateTime!
 
-  # The date and time when the health metric was created.
+  """
+  The date and time when the health metric was created.
+  """
   createdAt: DateTime!
 }
 
@@ -4027,10 +3987,14 @@ type HealthMetric {
 Response type for adding a health metric.
 """
 type AddHealthMetricResponse {
-  # The ID of the newly added health metric.
+  """
+  The ID of the newly added health metric.
+  """
   metricId: String!
 
-  # A message indicating the result of the addition operation.
+  """
+  A message indicating the result of the addition operation.
+  """
   message: String!
 }
 
@@ -4038,19 +4002,29 @@ type AddHealthMetricResponse {
 Detailed information about a health metric.
 """
 type HealthMetricDetail {
-  # The ID of the health metric.
+  """
+  The ID of the health metric.
+  """
   metricId: String!
 
-  # The type of the health metric.
+  """
+  The type of the health metric.
+  """
   metricType: String!
 
-  # The value of the health metric.
+  """
+  The value of the health metric.
+  """
   value: Float!
 
-  # The unit of measurement for the health metric.
+  """
+  The unit of measurement for the health metric.
+  """
   unit: String!
 
-  # The date and time when the health metric was recorded.
+  """
+  The date and time when the health metric was recorded.
+  """
   recordedAt: DateTime!
 }
 
@@ -4058,10 +4032,14 @@ type HealthMetricDetail {
 Response type for updating a health metric.
 """
 type UpdateHealthMetricResponse {
-  # The ID of the updated health metric.
+  """
+  The ID of the updated health metric.
+  """
   metricId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -4069,7 +4047,9 @@ type UpdateHealthMetricResponse {
 Response type for deleting a health metric.
 """
 type DeleteHealthMetricResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -4077,7 +4057,9 @@ type DeleteHealthMetricResponse {
 Represents a record object containing data.
 """
 type RecordObject {
-  # The data contained in the record object.
+  """
+  The data contained in the record object.
+  """
   data: String!
 }
 
@@ -4085,10 +4067,14 @@ type RecordObject {
 Response type for adding a medical record.
 """
 type AddMedicalRecordResponse {
-  # The ID of the newly added medical record.
+  """
+  The ID of the newly added medical record.
+  """
   recordId: String!
 
-  # A message indicating the result of the addition operation.
+  """
+  A message indicating the result of the addition operation.
+  """
   message: String!
 }
 
@@ -4096,16 +4082,24 @@ type AddMedicalRecordResponse {
 Detailed information about a medical record.
 """
 type MedicalRecordDetail {
-  # The ID of the medical record.
+  """
+  The ID of the medical record.
+  """
   recordId: String!
 
-  # The type of the medical record.
+  """
+  The type of the medical record.
+  """
   recordType: String!
 
-  # The content of the medical record.
+  """
+  The content of the medical record.
+  """
   content: String!
 
-  # The date and time when the medical record was created.
+  """
+  The date and time when the medical record was created.
+  """
   createdAt: DateTime!
 }
 
@@ -4113,10 +4107,14 @@ type MedicalRecordDetail {
 Response type for updating a medical record.
 """
 type UpdateMedicalRecordResponse {
-  # The ID of the updated medical record.
+  """
+  The ID of the updated medical record.
+  """
   recordId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -4124,87 +4122,47 @@ type UpdateMedicalRecordResponse {
 Response type for deleting a medical record.
 """
 type DeleteMedicalRecordResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
 extend type Query {
-  # Retrieves a list of health metrics for the user.
+  """
+  Retrieves a list of health metrics for the user.
+  """
   getHealthMetrics(
-    # The start date for filtering health metrics.
+    """
+    The start date for filtering health metrics.
+    """
     startDate: DateTime
 
-    # The end date for filtering health metrics.
+    """
+    The end date for filtering health metrics.
+    """
     endDate: DateTime
 
-    # The type of health metric to filter by.
+    """
+    The type of health metric to filter by.
+    """
     metricType: String
   ): [HealthMetricDetail]
 
-  # Retrieves a list of medical records for the user.
+  """
+  Retrieves a list of medical records for the user.
+  """
   getMedicalRecords: [MedicalRecordDetail]
 }
 
-extend type Mutation {
-  # Adds a new health metric.
-  addHealthMetric(
-    # The type of the health metric.
-    metricType: String!
-
-    # The value of the health metric.
-    value: Float!
-
-    # The unit of measurement for the health metric.
-    unit: String!
-
-    # The date and time when the health metric was recorded.
-    recordedAt: String!
-  ): AddHealthMetricResponse
-
-  # Updates an existing health metric.
-  updateHealthMetric(
-    # The ID of the health metric to be updated.
-    metricId: String!
-
-    # The new value of the health metric.
-    value: Float
-
-    # The new unit of measurement for the health metric.
-    unit: String
-  ): UpdateHealthMetricResponse
-
-  # Deletes a health metric.
-  deleteHealthMetric(
-    # The ID of the health metric to be deleted.
-    metricId: String!
-  ): DeleteHealthMetricResponse
-
-  # Adds a new medical record.
-  addMedicalRecord(
-    # The type of the medical record.
-    recordType: String!
-
-    # The content of the medical record.
-    content: String!
-  ): AddMedicalRecordResponse
-
-  # Updates an existing medical record.
-  updateMedicalRecord(
-    # The ID of the medical record to be updated.
-    recordId: String!
-
-    # The new type of the medical record.
-    recordType: String
-
-    # The new content of the medical record.
-    content: String
-  ): UpdateMedicalRecordResponse
-
-  # Deletes a medical record.
-  deleteMedicalRecord(
-    # The ID of the medical record to be deleted.
-    recordId: String!
-  ): DeleteMedicalRecordResponse
+extend type Mutation{
+  addHealthMetric(metricType: String!, value: Float!, unit: String!, recordedAt: DateTime!): AddHealthMetricResponse 
+  updateHealthMetric(metricId: String!, value: Float, unit: String, recordedAt:DateTime): UpdateHealthMetricResponse
+  deleteHealthMetric(metricId: String!): DeleteHealthMetricResponse
+   
+  addMedicalRecord(recordType: String!, content: String!): AddMedicalRecordResponse
+  updateMedicalRecord(recordId: String!, recordType: String, content: String): UpdateMedicalRecordResponse
+  deleteMedicalRecord(recordId: String!): DeleteMedicalRecordResponse
 }
 `, BuiltIn: false},
 	{Name: "../schemas/schema.graphqls", Input: `# GraphQL schema example
@@ -4226,31 +4184,49 @@ type Mutation
 Represents a token for user authentication.
 """
 type Token {
-  # The unique identifier of the token.
+  """
+  The unique identifier of the token.
+  """
   id: String!
 
-  # The ID of the user associated with the token.
+  """
+  The ID of the user associated with the token.
+  """
   user: String!
 
-  # The access token for authentication.
+  """
+  The access token for authentication.
+  """
   accessToken: String!
 
-  # The refresh token for renewing the access token.
+  """
+  The refresh token for renewing the access token.
+  """
   refreshToken: String!
 
-  # The expiry date and time of the access token.
+  """
+  The expiry date and time of the access token.
+  """
   accessTokenExpiry: DateTime!
 
-  # The expiry date and time of the refresh token.
+  """
+  The expiry date and time of the refresh token.
+  """
   refreshTokenExpiry: DateTime!
 
-  # The device associated with the token.
+  """
+  The device associated with the token.
+  """
   device: String!
 
-  # The date and time when the token was created.
+  """
+  The date and time when the token was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the token was last updated.
+  """
+  The date and time when the token was last updated.
+  """
   updatedAt: DateTime!
 }
 
@@ -4258,34 +4234,54 @@ type Token {
 Represents a user in the system.
 """
 type User {
-  # The unique identifier of the user.
+  """
+  The unique identifier of the user.
+  """
   id: String!
 
-  # The phone number of the user.
+  """
+  The phone number of the user.
+  """
   phoneNumber: String!
 
-  # The password of the user.
+  """
+  The password of the user.
+  """
   password: String!
 
-  # The name of the user.
+  """
+  The name of the user.
+  """
   name: String!
 
-  # The total points earned by the user.
+  """
+  The total points earned by the user.
+  """
   points: Float!
 
-  # The date and time when the user was created.
+  """
+  The date and time when the user was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the user was last updated.
+  """
+  The date and time when the user was last updated.
+  """
   updatedAt: DateTime!
 
-  # The date and time when the user last logged in.
+  """
+  The date and time when the user last logged in.
+  """
   lastLogin: DateTime!
 
-  # The status of the user account.
+  """
+  The status of the user account.
+  """
   status: Int!
 
-  # The role of the user in the system.
+  """
+  The role of the user in the system.
+  """
   role: String!
 }
 
@@ -4293,16 +4289,24 @@ type User {
 Represents a password change request.
 """
 type PasswordChange {
-  # The unique identifier of the password change request.
+  """
+  The unique identifier of the password change request.
+  """
   id: String!
 
-  # The ID of the user requesting the password change.
+  """
+  The ID of the user requesting the password change.
+  """
   user: String!
 
-  # The token associated with the password change request.
+  """
+  The token associated with the password change request.
+  """
   token: String!
 
-  # The date and time when the password change request was created.
+  """
+  The date and time when the password change request was created.
+  """
   createdAt: DateTime!
 }
 
@@ -4310,10 +4314,14 @@ type PasswordChange {
 Response type for creating a user.
 """
 type CreateUserResponse {
-  # The ID of the newly created user.
+  """
+  The ID of the newly created user.
+  """
   userId: String!
 
-  # A message indicating the result of the creation operation.
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
@@ -4321,13 +4329,19 @@ type CreateUserResponse {
 Response type for logging in a user.
 """
 type LoginUserResponse {
-  # The ID of the logged-in user.
+  """
+  The ID of the logged-in user.
+  """
   userId: String!
 
-  # The token associated with the logged-in user.
+  """
+  The token associated with the logged-in user.
+  """
   token: Token!
 
-  # A message indicating the result of the login operation.
+  """
+  A message indicating the result of the login operation.
+  """
   message: String!
 }
 
@@ -4335,25 +4349,39 @@ type LoginUserResponse {
 Detailed information about a user.
 """
 type UserDetailResponse {
-  # The ID of the user.
+  """
+  The ID of the user.
+  """
   userId: String!
 
-  # The phone number of the user.
+  """
+  The phone number of the user.
+  """
   phoneNumber: String!
 
-  # The name of the user.
+  """
+  The name of the user.
+  """
   name: String!
 
-  # The total points earned by the user.
+  """
+  The total points earned by the user.
+  """
   points: Float!
 
-  # The role of the user in the system.
+  """
+  The role of the user in the system.
+  """
   role: String!
 
-  # The date and time when the user was created.
+  """
+  The date and time when the user was created.
+  """
   createdAt: DateTime!
 
-  # The date and time when the user last logged in.
+  """
+  The date and time when the user last logged in.
+  """
   lastLogin: DateTime
 }
 
@@ -4361,10 +4389,14 @@ type UserDetailResponse {
 Response type for updating a user.
 """
 type UpdateUserResponse {
-  # The ID of the updated user.
+  """
+  The ID of the updated user.
+  """
   userId: String!
 
-  # A message indicating the result of the update operation.
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
@@ -4372,7 +4404,9 @@ type UpdateUserResponse {
 Response type for deleting a user.
 """
 type DeleteUserResponse {
-  # A message indicating the result of the deletion operation.
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
@@ -4380,7 +4414,9 @@ type DeleteUserResponse {
 Response type for requesting a password reset.
 """
 type RequestPasswordResetResponse {
-  # A message indicating the result of the password reset request.
+  """
+  A message indicating the result of the password reset request.
+  """
   message: String!
 }
 
@@ -4388,7 +4424,9 @@ type RequestPasswordResetResponse {
 Response type for resetting a password.
 """
 type ResetPasswordResponse {
-  # A message indicating the result of the password reset operation.
+  """
+  A message indicating the result of the password reset operation.
+  """
   message: String!
 }
 
@@ -4396,19 +4434,29 @@ type ResetPasswordResponse {
 Detailed information about a user profile.
 """
 type ProfileDetail {
-  # The unique identifier of the profile.
+  """
+  The unique identifier of the profile.
+  """
   id: String!
 
-  # The name of the profile.
+  """
+  The name of the profile.
+  """
   name: String!
 
-  # The phone number associated with the profile.
+  """
+  The phone number associated with the profile.
+  """
   phoneNumber: String!
 
-  # The role of the profile in the system.
+  """
+  The role of the profile in the system.
+  """
   role: String!
 
-  # The date and time when the profile was created.
+  """
+  The date and time when the profile was created.
+  """
   createdAt: DateTime!
 }
 
@@ -4416,7 +4464,9 @@ type ProfileDetail {
 Response type for sharing a profile.
 """
 type ShareProfileResponse {
-  # A message indicating the result of the profile sharing operation.
+  """
+  A message indicating the result of the profile sharing operation.
+  """
   message: String!
 }
 
@@ -4424,136 +4474,222 @@ type ShareProfileResponse {
 Response type for unsharing a profile.
 """
 type UnshareProfileResponse {
-  # A message indicating the result of the profile unsharing operation.
+  """
+  A message indicating the result of the profile unsharing operation.
+  """
   message: String!
 }
 
 extend type Query {
-  # Retrieves the details of the current user.
+  """
+  Retrieves the details of the current user.
+  """
   getUser: UserDetailResponse
 
-  # Retrieves a list of profiles for the user.
+  """
+  Retrieves a list of profiles for the user.
+  """
   getProfiles: [ProfileDetail]
 
-  # Retrieves a list of shared profiles for the user.
+  """
+  Retrieves a list of shared profiles for the user.
+  """
   getSharedProfiles: [ProfileDetail]
 
-  # Retrieves shared medical records for a specific patient.
+  """
+  Retrieves shared medical records for a specific patient.
+  """
   getSharedMedicalRecords(
-    # The ID of the patient.
+    """
+    The ID of the patient.
+    """
     patientId: String!
   ): [MedicalRecordDetail]
 
-  # Retrieves shared treatment schedules for a specific patient.
+  """
+  Retrieves shared treatment schedules for a specific patient.
+  """
   getSharedTreatmentSchedule(
-    # The ID of the patient.
+    """
+    The ID of the patient.
+    """
     patientId: String!
   ): [TreatmentScheduleDetail]
 
-  # Retrieves shared medications for a specific patient.
+  """
+  Retrieves shared medications for a specific patient.
+  """
   getSharedMedications(
-    # The ID of the patient.
+    """
+    The ID of the patient.
+    """
     patientId: String!
   ): [MedicationDetail]
 
-  # Retrieves shared health metrics for a specific patient.
+  """
+  Retrieves shared health metrics for a specific patient.
+  """
   getSharedHealthMetrics(
-    # The ID of the patient.
+    """
+    The ID of the patient.
+    """
     patientId: String!
 
-    # The start date for filtering health metrics.
+    """
+    The start date for filtering health metrics.
+    """
     startDate: DateTime
 
-    # The end date for filtering health metrics.
+    """
+    The end date for filtering health metrics.
+    """
     endDate: DateTime
 
-    # The type of health metric to filter by.
+    """
+    The type of health metric to filter by.
+    """
     metricType: String
   ): [HealthMetricDetail]
 }
 
 extend type Mutation {
-  # Refreshes the authentication token.
+  """
+  Refreshes the authentication token.
+  """
   refreshToken(
-    # The current access token.
+    """
+    The current access token.
+    """
     accessToken: String!
 
-    # The current refresh token.
+    """
+    The current refresh token.
+    """
     refreshToken: String!
 
-    # The device associated with the token.
+    """
+    The device associated with the token.
+    """
     device: String!
   ): Token
 
-  # Creates a new user.
+  """
+  Creates a new user.
+  """
   createUser(
-    # The phone number of the user.
+    """
+    The phone number of the user.
+    """
     phoneNumber: String!
 
-    # The password of the user.
+    """
+    The password of the user.
+    """
     password: String!
 
-    # The username of the user.
+    """
+    The username of the user.
+    """
     username: String!
 
-    # The role of the user in the system.
+    """
+    The role of the user in the system.
+    """
     role: String!
   ): CreateUserResponse
 
-  # Logs in a user.
+  """
+  Logs in a user.
+  """
   loginUser(
-    # The phone number of the user.
+    """
+    The phone number of the user.
+    """
     phoneNumber: String!
 
-    # The password of the user.
+    """
+    The password of the user.
+    """
     password: String!
   ): LoginUserResponse
 
-  # Updates the details of the current user.
+  """
+  Updates the details of the current user.
+  """
   updateUser(
-    # The new name of the user.
+    """
+    The new name of the user.
+    """
     name: String
 
-    # The new phone number of the user.
+    """
+    The new phone number of the user.
+    """
     phoneNumber: String
 
-    # The new password of the user.
+    """
+    The new password of the user.
+    """
     password: String
   ): UpdateUserResponse
 
-  # Deletes the current user.
+  """
+  Deletes the current user.
+  """
   deleteUser: DeleteUserResponse
 
-  # Requests a password reset for a user.
+  """
+  Requests a password reset for a user.
+  """
   requestPasswordReset(
-    # The phone number of the user.
+    """
+    The phone number of the user.
+    """
     phoneNumber: String!
   ): RequestPasswordResetResponse
 
-  # Resets the password for a user.
+  """
+  Resets the password for a user.
+  """
   resetPassword(
-    # The token associated with the password reset request.
+    """
+    The token associated with the password reset request.
+    """
     token: String!
 
-    # The new password for the user.
+    """
+    The new password for the user.
+    """
     newPassword: String!
   ): ResetPasswordResponse
 
-  # Shares a user profile.
+  """
+  Shares a user profile.
+  """
   shareProfile(
-    # The phone number of the user to share the profile with.
+    """
+    The phone number of the user to share the profile with.
+    """
     phoneNumber: String!
 
-    # The access level granted to the shared profile.
+    """
+    The access level granted to the shared profile.
+    """
     accessLevel: String!
 
-    # Additional remarks about the profile sharing.
+    """
+    Additional remarks about the profile sharing.
+    """
     remarks: String!
   ): ShareProfileResponse!
 
-  # Unshares a user profile.
+  """
+  Unshares a user profile.
+  """
   unshareProfile(
-    # The ID of the user to unshare the profile with.
+    """
+    The ID of the user to unshare the profile with.
+    """
     targetUserId: String!
   ): UnshareProfileResponse!
 }`, BuiltIn: false},
@@ -4563,65 +4699,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_addFamilyMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addFamilyMember_argsMemberPhoneNumber(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["memberPhoneNumber"] = arg0
-	arg1, err := ec.field_Mutation_addFamilyMember_argsRelationship(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["relationship"] = arg1
-	arg2, err := ec.field_Mutation_addFamilyMember_argsAccessLevel(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["accessLevel"] = arg2
-	return args, nil
-}
-func (ec *executionContext) field_Mutation_addFamilyMember_argsMemberPhoneNumber(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("memberPhoneNumber"))
-	if tmp, ok := rawArgs["memberPhoneNumber"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addFamilyMember_argsRelationship(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("relationship"))
-	if tmp, ok := rawArgs["relationship"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addFamilyMember_argsAccessLevel(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (int, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
-	if tmp, ok := rawArgs["accessLevel"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Mutation_addHealthMetric_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -4690,13 +4767,13 @@ func (ec *executionContext) field_Mutation_addHealthMetric_argsUnit(
 func (ec *executionContext) field_Mutation_addHealthMetric_argsRecordedAt(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("recordedAt"))
 	if tmp, ok := rawArgs["recordedAt"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
+		return ec.unmarshalNDateTime2timeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal time.Time
 	return zeroVal, nil
 }
 
@@ -4949,13 +5026,13 @@ func (ec *executionContext) field_Mutation_createMedicationReminder_argsMedicati
 func (ec *executionContext) field_Mutation_createMedicationReminder_argsReminderTime(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderTime"))
 	if tmp, ok := rawArgs["reminderTime"]; ok {
-		return ec.unmarshalNDateTime2string(ctx, tmp)
+		return ec.unmarshalNDateTime2timeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal time.Time
 	return zeroVal, nil
 }
 
@@ -5000,13 +5077,13 @@ func (ec *executionContext) field_Mutation_createTreatmentSchedule_argsTreatment
 func (ec *executionContext) field_Mutation_createTreatmentSchedule_argsScheduledTime(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduledTime"))
 	if tmp, ok := rawArgs["scheduledTime"]; ok {
-		return ec.unmarshalNDateTime2string(ctx, tmp)
+		return ec.unmarshalNDateTime2timeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal time.Time
 	return zeroVal, nil
 }
 
@@ -5106,29 +5183,6 @@ func (ec *executionContext) field_Mutation_createUser_argsRole(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
 	if tmp, ok := rawArgs["role"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteFamilyMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_deleteFamilyMember_argsMemberID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["memberId"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Mutation_deleteFamilyMember_argsMemberID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("memberId"))
-	if tmp, ok := rawArgs["memberId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -5584,65 +5638,6 @@ func (ec *executionContext) field_Mutation_unshareProfile_argsTargetUserID(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_updateFamilyMember_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_updateFamilyMember_argsMemberID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["memberId"] = arg0
-	arg1, err := ec.field_Mutation_updateFamilyMember_argsRelationship(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["relationship"] = arg1
-	arg2, err := ec.field_Mutation_updateFamilyMember_argsAccessLevel(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["accessLevel"] = arg2
-	return args, nil
-}
-func (ec *executionContext) field_Mutation_updateFamilyMember_argsMemberID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("memberId"))
-	if tmp, ok := rawArgs["memberId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_updateFamilyMember_argsRelationship(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("relationship"))
-	if tmp, ok := rawArgs["relationship"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_updateFamilyMember_argsAccessLevel(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
-	if tmp, ok := rawArgs["accessLevel"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Mutation_updateHealthMetric_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5661,6 +5656,11 @@ func (ec *executionContext) field_Mutation_updateHealthMetric_args(ctx context.C
 		return nil, err
 	}
 	args["unit"] = arg2
+	arg3, err := ec.field_Mutation_updateHealthMetric_argsRecordedAt(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["recordedAt"] = arg3
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_updateHealthMetric_argsMetricID(
@@ -5699,6 +5699,19 @@ func (ec *executionContext) field_Mutation_updateHealthMetric_argsUnit(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_updateHealthMetric_argsRecordedAt(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*time.Time, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("recordedAt"))
+	if tmp, ok := rawArgs["recordedAt"]; ok {
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
+	}
+
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
@@ -5797,13 +5810,13 @@ func (ec *executionContext) field_Mutation_updateMedicationReminder_argsReminder
 func (ec *executionContext) field_Mutation_updateMedicationReminder_argsReminderTime(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderTime"))
 	if tmp, ok := rawArgs["reminderTime"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
@@ -5992,13 +6005,13 @@ func (ec *executionContext) field_Mutation_updateTreatmentSchedule_argsTreatment
 func (ec *executionContext) field_Mutation_updateTreatmentSchedule_argsScheduledTime(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("scheduledTime"))
 	if tmp, ok := rawArgs["scheduledTime"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
@@ -6156,26 +6169,26 @@ func (ec *executionContext) field_Query_getHealthMetrics_args(ctx context.Contex
 func (ec *executionContext) field_Query_getHealthMetrics_argsStartDate(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
 	if tmp, ok := rawArgs["startDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_getHealthMetrics_argsEndDate(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
 	if tmp, ok := rawArgs["endDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
@@ -6208,152 +6221,6 @@ func (ec *executionContext) field_Query_getMockFoodSpecs_argsFood(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("food"))
 	if tmp, ok := rawArgs["food"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientHealthMetrics_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getPatientHealthMetrics_argsPatientID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["patientId"] = arg0
-	arg1, err := ec.field_Query_getPatientHealthMetrics_argsStartDate(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["startDate"] = arg1
-	arg2, err := ec.field_Query_getPatientHealthMetrics_argsEndDate(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["endDate"] = arg2
-	arg3, err := ec.field_Query_getPatientHealthMetrics_argsMetricType(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["metricType"] = arg3
-	return args, nil
-}
-func (ec *executionContext) field_Query_getPatientHealthMetrics_argsPatientID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
-	if tmp, ok := rawArgs["patientId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientHealthMetrics_argsStartDate(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
-	if tmp, ok := rawArgs["startDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientHealthMetrics_argsEndDate(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
-	if tmp, ok := rawArgs["endDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientHealthMetrics_argsMetricType(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("metricType"))
-	if tmp, ok := rawArgs["metricType"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientMedicalRecords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getPatientMedicalRecords_argsPatientID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["patientId"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_getPatientMedicalRecords_argsPatientID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
-	if tmp, ok := rawArgs["patientId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientMedications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getPatientMedications_argsPatientID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["patientId"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_getPatientMedications_argsPatientID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
-	if tmp, ok := rawArgs["patientId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_getPatientTreatmentSchedule_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getPatientTreatmentSchedule_argsPatientID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["patientId"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_getPatientTreatmentSchedule_argsPatientID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("patientId"))
-	if tmp, ok := rawArgs["patientId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -6402,26 +6269,26 @@ func (ec *executionContext) field_Query_getSharedHealthMetrics_argsPatientID(
 func (ec *executionContext) field_Query_getSharedHealthMetrics_argsStartDate(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
 	if tmp, ok := rawArgs["startDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_getSharedHealthMetrics_argsEndDate(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (*time.Time, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
 	if tmp, ok := rawArgs["endDate"]; ok {
-		return ec.unmarshalODateTime2ᚖstring(ctx, tmp)
+		return ec.unmarshalODateTime2ᚖtimeᚐTime(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal *time.Time
 	return zeroVal, nil
 }
 
@@ -6763,9 +6630,9 @@ func (ec *executionContext) _AchievementBadge_createdAt(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AchievementBadge_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6983,9 +6850,9 @@ func (ec *executionContext) _AchievementBadgeDetail_createdAt(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AchievementBadgeDetail_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7379,9 +7246,9 @@ func (ec *executionContext) _ActivityLog_timestamp(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ActivityLog_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7731,9 +7598,9 @@ func (ec *executionContext) _ActivityLogDetail_timestamp(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ActivityLogDetail_timestamp(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7744,94 +7611,6 @@ func (ec *executionContext) fieldContext_ActivityLogDetail_timestamp(_ context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AddFamilyMemberResponse_memberId(ctx context.Context, field graphql.CollectedField, obj *model.AddFamilyMemberResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AddFamilyMemberResponse_memberId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MemberID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_AddFamilyMemberResponse_memberId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AddFamilyMemberResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AddFamilyMemberResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.AddFamilyMemberResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AddFamilyMemberResponse_message(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_AddFamilyMemberResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AddFamilyMemberResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8541,50 +8320,6 @@ func (ec *executionContext) fieldContext_CreateUserResponse_message(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _DeleteFamilyMemberResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.DeleteFamilyMemberResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_DeleteFamilyMemberResponse_message(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_DeleteFamilyMemberResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DeleteFamilyMemberResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _DeleteHealthMetricResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.DeleteHealthMetricResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DeleteHealthMetricResponse_message(ctx, field)
 	if err != nil {
@@ -8976,534 +8711,6 @@ func (ec *executionContext) fieldContext_EvaluateHealthRiskAssessmentResponse_re
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_id(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_userId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_userId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_patient_userId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_patient_userId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PatientUserID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_patient_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_relationship(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_relationship(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Relationship, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_relationship(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_accessLevel(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_accessLevel(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessLevel, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_accessLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMember_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMember) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMember_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMember_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMember",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_memberId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_memberId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MemberID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_memberId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_familyId(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_familyId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FamilyID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_familyId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_name(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_phoneNumber(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PhoneNumber, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_phoneNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_relationship(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_relationship(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Relationship, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_relationship(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _FamilyMemberDetail_accessLevel(ctx context.Context, field graphql.CollectedField, obj *model.FamilyMemberDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_FamilyMemberDetail_accessLevel(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessLevel, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_FamilyMemberDetail_accessLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "FamilyMemberDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -10073,9 +9280,9 @@ func (ec *executionContext) _HealthMetric_recordedAt(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthMetric_recordedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10117,9 +9324,9 @@ func (ec *executionContext) _HealthMetric_createdAt(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthMetric_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10337,9 +9544,9 @@ func (ec *executionContext) _HealthMetricDetail_recordedAt(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthMetricDetail_recordedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10738,9 +9945,9 @@ func (ec *executionContext) _HealthRiskAssessment_createdAt(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthRiskAssessment_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -10966,9 +10173,9 @@ func (ec *executionContext) _HealthRiskAssessmentDetailResponse_createdAt(ctx co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_HealthRiskAssessmentDetailResponse_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11338,9 +10545,9 @@ func (ec *executionContext) _MedicalRecord_createdAt(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecord_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11382,9 +10589,9 @@ func (ec *executionContext) _MedicalRecord_updatedAt(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecord_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11558,9 +10765,9 @@ func (ec *executionContext) _MedicalRecordDetail_createdAt(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicalRecordDetail_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11910,9 +11117,9 @@ func (ec *executionContext) _Medication_createdAt(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Medication_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11954,9 +11161,9 @@ func (ec *executionContext) _Medication_updatedAt(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Medication_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12394,9 +11601,9 @@ func (ec *executionContext) _MedicationReminder_reminderTime(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicationReminder_reminderTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12482,9 +11689,9 @@ func (ec *executionContext) _MedicationReminder_createdAt(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicationReminder_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12614,9 +11821,9 @@ func (ec *executionContext) _MedicationReminderDetail_reminderTime(ctx context.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MedicationReminderDetail_reminderTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -12910,178 +12117,6 @@ func (ec *executionContext) fieldContext_Mutation_evaluateHealthRiskAssessment(c
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_addFamilyMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_addFamilyMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddFamilyMember(rctx, fc.Args["memberPhoneNumber"].(string), fc.Args["relationship"].(string), fc.Args["accessLevel"].(int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.AddFamilyMemberResponse)
-	fc.Result = res
-	return ec.marshalOAddFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐAddFamilyMemberResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_addFamilyMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "memberId":
-				return ec.fieldContext_AddFamilyMemberResponse_memberId(ctx, field)
-			case "message":
-				return ec.fieldContext_AddFamilyMemberResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type AddFamilyMemberResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addFamilyMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_deleteFamilyMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_deleteFamilyMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteFamilyMember(rctx, fc.Args["memberId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.DeleteFamilyMemberResponse)
-	fc.Result = res
-	return ec.marshalODeleteFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteFamilyMemberResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_deleteFamilyMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "message":
-				return ec.fieldContext_DeleteFamilyMemberResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DeleteFamilyMemberResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_deleteFamilyMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_updateFamilyMember(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateFamilyMember(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateFamilyMember(rctx, fc.Args["memberId"].(string), fc.Args["relationship"].(*string), fc.Args["accessLevel"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.UpdateFamilyMemberResponse)
-	fc.Result = res
-	return ec.marshalOUpdateFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐUpdateFamilyMemberResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_updateFamilyMember(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "memberId":
-				return ec.fieldContext_UpdateFamilyMemberResponse_memberId(ctx, field)
-			case "message":
-				return ec.fieldContext_UpdateFamilyMemberResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UpdateFamilyMemberResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateFamilyMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_addMedication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addMedication(ctx, field)
 	if err != nil {
@@ -13268,7 +12303,7 @@ func (ec *executionContext) _Mutation_createMedicationReminder(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateMedicationReminder(rctx, fc.Args["medicationId"].(string), fc.Args["reminderTime"].(string))
+		return ec.resolvers.Mutation().CreateMedicationReminder(rctx, fc.Args["medicationId"].(string), fc.Args["reminderTime"].(time.Time))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13326,7 +12361,7 @@ func (ec *executionContext) _Mutation_updateMedicationReminder(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateMedicationReminder(rctx, fc.Args["reminderId"].(string), fc.Args["reminderTime"].(*string), fc.Args["isTaken"].(*bool))
+		return ec.resolvers.Mutation().UpdateMedicationReminder(rctx, fc.Args["reminderId"].(string), fc.Args["reminderTime"].(*time.Time), fc.Args["isTaken"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13499,7 +12534,7 @@ func (ec *executionContext) _Mutation_createTreatmentSchedule(ctx context.Contex
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTreatmentSchedule(rctx, fc.Args["treatmentType"].(string), fc.Args["scheduledTime"].(string), fc.Args["location"].(string), fc.Args["notes"].(*string))
+		return ec.resolvers.Mutation().CreateTreatmentSchedule(rctx, fc.Args["treatmentType"].(string), fc.Args["scheduledTime"].(time.Time), fc.Args["location"].(string), fc.Args["notes"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13557,7 +12592,7 @@ func (ec *executionContext) _Mutation_updateTreatmentSchedule(ctx context.Contex
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTreatmentSchedule(rctx, fc.Args["scheduleId"].(string), fc.Args["treatmentType"].(*string), fc.Args["scheduledTime"].(*string), fc.Args["location"].(*string), fc.Args["notes"].(*string))
+		return ec.resolvers.Mutation().UpdateTreatmentSchedule(rctx, fc.Args["scheduleId"].(string), fc.Args["treatmentType"].(*string), fc.Args["scheduledTime"].(*time.Time), fc.Args["location"].(*string), fc.Args["notes"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13671,7 +12706,7 @@ func (ec *executionContext) _Mutation_addHealthMetric(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddHealthMetric(rctx, fc.Args["metricType"].(string), fc.Args["value"].(float64), fc.Args["unit"].(string), fc.Args["recordedAt"].(string))
+		return ec.resolvers.Mutation().AddHealthMetric(rctx, fc.Args["metricType"].(string), fc.Args["value"].(float64), fc.Args["unit"].(string), fc.Args["recordedAt"].(time.Time))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13729,7 +12764,7 @@ func (ec *executionContext) _Mutation_updateHealthMetric(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateHealthMetric(rctx, fc.Args["metricId"].(string), fc.Args["value"].(*float64), fc.Args["unit"].(*string))
+		return ec.resolvers.Mutation().UpdateHealthMetric(rctx, fc.Args["metricId"].(string), fc.Args["value"].(*float64), fc.Args["unit"].(*string), fc.Args["recordedAt"].(*time.Time))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14682,9 +13717,9 @@ func (ec *executionContext) _PasswordChange_createdAt(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PasswordChange_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -14695,226 +13730,6 @@ func (ec *executionContext) fieldContext_PasswordChange_createdAt(_ context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PatientDetail_patientId(ctx context.Context, field graphql.CollectedField, obj *model.PatientDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PatientDetail_patientId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PatientID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PatientDetail_patientId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PatientDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PatientDetail_name(ctx context.Context, field graphql.CollectedField, obj *model.PatientDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PatientDetail_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PatientDetail_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PatientDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PatientDetail_phoneNumber(ctx context.Context, field graphql.CollectedField, obj *model.PatientDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PatientDetail_phoneNumber(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PhoneNumber, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PatientDetail_phoneNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PatientDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PatientDetail_relationship(ctx context.Context, field graphql.CollectedField, obj *model.PatientDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PatientDetail_relationship(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Relationship, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PatientDetail_relationship(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PatientDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PatientDetail_accessLevel(ctx context.Context, field graphql.CollectedField, obj *model.PatientDetail) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PatientDetail_accessLevel(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessLevel, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PatientDetail_accessLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PatientDetail",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -15122,9 +13937,9 @@ func (ec *executionContext) _ProfileDetail_createdAt(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ProfileDetail_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -15448,370 +14263,6 @@ func (ec *executionContext) fieldContext_Query_getHealthRiskAssessmentQuestion(_
 			}
 			return nil, fmt.Errorf("no field named %q was found under type QuestionnaireObject", field.Name)
 		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getFamilyMembers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getFamilyMembers(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetFamilyMembers(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.FamilyMemberDetail)
-	fc.Result = res
-	return ec.marshalOFamilyMemberDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐFamilyMemberDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getFamilyMembers(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "memberId":
-				return ec.fieldContext_FamilyMemberDetail_memberId(ctx, field)
-			case "familyId":
-				return ec.fieldContext_FamilyMemberDetail_familyId(ctx, field)
-			case "name":
-				return ec.fieldContext_FamilyMemberDetail_name(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_FamilyMemberDetail_phoneNumber(ctx, field)
-			case "relationship":
-				return ec.fieldContext_FamilyMemberDetail_relationship(ctx, field)
-			case "accessLevel":
-				return ec.fieldContext_FamilyMemberDetail_accessLevel(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type FamilyMemberDetail", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getRelatedPatients(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getRelatedPatients(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetRelatedPatients(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.PatientDetail)
-	fc.Result = res
-	return ec.marshalOPatientDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐPatientDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getRelatedPatients(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "patientId":
-				return ec.fieldContext_PatientDetail_patientId(ctx, field)
-			case "name":
-				return ec.fieldContext_PatientDetail_name(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_PatientDetail_phoneNumber(ctx, field)
-			case "relationship":
-				return ec.fieldContext_PatientDetail_relationship(ctx, field)
-			case "accessLevel":
-				return ec.fieldContext_PatientDetail_accessLevel(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PatientDetail", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getPatientMedicalRecords(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPatientMedicalRecords(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPatientMedicalRecords(rctx, fc.Args["patientId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.MedicalRecordDetail)
-	fc.Result = res
-	return ec.marshalOMedicalRecordDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicalRecordDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getPatientMedicalRecords(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "recordId":
-				return ec.fieldContext_MedicalRecordDetail_recordId(ctx, field)
-			case "recordType":
-				return ec.fieldContext_MedicalRecordDetail_recordType(ctx, field)
-			case "content":
-				return ec.fieldContext_MedicalRecordDetail_content(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_MedicalRecordDetail_createdAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MedicalRecordDetail", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPatientMedicalRecords_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getPatientTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPatientTreatmentSchedule(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPatientTreatmentSchedule(rctx, fc.Args["patientId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.TreatmentScheduleDetail)
-	fc.Result = res
-	return ec.marshalOTreatmentScheduleDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐTreatmentScheduleDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getPatientTreatmentSchedule(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "scheduleId":
-				return ec.fieldContext_TreatmentScheduleDetail_scheduleId(ctx, field)
-			case "treatmentType":
-				return ec.fieldContext_TreatmentScheduleDetail_treatmentType(ctx, field)
-			case "scheduledTime":
-				return ec.fieldContext_TreatmentScheduleDetail_scheduledTime(ctx, field)
-			case "location":
-				return ec.fieldContext_TreatmentScheduleDetail_location(ctx, field)
-			case "notes":
-				return ec.fieldContext_TreatmentScheduleDetail_notes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type TreatmentScheduleDetail", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPatientTreatmentSchedule_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getPatientMedications(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPatientMedications(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPatientMedications(rctx, fc.Args["patientId"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.MedicationDetail)
-	fc.Result = res
-	return ec.marshalOMedicationDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐMedicationDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getPatientMedications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "medicationId":
-				return ec.fieldContext_MedicationDetail_medicationId(ctx, field)
-			case "name":
-				return ec.fieldContext_MedicationDetail_name(ctx, field)
-			case "dosage":
-				return ec.fieldContext_MedicationDetail_dosage(ctx, field)
-			case "unit":
-				return ec.fieldContext_MedicationDetail_unit(ctx, field)
-			case "frequency":
-				return ec.fieldContext_MedicationDetail_frequency(ctx, field)
-			case "inventory":
-				return ec.fieldContext_MedicationDetail_inventory(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MedicationDetail", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPatientMedications_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getPatientHealthMetrics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getPatientHealthMetrics(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPatientHealthMetrics(rctx, fc.Args["patientId"].(string), fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["metricType"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.HealthMetricDetail)
-	fc.Result = res
-	return ec.marshalOHealthMetricDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐHealthMetricDetail(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_getPatientHealthMetrics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "metricId":
-				return ec.fieldContext_HealthMetricDetail_metricId(ctx, field)
-			case "metricType":
-				return ec.fieldContext_HealthMetricDetail_metricType(ctx, field)
-			case "value":
-				return ec.fieldContext_HealthMetricDetail_value(ctx, field)
-			case "unit":
-				return ec.fieldContext_HealthMetricDetail_unit(ctx, field)
-			case "recordedAt":
-				return ec.fieldContext_HealthMetricDetail_recordedAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HealthMetricDetail", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getPatientHealthMetrics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -16195,7 +14646,7 @@ func (ec *executionContext) _Query_getHealthMetrics(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetHealthMetrics(rctx, fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["metricType"].(*string))
+		return ec.resolvers.Query().GetHealthMetrics(rctx, fc.Args["startDate"].(*time.Time), fc.Args["endDate"].(*time.Time), fc.Args["metricType"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16665,7 +15116,7 @@ func (ec *executionContext) _Query_getSharedHealthMetrics(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSharedHealthMetrics(rctx, fc.Args["patientId"].(string), fc.Args["startDate"].(*string), fc.Args["endDate"].(*string), fc.Args["metricType"].(*string))
+		return ec.resolvers.Query().GetSharedHealthMetrics(rctx, fc.Args["patientId"].(string), fc.Args["startDate"].(*time.Time), fc.Args["endDate"].(*time.Time), fc.Args["metricType"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17537,9 +15988,9 @@ func (ec *executionContext) _Token_accessTokenExpiry(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Token_accessTokenExpiry(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17581,9 +16032,9 @@ func (ec *executionContext) _Token_refreshTokenExpiry(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Token_refreshTokenExpiry(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17669,9 +16120,9 @@ func (ec *executionContext) _Token_createdAt(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Token_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17713,9 +16164,9 @@ func (ec *executionContext) _Token_updatedAt(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Token_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17889,9 +16340,9 @@ func (ec *executionContext) _TreatmentSchedule_scheduledTime(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TreatmentSchedule_scheduledTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18106,9 +16557,9 @@ func (ec *executionContext) _TreatmentScheduleDetail_scheduledTime(ctx context.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_TreatmentScheduleDetail_scheduledTime(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -18243,94 +16694,6 @@ func (ec *executionContext) _UnshareProfileResponse_message(ctx context.Context,
 func (ec *executionContext) fieldContext_UnshareProfileResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UnshareProfileResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateFamilyMemberResponse_memberId(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFamilyMemberResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateFamilyMemberResponse_memberId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MemberID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateFamilyMemberResponse_memberId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateFamilyMemberResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UpdateFamilyMemberResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.UpdateFamilyMemberResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UpdateFamilyMemberResponse_message(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UpdateFamilyMemberResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UpdateFamilyMemberResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -19115,9 +17478,9 @@ func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19159,9 +17522,9 @@ func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19203,9 +17566,9 @@ func (ec *executionContext) _User_lastLogin(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_lastLogin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19467,9 +17830,9 @@ func (ec *executionContext) _UserAchievement_earnedAt(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAchievement_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19511,9 +17874,9 @@ func (ec *executionContext) _UserAchievement_createdAt(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAchievement_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19643,9 +18006,9 @@ func (ec *executionContext) _UserAchievementDetail_earnedAt(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserAchievementDetail_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19907,9 +18270,9 @@ func (ec *executionContext) _UserDetailResponse_createdAt(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserDetailResponse_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19948,9 +18311,9 @@ func (ec *executionContext) _UserDetailResponse_lastLogin(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*time.Time)
 	fc.Result = res
-	return ec.marshalODateTime2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalODateTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserDetailResponse_lastLogin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20168,9 +18531,9 @@ func (ec *executionContext) _UserPointRecord_earnedAt(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserPointRecord_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20344,9 +18707,9 @@ func (ec *executionContext) _UserPointRecordDetail_earnedAt(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(time.Time)
 	fc.Result = res
-	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+	return ec.marshalNDateTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserPointRecordDetail_earnedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -22577,50 +20940,6 @@ func (ec *executionContext) _ActivityLogDetail(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var addFamilyMemberResponseImplementors = []string{"AddFamilyMemberResponse"}
-
-func (ec *executionContext) _AddFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, obj *model.AddFamilyMemberResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, addFamilyMemberResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("AddFamilyMemberResponse")
-		case "memberId":
-			out.Values[i] = ec._AddFamilyMemberResponse_memberId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._AddFamilyMemberResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var addHealthMetricResponseImplementors = []string{"AddHealthMetricResponse"}
 
 func (ec *executionContext) _AddHealthMetricResponse(ctx context.Context, sel ast.SelectionSet, obj *model.AddHealthMetricResponse) graphql.Marshaler {
@@ -22973,45 +21292,6 @@ func (ec *executionContext) _CreateUserResponse(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var deleteFamilyMemberResponseImplementors = []string{"DeleteFamilyMemberResponse"}
-
-func (ec *executionContext) _DeleteFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteFamilyMemberResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, deleteFamilyMemberResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("DeleteFamilyMemberResponse")
-		case "message":
-			out.Values[i] = ec._DeleteFamilyMemberResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
 var deleteHealthMetricResponseImplementors = []string{"DeleteHealthMetricResponse"}
 
 func (ec *executionContext) _DeleteHealthMetricResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteHealthMetricResponse) graphql.Marshaler {
@@ -23269,134 +21549,6 @@ func (ec *executionContext) _EvaluateHealthRiskAssessmentResponse(ctx context.Co
 			}
 		case "recommendations":
 			out.Values[i] = ec._EvaluateHealthRiskAssessmentResponse_recommendations(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var familyMemberImplementors = []string{"FamilyMember"}
-
-func (ec *executionContext) _FamilyMember(ctx context.Context, sel ast.SelectionSet, obj *model.FamilyMember) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, familyMemberImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("FamilyMember")
-		case "id":
-			out.Values[i] = ec._FamilyMember_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "userId":
-			out.Values[i] = ec._FamilyMember_userId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "patient_userId":
-			out.Values[i] = ec._FamilyMember_patient_userId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "relationship":
-			out.Values[i] = ec._FamilyMember_relationship(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "accessLevel":
-			out.Values[i] = ec._FamilyMember_accessLevel(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdAt":
-			out.Values[i] = ec._FamilyMember_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var familyMemberDetailImplementors = []string{"FamilyMemberDetail"}
-
-func (ec *executionContext) _FamilyMemberDetail(ctx context.Context, sel ast.SelectionSet, obj *model.FamilyMemberDetail) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, familyMemberDetailImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("FamilyMemberDetail")
-		case "memberId":
-			out.Values[i] = ec._FamilyMemberDetail_memberId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "familyId":
-			out.Values[i] = ec._FamilyMemberDetail_familyId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "name":
-			out.Values[i] = ec._FamilyMemberDetail_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "phoneNumber":
-			out.Values[i] = ec._FamilyMemberDetail_phoneNumber(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "relationship":
-			out.Values[i] = ec._FamilyMemberDetail_relationship(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "accessLevel":
-			out.Values[i] = ec._FamilyMemberDetail_accessLevel(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -24320,18 +22472,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_evaluateHealthRiskAssessment(ctx, field)
 			})
-		case "addFamilyMember":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addFamilyMember(ctx, field)
-			})
-		case "deleteFamilyMember":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_deleteFamilyMember(ctx, field)
-			})
-		case "updateFamilyMember":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateFamilyMember(ctx, field)
-			})
 		case "addMedication":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addMedication(ctx, field)
@@ -24492,65 +22632,6 @@ func (ec *executionContext) _PasswordChange(ctx context.Context, sel ast.Selecti
 			}
 		case "createdAt":
 			out.Values[i] = ec._PasswordChange_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var patientDetailImplementors = []string{"PatientDetail"}
-
-func (ec *executionContext) _PatientDetail(ctx context.Context, sel ast.SelectionSet, obj *model.PatientDetail) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, patientDetailImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("PatientDetail")
-		case "patientId":
-			out.Values[i] = ec._PatientDetail_patientId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "name":
-			out.Values[i] = ec._PatientDetail_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "phoneNumber":
-			out.Values[i] = ec._PatientDetail_phoneNumber(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "relationship":
-			out.Values[i] = ec._PatientDetail_relationship(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "accessLevel":
-			out.Values[i] = ec._PatientDetail_accessLevel(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -24760,120 +22841,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getHealthRiskAssessmentQuestion(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getFamilyMembers":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getFamilyMembers(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getRelatedPatients":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getRelatedPatients(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getPatientMedicalRecords":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getPatientMedicalRecords(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getPatientTreatmentSchedule":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getPatientTreatmentSchedule(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getPatientMedications":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getPatientMedications(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getPatientHealthMetrics":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getPatientHealthMetrics(ctx, field)
 				return res
 			}
 
@@ -25717,50 +23684,6 @@ func (ec *executionContext) _UnshareProfileResponse(ctx context.Context, sel ast
 			out.Values[i] = graphql.MarshalString("UnshareProfileResponse")
 		case "message":
 			out.Values[i] = ec._UnshareProfileResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var updateFamilyMemberResponseImplementors = []string{"UpdateFamilyMemberResponse"}
-
-func (ec *executionContext) _UpdateFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateFamilyMemberResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, updateFamilyMemberResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UpdateFamilyMemberResponse")
-		case "memberId":
-			out.Values[i] = ec._UpdateFamilyMemberResponse_memberId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._UpdateFamilyMemberResponse_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -26807,13 +24730,13 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNDateTime2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalString(v)
+func (ec *executionContext) unmarshalNDateTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := custom.UnmarshalDateTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNDateTime2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalString(v)
+func (ec *executionContext) marshalNDateTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := custom.MarshalDateTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -27457,13 +25380,6 @@ func (ec *executionContext) marshalOActivityLogDetail2ᚖmeditraxᚋgraphᚋmode
 	return ec._ActivityLogDetail(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAddFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐAddFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, v *model.AddFamilyMemberResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._AddFamilyMemberResponse(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOAddHealthMetricResponse2ᚖmeditraxᚋgraphᚋmodelᚐAddHealthMetricResponse(ctx context.Context, sel ast.SelectionSet, v *model.AddHealthMetricResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -27546,27 +25462,20 @@ func (ec *executionContext) marshalOCreateUserResponse2ᚖmeditraxᚋgraphᚋmod
 	return ec._CreateUserResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalODateTime2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+func (ec *executionContext) unmarshalODateTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalString(v)
+	res, err := custom.UnmarshalDateTime(v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalODateTime2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+func (ec *executionContext) marshalODateTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	res := graphql.MarshalString(*v)
+	res := custom.MarshalDateTime(*v)
 	return res
-}
-
-func (ec *executionContext) marshalODeleteFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, v *model.DeleteFamilyMemberResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._DeleteFamilyMemberResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODeleteHealthMetricResponse2ᚖmeditraxᚋgraphᚋmodelᚐDeleteHealthMetricResponse(ctx context.Context, sel ast.SelectionSet, v *model.DeleteHealthMetricResponse) graphql.Marshaler {
@@ -27616,54 +25525,6 @@ func (ec *executionContext) marshalOEvaluateHealthRiskAssessmentResponse2ᚖmedi
 		return graphql.Null
 	}
 	return ec._EvaluateHealthRiskAssessmentResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOFamilyMemberDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐFamilyMemberDetail(ctx context.Context, sel ast.SelectionSet, v []*model.FamilyMemberDetail) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOFamilyMemberDetail2ᚖmeditraxᚋgraphᚋmodelᚐFamilyMemberDetail(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOFamilyMemberDetail2ᚖmeditraxᚋgraphᚋmodelᚐFamilyMemberDetail(ctx context.Context, sel ast.SelectionSet, v *model.FamilyMemberDetail) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._FamilyMemberDetail(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
@@ -27943,54 +25804,6 @@ func (ec *executionContext) marshalOMedicationReminderDetail2ᚖmeditraxᚋgraph
 	return ec._MedicationReminderDetail(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOPatientDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐPatientDetail(ctx context.Context, sel ast.SelectionSet, v []*model.PatientDetail) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOPatientDetail2ᚖmeditraxᚋgraphᚋmodelᚐPatientDetail(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOPatientDetail2ᚖmeditraxᚋgraphᚋmodelᚐPatientDetail(ctx context.Context, sel ast.SelectionSet, v *model.PatientDetail) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._PatientDetail(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOProfileDetail2ᚕᚖmeditraxᚋgraphᚋmodelᚐProfileDetail(ctx context.Context, sel ast.SelectionSet, v []*model.ProfileDetail) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -28167,13 +25980,6 @@ func (ec *executionContext) marshalOTreatmentScheduleDetail2ᚖmeditraxᚋgraph�
 		return graphql.Null
 	}
 	return ec._TreatmentScheduleDetail(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOUpdateFamilyMemberResponse2ᚖmeditraxᚋgraphᚋmodelᚐUpdateFamilyMemberResponse(ctx context.Context, sel ast.SelectionSet, v *model.UpdateFamilyMemberResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._UpdateFamilyMemberResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUpdateHealthMetricResponse2ᚖmeditraxᚋgraphᚋmodelᚐUpdateHealthMetricResponse(ctx context.Context, sel ast.SelectionSet, v *model.UpdateHealthMetricResponse) graphql.Marshaler {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/app_state.dart';
@@ -24,38 +25,62 @@ import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/ai_helper_screen.dart';
 import 'screens/diet_management_screen.dart';
-import 'screens/family_collaboration_screen.dart';
-import 'screens/health_risk_assessment_screen.dart';
+import 'screens/health_risk_entry_screen.dart';
 import 'screens/health_risk_report_screen.dart';
 import 'screens/medical_records_screen.dart';
 import 'screens/medicine_inventory_screen.dart';
 import 'screens/prescription_management_screen.dart';
 import 'screens/rewards_screen.dart';
 import 'screens/treatment_monitoring_screen.dart';
+import 'screens/profile_sharing_screen.dart';
 import 'providers/app_state.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'services/notification_service.dart';
+
+// Add this provider at the top level
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService();
+});
 
 void main() async {
-  await Hive.initFlutter();
-  Hive.registerAdapter(AppStateDataImplAdapter());
-  Hive.registerAdapter(TokenAdapter());
-  Hive.registerAdapter(UserImplAdapter());
-  Hive.registerAdapter(HealthRiskAssessmentImplAdapter());
-  Hive.registerAdapter(MedicationImplAdapter());
-  Hive.registerAdapter(MedicationReminderImplAdapter());
-  Hive.registerAdapter(TreatmentScheduleImplAdapter());
-  Hive.registerAdapter(HealthMetricImplAdapter());
-  Hive.registerAdapter(DietPlanImplAdapter());
-  Hive.registerAdapter(MedicalRecordImplAdapter());
-  Hive.registerAdapter(FamilyMemberImplAdapter());
-  Hive.registerAdapter(AchievementBadgeImplAdapter());
-  Hive.registerAdapter(UserAchievementImplAdapter());
-  await Hive.openBox<AppStateData>('appState');
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Initialize notifications through the provider
+    final notificationService = NotificationService();
+    if (notificationService.isSupported) {
+      await notificationService.initialize();
+    }
+
+    await Hive.initFlutter();
+    Hive.registerAdapter(AppStateDataImplAdapter());
+    Hive.registerAdapter(TokenAdapter());
+    Hive.registerAdapter(UserImplAdapter());
+    Hive.registerAdapter(HealthRiskAssessmentImplAdapter());
+    Hive.registerAdapter(MedicationImplAdapter());
+    Hive.registerAdapter(MedicationReminderImplAdapter());
+    Hive.registerAdapter(TreatmentScheduleImplAdapter());
+    Hive.registerAdapter(HealthMetricImplAdapter());
+    Hive.registerAdapter(DietPlanImplAdapter());
+    Hive.registerAdapter(MedicalRecordImplAdapter());
+    Hive.registerAdapter(FamilyMemberImplAdapter());
+    Hive.registerAdapter(AchievementBadgeImplAdapter());
+    Hive.registerAdapter(UserAchievementImplAdapter());
+    await Hive.openBox<AppStateData>('appState');
+
+    runApp(
+      ProviderScope(
+        overrides: [
+          // Provide the initialized notification service
+          notificationServiceProvider.overrideWithValue(notificationService),
+        ],
+        child: const MyApp(),
+      ),
+    );
+  } catch (e) {
+    debugPrint('Initialization error: $e');
+    runApp(const ProviderScope(child: MyApp()));
+  }
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -187,12 +212,8 @@ class RouterNotifier extends ChangeNotifier {
               builder: (context, state) => const ProfileSharingScreen(),
             ),
             GoRoute(
-              path: '/family-collaboration',
-              builder: (context, state) => const FamilyCollaborationScreen(),
-            ),
-            GoRoute(
               path: '/health-risk-assessment',
-              builder: (context, state) => const HealthRiskAssessmentScreen(),
+              builder: (context, state) => const HealthRiskEntryScreen(),
             ),
             GoRoute(
               path: '/health-risk-report',
@@ -222,6 +243,8 @@ class MyApp extends ConsumerWidget {
       title: 'Health Care App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        textTheme: GoogleFonts.notoSerifTextTheme(),
+        hintColor: Color.fromRGBO(245, 245, 245, 0.2),
         useMaterial3: true,
       ),
       routerConfig: router,

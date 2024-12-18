@@ -21,22 +21,6 @@ final userDataProvider =
 );
 
 typedef _$UserData = AutoDisposeAsyncNotifier<User?>;
-String _$familyMembersHash() => r'fa1a7f84b0adf457adf33700e9816932b92d42b5';
-
-/// See also [FamilyMembers].
-@ProviderFor(FamilyMembers)
-final familyMembersProvider = AutoDisposeAsyncNotifierProvider<FamilyMembers,
-    List<FamilyMember>>.internal(
-  FamilyMembers.new,
-  name: r'familyMembersProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$familyMembersHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$FamilyMembers = AutoDisposeAsyncNotifier<List<FamilyMember>>;
 String _$achievementsHash() => r'28a1b2da6c0bfe8dad03657ad52192526b5aa686';
 
 /// See also [Achievements].

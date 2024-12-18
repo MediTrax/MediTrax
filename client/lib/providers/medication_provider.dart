@@ -10,7 +10,7 @@ import 'package:meditrax/providers/medication_provider.graphql.dart';
 part 'medication_provider.g.dart';
 
 @riverpod
-class MedicationNotifier extends _$MedicationNotifier {
+class MedicationProvider extends _$MedicationProvider {
   @override
   Future<List<Medication>> build() {
     return fetchMedications();
@@ -33,12 +33,13 @@ class MedicationNotifier extends _$MedicationNotifier {
 
       final medications = (result.parsedData!.getMedications ?? [])
           .map((item) => Medication(
-                id: item!.medicationId, // Use medicationId instead of id
+                id: item!.medicationId,
                 name: item.name,
                 dosage: item.dosage,
                 unit: item.unit,
                 frequency: item.frequency,
                 inventory: item.inventory,
+                userId: user?.id ?? '',
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ))
@@ -60,12 +61,13 @@ class MedicationNotifier extends _$MedicationNotifier {
       }
       final medications = (result.parsedData!.getSharedMedications ?? [])
           .map((item) => Medication(
-                id: item!.medicationId, // Use medicationId instead of id
+                id: item!.medicationId,
                 name: item.name,
                 dosage: item.dosage,
                 unit: item.unit,
                 frequency: item.frequency,
                 inventory: item.inventory,
+                userId: user?.id ?? '',
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
               ))
@@ -118,6 +120,7 @@ class MedicationNotifier extends _$MedicationNotifier {
         inventory:
             (result.data!['addMedication']['inventory'] as num?)?.toDouble() ??
                 0.0,
+        userId: '',
         createdAt: DateTime.parse(result.data!['addMedication']['createdAt'] ??
             DateTime.now().toIso8601String()),
         updatedAt: DateTime.parse(result.data!['addMedication']['updatedAt'] ??
@@ -143,8 +146,22 @@ class MedicationNotifier extends _$MedicationNotifier {
     double? inventory,
   }) async {
     try {
-      print("Attempting to update medication with the following parameters:");
-      print("ID: $medicationId");
+      print("\n=== Update Medication Debug Info ===");
+      print("Medication ID: $medicationId");
+      print("New values: $name, $dosage, $unit, $frequency, $inventory");
+
+      // First get the current state
+      final currentState = state;
+      if (currentState is! AsyncData<List<Medication>>) {
+        print("State is not ready");
+        return false;
+      }
+
+      final medications = currentState.value;
+      final originalMedication = medications.firstWhere(
+        (med) => med.id == medicationId,
+        orElse: () => throw Exception("Medication not found"),
+      );
 
       final result = await ref
           .read(graphQLServiceProvider)
@@ -158,34 +175,49 @@ class MedicationNotifier extends _$MedicationNotifier {
             inventory: inventory,
           )));
 
-      print("GraphQL result: ${result.data}");
-      print("GraphQL exception: ${result.exception}");
-
       if (result.hasException) {
         throw result.exception!;
       }
 
-      // Update the state with the updated medication
-      state.whenData((medications) {
-        final originalMedication =
-            medications.firstWhere((med) => med.id == medicationId);
-        final updatedMedication = Medication(
-            id: medicationId,
-            name: name ?? originalMedication.name,
-            dosage: dosage ?? originalMedication.dosage,
-            unit: unit ?? originalMedication.unit,
-            frequency: frequency ?? originalMedication.frequency,
-            inventory: inventory ?? originalMedication.inventory,
-            createdAt: originalMedication.createdAt,
-            updatedAt: DateTime.now());
-        final updatedList = medications
-            .map((med) => med.id == medicationId ? updatedMedication : med)
-            .toList();
+      final updatedMedication = Medication(
+          id: medicationId,
+          name: name ?? originalMedication.name,
+          dosage: dosage ?? originalMedication.dosage,
+          unit: unit ?? originalMedication.unit,
+          frequency: frequency ?? originalMedication.frequency,
+          inventory: inventory ?? originalMedication.inventory,
+          userId: '',
+          createdAt: originalMedication.createdAt,
+          updatedAt: DateTime.now());
+
+      final updatedList = medications
+          .map((med) => med.id == medicationId ? updatedMedication : med)
+          .toList();
+
+      print("\n=== Updated List Debug Info ===");
+      print("Original list length: ${medications.length}");
+      print("Updated list length: ${updatedList.length}");
+      print("\nMedications in updated list:");
+      for (var med in updatedList) {
+        print("- ID: ${med.id}");
+        print("  Name: ${med.name}");
+        print("  Inventory: ${med.inventory}");
+        print("  Was Updated: ${med.id == medicationId ? 'Yes' : 'No'}");
+      }
+      print("===============================\n");
+
+      // Try updating state in a microtask
+      await Future.microtask(() {
         state = AsyncValue.data(updatedList);
+        print("State update scheduled");
       });
 
+      // Verify state was updated
+      print("Current state after update: ${state.value?.length} medications");
+
       return true;
-    } catch (e) {
+    } catch (e, stack) {
+      print("Error: $e\n$stack");
       return false;
     }
   }

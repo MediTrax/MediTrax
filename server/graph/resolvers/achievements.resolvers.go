@@ -10,6 +10,7 @@ import (
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
 	"meditrax/graph/model"
+	"time"
 
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
@@ -27,11 +28,12 @@ func (r *mutationResolver) CreateAchievementBadge(ctx context.Context, name stri
         SET name=$name,
             description=$description,
             iconUrl=$iconUrl,
-            createdAt=time::now();`,
+            createdAt=<datetime>$now;`,
 		map[string]interface{}{
 			"name":        name,
 			"description": description,
 			"iconUrl":     iconURL,
+			"now":         time.Now().UTC(),
 		},
 	)
 	if err != nil {
@@ -83,12 +85,13 @@ func (r *mutationResolver) AwardAchievement(ctx context.Context, badgeID string)
 		SET 
 			userId = $userId,
 			badgeID = $badgeID,
-			earnedAt = time::now(),
-			createdAt = time::now();
+			earnedAt = <datetime>$now,
+			createdAt = <datetime>$now;
 	`
 	createResult, err := database.DB.Query(createAchievementQuery, map[string]interface{}{
 		"userId":  user.ID,
 		"badgeID": badgeID,
+		"now":     time.Now().UTC(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user achievement: %w", err)
@@ -125,11 +128,12 @@ func (r *mutationResolver) EarnPoints(ctx context.Context, pointsEarned float64,
         SET userId=$userId,
 		pointsEarned=$pointsEarned,
 		reason=$reason,
-		earnedAt=time::now();`,
+		earnedAt=<datetime>$now;`,
 		map[string]interface{}{
 			"userId":       user.ID,
 			"pointsEarned": pointsEarned,
 			"reason":       reason,
+			"now":          time.Now().UTC(),
 		},
 	)
 	if err != nil {

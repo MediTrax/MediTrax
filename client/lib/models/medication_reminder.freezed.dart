@@ -20,14 +20,10 @@ mixin _$MedicationReminder {
   String get id => throw _privateConstructorUsedError;
   @HiveField(1)
   String get medicationId => throw _privateConstructorUsedError;
-  @HiveField(2)
-  String get userId => throw _privateConstructorUsedError;
   @HiveField(3)
   DateTime get reminderTime => throw _privateConstructorUsedError;
   @HiveField(4)
   bool get isTaken => throw _privateConstructorUsedError;
-  @HiveField(5)
-  DateTime get createdAt => throw _privateConstructorUsedError;
 
   /// Create a copy of MedicationReminder
   /// with the given fields replaced by the non-null parameter values.
@@ -45,10 +41,8 @@ abstract class $MedicationReminderCopyWith<$Res> {
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String medicationId,
-      @HiveField(2) String userId,
       @HiveField(3) DateTime reminderTime,
-      @HiveField(4) bool isTaken,
-      @HiveField(5) DateTime createdAt});
+      @HiveField(4) bool isTaken});
 }
 
 /// @nodoc
@@ -68,10 +62,8 @@ class _$MedicationReminderCopyWithImpl<$Res, $Val extends MedicationReminder>
   $Res call({
     Object? id = null,
     Object? medicationId = null,
-    Object? userId = null,
     Object? reminderTime = null,
     Object? isTaken = null,
-    Object? createdAt = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -82,10 +74,6 @@ class _$MedicationReminderCopyWithImpl<$Res, $Val extends MedicationReminder>
           ? _value.medicationId
           : medicationId // ignore: cast_nullable_to_non_nullable
               as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       reminderTime: null == reminderTime
           ? _value.reminderTime
           : reminderTime // ignore: cast_nullable_to_non_nullable
@@ -94,10 +82,6 @@ class _$MedicationReminderCopyWithImpl<$Res, $Val extends MedicationReminder>
           ? _value.isTaken
           : isTaken // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
     ) as $Val);
   }
 }
@@ -113,10 +97,8 @@ abstract class _$$MedicationReminderImplCopyWith<$Res>
   $Res call(
       {@HiveField(0) String id,
       @HiveField(1) String medicationId,
-      @HiveField(2) String userId,
       @HiveField(3) DateTime reminderTime,
-      @HiveField(4) bool isTaken,
-      @HiveField(5) DateTime createdAt});
+      @HiveField(4) bool isTaken});
 }
 
 /// @nodoc
@@ -134,10 +116,8 @@ class __$$MedicationReminderImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? medicationId = null,
-    Object? userId = null,
     Object? reminderTime = null,
     Object? isTaken = null,
-    Object? createdAt = null,
   }) {
     return _then(_$MedicationReminderImpl(
       id: null == id
@@ -148,10 +128,6 @@ class __$$MedicationReminderImplCopyWithImpl<$Res>
           ? _value.medicationId
           : medicationId // ignore: cast_nullable_to_non_nullable
               as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       reminderTime: null == reminderTime
           ? _value.reminderTime
           : reminderTime // ignore: cast_nullable_to_non_nullable
@@ -160,10 +136,6 @@ class __$$MedicationReminderImplCopyWithImpl<$Res>
           ? _value.isTaken
           : isTaken // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
     ));
   }
 }
@@ -175,10 +147,8 @@ class _$MedicationReminderImpl extends _MedicationReminder {
   _$MedicationReminderImpl(
       {@HiveField(0) required this.id,
       @HiveField(1) required this.medicationId,
-      @HiveField(2) required this.userId,
       @HiveField(3) required this.reminderTime,
-      @HiveField(4) required this.isTaken,
-      @HiveField(5) required this.createdAt})
+      @HiveField(4) required this.isTaken})
       : super._();
 
   @override
@@ -188,21 +158,15 @@ class _$MedicationReminderImpl extends _MedicationReminder {
   @HiveField(1)
   final String medicationId;
   @override
-  @HiveField(2)
-  final String userId;
-  @override
   @HiveField(3)
   final DateTime reminderTime;
   @override
   @HiveField(4)
   final bool isTaken;
-  @override
-  @HiveField(5)
-  final DateTime createdAt;
 
   @override
   String toString() {
-    return 'MedicationReminder(id: $id, medicationId: $medicationId, userId: $userId, reminderTime: $reminderTime, isTaken: $isTaken, createdAt: $createdAt)';
+    return 'MedicationReminder(id: $id, medicationId: $medicationId, reminderTime: $reminderTime, isTaken: $isTaken)';
   }
 
   @override
@@ -213,17 +177,14 @@ class _$MedicationReminderImpl extends _MedicationReminder {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.medicationId, medicationId) ||
                 other.medicationId == medicationId) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.reminderTime, reminderTime) ||
                 other.reminderTime == reminderTime) &&
-            (identical(other.isTaken, isTaken) || other.isTaken == isTaken) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+            (identical(other.isTaken, isTaken) || other.isTaken == isTaken));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, medicationId, userId, reminderTime, isTaken, createdAt);
+  int get hashCode =>
+      Object.hash(runtimeType, id, medicationId, reminderTime, isTaken);
 
   /// Create a copy of MedicationReminder
   /// with the given fields replaced by the non-null parameter values.
@@ -237,13 +198,10 @@ class _$MedicationReminderImpl extends _MedicationReminder {
 
 abstract class _MedicationReminder extends MedicationReminder {
   factory _MedicationReminder(
-          {@HiveField(0) required final String id,
-          @HiveField(1) required final String medicationId,
-          @HiveField(2) required final String userId,
-          @HiveField(3) required final DateTime reminderTime,
-          @HiveField(4) required final bool isTaken,
-          @HiveField(5) required final DateTime createdAt}) =
-      _$MedicationReminderImpl;
+      {@HiveField(0) required final String id,
+      @HiveField(1) required final String medicationId,
+      @HiveField(3) required final DateTime reminderTime,
+      @HiveField(4) required final bool isTaken}) = _$MedicationReminderImpl;
   _MedicationReminder._() : super._();
 
   @override
@@ -253,17 +211,11 @@ abstract class _MedicationReminder extends MedicationReminder {
   @HiveField(1)
   String get medicationId;
   @override
-  @HiveField(2)
-  String get userId;
-  @override
   @HiveField(3)
   DateTime get reminderTime;
   @override
   @HiveField(4)
   bool get isTaken;
-  @override
-  @HiveField(5)
-  DateTime get createdAt;
 
   /// Create a copy of MedicationReminder
   /// with the given fields replaced by the non-null parameter values.
