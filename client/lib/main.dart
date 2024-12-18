@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/app_state.dart';
@@ -32,7 +31,6 @@ import 'screens/medicine_inventory_screen.dart';
 import 'screens/prescription_management_screen.dart';
 import 'screens/rewards_screen.dart';
 import 'screens/treatment_monitoring_screen.dart';
-import 'screens/profile_sharing_screen.dart';
 import 'providers/app_state.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'services/notification_service.dart';
@@ -240,11 +238,11 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Health Care App',
+      title: 'Meditrax',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        textTheme: GoogleFonts.notoSerifTextTheme(),
-        hintColor: Color.fromRGBO(245, 245, 245, 0.2),
+        fontFamily: 'NotoSerifSC',
+        hintColor: const Color.fromRGBO(245, 245, 245, 0.2),
         useMaterial3: true,
       ),
       routerConfig: router,
