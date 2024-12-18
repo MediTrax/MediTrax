@@ -86,7 +86,7 @@ void main() async {
       appState.changeNavigatorIndex(0);
       await multiScreenGolden(
         tester,
-        "Utilities_Light",
+        "TreatmentMonitoring_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -95,7 +95,7 @@ void main() async {
       appState.changeNavigatorIndex(1);
       await multiScreenGolden(
         tester,
-        "StressFree_Light",
+        "Medication_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -104,7 +104,7 @@ void main() async {
       appState.changeNavigatorIndex(3);
       await multiScreenGolden(
         tester,
-        "Feeds_Light",
+        "MedicalRecords_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -113,7 +113,7 @@ void main() async {
       appState.changeNavigatorIndex(4);
       await multiScreenGolden(
         tester,
-        "Account_Light",
+        "Profile_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },

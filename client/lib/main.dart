@@ -35,6 +35,14 @@ import 'providers/app_state.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'services/notification_service.dart';
 
+final navBarRoutes = {
+  0: '/treatment',
+  1: '/medicine-inventory',
+  2: '/',
+  3: '/medical-records',
+  4: '/profile',
+};
+
 // Add this provider at the top level
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -122,6 +130,11 @@ class RouterNotifier extends ChangeNotifier {
 
     if (isAuth && state.matchedLocation == '/auth') {
       return '/';
+    }
+
+    final currentRoute = navBarRoutes[_appState.navigatorIndex];
+    if (currentRoute != state.uri.path) {
+      return currentRoute;
     }
 
     return null;
