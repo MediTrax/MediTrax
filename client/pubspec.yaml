@@ -56,6 +56,7 @@ dependencies:
   timezone: ^0.10.0
   flutter_timezone: ^1.0.8
   intl_phone_number_input: ^0.7.4
+  fl_chart: ^0.69.2
   google_fonts: ^6.2.1
 
 dev_dependencies:
