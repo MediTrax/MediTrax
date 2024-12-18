@@ -11,8 +11,12 @@ import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/graphql_test.dart';
 import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/providers/health_metrics_provider_test.dart';
+import 'package:meditrax/providers/health_risk_provider.dart';
+import 'package:meditrax/providers/health_risk_provider_test.dart';
 import 'package:meditrax/providers/medical_records_provider.dart';
 import 'package:meditrax/providers/medical_records_test.dart';
+import 'package:meditrax/providers/medication_provider.dart';
+import 'package:meditrax/providers/medication_provider_test.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/providers/user_test.dart';
 
@@ -60,6 +64,10 @@ void main() async {
           healthMetricsProvider.overrideWith(() => HealthMetricsTest()),
           medicalRecordsProvider.overrideWith(() => MedicalRecordsTest()),
           userDataProvider.overrideWith(() => UserTest()),
+          medicationProviderProvider.overrideWith(() => MedicationTest()),
+          userPointsProvider.overrideWith(() => UserPointsTest()),
+          healthRiskProvider.overrideWith(() => HealthRiskNotifierTest()),
+          questionnaireProvider.overrideWith(() => QuestionnaireNotifierTest()),
         ],
         child: const MyApp(),
       );

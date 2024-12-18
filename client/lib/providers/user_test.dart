@@ -74,3 +74,16 @@ class AchievementsTest extends Achievements {
     ];
   }
 }
+
+class UserPointsTest extends UserPoints {
+  @override
+  Future<Map<String, dynamic>> build() async {
+    return {
+      'currentPoints': 100,
+      'nextLevelPoints': 200,
+      'currentLevel': 1,
+      'nextLevel': 2,
+      'achievements': [],
+    };
+  }
+}
