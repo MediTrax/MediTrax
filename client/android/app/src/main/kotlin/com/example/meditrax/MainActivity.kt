@@ -1,4 +1,4 @@
-package com.example.meditrax
+package com.meditrax.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -23,7 +23,7 @@ class AppState extends _$AppState {
   AppStateData build() {
     _hiveBox ??= Hive.box<AppStateData>("appState");
     final result = _hiveBox!.get("appState", defaultValue: AppStateData())!;
-    return result.copyWith(autoLoginResult: null);
+    return result.copyWith(autoLoginResult: null, navigatorIndex: 2);
   }
 
   void changeNavigatorIndex(int newIndex) {
@@ -76,7 +76,11 @@ class AppState extends _$AppState {
       },
     );
 
-    state = state.copyWith(token: token, autoLoginResult: true);
+    state = state.copyWith(
+      token: token,
+      autoLoginResult: true,
+      navigatorIndex: 2,
+    );
     ref.invalidate(graphQLServiceProvider);
     await _hiveBox!.put("appState", state);
   }

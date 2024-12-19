@@ -9,22 +9,21 @@ class HealthRiskHistoryScreen extends ConsumerStatefulWidget {
   const HealthRiskHistoryScreen({super.key});
 
   @override
-  ConsumerState<HealthRiskHistoryScreen> createState() => _HealthRiskHistoryScreenState();
+  ConsumerState<HealthRiskHistoryScreen> createState() =>
+      _HealthRiskHistoryScreenState();
 }
 
-class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScreen> {
+class _HealthRiskHistoryScreenState
+    extends ConsumerState<HealthRiskHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    Future(() {
-      ref.read(healthRiskProvider.notifier).fetchHealthRiskAssessment();
-    });
   }
 
   Widget _buildAssessmentCard(HealthRiskAssessment assessment) {
     Color riskColor;
     IconData riskIcon;
-    
+
     switch (assessment.riskLevel) {
       case '低风险':
         riskColor = Colors.green;
@@ -48,9 +47,11 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
       print('\n=== Date Formatting Debug Info ===');
       print('Raw createdAt: ${assessment.createdAt}');
       print('createdAt type: ${assessment.createdAt.runtimeType}');
-      print('createdAt timestamp: ${assessment.createdAt.millisecondsSinceEpoch}');
-      
-      formattedDate = DateFormat('yyyy年MM月dd日 HH:mm').format(assessment.createdAt);
+      print(
+          'createdAt timestamp: ${assessment.createdAt.millisecondsSinceEpoch}');
+
+      formattedDate =
+          DateFormat('yyyy年MM月dd日 HH:mm').format(assessment.createdAt);
       print('Formatted date: $formattedDate');
       print('===============================\n');
     } catch (e, stackTrace) {
@@ -60,7 +61,7 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
       print('Assessment ID: ${assessment.assessmentId}');
       print('CreatedAt raw value: ${assessment.createdAt}');
       print('==========================\n');
-      
+
       formattedDate = DateFormat('yyyy年MM月dd日 HH:mm').format(DateTime.now());
     }
 
@@ -68,7 +69,9 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: InkWell(
         onTap: () {
-          ref.read(healthRiskProvider.notifier).setSelectedAssessment(assessment);
+          ref
+              .read(healthRiskProvider.notifier)
+              .setSelectedAssessment(assessment);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -126,17 +129,17 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
 
   @override
   Widget build(BuildContext context) {
-    final assessmentState = ref.watch(healthRiskProvider);
+    final assessments = ref.watch(healthRiskProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('健康风险评估记录'),
       ),
-      body: assessmentState.when(
+      body: assessments.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
-        error: (error, stack) => Center(
+        error: (error, stackTrace) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -144,15 +147,15 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  ref.read(healthRiskProvider.notifier).fetchHealthRiskAssessment();
+                  ref.invalidate(healthRiskProvider);
                 },
                 child: const Text('重试'),
               ),
             ],
           ),
         ),
-        data: (assessments) {
-          if (assessments.isEmpty) {
+        data: (assessmentList) {
+          if (assessmentList.isEmpty) {
             return const Center(
               child: Text('暂无评估记录'),
             );
@@ -160,15 +163,16 @@ class _HealthRiskHistoryScreenState extends ConsumerState<HealthRiskHistoryScree
 
           return RefreshIndicator(
             onRefresh: () async {
-              await ref.read(healthRiskProvider.notifier).fetchHealthRiskAssessment();
+              ref.invalidate(healthRiskProvider);
             },
             child: ListView.builder(
-              itemCount: assessments.length,
-              itemBuilder: (context, index) => _buildAssessmentCard(assessments[index]),
+              itemCount: assessmentList.length,
+              itemBuilder: (context, index) =>
+                  _buildAssessmentCard(assessmentList[index]),
             ),
           );
         },
       ),
     );
   }
-} 
+}

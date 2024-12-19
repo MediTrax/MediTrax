@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:meditrax/providers/health_metrics_provider.dart';
+import 'package:meditrax/providers/health_risk_provider.dart';
+import 'package:meditrax/providers/medication_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -9,6 +12,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userDataProvider);
+    final medicationsAsync = ref.watch(medicationProviderProvider);
+    final healthMetricsAsync = ref.watch(healthMetricsProvider);
+    final userPointsAsync = ref.watch(userPointsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -103,24 +109,60 @@ class HomeScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: _buildInfoCard(
-                                title: '今日用药',
-                                content: '3/4',
-                                subtitle: '已完成/总次数',
-                                icon: Icons.medication_rounded,
-                                color: Colors.green,
-                                onTap: () => context.go('/medicine-inventory'),
+                              child: medicationsAsync.when(
+                                loading: () => _buildLoadingCard(),
+                                error: (err, stack) => _buildErrorCard(),
+                                data: (medications) {
+                                  final now = DateTime.now();
+                                  final todayMeds = medications.where((med) {
+                                    return med.frequency.contains('daily') ||
+                                        med.frequency
+                                            .contains(now.weekday.toString());
+                                  }).length;
+
+                                  return _buildInfoCard(
+                                    title: '今日用药',
+                                    content: '$todayMeds',
+                                    subtitle: '待服用次数',
+                                    icon: Icons.medication_rounded,
+                                    color: Colors.green,
+                                    onTap: () =>
+                                        context.go('/medicine-inventory'),
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: _buildInfoCard(
-                                title: '下次预约',
-                                content: '10月20日',
-                                subtitle: '距今2天',
-                                icon: Icons.calendar_month_rounded,
-                                color: Colors.blue,
-                                onTap: () => context.go('/treatment'),
+                              child: healthMetricsAsync.when(
+                                loading: () => _buildLoadingCard(),
+                                error: (err, stack) => _buildErrorCard(),
+                                data: (metrics) {
+                                  final now = DateTime.now();
+                                  final nextAppointment = metrics
+                                      .where((m) =>
+                                          m.metricType == 'appointment' &&
+                                          m.recordedAt.isAfter(now))
+                                      .fold<DateTime?>(
+                                          null,
+                                          (min, m) => min == null ||
+                                                  m.recordedAt.isBefore(min)
+                                              ? m.recordedAt
+                                              : min);
+
+                                  return _buildInfoCard(
+                                    title: '下次预约',
+                                    content: nextAppointment != null
+                                        ? '${nextAppointment.month}月${nextAppointment.day}日'
+                                        : '无预约',
+                                    subtitle: nextAppointment != null
+                                        ? '距今${nextAppointment.difference(now).inDays}天'
+                                        : '',
+                                    icon: Icons.calendar_month_rounded,
+                                    color: Colors.blue,
+                                    onTap: () => context.go('/appointments'),
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -131,25 +173,45 @@ class HomeScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: _buildInfoCard(
-                                title: '健康积分',
-                                content: '750',
-                                subtitle: '距下一等级250分',
-                                icon: Icons.stars_rounded,
-                                color: Colors.amber,
-                                onTap: () => context.go('/rewards'),
+                              child: userPointsAsync.when(
+                                loading: () => _buildLoadingCard(),
+                                error: (err, stack) => _buildErrorCard(),
+                                data: (points) => _buildInfoCard(
+                                  title: '健康积分',
+                                  content: '${points['currentPoints']}',
+                                  subtitle:
+                                      '距下一等级${points['nextLevelPoints'] - points['currentPoints']}分',
+                                  icon: Icons.stars_rounded,
+                                  color: Colors.amber,
+                                  onTap: () => context.go('/rewards'),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              child: _buildInfoCard(
-                                title: '健康风险',
-                                content: '低风险',
-                                subtitle: '上次评估: 10-15',
-                                icon: Icons.shield_rounded,
-                                color: Colors.purple,
-                                onTap: () => context.go('/health-risk-report'),
-                              ),
+                              child: ref.watch(healthRiskProvider).when(
+                                    loading: () => _buildLoadingCard(),
+                                    error: (err, stack) => _buildErrorCard(),
+                                    data: (assessments) {
+                                      final latestAssessment = assessments
+                                              .isNotEmpty
+                                          ? assessments
+                                              .first // Already sorted by date in provider
+                                          : null;
+
+                                      return _buildInfoCard(
+                                        title: '健康风险',
+                                        content: latestAssessment?.riskLevel ??
+                                            '未评估',
+                                        subtitle: latestAssessment != null
+                                            ? '上次评估: ${latestAssessment.createdAt.month}-${latestAssessment.createdAt.day}'
+                                            : '点击进行评估',
+                                        icon: Icons.shield_rounded,
+                                        color: Colors.purple,
+                                        onTap: () => context.go('/health-risk'),
+                                      );
+                                    },
+                                  ),
                             ),
                           ],
                         ),
@@ -216,6 +278,26 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingCard() {
+    return const Card(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Icon(Icons.error_outline, color: Colors.red.shade400),
         ),
       ),
     );
@@ -307,31 +389,32 @@ class HomeScreen extends ConsumerWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
             color: color.shade50,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
+                  size: 28,
                   color: color.shade400,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: color.shade700,
                 ),
