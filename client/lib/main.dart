@@ -133,7 +133,10 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     final currentRoute = navBarRoutes[_appState.navigatorIndex];
-    if (currentRoute != state.uri.path) {
+    if (currentRoute == null) {
+      return null;
+    }
+    if (_getCurrentIndex(currentRoute) != _getCurrentIndex(state.uri.path)) {
       return currentRoute;
     }
 
