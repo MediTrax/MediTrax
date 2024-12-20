@@ -8,4 +8,5 @@ FROM alpine
 RUN apk add --no-cache ca-certificates openssl tzdata
 ENV MONGODB_USERNAME=MONGODB_USERNAME MONGODB_PASSWORD=MONGODB_PASSWORD MONGODB_ENDPOINT=MONGODB_ENDPOINT
 COPY --from=builder /main ./
+COPY ./doc /doc
 ENTRYPOINT ["./main"]
