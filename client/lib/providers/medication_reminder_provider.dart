@@ -26,7 +26,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
   Future<void> fetchReminders() async {
     state = const AsyncValue.loading();
     try {
-      print('Fetching reminders...'); // Debug log
       final result = await _client.query$GetMedicationReminders(
         Options$Query$GetMedicationReminders(
           fetchPolicy: FetchPolicy.networkOnly, 
@@ -34,13 +33,10 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       );
       
       if (result.hasException) {
-        print('Error fetching reminders: ${result.exception}'); // Debug log
         throw result.exception!;
       }
 
       final remindersData = result.parsedData!.getMedicationReminders ?? [];
-      
-      print('Fetched ${remindersData.length} reminders'); // Debug log
       
       final reminders = remindersData.map((item) {
         return MedicationReminder(
@@ -52,9 +48,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       }).toList();
 
       state = AsyncValue.data(reminders);
-      print('Successfully updated reminders state'); // Debug log
     } catch (error, stackTrace) {
-      print('Error in fetchReminders: $error'); // Debug log
       state = AsyncValue.error(error, stackTrace);
     }
   }

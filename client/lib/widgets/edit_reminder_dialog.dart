@@ -24,9 +24,10 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
   @override
   void initState() {
     super.initState();
+    final localTime = widget.reminder.reminderTime.toLocal();
     selectedTime = TimeOfDay(
-      hour: widget.reminder.reminderTime.hour,
-      minute: widget.reminder.reminderTime.minute,
+      hour: localTime.hour,
+      minute: localTime.minute,
     );
   }
 
@@ -39,7 +40,10 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
         children: [
           ListTile(
             title: const Text('提醒时间'),
-            trailing: Text(selectedTime.format(context)),
+            trailing: Text(
+              selectedTime.format(context),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             onTap: () async {
               final TimeOfDay? time = await showTimePicker(
                 context: context,
@@ -58,6 +62,15 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               }
             },
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              _getNextReminderText(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
         ],
       ),
       actions: [
@@ -69,7 +82,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
           onPressed: () async {
             try {
               final now = DateTime.now();
-              final reminderTime = DateTime(
+              DateTime reminderTime = DateTime(
                 now.year,
                 now.month,
                 now.day,
@@ -77,9 +90,9 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                 selectedTime.minute,
               );
 
-              final adjustedReminderTime = reminderTime.isBefore(now)
-                  ? reminderTime.add(const Duration(days: 1))
-                  : reminderTime;
+              if (reminderTime.isBefore(now)) {
+                reminderTime = reminderTime.add(const Duration(days: 1));
+              }
 
               final notificationService = NotificationService();
               await notificationService.cancelReminder(widget.reminder.id);
@@ -87,7 +100,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               final success = await ref.read(medicationReminderProvider.notifier)
                   .updateReminder(
                     reminderId: widget.reminder.id,
-                    reminderTime: adjustedReminderTime,
+                    reminderTime: reminderTime,
                     isTaken: widget.reminder.isTaken,
                   );
 
@@ -98,7 +111,7 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
                   MedicationReminder(
                     id: widget.reminder.id,
                     medicationId: widget.reminder.medicationId,
-                    reminderTime: adjustedReminderTime,
+                    reminderTime: reminderTime,
                     isTaken: widget.reminder.isTaken,
                   ),
                   widget.medicationName,
@@ -132,5 +145,30 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
         ),
       ],
     );
+  }
+
+  String _getNextReminderText() {
+    final now = DateTime.now();
+    DateTime nextReminder = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+
+    if (nextReminder.isBefore(now)) {
+      nextReminder = nextReminder.add(const Duration(days: 1));
+    }
+
+    final difference = nextReminder.difference(now);
+    if (difference.inHours < 24) {
+      if (difference.inHours == 0) {
+        return '下次提醒将在 ${difference.inMinutes} 分钟后';
+      }
+      return '下次提醒将在 ${difference.inHours} 小时 ${difference.inMinutes % 60} 分钟后';
+    } else {
+      return '下次提醒将在明天 ${selectedTime.format(context)}';
+    }
   }
 } 
