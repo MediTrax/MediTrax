@@ -5,6 +5,8 @@ import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/providers/health_risk_provider.dart';
 import 'package:meditrax/providers/medication_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
+import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/medication_reminder_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -15,6 +17,7 @@ class HomeScreen extends ConsumerWidget {
     final medicationsAsync = ref.watch(medicationProviderProvider);
     final healthMetricsAsync = ref.watch(healthMetricsProvider);
     final userPointsAsync = ref.watch(userPointsProvider);
+    final remindersAsync = ref.watch(medicationReminderProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -109,25 +112,29 @@ class HomeScreen extends ConsumerWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: medicationsAsync.when(
+                              child: remindersAsync.when(
                                 loading: () => _buildLoadingCard(),
                                 error: (err, stack) => _buildErrorCard(),
-                                data: (medications) {
+                                data: (reminders) {
                                   final now = DateTime.now();
-                                  final todayMeds = medications.where((med) {
-                                    return med.frequency.contains('daily') ||
-                                        med.frequency
-                                            .contains(now.weekday.toString());
+                                  final todayStart = DateTime(now.year, now.month, now.day);
+                                  final todayEnd = todayStart.add(const Duration(days: 1));
+                                  
+                                  final todayReminders = reminders.where((reminder) {
+                                    final reminderTime = reminder.reminderTime.toLocal();
+                                    return reminderTime.isAfter(todayStart) && 
+                                           reminderTime.isBefore(todayEnd) && 
+                                           !reminder.isTaken;
                                   }).length;
 
                                   return _buildInfoCard(
                                     title: '今日用药',
-                                    content: '$todayMeds',
+                                    content: '$todayReminders',
                                     subtitle: '待服用次数',
                                     icon: Icons.medication_rounded,
                                     color: Colors.green,
                                     onTap: () =>
-                                        context.go('/medicine-inventory'),
+                                        ref.read(appStateProvider.notifier).changeNavigatorIndex(1),
                                   );
                                 },
                               ),
@@ -160,7 +167,8 @@ class HomeScreen extends ConsumerWidget {
                                         : '',
                                     icon: Icons.calendar_month_rounded,
                                     color: Colors.blue,
-                                    onTap: () => context.go('/appointments'),
+                                    onTap: () => 
+                                    ref.read(appStateProvider.notifier).changeNavigatorIndex(0),
                                   );
                                 },
                               ),
@@ -208,7 +216,7 @@ class HomeScreen extends ConsumerWidget {
                                             : '点击进行评估',
                                         icon: Icons.shield_rounded,
                                         color: Colors.purple,
-                                        onTap: () => context.go('/health-risk'),
+                                        onTap: () => context.go('/health-risk-assessment'),
                                       );
                                     },
                                   ),

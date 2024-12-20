@@ -44,6 +44,12 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               final TimeOfDay? time = await showTimePicker(
                 context: context,
                 initialTime: selectedTime,
+                builder: (BuildContext context, Widget? child) {
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                    child: child!,
+                  );
+                },
               );
               if (time != null) {
                 setState(() {
@@ -74,8 +80,6 @@ class _EditReminderDialogState extends ConsumerState<EditReminderDialog> {
               final adjustedReminderTime = reminderTime.isBefore(now)
                   ? reminderTime.add(const Duration(days: 1))
                   : reminderTime;
-
-              print('Adjusted DateTime: $adjustedReminderTime');
 
               final notificationService = NotificationService();
               await notificationService.cancelReminder(widget.reminder.id);

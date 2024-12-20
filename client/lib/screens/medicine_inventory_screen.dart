@@ -91,11 +91,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     try {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null) {
-        print("Fetching medications for user: ${userData.id}");
         await ref.read(medicationProviderProvider.notifier).fetchMedications();
-      } else {
-        print("No user data available");
-      }
+      } 
     } catch (e) {
       print("Error fetching medications: $e");
     }
@@ -274,21 +271,16 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     required Medication medication,
   }) {
     final frequencyParts = medication.frequency.split('/');
-    // print('Frequency Parts: $frequencyParts'); // Debug info
 
     final times =
         frequencyParts.isNotEmpty ? int.tryParse(frequencyParts[0]) ?? 1 : 1;
-    // print('Times: $times'); // Debug info
 
     final days =
         frequencyParts.length > 1 ? int.tryParse(frequencyParts[1]) ?? 1 : 1;
-    // print('Days: $days'); // Debug info
 
     final dailyUsage = (times * medication.dosage) / days;
-    // print('Daily Usage: $dailyUsage'); // Debug info
 
     final remainingDays = medication.inventory / dailyUsage;
-    // print('Remaining Days: $remainingDays'); // Debug info
 
     // Determine if low stock warning should be triggered
     final isLowStock = remainingDays < 3;
@@ -505,15 +497,12 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     );
   }
 
-  void _showEditDialog(
-      BuildContext context, WidgetRef ref, Medication medication) {
+  void _showEditDialog(BuildContext context, WidgetRef ref, Medication medication) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: medication.name);
-    final dosageController =
-        TextEditingController(text: medication.dosage.toString());
+    final dosageController = TextEditingController(text: medication.dosage.toString());
     final unitController = TextEditingController(text: medication.unit);
-    final inventoryController =
-        TextEditingController(text: medication.inventory.toString());
+    final inventoryController = TextEditingController(text: medication.inventory.toString());
 
     // Split frequency into times and days
     final frequencyParts = medication.frequency.split('/');
@@ -522,364 +511,293 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final daysController = TextEditingController(
         text: frequencyParts.length > 1 ? frequencyParts[1] : '1');
 
-    // Move disposal to after dialog is completely closed
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return WillPopScope(
-          onWillPop: () async {
-            Navigator.of(dialogContext).pop();
-            return false;
-          },
-          child: Dialog(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: 500,
-                maxHeight: MediaQuery.of(dialogContext).size.height * 0.9,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Title Bar
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.edit_rounded,
-                          color: Colors.blue.shade400,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '编辑${medication.name}',
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    // Scrollable Content
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Medicine Name Section
-                              _buildFormField(
-                                controller: nameController,
-                                hintText: '输入药品名称',
-                                prefixIcon: Icons.medication_liquid_rounded,
-                                iconColor: Colors.green.shade300,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return '请输入药品名称';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Dosage and Unit Section
-                              _buildSectionHeader(
-                                title: '用药剂量',
-                                icon: Icons.scale_rounded,
-                                iconColor: Colors.blue.shade400,
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: _buildFormField(
-                                      controller: dosageController,
-                                      hintText: '输入剂量数值',
-                                      prefixIcon: Icons.scale_rounded,
-                                      iconColor: Colors.blue.shade300,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                              decimal: true),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return '请输入剂量';
-                                        }
-                                        final number = double.tryParse(value);
-                                        if (number == null || number <= 0) {
-                                          return '请输入有效的剂量';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    flex: 2,
-                                    child: DropdownButtonFormField<String>(
-                                      value: unitController.text.isEmpty ? null : unitController.text,
-                                      decoration: InputDecoration(
-                                        prefixIcon: Icon(
-                                          Icons.straighten_rounded,
-                                          color: Colors.blue.shade300,
-                                        ),
-                                        border: const OutlineInputBorder(),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                      ),
-                                      hint: const Text('单位'),
-                                      items: _unitOptions.map((String unit) {
-                                        return DropdownMenuItem<String>(
-                                          value: unit,
-                                          child: Text(unit),
-                                        );
-                                      }).toList(),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return '请选择单位';
-                                        }
-                                        return null;
-                                      },
-                                      onChanged: (String? newValue) {
-                                        if (newValue != null) {
-                                          unitController.text = newValue;
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Frequency Section
-                              _buildSectionHeader(
-                                title: '服用频率',
-                                icon: Icons.calendar_month_rounded,
-                                iconColor: Colors.purple.shade400,
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildFormField(
-                                      controller: timesController,
-                                      hintText: '几次',
-                                      prefixIcon: Icons.repeat_rounded,
-                                      iconColor: Colors.purple.shade300,
-                                      keyboardType: TextInputType.number,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return '请输入次数';
-                                        }
-                                        final times = int.tryParse(value);
-                                        if (times == null || times <= 0) {
-                                          return '请输入有效的次数';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: _buildFormField(
-                                      controller: daysController,
-                                      hintText: '几天',
-                                      prefixIcon: Icons.calendar_today_rounded,
-                                      iconColor: Colors.purple.shade300,
-                                      keyboardType: TextInputType.number,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return '请输入天数';
-                                        }
-                                        final days = int.tryParse(value);
-                                        if (days == null || days <= 0) {
-                                          return '请输入有效的天数';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Inventory Section
-                              _buildSectionHeader(
-                                title: '库存信息',
-                                icon: Icons.inventory_2_rounded,
-                                iconColor: Colors.orange.shade400,
-                              ),
-                              const SizedBox(height: 8),
-                              _buildFormField(
-                                controller: inventoryController,
-                                hintText: '输入库存数量（单位：片）',
-                                prefixIcon: Icons.inventory_rounded,
-                                iconColor: Colors.orange.shade300,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return '请输入库存数量';
-                                  }
-                                  final number = double.tryParse(value);
-                                  if (number == null || number <= 0) {
-                                    return '请输入有效的库存数量';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 500,
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Bar
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.edit_calendar_rounded,
+                        color: Colors.blue.shade400,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '编辑${medication.name}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ),
-                    const Divider(),
-                    // Action Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('取消'),
-                        ),
-                        const SizedBox(width: 8),
-                        FilledButton.icon(
-                          onPressed: () async {
-                            if (formKey.currentState!.validate()) {
-                              try {
-                                final success = await ref
-                                    .read(medicationProviderProvider.notifier)
-                                    .updateMedication(
-                                      medicationId: medication.id,
-                                      name: nameController.text,
-                                      dosage:
-                                          double.parse(dosageController.text),
-                                      unit: unitController.text,
-                                      frequency:
-                                          '${timesController.text}/${daysController.text}', // Use split frequency
-                                      inventory: double.parse(
-                                          inventoryController.text),
-                                    );
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
 
-                                if (success && dialogContext.mounted) {
-                                  Navigator.of(dialogContext).pop();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('药品信息已更新')),
-                                  );
-                                  await _fetchMedications();
-                                }
-                              } catch (e) {
-                                if (dialogContext.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('错误: $e'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              }
+                  // Medicine Name
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: '药品名称',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.medication_liquid_rounded,
+                        color: Colors.purple.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入药品名称';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Dosage
+                  TextFormField(
+                    controller: dosageController,
+                    decoration: InputDecoration(
+                      labelText: '剂量',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.scale_rounded,
+                        color: Colors.green.shade300,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow decimal numbers
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入剂量';
+                      }
+                      final number = double.tryParse(value);
+                      if (number == null || number <= 0) {
+                        return '请输入有效的剂量';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Unit (changed to dropdown)
+                  DropdownButtonFormField<String>(
+                    value: unitController.text.isEmpty ? null : unitController.text,
+                    decoration: InputDecoration(
+                      labelText: '单位',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.straighten_rounded,
+                        color: Colors.orange.shade300,
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: '片',
+                        child: Text('片'),
+                      ),
+                      DropdownMenuItem(
+                        value: '毫升',
+                        child: Text('毫升'),
+                      ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请选择单位';
+                      }
+                      return null;
+                    },
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        unitController.text = newValue;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Frequency fields
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: daysController,
+                          decoration: InputDecoration(
+                            labelText: '每隔几天',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.calendar_today_rounded,
+                              color: Colors.purple.shade300,
+                            ),
+                            suffixText: '天',
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '请输入天数';
                             }
+                            final days = int.tryParse(value);
+                            if (days == null || days <= 0) {
+                              return '请输入有效天数';
+                            }
+                            return null;
                           },
-                          icon: const Icon(Icons.save_rounded),
-                          label: const Text('保存'),
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: timesController,
+                          decoration: InputDecoration(
+                            labelText: '服用次数',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.access_time_rounded,
+                              color: Colors.blue.shade300,
+                            ),
+                            suffixText: '次',
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '请输入次数';
+                            }
+                            final times = int.tryParse(value);
+                            if (times == null || times <= 0) {
+                              return '请输入有效次数';
+                            }
+                            if (times > 24) {
+                              return '次数不能超过24';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Inventory (moved to end)
+                  TextFormField(
+                    controller: inventoryController,
+                    decoration: InputDecoration(
+                      labelText: '库存',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.inventory_rounded,
+                        color: Colors.orange.shade300,
+                      ),
                     ),
-                  ],
-                ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow decimal numbers
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入库存';
+                      }
+                      final number = double.tryParse(value);
+                      if (number == null || number < 0) {
+                        return '请输入有效的库存数量';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            try {
+                              final success = await ref
+                                  .read(medicationProviderProvider.notifier)
+                                  .updateMedication(
+                                    medicationId: medication.id,
+                                    name: nameController.text,
+                                    dosage: double.parse(dosageController.text),
+                                    unit: unitController.text,
+                                    inventory:
+                                        double.parse(inventoryController.text),
+                                    frequency: '${timesController.text}/${daysController.text}',
+                                  );
+
+                              if (success && context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('药品更新成功')),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('更新失败: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.save_rounded),
+                        label: const Text('保存'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      },
-    ).then((_) {
-      // Dispose controllers only after dialog is fully closed
-      nameController.dispose();
-      dosageController.dispose();
-      unitController.dispose();
-      timesController.dispose();
-      daysController.dispose();
-      inventoryController.dispose();
-    });
-  }
-
-  // Helper method to build form section headers
-  Widget _buildSectionHeader({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: iconColor,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              title,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
-    );
-  }
-
-  // Helper method to build form fields with proper constraints
-  Widget _buildFormField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIcon,
-    required Color iconColor,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
-        prefixIcon: Icon(
-          prefixIcon,
-          color: iconColor,
-        ),
-        hintText: hintText,
-        errorMaxLines: 2,
-        isCollapsed: false,
-        isDense: true,
-      ),
-      keyboardType: keyboardType,
-      validator: validator,
     );
   }
 
@@ -2379,8 +2297,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
             reminderTime: reminder.reminderTime,
             isTaken: false,
           );
-          
-       print('ISO string: ${reminder.reminderTime.toIso8601String()}');
        
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

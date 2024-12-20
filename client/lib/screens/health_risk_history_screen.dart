@@ -44,24 +44,9 @@ class _HealthRiskHistoryScreenState
 
     String formattedDate;
     try {
-      print('\n=== Date Formatting Debug Info ===');
-      print('Raw createdAt: ${assessment.createdAt}');
-      print('createdAt type: ${assessment.createdAt.runtimeType}');
-      print(
-          'createdAt timestamp: ${assessment.createdAt.millisecondsSinceEpoch}');
-
       formattedDate =
           DateFormat('yyyy年MM月dd日 HH:mm').format(assessment.createdAt);
-      print('Formatted date: $formattedDate');
-      print('===============================\n');
-    } catch (e, stackTrace) {
-      print('\n=== Date Formatting Error ===');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
-      print('Assessment ID: ${assessment.assessmentId}');
-      print('CreatedAt raw value: ${assessment.createdAt}');
-      print('==========================\n');
-
+    } catch (e) {
       formattedDate = DateFormat('yyyy年MM月dd日 HH:mm').format(DateTime.now());
     }
 

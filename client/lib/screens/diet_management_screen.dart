@@ -39,10 +39,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
     try {
       final foodSpecsNotifier = ref.read(foodSpecsProvider.notifier);
       await foodSpecsNotifier.getMockFoodSpecs(searchTerm);
-      
-      print('Search completed for: $searchTerm');
     } catch (e) {
-      print('Error during search: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -420,12 +417,6 @@ Widget _buildFoodSafetyTab() {
   }
 
   Widget _buildNutritionRow(FoodSpec spec) {
-    print('\n=== Nutrition Row Debug Info ===');
-    print('Name: ${spec.name}');
-    print('Value: ${spec.value}');
-    print('Unit: ${spec.unit}');
-    print('How High: ${spec.howHigh}');
-
     // Parse howHigh value (ensure it's between 0 and 1)
     final howHigh = double.tryParse(spec.howHigh) ?? 0;
     final normalizedHowHigh = howHigh.clamp(0.0, 1.0);
