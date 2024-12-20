@@ -256,12 +256,9 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 	/* delete related data entries */
 	// delete all objects with userId=user.ID
 	for _, tableName := range utils.UserRelatedTables {
-		_, err = database.DB.Query(
-			`DELETE $table_name WHERE userId = $id;`,
-			map[string]interface{}{
-				"table_name": tableName,
-				"id":         user.ID,
-			},
+		_, err = database.DB.Query(fmt.Sprintf(
+			`DELETE %s WHERE userId = %s;`, tableName, user.ID),
+			map[string]interface{}{},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to delete related data from table %s: %w", tableName, err)
@@ -322,7 +319,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 
 	// 获取重置码
 	resetCode := strings.Split(results2.ID, ":")[1]
-	log.Printf(resetCode)
+	// log.Printf(resetCode)
 	// 使用提取部分的长度作为种子（确保每次生成不同）
 	rand.Seed(time.Now().UnixNano() + int64(len(resetCode)))
 
