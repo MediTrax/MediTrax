@@ -128,10 +128,22 @@ class _VisitHistoryTab extends ConsumerWidget {
                     final content = jsonDecode(record.content.toString())
                         as Map<String, dynamic>;
                     return _buildVisitCard(
+                      recordId: record.id,
                       date: record.createdAt.toString().split(' ')[0],
                       type: content['type'] as String,
                       diagnosis: content['diagnosis'] as String,
                       prescription: content['prescription'] as String,
+                      onEdit: () => _showEditVisitDialog(
+                        context,
+                        ref,
+                        recordId: record.id,
+                        type: content['type'] as String,
+                        diagnosis: content['diagnosis'] as String,
+                        prescription: content['prescription'] as String,
+                        date: DateTime.parse(content['date'] as String),
+                      ),
+                      onDelete: () => _showDeleteConfirmationDialog(
+                          context, ref, record.id),
                     );
                   },
                 );
@@ -148,6 +160,9 @@ class _VisitHistoryTab extends ConsumerWidget {
     required String type,
     required String diagnosis,
     required String prescription,
+    required String recordId,
+    required Function() onEdit,
+    required Function() onDelete,
   }) {
     return Card(
       elevation: 0,
@@ -187,6 +202,42 @@ class _VisitHistoryTab extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Colors.grey.shade600,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 8),
+                            Text('编辑'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('删除', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -464,6 +515,254 @@ class _VisitHistoryTab extends ConsumerWidget {
       ),
     );
   }
+
+  void _showEditVisitDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    required String recordId,
+    required String type,
+    required String diagnosis,
+    required String prescription,
+    required DateTime date,
+  }) {
+    DateTime selectedDate = date;
+    final diagnosisController = TextEditingController(text: diagnosis);
+    final prescriptionController = TextEditingController(text: prescription);
+    String visitType = type;
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 500,
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Bar
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.edit_rounded,
+                        color: Colors.blue.shade400,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          '编辑就诊记录',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
+
+                  // Date Picker
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.event_rounded,
+                        color: Colors.blue.shade300,
+                      ),
+                      title: const Text('就诊日期'),
+                      subtitle: Text(
+                        selectedDate.toString().split(' ')[0],
+                        style: TextStyle(color: Colors.blue.shade700),
+                      ),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          selectedDate = date;
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Visit Type
+                  DropdownButtonFormField<String>(
+                    value: visitType,
+                    decoration: InputDecoration(
+                      labelText: '就诊类型',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.medical_services_rounded,
+                        color: Colors.purple.shade300,
+                      ),
+                    ),
+                    items: ['门诊', '住院'].map((type) {
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(type),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      visitType = value!;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Diagnosis
+                  TextFormField(
+                    controller: diagnosisController,
+                    decoration: InputDecoration(
+                      labelText: '诊断结果',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.medical_information_rounded,
+                        color: Colors.green.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入诊断结果';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Prescription
+                  TextFormField(
+                    controller: prescriptionController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: '处方',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.medication_rounded,
+                        color: Colors.orange.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入处方';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            try {
+                              await ref
+                                  .read(medicalRecordsProvider.notifier)
+                                  .updateRecord(
+                                    recordId: recordId,
+                                    recordType: 'visit',
+                                    content: jsonEncode({
+                                      'type': visitType,
+                                      'diagnosis': diagnosisController.text,
+                                      'prescription':
+                                          prescriptionController.text,
+                                      'date': selectedDate.toIso8601String(),
+                                    }),
+                                  );
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ErrorHandler.showErrorSnackBar(context, e);
+                              }
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.save_rounded),
+                        label: const Text('保存'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+      BuildContext context, WidgetRef ref, String recordId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: const Text('确定要删除这条记录吗？此操作无法撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              try {
+                await ref
+                    .read(medicalRecordsProvider.notifier)
+                    .deleteRecord(recordId);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
+            },
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MedicationHistoryTab extends ConsumerWidget {
@@ -558,10 +857,23 @@ class _MedicationHistoryTab extends ConsumerWidget {
                     final content = jsonDecode(record.content.toString())
                         as Map<String, dynamic>;
                     return _buildMedicationCard(
+                      recordId: record.id,
                       name: content['name'] as String,
                       dosage: content['dosage'] as String,
                       frequency: content['frequency'] as String,
                       startDate: record.createdAt.toString().split(' ')[0],
+                      onEdit: () => _showEditMedicationDialog(
+                        context,
+                        ref,
+                        recordId: record.id,
+                        name: content['name'] as String,
+                        dosage: content['dosage'] as String,
+                        frequency: content['frequency'] as String,
+                        startDate:
+                            DateTime.parse(content['startDate'] as String),
+                      ),
+                      onDelete: () => _showDeleteConfirmationDialog(
+                          context, ref, record.id),
                     );
                   },
                 );
@@ -578,6 +890,9 @@ class _MedicationHistoryTab extends ConsumerWidget {
     required String dosage,
     required String frequency,
     required String startDate,
+    required String recordId,
+    required Function() onEdit,
+    required Function() onDelete,
   }) {
     return Card(
       elevation: 0,
@@ -617,6 +932,42 @@ class _MedicationHistoryTab extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Colors.grey.shade600,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 8),
+                            Text('编辑'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('删除', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -890,6 +1241,217 @@ class _MedicationHistoryTab extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditMedicationDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    required String recordId,
+    required String name,
+    required String dosage,
+    required String frequency,
+    required DateTime startDate,
+  }) {
+    final nameController = TextEditingController(text: name);
+    final dosageController = TextEditingController(text: dosage);
+    final frequencyController = TextEditingController(text: frequency);
+    DateTime selectedDate = startDate;
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 500,
+            maxHeight: MediaQuery.of(context).size.height * 0.9,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Bar
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.edit_rounded,
+                        color: Colors.orange.shade400,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          '编辑用药记录',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
+
+                  // Same form fields as add dialog
+                  TextFormField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: '药品名称',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.medication_rounded,
+                        color: Colors.orange.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入药品名称';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: dosageController,
+                    decoration: InputDecoration(
+                      labelText: '剂量',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.straighten_rounded,
+                        color: Colors.green.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入剂量';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextFormField(
+                    controller: frequencyController,
+                    decoration: InputDecoration(
+                      labelText: '服用频率',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.schedule_rounded,
+                        color: Colors.purple.shade300,
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return '请输入服用频率';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            try {
+                              await ref
+                                  .read(medicalRecordsProvider.notifier)
+                                  .updateRecord(
+                                    recordId: recordId,
+                                    recordType: 'medication',
+                                    content: jsonEncode({
+                                      'name': nameController.text,
+                                      'dosage': dosageController.text,
+                                      'frequency': frequencyController.text,
+                                      'startDate':
+                                          selectedDate.toIso8601String(),
+                                    }),
+                                  );
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ErrorHandler.showErrorSnackBar(context, e);
+                              }
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.save_rounded),
+                        label: const Text('保存'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(
+      BuildContext context, WidgetRef ref, String recordId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: const Text('确定要删除这条用药记录吗？此操作无法撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              try {
+                await ref
+                    .read(medicalRecordsProvider.notifier)
+                    .deleteRecord(recordId);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
+            },
+            child: const Text('删除'),
+          ),
+        ],
       ),
     );
   }
