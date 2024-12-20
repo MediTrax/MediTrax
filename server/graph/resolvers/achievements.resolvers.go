@@ -224,7 +224,7 @@ func (r *queryResolver) GetUserAchievements(ctx context.Context) ([]*model.UserA
 	var achievementDetails []*model.UserAchievementDetail
 	for _, achievement := range achievements {
 		badgeDetail := &model.UserAchievementDetail{
-			BadgeID:           achievement.ID,
+			BadgeID:           achievement.BadgeID,
 			UserAchievementID: achievement.ID,
 			EarnedAt:          achievement.EarnedAt,
 		}
