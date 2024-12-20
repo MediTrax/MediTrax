@@ -89,7 +89,7 @@ func (r *queryResolver) GetMockFoodSpecs(ctx context.Context, food string) (*mod
 
 	var specs []*model.FoodSpec
 	for _, spec_limit := range chat.SpecLimits {
-		specs = append(specs, &model.FoodSpec{Name: spec_limit.Name, Value: spec_limit.UpperRange / 2, Unit: "mock unit", HowHigh: 0.5})
+		specs = append(specs, &model.FoodSpec{Name: spec_limit.ChineseName, Value: spec_limit.UpperRange / 2, Unit: "mock unit", HowHigh: 0.5})
 	}
 
 	foodSpecs := &model.FoodSpecs{
