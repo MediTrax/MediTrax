@@ -3083,15 +3083,7 @@ type Question {
   The text of the question.
   """
   question: String!
-
-  """
-  The type of choice available for the question (e.g., single choice, multiple choice).
-  """
-  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
-
-  """
-  The list of choices available for the question.
-  """
+  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, 3 = fill in the blank with figure etc.
   choices: [String!] # empty if it is fill in the blank
 }
 
@@ -3273,18 +3265,8 @@ extend type Mutation {
     filledQuestionnaire: FilledQuestionnaire!
   ): EvaluateHealthRiskAssessmentResponse #拿结果
 }`, BuiltIn: false},
-	{Name: "../schemas/foodspec.graphqls", Input: `"""
-Represents the specification of a food item.
-"""
-type FoodSpec {
-  """
-  The name of the food specification.
-  """
+	{Name: "../schemas/foodspec.graphqls", Input: `type FoodSpec{
   name: String!
-
-  """
-  The value of the food specification.
-  """
   value: Float!
 
   """
