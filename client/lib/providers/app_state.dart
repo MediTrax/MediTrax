@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:meditrax/main.dart';
 import 'package:meditrax/models/app_state.dart';
 import 'package:meditrax/models/token.dart';
 import 'package:meditrax/providers/auth.graphql.dart';
@@ -79,6 +76,7 @@ class AppState extends _$AppState {
     state = state.copyWith(
       token: token,
       autoLoginResult: true,
+      selectedProfile: null,
       navigatorIndex: 2,
     );
     ref.invalidate(graphQLServiceProvider);
@@ -90,11 +88,13 @@ class AppState extends _$AppState {
       navigatorIndex: 0,
       token: null,
       autoLoginResult: null,
+      selectedProfile: null,
     );
     _refreshTokenTimer?.cancel();
     _refreshTokenTimer = null;
     ref.invalidate(graphQLServiceProvider);
     // ref.read(shopProvider.notifier).clearData();
+    ref.read(notificationServiceProvider).cancelAllReminders();
     await _hiveBox!.put("appState", state);
   }
 
@@ -168,46 +168,48 @@ class AppState extends _$AppState {
   //       );
   // }
 
-  Future<void> loginWithPhonePassword(String phone, String password) async {
-    final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
-          Options$Mutation$LoginUser(
-            variables: Variables$Mutation$LoginUser(
-              phoneNumber: phone,
-              password: password,
-            ),
-          ),
-        );
+  // Future<void> loginWithPhonePassword(String phone, String password) async {
+  //   final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
+  //         Options$Mutation$LoginUser(
+  //           variables: Variables$Mutation$LoginUser(
+  //             phoneNumber: phone,
+  //             password: password,
+  //           ),
+  //         ),
+  //       );
 
-    if (result.hasException) {
-      throw result.exception!;
-    }
+  //   if (result.hasException) {
+  //     throw result.exception!;
+  //   }
 
-    final loginData = result.parsedData!.loginUser!;
-    final tokenData = loginData.token;
+  //   final loginData = result.parsedData!.loginUser!;
+  //   final tokenData = loginData.token;
 
-    state = state.copyWith(
-      token: Token(
-        id: tokenData.refreshToken,
-        user: tokenData.user,
-        accessToken: tokenData.accessToken,
-        accessTokenExpiry: tokenData.accessTokenExpiry,
-        refreshTokenExpiry: tokenData.refreshTokenExpiry,
-        device: tokenData.device,
-        createdAt: tokenData.createdAt,
-      ),
-    );
+  //   state = state.copyWith(
+  //     token: Token(
+  //       id: tokenData.refreshToken,
+  //       user: tokenData.user,
+  //       accessToken: tokenData.accessToken,
+  //       accessTokenExpiry: tokenData.accessTokenExpiry,
+  //       refreshTokenExpiry: tokenData.refreshTokenExpiry,
+  //       device: tokenData.device,
+  //       createdAt: tokenData.createdAt,
+  //     ),
+  //     selectedProfile: null,
+  //     navigatorIndex: 2,
+  //   );
 
-    // Set up token refresh timer
-    _refreshTokenTimer = Timer(
-      tokenData.accessTokenExpiry.difference(DateTime.now()),
-      () {
-        refreshToken();
-      },
-    );
+  //   // Set up token refresh timer
+  //   _refreshTokenTimer = Timer(
+  //     tokenData.accessTokenExpiry.difference(DateTime.now()),
+  //     () {
+  //       refreshToken();
+  //     },
+  //   );
 
-    ref.invalidate(graphQLServiceProvider);
-    await _hiveBox!.put("appState", state);
-  }
+  //   ref.invalidate(graphQLServiceProvider);
+  //   await _hiveBox!.put("appState", state);
+  // }
 
   Future<void> signupWithPhone({
     required String phone,
@@ -230,6 +232,6 @@ class AppState extends _$AppState {
     }
 
     // After successful signup, login with the new credentials
-    await loginWithPhonePassword(phone, password);
+    await loginWithPhoneNumberPassword(phone, password, "");
   }
 }
