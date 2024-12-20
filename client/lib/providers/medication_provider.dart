@@ -85,13 +85,6 @@ class MedicationProvider extends _$MedicationProvider {
     required double inventory,
   }) async {
     try {
-      // print("Adding medication with data:");
-      // print("Name: $name");
-      // print("Dosage: $dosage");
-      // print("Unit: $unit");
-      // print("Frequency: $frequency");
-      // print("Inventory: $inventory");
-
       // Perform the mutation request
       final result = await ref
           .read(graphQLServiceProvider)
@@ -102,8 +95,6 @@ class MedicationProvider extends _$MedicationProvider {
                   unit: unit,
                   frequency: frequency,
                   inventory: inventory)));
-
-      print("GraphQL exception: ${result.exception}");
 
       if (result.hasException) {
         throw result.exception!;
@@ -146,14 +137,10 @@ class MedicationProvider extends _$MedicationProvider {
     double? inventory,
   }) async {
     try {
-      print("\n=== Update Medication Debug Info ===");
-      print("Medication ID: $medicationId");
-      print("New values: $name, $dosage, $unit, $frequency, $inventory");
 
       // First get the current state
       final currentState = state;
       if (currentState is! AsyncData<List<Medication>>) {
-        print("State is not ready");
         return false;
       }
 
@@ -194,48 +181,26 @@ class MedicationProvider extends _$MedicationProvider {
           .map((med) => med.id == medicationId ? updatedMedication : med)
           .toList();
 
-      print("\n=== Updated List Debug Info ===");
-      print("Original list length: ${medications.length}");
-      print("Updated list length: ${updatedList.length}");
-      print("\nMedications in updated list:");
-      for (var med in updatedList) {
-        print("- ID: ${med.id}");
-        print("  Name: ${med.name}");
-        print("  Inventory: ${med.inventory}");
-        print("  Was Updated: ${med.id == medicationId ? 'Yes' : 'No'}");
-      }
-      print("===============================\n");
-
       // Try updating state in a microtask
       await Future.microtask(() {
         state = AsyncValue.data(updatedList);
-        print("State update scheduled");
       });
-
-      // Verify state was updated
-      print("Current state after update: ${state.value?.length} medications");
 
       return true;
     } catch (e, stack) {
-      print("Error: $e\n$stack");
       return false;
     }
   }
 
   Future<bool> deleteMedication(String medicationId) async {
     try {
-      print('Starting deletion of medication with ID: $medicationId');
-
       final result = await ref
           .read(graphQLServiceProvider)
           .mutate$DeleteMedication(Options$Mutation$DeleteMedication(
               variables: Variables$Mutation$DeleteMedication(
                   medicationId: medicationId)));
 
-      print('Mutation result: ${result.data}');
-
       if (result.hasException) {
-        print('Error executing mutation: ${result.exception.toString()}');
         throw result.exception!;
       }
 

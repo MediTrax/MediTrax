@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meditrax/providers/app_state.dart';
 
-class BottomNavBar extends StatelessWidget {
+class BottomNavBar extends ConsumerWidget {
   final int currentIndex;
 
   const BottomNavBar({
@@ -10,25 +11,26 @@ class BottomNavBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appState = ref.read(appStateProvider);
     return NavigationBar(
-      selectedIndex: currentIndex,
+      selectedIndex: appState.navigatorIndex,
       onDestinationSelected: (index) {
         switch (index) {
           case 0:
-            context.go('/treatment');  // Changed from '/appointments'
+            ref.read(appStateProvider.notifier).changeNavigatorIndex(0);
             break;
           case 1:
-            context.go('/medicine-inventory');
+            ref.read(appStateProvider.notifier).changeNavigatorIndex(1);
             break;
           case 2:
-            context.go('/');  // Changed from '/home'
+            ref.read(appStateProvider.notifier).changeNavigatorIndex(2);
             break;
           case 3:
-            context.go('/medical-records');
+            ref.read(appStateProvider.notifier).changeNavigatorIndex(3);
             break;
           case 4:
-            context.go('/profile');
+            ref.read(appStateProvider.notifier).changeNavigatorIndex(4);
             break;
         }
       },

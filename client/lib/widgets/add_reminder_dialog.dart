@@ -65,11 +65,14 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
             final TimeOfDay? picked = await showTimePicker(
               context: context,
               initialTime: _selectedTimes[index],
+              builder: (BuildContext context, Widget? child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                  child: child!,
+                );
+              },
             );
             if (picked != null && picked != _selectedTimes[index]) {
-              print('\n=== Time Picker Debug Info ===');
-              print('Selected time: ${picked.format(context)}');
-              print('Hour: ${picked.hour}, Minute: ${picked.minute}');
               setState(() {
                 _selectedTimes[index] = picked;
               });
@@ -162,15 +165,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
         FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              bool allSuccess = true;
-              
-              print('\n=== Add Reminder Dialog Debug Info ===');
-              print('Selected Date: $_selectedDate');
-              print('Selected Times:');
-              for (final time in _selectedTimes) {
-                print('- Time of Day: ${time.hour}:${time.minute}');
-              }
-              
+              bool allSuccess = true;              
               // Add a reminder for each selected time
               for (final time in _selectedTimes) {
                 // Create DateTime in local timezone and preserve it
@@ -181,11 +176,6 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                   time.hour,
                   time.minute,
                 );
-
-                print('\nCreating reminder for time slot:');
-                print('TimeOfDay: ${time.format(context)}');
-                print('Selected hour: ${time.hour}, minute: ${time.minute}');
-                print('Created DateTime: $reminderTime');
                 
                 final success = await ref.read(medicationReminderProvider.notifier).addReminder(
                   medicationId: _selectedMedicationId!,
@@ -193,12 +183,10 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
                 );
                 
                 if (!success) {
-                  print('Failed to add reminder for time: ${time.format(context)}');
                   allSuccess = false;
                   break;
                 }
               }
-              print('===============================\n');
 
               if (allSuccess) {
                 await ref.read(medicationReminderProvider.notifier).fetchReminders();

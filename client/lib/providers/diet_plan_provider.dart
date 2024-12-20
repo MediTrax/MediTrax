@@ -20,10 +20,7 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
   FoodSpecsNotifier(this._client) : super(const AsyncValue.data(null));
 
   Future<void> getMockFoodSpecs(String food) async {
-    try {
-      print('\n=== getMockFoodSpecs Debug Info ===');
-      print('Searching for food: $food');
-      
+    try {     
       state = const AsyncValue.loading();
       
       final result = await _client.query$GetMockFoodSpecs(
@@ -34,31 +31,18 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
           fetchPolicy: FetchPolicy.networkOnly,
         ),
       );
-
-      print('\nGraphQL Response:');
-      print('Has Exception: ${result.hasException}');
       
       if (result.hasException) {
-        print('Exception: ${result.exception}');
         throw result.exception!;
       }
 
-      print('\nRaw Data:');
-      print('getMockFoodSpecs: ${result.data}');
-
       if (result.data?['getMockFoodSpecs'] == null) {
-        print('No data returned from getMockFoodSpecs');
         state = const AsyncValue.data(null);
         return;
       }
 
       final specs = (result.data!['getMockFoodSpecs']['specs'] as List)
           .map((spec) {
-            print('\nProcessing Spec:');
-            print('  name: ${spec['name']}');
-            print('  value: ${spec['value']}');
-            print('  unit: ${spec['unit']}');
-            print('  howHigh: ${spec['howHigh']}');
             return FoodSpec(
               name: spec['name'].toString(),
               value: spec['value'].toString(),
@@ -73,17 +57,8 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
         howRecommend: result.data!['getMockFoodSpecs']['howRecommend'].toString(),
       );
 
-      print('\nProcessed FoodSpecs:');
-      print('Number of specs: ${foodSpecs.specs.length}');
-      print('How Recommend: ${foodSpecs.howRecommend}');
-      print('================================\n');
-
       state = AsyncValue.data(foodSpecs);
     } catch (error, stackTrace) {
-      print('\nError in getMockFoodSpecs:');
-      print('Error: $error');
-      print('Stack Trace: $stackTrace');
-      print('================================\n');
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -125,7 +100,6 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
 
       state = AsyncValue.data(foodSpecs);
     } catch (error, stackTrace) {
-      print('Error in getFoodSpecs: $error');
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -161,7 +135,6 @@ class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommenda
 
       state = AsyncValue.data(recommendation);
     } catch (error, stackTrace) {
-      print('Error in getMockFoodRecommendation: $error');
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -191,7 +164,6 @@ class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommenda
 
       state = AsyncValue.data(recommendation);
     } catch (error, stackTrace) {
-      print('Error in getFoodRecommendation: $error');
       state = AsyncValue.error(error, stackTrace);
     }
   }

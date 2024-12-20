@@ -11,8 +11,12 @@ import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/graphql_test.dart';
 import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/providers/health_metrics_provider_test.dart';
+import 'package:meditrax/providers/health_risk_provider.dart';
+import 'package:meditrax/providers/health_risk_provider_test.dart';
 import 'package:meditrax/providers/medical_records_provider.dart';
 import 'package:meditrax/providers/medical_records_test.dart';
+import 'package:meditrax/providers/medication_provider.dart';
+import 'package:meditrax/providers/medication_provider_test.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/providers/user_test.dart';
 
@@ -36,26 +40,14 @@ final testDevices = [
     devicePixelRatio: 1,
   ),
   const Device(
-    name: "Screen_IpadPro2ndGen",
-    size: Size(2048 / 2, 2732 / 2),
+    name: "Screen_IpadPro13Inch",
+    size: Size(2064 / 2, 2752 / 2),
     textScale: 2,
     devicePixelRatio: 2,
   ),
   const Device(
-    name: "Screen_IpadPro6thGen",
-    size: Size(2048 / 2, 2732 / 2),
-    textScale: 2,
-    devicePixelRatio: 2,
-  ),
-  const Device(
-    name: "Screen_Iphone5Inch5",
-    size: Size(1242 / 2, 2208 / 2),
-    textScale: 2,
-    devicePixelRatio: 2,
-  ),
-  const Device(
-    name: "Screen_Iphone6Inch7",
-    size: Size(1290 / 2, 2796 / 2),
+    name: "Screen_Iphone6Inch9",
+    size: Size(1320 / 2, 2868 / 2),
     textScale: 2,
     devicePixelRatio: 2,
   ),
@@ -72,6 +64,10 @@ void main() async {
           healthMetricsProvider.overrideWith(() => HealthMetricsTest()),
           medicalRecordsProvider.overrideWith(() => MedicalRecordsTest()),
           userDataProvider.overrideWith(() => UserTest()),
+          medicationProviderProvider.overrideWith(() => MedicationTest()),
+          userPointsProvider.overrideWith(() => UserPointsTest()),
+          healthRiskProvider.overrideWith(() => HealthRiskNotifierTest()),
+          questionnaireProvider.overrideWith(() => QuestionnaireNotifierTest()),
         ],
         child: const MyApp(),
       );
@@ -98,7 +94,7 @@ void main() async {
       appState.changeNavigatorIndex(0);
       await multiScreenGolden(
         tester,
-        "Utilities_Light",
+        "TreatmentMonitoring_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -107,7 +103,7 @@ void main() async {
       appState.changeNavigatorIndex(1);
       await multiScreenGolden(
         tester,
-        "StressFree_Light",
+        "Medication_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -116,7 +112,7 @@ void main() async {
       appState.changeNavigatorIndex(3);
       await multiScreenGolden(
         tester,
-        "Feeds_Light",
+        "MedicalRecords_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },
@@ -125,7 +121,7 @@ void main() async {
       appState.changeNavigatorIndex(4);
       await multiScreenGolden(
         tester,
-        "Account_Light",
+        "Profile_Light",
         customPump: (WidgetTester tester) async {
           await tester.pump(const Duration(seconds: 1));
         },

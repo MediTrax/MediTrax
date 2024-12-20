@@ -22,6 +22,7 @@ class AppStateTest extends AppState {
         createdAt: DateTime.now(),
       ),
       autoLoginResult: true,
+      navigatorIndex: 2,
     );
   }
 

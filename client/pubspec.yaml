@@ -56,7 +56,8 @@ dependencies:
   timezone: ^0.10.0
   flutter_timezone: ^1.0.8
   intl_phone_number_input: ^0.7.4
-  google_fonts: ^6.2.1
+  fl_chart: ^0.69.2
+  flutter_libphonenumber_ios: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -78,9 +79,21 @@ dev_dependencies:
   hive_generator: ^2.0.1
   graphql_codegen: ^1.0.1
   golden_toolkit: ^0.15.0
+  flutter_launcher_icons: ^0.14.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#000000"
+    theme_color: "#000000"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -120,3 +133,17 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  fonts:
+    - family: NotoSerifSC
+      fonts:
+        - asset: assets/fonts/NotoSerifSC-Black.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSerifSC-Bold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSerifSC-Medium.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSerifSC-Regular.ttf
+          weight: 300
+        - asset: assets/fonts/NotoSerifSC-Light.ttf
+          weight: 200

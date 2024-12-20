@@ -6,411 +6,690 @@ import (
 	"time"
 )
 
+// Represents an achievement badge that can be awarded to users.
 type AchievementBadge struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	IconURL     string    `json:"iconUrl"`
-	CreatedAt   time.Time `json:"createdAt"`
+	// The unique identifier of the achievement badge.
+	ID string `json:"id"`
+	// The name of the achievement badge.
+	Name string `json:"name"`
+	// A description of the achievement badge.
+	Description string `json:"description"`
+	// The URL of the icon representing the achievement badge.
+	IconURL string `json:"iconUrl"`
+	// The date and time when the achievement badge was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed information about an achievement badge.
 type AchievementBadgeDetail struct {
-	BadgeID     string    `json:"badgeId"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	IconURL     string    `json:"iconUrl"`
-	CreatedAt   time.Time `json:"createdAt"`
-}
-
-type ActivityLog struct {
-	ID            string    `json:"id"`
-	UserID        string    `json:"userId"`
-	ActivityType  string    `json:"activityType"`
-	Description   string    `json:"description"`
-	ChangedObject string    `json:"changedObject"`
-	ChangedField  string    `json:"changedField"`
-	From          string    `json:"from"`
-	To            string    `json:"to"`
-	Timestamp     time.Time `json:"timestamp"`
-}
-
-type ActivityLogDetail struct {
-	LogID         string    `json:"logId"`
-	ActivityType  string    `json:"activityType"`
-	Description   string    `json:"description"`
-	ChangedObject string    `json:"changedObject"`
-	ChangedField  string    `json:"changedField"`
-	From          string    `json:"from"`
-	To            string    `json:"to"`
-	Timestamp     time.Time `json:"timestamp"`
-}
-
-type AddHealthMetricResponse struct {
-	MetricID string `json:"metricId"`
-	Message  string `json:"message"`
-}
-
-type AddMedicalRecordResponse struct {
-	RecordID string `json:"recordId"`
-	Message  string `json:"message"`
-}
-
-type AddMedicationResponse struct {
-	MedicationID string `json:"medicationId"`
-	Message      string `json:"message"`
-}
-
-type AwardAchievementResponse struct {
-	UserAchievementID string `json:"userAchievementId"`
-	Message           string `json:"message"`
-}
-
-type CreateAchievementBadgeResponse struct {
+	// The ID of the achievement badge.
 	BadgeID string `json:"badgeId"`
+	// The name of the achievement badge.
+	Name string `json:"name"`
+	// A description of the achievement badge.
+	Description string `json:"description"`
+	// The URL of the icon representing the achievement badge.
+	IconURL string `json:"iconUrl"`
+	// The date and time when the achievement badge was created.
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// Represents an activity log entry for a user.
+type ActivityLog struct {
+	// The unique identifier of the activity log entry.
+	ID string `json:"id"`
+	// The ID of the user associated with the activity.
+	UserID string `json:"userId"`
+	// The type of activity performed.
+	ActivityType string `json:"activityType"`
+	// A description of the activity.
+	Description string `json:"description"`
+	// The object that was changed during the activity.
+	ChangedObject string `json:"changedObject"`
+	// The field of the object that was changed.
+	ChangedField string `json:"changedField"`
+	// The original value before the change.
+	From string `json:"from"`
+	// The new value after the change.
+	To string `json:"to"`
+	// The timestamp when the activity occurred.
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// Detailed information about an activity log entry.
+type ActivityLogDetail struct {
+	// The ID of the activity log entry.
+	LogID string `json:"logId"`
+	// The type of activity performed.
+	ActivityType string `json:"activityType"`
+	// A description of the activity.
+	Description string `json:"description"`
+	// The object that was changed during the activity.
+	ChangedObject string `json:"changedObject"`
+	// The field of the object that was changed.
+	ChangedField string `json:"changedField"`
+	// The original value before the change.
+	From string `json:"from"`
+	// The new value after the change.
+	To string `json:"to"`
+	// The timestamp when the activity occurred.
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// Response type for adding a health metric.
+type AddHealthMetricResponse struct {
+	// The ID of the newly added health metric.
+	MetricID string `json:"metricId"`
+	// A message indicating the result of the addition operation.
 	Message string `json:"message"`
 }
 
+// Response type for adding a medical record.
+type AddMedicalRecordResponse struct {
+	// The ID of the newly added medical record.
+	RecordID string `json:"recordId"`
+	// A message indicating the result of the addition operation.
+	Message string `json:"message"`
+}
+
+// Response type for adding a medication.
+type AddMedicationResponse struct {
+	// The ID of the newly added medication.
+	MedicationID string `json:"medicationId"`
+	// A message indicating the result of the addition operation.
+	Message string `json:"message"`
+}
+
+// Response type for awarding an achievement to a user.
+type AwardAchievementResponse struct {
+	// The ID of the user achievement that was awarded.
+	UserAchievementID string `json:"userAchievementId"`
+	// A message indicating the result of the award operation.
+	Message string `json:"message"`
+}
+
+// Response type for creating an achievement badge.
+type CreateAchievementBadgeResponse struct {
+	// The ID of the newly created achievement badge.
+	BadgeID string `json:"badgeId"`
+	// A message indicating the result of the creation operation.
+	Message string `json:"message"`
+}
+
+// Response type for creating a medication reminder.
 type CreateMedicationReminderResponse struct {
+	// The ID of the newly created medication reminder.
 	ReminderID string `json:"reminderId"`
-	Message    string `json:"message"`
+	// A message indicating the result of the creation operation.
+	Message string `json:"message"`
 }
 
+// Response type for creating a treatment schedule.
 type CreateTreatmentScheduleResponse struct {
+	// The ID of the newly created treatment schedule.
 	ScheduleID string `json:"scheduleId"`
-	Message    string `json:"message"`
+	// A message indicating the result of the creation operation.
+	Message string `json:"message"`
 }
 
+// Response type for creating a user.
 type CreateUserResponse struct {
-	UserID  string `json:"userId"`
+	// The ID of the newly created user.
+	UserID string `json:"userId"`
+	// A message indicating the result of the creation operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a health metric.
 type DeleteHealthMetricResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medical record.
 type DeleteMedicalRecordResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medication reminder.
 type DeleteMedicationReminderResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a medication.
 type DeleteMedicationResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a treatment schedule.
 type DeleteTreatmentScheduleResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for deleting a user.
 type DeleteUserResponse struct {
+	// A message indicating the result of the deletion operation.
 	Message string `json:"message"`
 }
 
+// Response type for evaluating a health risk assessment.
 type EvaluateHealthRiskAssessmentResponse struct {
-	AssessmentID    string `json:"assessmentId"`
-	RiskLevel       string `json:"riskLevel"`
+	// The ID of the health risk assessment.
+	AssessmentID string `json:"assessmentId"`
+	// The risk level determined from the assessment.
+	RiskLevel string `json:"riskLevel"`
+	// Recommendations based on the assessment results.
 	Recommendations string `json:"recommendations"`
 }
 
+// Input type for a filled questionnaire.
 type FilledQuestionnaire struct {
-	QuestionnaireID int         `json:"questionnaireId"`
-	Responses       []*Response `json:"responses"`
+	// The ID of the questionnaire being filled.
+	QuestionnaireID int `json:"questionnaireId"`
+	// The list of responses to the questionnaire.
+	Responses []*Response `json:"responses"`
 }
 
+// Represents a recommendation for a food item.
 type FoodRecommendation struct {
+	// The name of the recommended food item.
 	Name string `json:"name"`
 }
 
+// Represents the specification of a food item.
 type FoodSpec struct {
-	Name    string  `json:"name"`
-	Value   float64 `json:"value"`
-	Unit    string  `json:"unit"`
+	// The name of the food specification.
+	Name string `json:"name"`
+	// The value of the food specification.
+	Value float64 `json:"value"`
+	// The unit of measurement for the food specification.
+	Unit string `json:"unit"`
+	// A measure of how high the specification value is compared to a standard.
 	HowHigh float64 `json:"howHigh"`
 }
 
+// Represents a collection of food specifications.
 type FoodSpecs struct {
-	Specs        []*FoodSpec `json:"specs"`
-	HowRecommend float64     `json:"howRecommend"`
+	// The list of food specifications.
+	Specs []*FoodSpec `json:"specs"`
+	// A measure of how recommended the food item is.
+	HowRecommend float64 `json:"howRecommend"`
 }
 
+// Represents a health metric recorded for a user.
 type HealthMetric struct {
-	ID         string    `json:"id"`
-	UserID     string    `json:"userId"`
-	MetricType string    `json:"metricType"`
-	Value      float64   `json:"value"`
-	Unit       string    `json:"unit"`
+	// The unique identifier of the health metric.
+	ID string `json:"id"`
+	// The ID of the user associated with the health metric.
+	UserID string `json:"userId"`
+	// The type of the health metric.
+	MetricType string `json:"metricType"`
+	// The value of the health metric.
+	Value float64 `json:"value"`
+	// The unit of measurement for the health metric.
+	Unit string `json:"unit"`
+	// The date and time when the health metric was recorded.
 	RecordedAt time.Time `json:"recordedAt"`
-	CreatedAt  time.Time `json:"createdAt"`
+	// The date and time when the health metric was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed information about a health metric.
 type HealthMetricDetail struct {
-	MetricID   string    `json:"metricId"`
-	MetricType string    `json:"metricType"`
-	Value      float64   `json:"value"`
-	Unit       string    `json:"unit"`
+	// The ID of the health metric.
+	MetricID string `json:"metricId"`
+	// The type of the health metric.
+	MetricType string `json:"metricType"`
+	// The value of the health metric.
+	Value float64 `json:"value"`
+	// The unit of measurement for the health metric.
+	Unit string `json:"unit"`
+	// The date and time when the health metric was recorded.
 	RecordedAt time.Time `json:"recordedAt"`
 }
 
+// Represents a health response in a risk assessment.
 type HealthResponse struct {
-	QuestionID int     `json:"questionId"`
-	Choice     string  `json:"choice"`
-	Answer     *string `json:"answer,omitempty"`
+	// The ID of the question being answered.
+	QuestionID int `json:"questionId"`
+	// The choice selected for the question.
+	Choice string `json:"choice"`
+	// The answer provided for the question, if applicable.
+	Answer *string `json:"answer,omitempty"`
 }
 
+// Represents a health risk assessment for a user.
 type HealthRiskAssessment struct {
-	ID                string            `json:"id"`
-	UserID            string            `json:"userId"`
+	// The unique identifier of the health risk assessment.
+	ID string `json:"id"`
+	// The ID of the user who completed the assessment.
+	UserID string `json:"userId"`
+	// The data from the completed questionnaire.
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
-	RiskLevel         string            `json:"riskLevel"`
-	Recommendations   string            `json:"recommendations"`
-	CreatedAt         time.Time         `json:"createdAt"`
+	// The risk level determined from the assessment.
+	RiskLevel string `json:"riskLevel"`
+	// Recommendations based on the assessment results.
+	Recommendations string `json:"recommendations"`
+	// The date and time when the assessment was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed response for a health risk assessment.
 type HealthRiskAssessmentDetailResponse struct {
-	AssessmentID      string            `json:"assessmentId"`
+	// The ID of the health risk assessment.
+	AssessmentID string `json:"assessmentId"`
+	// The data from the completed questionnaire.
 	QuestionnaireData []*HealthResponse `json:"questionnaireData"`
-	RiskLevel         string            `json:"riskLevel"`
-	Recommendations   string            `json:"recommendations"`
-	CreatedAt         time.Time         `json:"createdAt"`
+	// The risk level determined from the assessment.
+	RiskLevel string `json:"riskLevel"`
+	// Recommendations based on the assessment results.
+	Recommendations string `json:"recommendations"`
+	// The date and time when the assessment was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Response type for logging in a user.
 type LoginUserResponse struct {
-	UserID  string `json:"userId"`
-	Token   *Token `json:"token"`
+	// The ID of the logged-in user.
+	UserID string `json:"userId"`
+	// The token associated with the logged-in user.
+	Token *Token `json:"token"`
+	// A message indicating the result of the login operation.
 	Message string `json:"message"`
 }
 
+// Represents a medical record for a user.
 type MedicalRecord struct {
-	ID         string    `json:"id"`
-	UserID     string    `json:"userId"`
-	RecordType string    `json:"recordType"`
-	Content    string    `json:"content"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
-}
-
-type MedicalRecordDetail struct {
-	RecordID   string    `json:"recordId"`
-	RecordType string    `json:"recordType"`
-	Content    string    `json:"content"`
-	CreatedAt  time.Time `json:"createdAt"`
-}
-
-type Medication struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Dosage    float64   `json:"dosage"`
-	Unit      string    `json:"unit"`
-	Frequency string    `json:"frequency"`
-	Inventory float64   `json:"inventory"`
-	UserID    string    `json:"userId"`
+	// The unique identifier of the medical record.
+	ID string `json:"id"`
+	// The ID of the user associated with the medical record.
+	UserID string `json:"userId"`
+	// The type of the medical record.
+	RecordType string `json:"recordType"`
+	// The content of the medical record.
+	Content string `json:"content"`
+	// The date and time when the medical record was created.
 	CreatedAt time.Time `json:"createdAt"`
+	// The date and time when the medical record was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// Detailed information about a medical record.
+type MedicalRecordDetail struct {
+	// The ID of the medical record.
+	RecordID string `json:"recordId"`
+	// The type of the medical record.
+	RecordType string `json:"recordType"`
+	// The content of the medical record.
+	Content string `json:"content"`
+	// The date and time when the medical record was created.
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// Represents a medication prescribed to a user.
+type Medication struct {
+	// The unique identifier of the medication.
+	ID string `json:"id"`
+	// The name of the medication.
+	Name string `json:"name"`
+	// The dosage of the medication.
+	Dosage float64 `json:"dosage"`
+	// The unit of measurement for the dosage.
+	Unit string `json:"unit"`
+	// The frequency at which the medication should be taken.
+	Frequency string `json:"frequency"`
+	// The inventory count of the medication.
+	Inventory float64 `json:"inventory"`
+	// The ID of the user who is prescribed the medication.
+	UserID string `json:"userId"`
+	// The date and time when the medication was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The date and time when the medication was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// Detailed information about a medication.
 type MedicationDetail struct {
-	MedicationID string  `json:"medicationId"`
-	Name         string  `json:"name"`
-	Dosage       float64 `json:"dosage"`
-	Unit         string  `json:"unit"`
-	Frequency    string  `json:"frequency"`
-	Inventory    float64 `json:"inventory"`
+	// The ID of the medication.
+	MedicationID string `json:"medicationId"`
+	// The name of the medication.
+	Name string `json:"name"`
+	// The dosage of the medication.
+	Dosage float64 `json:"dosage"`
+	// The unit of measurement for the dosage.
+	Unit string `json:"unit"`
+	// The frequency at which the medication should be taken.
+	Frequency string `json:"frequency"`
+	// The inventory count of the medication.
+	Inventory float64 `json:"inventory"`
 }
 
+// Represents a reminder for taking a medication.
 type MedicationReminder struct {
-	ID           string    `json:"id"`
-	MedicationID string    `json:"medicationId"`
-	UserID       string    `json:"userId"`
+	// The unique identifier of the medication reminder.
+	ID string `json:"id"`
+	// The ID of the medication associated with the reminder.
+	MedicationID string `json:"medicationId"`
+	// The ID of the user who set the reminder.
+	UserID string `json:"userId"`
+	// The time at which the reminder is set.
 	ReminderTime time.Time `json:"reminderTime"`
-	IsTaken      bool      `json:"isTaken"`
-	CreatedAt    time.Time `json:"createdAt"`
+	// Indicates whether the medication has been taken.
+	IsTaken bool `json:"isTaken"`
+	// The date and time when the reminder was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed information about a medication reminder.
 type MedicationReminderDetail struct {
-	ReminderID   string    `json:"reminderId"`
-	MedicationID string    `json:"medicationId"`
+	// The ID of the medication reminder.
+	ReminderID string `json:"reminderId"`
+	// The ID of the medication associated with the reminder.
+	MedicationID string `json:"medicationId"`
+	// The time at which the reminder is set.
 	ReminderTime time.Time `json:"reminderTime"`
-	IsTaken      bool      `json:"isTaken"`
+	// Indicates whether the medication has been taken.
+	IsTaken bool `json:"isTaken"`
 }
 
 type Mutation struct {
 }
 
+// Represents a password change request.
 type PasswordChange struct {
-	ID        string    `json:"id"`
-	User      string    `json:"user"`
-	Token     string    `json:"token"`
+	// The unique identifier of the password change request.
+	ID string `json:"id"`
+	// The ID of the user requesting the password change.
+	User string `json:"user"`
+	// The token associated with the password change request.
+	Token string `json:"token"`
+	// The date and time when the password change request was created.
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed information about a user profile.
 type ProfileDetail struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	PhoneNumber string    `json:"phoneNumber"`
-	Role        string    `json:"role"`
-	CreatedAt   time.Time `json:"createdAt"`
+	// The unique identifier of the profile.
+	ID string `json:"id"`
+	// The name of the profile.
+	Name string `json:"name"`
+	// The phone number associated with the profile.
+	PhoneNumber string `json:"phoneNumber"`
+	// The role of the profile in the system.
+	Role string `json:"role"`
+	// The date and time when the profile was created.
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type Query struct {
 }
 
+// Represents a question in a health risk assessment questionnaire.
 type Question struct {
-	QuestionID   int      `json:"questionId"`
-	Question     string   `json:"question"`
-	QuestionType int      `json:"questionType"`
-	Choices      []string `json:"choices,omitempty"`
+	// The unique identifier of the question.
+	QuestionID int `json:"questionId"`
+	// The text of the question.
+	Question string `json:"question"`
+	// The type of choice available for the question (e.g., single choice, multiple choice).
+	QuestionType int `json:"questionType"`
+	// The list of choices available for the question.
+	Choices []string `json:"choices,omitempty"`
 }
 
+// Represents a questionnaire object containing multiple questions.
 type QuestionnaireObject struct {
-	QuestionnaireID int         `json:"questionnaireId"`
-	Data            []*Question `json:"data"`
+	// The unique identifier of the questionnaire.
+	QuestionnaireID int `json:"questionnaireId"`
+	// The list of questions in the questionnaire.
+	Data []*Question `json:"data"`
 }
 
+// Represents a record object containing data.
 type RecordObject struct {
+	// The data contained in the record object.
 	Data string `json:"data"`
 }
 
+// Response type for requesting a password reset.
 type RequestPasswordResetResponse struct {
+	// A message indicating the result of the password reset request.
 	Message string `json:"message"`
 }
 
+// Response type for resetting a password.
 type ResetPasswordResponse struct {
+	// A message indicating the result of the password reset operation.
 	Message string `json:"message"`
 }
 
+// Input type for a response to a questionnaire.
 type Response struct {
-	QuestionID int     `json:"questionId"`
-	Choice     string  `json:"choice"`
-	Answer     *string `json:"answer,omitempty"`
+	// The ID of the question being answered.
+	QuestionID int `json:"questionId"`
+	// The choice selected for the question.
+	Choice string `json:"choice"`
+	// The answer provided for the question, if applicable.
+	Answer *string `json:"answer,omitempty"`
 }
 
+// Response type for sharing a profile.
 type ShareProfileResponse struct {
+	// A message indicating the result of the profile sharing operation.
 	Message string `json:"message"`
 }
 
+// Response type for taking a medication.
 type TakeMedicationResponse struct {
+	// A message indicating the result of the medication taking operation.
 	Message string `json:"message"`
 }
 
+// Represents a token for user authentication.
 type Token struct {
-	ID                 string    `json:"id"`
-	User               string    `json:"user"`
-	AccessToken        string    `json:"accessToken"`
-	RefreshToken       string    `json:"refreshToken"`
-	AccessTokenExpiry  time.Time `json:"accessTokenExpiry"`
+	// The unique identifier of the token.
+	ID string `json:"id"`
+	// The ID of the user associated with the token.
+	User string `json:"user"`
+	// The access token for authentication.
+	AccessToken string `json:"accessToken"`
+	// The refresh token for renewing the access token.
+	RefreshToken string `json:"refreshToken"`
+	// The expiry date and time of the access token.
+	AccessTokenExpiry time.Time `json:"accessTokenExpiry"`
+	// The expiry date and time of the refresh token.
 	RefreshTokenExpiry time.Time `json:"refreshTokenExpiry"`
-	Device             string    `json:"device"`
-	CreatedAt          time.Time `json:"createdAt"`
-	UpdatedAt          time.Time `json:"updatedAt"`
+	// The device associated with the token.
+	Device string `json:"device"`
+	// The date and time when the token was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The date and time when the token was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// Represents a treatment schedule for a user.
 type TreatmentSchedule struct {
-	ID            string    `json:"id"`
-	UserID        string    `json:"userId"`
-	TreatmentType string    `json:"treatmentType"`
+	// The unique identifier of the treatment schedule.
+	ID string `json:"id"`
+	// The ID of the user who is scheduled for the treatment.
+	UserID string `json:"userId"`
+	// The type of treatment scheduled.
+	TreatmentType string `json:"treatmentType"`
+	// The time at which the treatment is scheduled.
 	ScheduledTime time.Time `json:"scheduledTime"`
-	Location      string    `json:"location"`
-	Notes         *string   `json:"notes,omitempty"`
+	// The location where the treatment is scheduled.
+	Location string `json:"location"`
+	// Additional notes about the treatment.
+	Notes *string `json:"notes,omitempty"`
 }
 
+// Detailed information about a treatment schedule.
 type TreatmentScheduleDetail struct {
-	ScheduleID    string    `json:"scheduleId"`
-	TreatmentType string    `json:"treatmentType"`
-	ScheduledTime time.Time `json:"scheduledTime"`
-	Location      string    `json:"location"`
-	Notes         *string   `json:"notes,omitempty"`
-}
-
-type UnshareProfileResponse struct {
-	Message string `json:"message"`
-}
-
-type UpdateHealthMetricResponse struct {
-	MetricID string `json:"metricId"`
-	Message  string `json:"message"`
-}
-
-type UpdateMedicalRecordResponse struct {
-	RecordID string `json:"recordId"`
-	Message  string `json:"message"`
-}
-
-type UpdateMedicationReminderResponse struct {
-	ReminderID string `json:"reminderId"`
-	Message    string `json:"message"`
-}
-
-type UpdateMedicationResponse struct {
-	MedicationID string `json:"medicationId"`
-	Message      string `json:"message"`
-}
-
-type UpdateTreatmentScheduleResponse struct {
+	// The ID of the treatment schedule.
 	ScheduleID string `json:"scheduleId"`
-	Message    string `json:"message"`
+	// The type of treatment scheduled.
+	TreatmentType string `json:"treatmentType"`
+	// The time at which the treatment is scheduled.
+	ScheduledTime time.Time `json:"scheduledTime"`
+	// The location where the treatment is scheduled.
+	Location string `json:"location"`
+	// Additional notes about the treatment.
+	Notes *string `json:"notes,omitempty"`
 }
 
-type UpdateUserResponse struct {
-	UserID  string `json:"userId"`
+// Response type for unsharing a profile.
+type UnshareProfileResponse struct {
+	// A message indicating the result of the profile unsharing operation.
 	Message string `json:"message"`
 }
 
-type User struct {
-	ID          string    `json:"id"`
-	PhoneNumber string    `json:"phoneNumber"`
-	Password    string    `json:"password"`
-	Name        string    `json:"name"`
-	Points      float64   `json:"points"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	LastLogin   time.Time `json:"lastLogin"`
-	Status      int       `json:"status"`
-	Role        string    `json:"role"`
+// Response type for updating a health metric.
+type UpdateHealthMetricResponse struct {
+	// The ID of the updated health metric.
+	MetricID string `json:"metricId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
 }
 
+// Response type for updating a medical record.
+type UpdateMedicalRecordResponse struct {
+	// The ID of the updated medical record.
+	RecordID string `json:"recordId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
+}
+
+// Response type for updating a medication reminder.
+type UpdateMedicationReminderResponse struct {
+	// The ID of the updated medication reminder.
+	ReminderID string `json:"reminderId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
+}
+
+// Response type for updating a medication.
+type UpdateMedicationResponse struct {
+	// The ID of the updated medication.
+	MedicationID string `json:"medicationId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
+}
+
+// Response type for updating a treatment schedule.
+type UpdateTreatmentScheduleResponse struct {
+	// The ID of the updated treatment schedule.
+	ScheduleID string `json:"scheduleId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
+}
+
+// Response type for updating a user.
+type UpdateUserResponse struct {
+	// The ID of the updated user.
+	UserID string `json:"userId"`
+	// A message indicating the result of the update operation.
+	Message string `json:"message"`
+}
+
+// Represents a user in the system.
+type User struct {
+	// The unique identifier of the user.
+	ID string `json:"id"`
+	// The phone number of the user.
+	PhoneNumber string `json:"phoneNumber"`
+	// The password of the user.
+	Password string `json:"password"`
+	// The name of the user.
+	Name string `json:"name"`
+	// The total points earned by the user.
+	Points float64 `json:"points"`
+	// The date and time when the user was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The date and time when the user was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The date and time when the user last logged in.
+	LastLogin time.Time `json:"lastLogin"`
+	// The status of the user account.
+	Status int `json:"status"`
+	// The role of the user in the system.
+	Role string `json:"role"`
+}
+
+// Represents a user's achievement, linking a user to a badge.
 type UserAchievement struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"userId"`
-	BadgeID   string    `json:"badgeId"`
-	EarnedAt  time.Time `json:"earnedAt"`
+	// The unique identifier of the user achievement.
+	ID string `json:"id"`
+	// The ID of the user who earned the achievement.
+	UserID string `json:"userId"`
+	// The ID of the badge that was earned.
+	BadgeID string `json:"badgeId"`
+	// The date and time when the achievement was earned.
+	EarnedAt time.Time `json:"earnedAt"`
+	// The date and time when the user achievement was created.
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+// Detailed information about a user's achievement.
 type UserAchievementDetail struct {
-	UserAchievementID string    `json:"userAchievementId"`
-	BadgeID           string    `json:"badgeId"`
-	EarnedAt          time.Time `json:"earnedAt"`
+	// The ID of the user achievement.
+	UserAchievementID string `json:"userAchievementId"`
+	// The ID of the badge that was earned.
+	BadgeID string `json:"badgeId"`
+	// The date and time when the achievement was earned.
+	EarnedAt time.Time `json:"earnedAt"`
 }
 
+// Detailed information about a user.
 type UserDetailResponse struct {
-	UserID      string     `json:"userId"`
-	PhoneNumber string     `json:"phoneNumber"`
-	Name        string     `json:"name"`
-	Points      float64    `json:"points"`
-	Role        string     `json:"role"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	LastLogin   *time.Time `json:"lastLogin,omitempty"`
+	// The ID of the user.
+	UserID string `json:"userId"`
+	// The phone number of the user.
+	PhoneNumber string `json:"phoneNumber"`
+	// The name of the user.
+	Name string `json:"name"`
+	// The total points earned by the user.
+	Points float64 `json:"points"`
+	// The role of the user in the system.
+	Role string `json:"role"`
+	// The date and time when the user was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The date and time when the user last logged in.
+	LastLogin *time.Time `json:"lastLogin,omitempty"`
 }
 
+// Represents a record of points earned by a user.
 type UserPointRecord struct {
-	ID           string    `json:"id"`
-	UserID       string    `json:"userId"`
-	PointsEarned float64   `json:"pointsEarned"`
-	Reason       string    `json:"reason"`
-	EarnedAt     time.Time `json:"earnedAt"`
+	// The unique identifier of the point record.
+	ID string `json:"id"`
+	// The ID of the user who earned the points.
+	UserID string `json:"userId"`
+	// The number of points earned.
+	PointsEarned float64 `json:"pointsEarned"`
+	// The reason for earning the points.
+	Reason string `json:"reason"`
+	// The date and time when the points were earned.
+	EarnedAt time.Time `json:"earnedAt"`
 }
 
+// Detailed information about a user's point record.
 type UserPointRecordDetail struct {
-	RecordID     string    `json:"recordId"`
-	PointsEarned float64   `json:"pointsEarned"`
-	Reason       string    `json:"reason"`
-	EarnedAt     time.Time `json:"earnedAt"`
+	// The ID of the point record.
+	RecordID string `json:"recordId"`
+	// The number of points earned.
+	PointsEarned float64 `json:"pointsEarned"`
+	// The reason for earning the points.
+	Reason string `json:"reason"`
+	// The date and time when the points were earned.
+	EarnedAt time.Time `json:"earnedAt"`
 }
 
+// Response type for earning points.
 type EarnPointsResponse struct {
+	// The updated total points of the user.
 	UpdatedPoints float64 `json:"updatedPoints"`
-	Message       string  `json:"message"`
+	// A message indicating the result of the points earning operation.
+	Message string `json:"message"`
 }
