@@ -120,7 +120,7 @@ type PasswordChange {
   """
   The token associated with the password change request.
   """
-  token: String!
+  resetCode: String!
 
   """
   The date and time when the password change request was created.
@@ -473,7 +473,7 @@ extend type Mutation {
     """
     The token associated with the password reset request.
     """
-    token: String!
+    resetCode: String!
 
     """
     The new password for the user.

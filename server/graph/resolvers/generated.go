@@ -293,7 +293,7 @@ type ComplexityRoot struct {
 		LoginUser                    func(childComplexity int, phoneNumber string, password string) int
 		RefreshToken                 func(childComplexity int, accessToken string, refreshToken string, device string) int
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
-		ResetPassword                func(childComplexity int, token string, newPassword string) int
+		ResetPassword                func(childComplexity int, resetCode string, newPassword string) int
 		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
 		TakeMedication               func(childComplexity int, reminderID *string) int
 		UnshareProfile               func(childComplexity int, targetUserID string) int
@@ -308,7 +308,7 @@ type ComplexityRoot struct {
 	PasswordChange struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
-		Token     func(childComplexity int) int
+		ResetCode func(childComplexity int) int
 		User      func(childComplexity int) int
 	}
 
@@ -525,7 +525,7 @@ type MutationResolver interface {
 	UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error)
 	DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error)
 	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
-	ResetPassword(ctx context.Context, token string, newPassword string) (*model.ResetPasswordResponse, error)
+	ResetPassword(ctx context.Context, resetCode string, newPassword string) (*model.ResetPasswordResponse, error)
 	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error)
 	UnshareProfile(ctx context.Context, targetUserID string) (*model.UnshareProfileResponse, error)
 }
@@ -1667,7 +1667,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPassword(childComplexity, args["token"].(string), args["newPassword"].(string)), true
+		return e.complexity.Mutation.ResetPassword(childComplexity, args["resetCode"].(string), args["newPassword"].(string)), true
 
 	case "Mutation.shareProfile":
 		if e.complexity.Mutation.ShareProfile == nil {
@@ -1791,12 +1791,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PasswordChange.ID(childComplexity), true
 
-	case "PasswordChange.token":
-		if e.complexity.PasswordChange.Token == nil {
+	case "PasswordChange.resetCode":
+		if e.complexity.PasswordChange.ResetCode == nil {
 			break
 		}
 
-		return e.complexity.PasswordChange.Token(childComplexity), true
+		return e.complexity.PasswordChange.ResetCode(childComplexity), true
 
 	case "PasswordChange.user":
 		if e.complexity.PasswordChange.User == nil {
@@ -4302,7 +4302,7 @@ type PasswordChange {
   """
   The token associated with the password change request.
   """
-  token: String!
+  resetCode: String!
 
   """
   The date and time when the password change request was created.
@@ -4655,7 +4655,7 @@ extend type Mutation {
     """
     The token associated with the password reset request.
     """
-    token: String!
+    resetCode: String!
 
     """
     The new password for the user.
@@ -5495,11 +5495,11 @@ func (ec *executionContext) field_Mutation_requestPasswordReset_argsPhoneNumber(
 func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_resetPassword_argsToken(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_resetPassword_argsResetCode(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["token"] = arg0
+	args["resetCode"] = arg0
 	arg1, err := ec.field_Mutation_resetPassword_argsNewPassword(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -5507,12 +5507,12 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 	args["newPassword"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_resetPassword_argsToken(
+func (ec *executionContext) field_Mutation_resetPassword_argsResetCode(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
-	if tmp, ok := rawArgs["token"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("resetCode"))
+	if tmp, ok := rawArgs["resetCode"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -13399,7 +13399,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetPassword(rctx, fc.Args["token"].(string), fc.Args["newPassword"].(string))
+		return ec.resolvers.Mutation().ResetPassword(rctx, fc.Args["resetCode"].(string), fc.Args["newPassword"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13647,8 +13647,8 @@ func (ec *executionContext) fieldContext_PasswordChange_user(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _PasswordChange_token(ctx context.Context, field graphql.CollectedField, obj *model.PasswordChange) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PasswordChange_token(ctx, field)
+func (ec *executionContext) _PasswordChange_resetCode(ctx context.Context, field graphql.CollectedField, obj *model.PasswordChange) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PasswordChange_resetCode(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -13661,7 +13661,7 @@ func (ec *executionContext) _PasswordChange_token(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
+		return obj.ResetCode, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13678,7 +13678,7 @@ func (ec *executionContext) _PasswordChange_token(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PasswordChange_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PasswordChange_resetCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PasswordChange",
 		Field:      field,
@@ -22625,8 +22625,8 @@ func (ec *executionContext) _PasswordChange(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "token":
-			out.Values[i] = ec._PasswordChange_token(ctx, field, obj)
+		case "resetCode":
+			out.Values[i] = ec._PasswordChange_resetCode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

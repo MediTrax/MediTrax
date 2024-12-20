@@ -406,7 +406,7 @@ type PasswordChange struct {
 	// The ID of the user requesting the password change.
 	User string `json:"user"`
 	// The token associated with the password change request.
-	Token string `json:"token"`
+	ResetCode string `json:"resetCode"`
 	// The date and time when the password change request was created.
 	CreatedAt time.Time `json:"createdAt"`
 }
