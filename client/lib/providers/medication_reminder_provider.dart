@@ -12,7 +12,10 @@ import 'package:meditrax/providers/medication_provider.graphql.dart';
 
 final medicationReminderProvider = StateNotifierProvider<MedicationReminderNotifier, AsyncValue<List<MedicationReminder>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
-  return MedicationReminderNotifier(client);
+  final notifier = MedicationReminderNotifier(client);
+  // Ensure initial fetch
+  Future.microtask(() => notifier.fetchReminders());
+  return notifier;
 });
 
 class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<MedicationReminder>>> {
@@ -28,25 +31,21 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
           fetchPolicy: FetchPolicy.networkOnly, 
         )
       );
+      
       if (result.hasException) {
         throw result.exception!;
       }
 
       final remindersData = result.parsedData!.getMedicationReminders ?? [];
       
-      print('\n=== Fetched Reminders Debug Info ===');
       final reminders = remindersData.map((item) {
-        print('\nReminder ID: ${item!.reminderId}');
-        print('Raw reminderTime from backend: ${item.reminderTime}');
-
         return MedicationReminder(
-          id: item.reminderId,
+          id: item!.reminderId,
           medicationId: item.medicationId,
           reminderTime: item.reminderTime,
           isTaken: item.isTaken, 
         );
       }).toList();
-      print('===============================\n');
 
       state = AsyncValue.data(reminders);
     } catch (error, stackTrace) {
