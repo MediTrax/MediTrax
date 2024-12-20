@@ -3083,15 +3083,7 @@ type Question {
   The text of the question.
   """
   question: String!
-
-  """
-  The type of choice available for the question (e.g., single choice, multiple choice).
-  """
-  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, etc.
-
-  """
-  The list of choices available for the question.
-  """
+  questionType: Int! # ex. 0 = single choice, 1 = multiple choice, 2 = fill in the blank, 3 = fill in the blank with figure etc.
   choices: [String!] # empty if it is fill in the blank
 }
 
@@ -3273,18 +3265,8 @@ extend type Mutation {
     filledQuestionnaire: FilledQuestionnaire!
   ): EvaluateHealthRiskAssessmentResponse #拿结果
 }`, BuiltIn: false},
-	{Name: "../schemas/foodspec.graphqls", Input: `"""
-Represents the specification of a food item.
-"""
-type FoodSpec {
-  """
-  The name of the food specification.
-  """
+	{Name: "../schemas/foodspec.graphqls", Input: `type FoodSpec{
   name: String!
-
-  """
-  The value of the food specification.
-  """
   value: Float!
 
   """
@@ -4298,15 +4280,7 @@ type PasswordChange {
   The ID of the user requesting the password change.
   """
   user: String!
-
-  """
-  The token associated with the password change request.
-  """
   resetCode: String!
-
-  """
-  The date and time when the password change request was created.
-  """
   createdAt: DateTime!
 }
 
@@ -4637,61 +4611,11 @@ extend type Mutation {
   Deletes the current user.
   """
   deleteUser: DeleteUserResponse
-
-  """
-  Requests a password reset for a user.
-  """
-  requestPasswordReset(
-    """
-    The phone number of the user.
-    """
-    phoneNumber: String!
-  ): RequestPasswordResetResponse
-
-  """
-  Resets the password for a user.
-  """
-  resetPassword(
-    """
-    The token associated with the password reset request.
-    """
-    resetCode: String!
-
-    """
-    The new password for the user.
-    """
-    newPassword: String!
-  ): ResetPasswordResponse
-
-  """
-  Shares a user profile.
-  """
-  shareProfile(
-    """
-    The phone number of the user to share the profile with.
-    """
-    phoneNumber: String!
-
-    """
-    The access level granted to the shared profile.
-    """
-    accessLevel: String!
-
-    """
-    Additional remarks about the profile sharing.
-    """
-    remarks: String!
-  ): ShareProfileResponse!
-
-  """
-  Unshares a user profile.
-  """
-  unshareProfile(
-    """
-    The ID of the user to unshare the profile with.
-    """
-    targetUserId: String!
-  ): UnshareProfileResponse!
+  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
+  resetPassword(resetCode: String!, newPassword: String!): ResetPasswordResponse
+  
+  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
+  unshareProfile(targetUserId: String!): UnshareProfileResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
