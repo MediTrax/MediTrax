@@ -842,6 +842,12 @@ class _MetricValueEditorState extends State<_MetricValueEditor> {
                 final time = await showTimePicker(
                   context: context,
                   initialTime: TimeOfDay.fromDateTime(selectedDate),
+                  builder: (BuildContext context, Widget? child) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                      child: child!,
+                    );
+                  },
                 );
                 if (time != null) {
                   setState(() {
@@ -1285,6 +1291,12 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                           final time = await showTimePicker(
                             context: context,
                             initialTime: TimeOfDay.fromDateTime(selectedTime),
+                            builder: (BuildContext context, Widget? child) {
+                              return MediaQuery(
+                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                child: child!,
+                              );
+                            },
                           );
                           if (time != null) {
                             selectedTime = DateTime(
@@ -1498,6 +1510,12 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                           final time = await showTimePicker(
                             context: context,
                             initialTime: TimeOfDay.fromDateTime(selectedTime),
+                            builder: (BuildContext context, Widget? child) {
+                              return MediaQuery(
+                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                child: child!,
+                              );
+                            },
                           );
                           if (time != null) {
                             selectedTime = DateTime(

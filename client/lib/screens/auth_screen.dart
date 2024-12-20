@@ -210,7 +210,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           setSelectorButtonAsPrefixIcon: true,
                         ),
                         ignoreBlank: false,
-                        autoValidateMode: AutovalidateMode.onUnfocus,
+                        autoValidateMode: AutovalidateMode.onUserInteraction,
                         selectorTextStyle: const TextStyle(color: Colors.black),
                         initialValue: _phoneNumber,
                         formatInput: true,

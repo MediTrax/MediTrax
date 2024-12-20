@@ -12,7 +12,10 @@ import 'package:meditrax/providers/medication_provider.graphql.dart';
 
 final medicationReminderProvider = StateNotifierProvider<MedicationReminderNotifier, AsyncValue<List<MedicationReminder>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
-  return MedicationReminderNotifier(client);
+  final notifier = MedicationReminderNotifier(client);
+  // Ensure initial fetch
+  Future.microtask(() => notifier.fetchReminders());
+  return notifier;
 });
 
 class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<MedicationReminder>>> {
@@ -28,31 +31,24 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
           fetchPolicy: FetchPolicy.networkOnly, 
         )
       );
+      
       if (result.hasException) {
-        print("GraphQL Exception: ${result.exception}");
         throw result.exception!;
       }
 
       final remindersData = result.parsedData!.getMedicationReminders ?? [];
       
-      print('\n=== Fetched Reminders Debug Info ===');
       final reminders = remindersData.map((item) {
-        print('\nReminder ID: ${item!.reminderId}');
-        print('Raw reminderTime from backend: ${item.reminderTime}');
-
         return MedicationReminder(
-          id: item.reminderId,
+          id: item!.reminderId,
           medicationId: item.medicationId,
           reminderTime: item.reminderTime,
           isTaken: item.isTaken, 
         );
       }).toList();
-      print('===============================\n');
 
       state = AsyncValue.data(reminders);
     } catch (error, stackTrace) {
-      print('Error fetching reminders: $error');
-      print('Stack trace: $stackTrace');
       state = AsyncValue.error(error, stackTrace);
     }
   }
@@ -65,9 +61,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     String? dayOfWeek,
   }) async {
     try {
-      print('\n=== Add Reminder Debug Info ===');
-      print('Medication ID: $medicationId');
-      print('Original reminderTime: $reminderTime');
       
       final result = await _client.mutate$CreateMedicationReminder(
         Options$Mutation$CreateMedicationReminder(
@@ -78,22 +71,13 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         )
       );
 
-      print('\nGraphQL Response:');
       if (result.hasException) {
-        print("GraphQL Exception: ${result.exception}");
-        print("GraphQL Errors: ${result.exception?.graphqlErrors}");
         throw result.exception!;
       }
-      print('Response data: ${result.data}');
-      print('===============================\n');
 
       await fetchReminders();
       return true;
     } catch (e, stackTrace) {
-      print('Error adding reminder:');
-      print('Error type: ${e.runtimeType}');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
       return false;
     }
   }
@@ -104,8 +88,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     required bool isTaken,
   }) async {
     try {
-      print('\n=== Update Reminder Debug Info ===');
-      print('Original reminderTime: $reminderTime');
 
       final result = await _client.mutate$UpdateMedicationReminder(
         Options$Mutation$UpdateMedicationReminder(
@@ -118,21 +100,18 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       );
 
       if (result.hasException) {
-        print('Error updating reminder: ${result.exception}');
         return false;
       }
 
       await fetchReminders();
       return true;
     } catch (e) {
-      print('Error in updateReminder: $e');
       return false;
     }
   }
 
   Future<bool> deleteReminder(String reminderId) async {
     try {
-      print('Deleting reminder with ID: $reminderId');
       final result = await _client.mutate$DeleteMedicationReminder(
         Options$Mutation$DeleteMedicationReminder(
           variables: Variables$Mutation$DeleteMedicationReminder(
@@ -140,7 +119,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
           ),
         ),
       );
-      print('GraphQL result: ${result.data}');
 
       if (!result.hasException) {
         state.whenData((reminders) {
@@ -149,7 +127,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         });
         return true;
       }
-      print('Error occurred during mutation: ${result.exception.toString()}');
       return false;
     } catch (e) {
       return false;
@@ -158,10 +135,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> toggleReminderStatus(String reminderId, bool isTaken) async {
     try {
-      print('Attempting to update reminder status:');
-      print('ReminderId: $reminderId');
-      print('New status (isTaken): $isTaken');
-
       // For marking as taken, use takeMedication mutation
       final result = await _client.mutate$TakeMedication(
         Options$Mutation$TakeMedication(
@@ -172,8 +145,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       );
 
       if (result.hasException) {
-        print('Error in takeMedication:');
-        print('Exception: ${result.exception}');
         throw result.exception!;
       }
 
@@ -182,9 +153,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       return true;
 
     } catch (e) {
-      print('Error in toggleReminderStatus:');
-      print('Error type: ${e.runtimeType}');
-      print('Error details: $e');
       return false;
     }
   }
@@ -223,7 +191,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         'showButton': shouldShowReminderButton(reminder.reminderTime),
       };
     } catch (e) {
-      print('Error getting reminder details: $e');
       return null;
     }
   }
@@ -234,7 +201,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       final details = await getReminderDetails(reminderId);
       
       if (details == null) {
-        print('Could not get reminder details');
         return false;
       }
 
@@ -248,16 +214,12 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
       return success;
     } catch (e) {
-      print('Error in confirmAndTakeMedication: $e');
       return false;
     }
   }
 
   Future<bool> takeMedication(String reminderId) async {
     try {
-      print('\n=== Taking Medication Debug Info ===');
-      print('ReminderId: $reminderId');
-      print('Current state: ${state.value?.length} reminders');
 
       final result = await _client.mutate$TakeMedication(
         Options$Mutation$TakeMedication(
@@ -267,28 +229,13 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         ),
       );
 
-      print('\nGraphQL Response Details:');
-      print('Has Exception: ${result.hasException}');
       if (result.hasException) {
-        print('GraphQL Errors: ${result.exception?.graphqlErrors}');
-        print('Link Exception: ${result.exception?.linkException}');
-        print('Raw Exception: ${result.exception}');
         return false;
       }
-
-      final message = result.data?['takeMedication']?['message'];
-      print('Response Message: $message');
-      print('Response Data: ${result.data}');
-      print('===============================\n');
-
       // Refresh from server to ensure consistency
       await fetchReminders();
       return true;
-    } catch (e, stackTrace) {
-      print('Error in takeMedication:');
-      print('Error type: ${e.runtimeType}');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       return false;
     }
   }
@@ -327,7 +274,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
         'inventory': medicationData.inventory,
       };
     } catch (e) {
-      print('Error getting medication info: $e');
       return null;
     }
   }

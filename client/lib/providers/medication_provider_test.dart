@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:meditrax/models/medication.dart';
 import 'package:meditrax/providers/medication_provider.dart';
+
+final medicationTestProvider = FutureProvider<List<Medication>>((ref) async {
+  return MedicationTest().build();
+});
 
 class MedicationTest extends MedicationProvider {
   @override
@@ -19,7 +22,7 @@ class MedicationTest extends MedicationProvider {
         updatedAt: DateTime.now(),
       ),
       Medication(
-        id: '1',
+        id: '2',
         name: 'Medication 2',
         dosage: 2,
         unit: 'pcs',
