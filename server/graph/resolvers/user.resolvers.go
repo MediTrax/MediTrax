@@ -184,9 +184,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, name *string, phoneNu
 	}
 
 	if phoneNumber != nil {
-		// TODO:可以添加电话号码格式验证
-		updateValues["phone_number"] = *phoneNumber
-		updateFields = append(updateFields, "phone_number = $phone_number")
+		updateValues["phoneNumber"] = *phoneNumber
+		updateFields = append(updateFields, "phoneNumber=$phoneNumber")
 	}
 
 	if password != nil {
@@ -290,7 +289,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context) (*model.DeleteUserRes
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error) {
 	result, err := database.DB.Query(`
-    SELECT * FROM user WHERE phoneNumber=$phoneNumber;`,
+    SELECT * FROM user WHERE phoneNumber = $phoneNumber;`,
 		map[string]interface{}{
 			"phoneNumber": phoneNumber,
 		})
@@ -459,10 +458,10 @@ func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string,
 	// First, find the target user by phone number
 	result, err := database.DB.Query(`
         SELECT * FROM user 
-        WHERE phoneNumber = $phone_number 
+        WHERE phoneNumber = $phoneNumber 
         LIMIT 1;
     `, map[string]interface{}{
-		"phone_number": phoneNumber,
+		"phoneNumber": phoneNumber,
 	})
 	if err != nil {
 		return nil, err
