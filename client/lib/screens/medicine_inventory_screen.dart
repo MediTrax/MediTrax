@@ -590,10 +590,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         Icons.scale_rounded,
                         color: Colors.green.shade300,
                       ),
+                      suffixText: unitController.text,
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow decimal numbers
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -728,14 +729,15 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         Icons.inventory_rounded,
                         color: Colors.orange.shade300,
                       ),
+                      suffixText: unitController.text,
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')), // Allow decimal numbers
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '请输入库存';
+                        return '请输入库存数量';
                       }
                       final number = double.tryParse(value);
                       if (number == null || number < 0) {
@@ -837,18 +839,21 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
             valueListenable: errorState,
             builder: (context, error, _) => TextField(
               controller: controller,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+              ],
               decoration: InputDecoration(
                 labelText: '补充量',
                 border: const OutlineInputBorder(),
-                errorText: error, // Show error message if any
+                errorText: error,
                 errorStyle: const TextStyle(
                   color: Colors.red,
                   fontSize: 12,
                 ),
+                suffixText: medication.unit,
               ),
               onChanged: (_) {
-                // Clear error when user types
                 errorState.value = null;
               },
             ),
@@ -1179,54 +1184,75 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
         // Watch the medication provider to get the current state
         final medicationsState = ref.watch(medicationProviderProvider);
 
-        // Check if the medication already exists
-        final medicationExists = medicationsState.maybeWhen(
-          data: (medications) => medications.any((medication) =>
-              medication.name.toLowerCase() ==
-              nameController.text.toLowerCase()),
-          orElse: () => false,
-        );
-
-        if (medicationExists) {
-          // Notify user that the medication already exists
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('药品已存在，请检查药品名称。'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        } else {
-          // Add the medication if it doesn't exist
-          final success =
-              await ref.read(medicationProviderProvider.notifier).addMedication(
-                    name: nameController.text,
-                    dosage: double.parse(dosageController.text),
-                    unit: unitController.text,
-                    frequency: formattedFrequency,
-                    inventory: double.parse(inventoryController.text),
-                  );
-
-          if (success && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('药品添加成功')),
+        final success = await ref.read(medicationProviderProvider.notifier)
+            .addMedication(
+              name: nameController.text,
+              dosage: double.parse(dosageController.text),
+              unit: unitController.text,
+              frequency: formattedFrequency,
+              inventory: double.parse(inventoryController.text),
             );
 
-            // Clear the form
-            _formKey.currentState!.reset();
-            nameController.clear();
-            dosageController.clear();
-            unitController.clear();
-            inventoryController.clear();
-            setState(() {
-              _timesPerPeriod = 1;
-              _periodInDays = 1;
-            });
+        if (!mounted) return;
 
-            // Switch to inventory tab
-            if (mounted) {
-              DefaultTabController.of(context)?.animateTo(0);
-            }
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('药品添加成功')),
+          );
+
+          // Clear the form
+          _formKey.currentState!.reset();
+          nameController.clear();
+          dosageController.clear();
+          unitController.clear();
+          inventoryController.clear();
+          setState(() {
+            _timesPerPeriod = 1;
+            _periodInDays = 1;
+          });
+
+          // Switch to inventory tab
+          if (mounted) {
+            DefaultTabController.of(context)?.animateTo(0);
           }
+        } else {
+          // Show error dialog for medication already exists
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange.shade400,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('药品已存在'),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('药品"${nameController.text}"已存在。'),
+                  const SizedBox(height: 8),
+                  Text(
+                    '请使用不同的药品名称。',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('确认'),
+                ),
+              ],
+            ),
+          );
         }
       } catch (e) {
         if (mounted) {
@@ -1306,12 +1332,11 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                           color: Colors.blue.shade300,
                         ),
                         hintText: '输入剂量值',
-                        // Add suffix text showing selected unit
                         suffixText: _selectedUnit,
                       ),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -1537,7 +1562,7 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                 ],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
