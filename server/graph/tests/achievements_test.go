@@ -128,8 +128,8 @@ func TestAchievement(t *testing.T) {
 			}
 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
-		require.Equal(t, assessmentId1, response.GetUserAchievements[1].BadgeID)
-		require.Equal(t, assessmentId2, response.GetUserAchievements[0].BadgeID)
+		require.Equal(t, assessmentId1, response.GetUserAchievements[1].UserAchievementID)
+		require.Equal(t, assessmentId2, response.GetUserAchievements[0].UserAchievementID)
 	})
 
 	t.Run("Invalid Award Achievement", func(t *testing.T) {
