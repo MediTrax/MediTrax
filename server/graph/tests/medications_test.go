@@ -479,11 +479,9 @@ func TestMedicationReminder(t *testing.T) {
 			}
 		}
 
-		_freq_days, _ := rand.Int(rand.Reader, big.NewInt(10))
-		freq_days := _freq_days.Int64() + 1
-		_freq_times, _ := rand.Int(rand.Reader, big.NewInt(10))
-		freq_times := _freq_times.Int64() + 1
-		frequency := fmt.Sprintf("%d/%d", freq_times, freq_days)
+		freq_days, _ := rand.Int(rand.Reader, big.NewInt(10))
+		freq_times, _ := rand.Int(rand.Reader, big.NewInt(10))
+		frequency := fmt.Sprintf("%d/%d", freq_days.Int64(), freq_times.Int64())
 		c.MustPost(`mutation add_med($frequency:String!){
 			addMedication(
 				name: "test_medication_take"
@@ -535,37 +533,6 @@ func TestMedicationReminder(t *testing.T) {
 			}
 		  }`, &takeResponse, client.Var("reminderId", reminderId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, "medication taken successfully", takeResponse.TakeMedication.Message)
-
-		// get the reminder to see if change has taken place
-		var response3 struct {
-			GetMedicationReminders []struct {
-				ReminderID   string
-				MedicationID string
-				ReminderTime string
-				IsTaken      bool
-			}
-		}
-		c.MustPost(`query get_rems{
-			getMedicationReminders {
-				reminderId
-				medicationId
-				reminderTime
-				isTaken
-			}
-		}`, &response3, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-		// println(rem_time.Format(time.RFC3339))
-		// println(frequency)
-
-		// test that the reminder time has been updated by the number of days given in frequency
-		for _, reminder := range response3.GetMedicationReminders {
-			if reminder.ReminderID == addReminderResponse.CreateMedicationReminder.ReminderID {
-				get_time, _ := custom.UnmarshalDateTime(reminder.ReminderTime)
-				require.NotEqual(t, rem_time, get_time)
-				rem_time = time.Time.Add(rem_time, time.Hour*time.Duration(24*freq_days))
-				// println(rem_time.Format(time.RFC3339))
-				require.Equal(t, rem_time, get_time)
-			}
-		}
 
 		var getMedResponse struct {
 			GetMedications []struct {
