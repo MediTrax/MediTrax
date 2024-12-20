@@ -90,6 +90,13 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
     return {'times': times, 'days': days};
   }
 
+  Future<bool> _hasExistingReminder(String medicationId) async {
+    final remindersState = ref.read(medicationReminderProvider);
+    final reminders = remindersState.value ?? [];
+    
+    return reminders.any((reminder) => reminder.medicationId == medicationId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -165,10 +172,52 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
         FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              bool allSuccess = true;              
-              // Add a reminder for each selected time
+              if (await _hasExistingReminder(_selectedMedicationId!)) {
+                if (!mounted) return;
+                
+                // Show conflict dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.orange.shade400,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('提醒已存在'),
+                      ],
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('该药品已设置提醒。'),
+                        const SizedBox(height: 8),
+                        Text(
+                          '请编辑现有提醒时间。',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('确认'),
+                      ),
+                    ],
+                  ),
+                );
+                return;
+              }
+
+              bool allSuccess = true;
+              // Add reminders if no conflicts found
               for (final time in _selectedTimes) {
-                // Create DateTime in local timezone and preserve it
                 final reminderTime = DateTime(
                   _selectedDate.year,
                   _selectedDate.month,

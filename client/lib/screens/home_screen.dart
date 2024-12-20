@@ -130,9 +130,7 @@ class HomeScreen extends ConsumerWidget {
                                     },
                                     child: _buildErrorCard(),
                                   ),
-                                  data: (reminders) {
-                                    print('Rendering reminders data: ${reminders.length} reminders');
-                                    
+                                  data: (reminders) {  
                                     final now = DateTime.now();
                                     final todayStart = DateTime(now.year, now.month, now.day);
                                     final todayEnd = todayStart.add(const Duration(days: 1));
@@ -143,8 +141,6 @@ class HomeScreen extends ConsumerWidget {
                                              reminderTime.isBefore(todayEnd) && 
                                              !reminder.isTaken;
                                     }).length;
-
-                                    print('Today\'s pending reminders: $todayReminders');
 
                                     return _buildInfoCard(
                                       title: '今日用药',

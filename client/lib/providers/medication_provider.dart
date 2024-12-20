@@ -85,7 +85,8 @@ class MedicationProvider extends _$MedicationProvider {
     required double inventory,
   }) async {
     try {
-      // Perform the mutation request
+      print('Adding medication: name=$name, dosage=$dosage, unit=$unit, frequency=$frequency, inventory=$inventory');
+      
       final result = await ref
           .read(graphQLServiceProvider)
           .mutate$AddMedication(Options$Mutation$AddMedication(
@@ -97,6 +98,20 @@ class MedicationProvider extends _$MedicationProvider {
                   inventory: inventory)));
 
       if (result.hasException) {
+        print('GraphQL Error in addMedication: ${result.exception}');
+        print('GraphQL Error details: ${result.exception?.graphqlErrors}');
+        
+        // Check if the error is about duplicate medication
+        final graphqlErrors = result.exception?.graphqlErrors ?? [];
+        final isDuplicateError = graphqlErrors.any(
+          (error) => error.message.contains('identical medication name already exists')
+        );
+        
+        if (isDuplicateError) {
+          print('Medication already exists: $name');
+          return false;
+        }
+        
         throw result.exception!;
       }
 
@@ -124,6 +139,8 @@ class MedicationProvider extends _$MedicationProvider {
 
       return true;
     } catch (e, stack) {
+      print('Error in addMedication: $e');
+      print('Stack trace: $stack');
       return false;
     }
   }
