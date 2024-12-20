@@ -12,7 +12,10 @@ import 'package:meditrax/providers/medication_provider.graphql.dart';
 
 final medicationReminderProvider = StateNotifierProvider<MedicationReminderNotifier, AsyncValue<List<MedicationReminder>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
-  return MedicationReminderNotifier(client);
+  final notifier = MedicationReminderNotifier(client);
+  // Ensure initial fetch
+  Future.microtask(() => notifier.fetchReminders());
+  return notifier;
 });
 
 class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<MedicationReminder>>> {
@@ -23,33 +26,35 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
   Future<void> fetchReminders() async {
     state = const AsyncValue.loading();
     try {
+      print('Fetching reminders...'); // Debug log
       final result = await _client.query$GetMedicationReminders(
         Options$Query$GetMedicationReminders(
           fetchPolicy: FetchPolicy.networkOnly, 
         )
       );
+      
       if (result.hasException) {
+        print('Error fetching reminders: ${result.exception}'); // Debug log
         throw result.exception!;
       }
 
       final remindersData = result.parsedData!.getMedicationReminders ?? [];
       
-      print('\n=== Fetched Reminders Debug Info ===');
+      print('Fetched ${remindersData.length} reminders'); // Debug log
+      
       final reminders = remindersData.map((item) {
-        print('\nReminder ID: ${item!.reminderId}');
-        print('Raw reminderTime from backend: ${item.reminderTime}');
-
         return MedicationReminder(
-          id: item.reminderId,
+          id: item!.reminderId,
           medicationId: item.medicationId,
           reminderTime: item.reminderTime,
           isTaken: item.isTaken, 
         );
       }).toList();
-      print('===============================\n');
 
       state = AsyncValue.data(reminders);
+      print('Successfully updated reminders state'); // Debug log
     } catch (error, stackTrace) {
+      print('Error in fetchReminders: $error'); // Debug log
       state = AsyncValue.error(error, stackTrace);
     }
   }
