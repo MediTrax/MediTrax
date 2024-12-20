@@ -30,7 +30,7 @@ require (
 
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.72
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.68
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
