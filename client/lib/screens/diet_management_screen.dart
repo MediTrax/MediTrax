@@ -38,7 +38,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
 
     try {
       final foodSpecsNotifier = ref.read(foodSpecsProvider.notifier);
-      await foodSpecsNotifier.getMockFoodSpecs(searchTerm);
+      await foodSpecsNotifier.getFoodSpecs(searchTerm);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
