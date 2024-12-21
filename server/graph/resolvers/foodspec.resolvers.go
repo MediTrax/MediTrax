@@ -21,9 +21,17 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 		return nil, fmt.Errorf("access denied")
 	}
 
-	client := chat.GetClient()
+	// client := chat.GetClient()
 
-	result, err := chat.GetFoodSpec(food, client)
+	// result, err := chat.GetFoodSpec(food, client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// println(*result)
+	client := chat.GetClientDeepSeek()
+
+	result, err := chat.GetFoodSpecDeepSeek(food, client)
 	if err != nil {
 		return nil, err
 	}
@@ -107,12 +115,21 @@ func (r *queryResolver) GetFoodRecommendation(ctx context.Context) (*model.FoodR
 		return nil, fmt.Errorf("access denied")
 	}
 
-	client := chat.GetClient()
+	// client := chat.GetClient()
 
-	result, err := chat.GetFoodRecommend(client)
+	// result, err := chat.GetFoodRecommend(client)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	client := chat.GetClientDeepSeek()
+
+	result, err := chat.GetFoodRecommendDeepSeek(client)
 	if err != nil {
 		return nil, err
 	}
+
+	println(*result)
 
 	recommendation := &model.FoodRecommendation{
 		Name: *result,
