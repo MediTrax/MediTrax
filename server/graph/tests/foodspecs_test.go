@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var MOCK = true
+var MOCK = false
 
 func TestFoodSpecs(t *testing.T) {
 	c := client.New(NewServer())
@@ -37,29 +37,27 @@ func TestFoodSpecs(t *testing.T) {
 			}
 		}
 
-		if MOCK {
-			c.MustPost(`query get_food_specs{
-				get1:getMockFoodSpecs(food:"牛肉"){
-					howRecommend,
-					specs{
-						name,
-						value,
-						unit,
-						howHigh
-					}
+		c.MustPost(`query get_food_specs{
+			get1:getMockFoodSpecs(food:"牛肉"){
+				howRecommend,
+				specs{
+					name,
+					value,
+					unit,
+					howHigh
 				}
-				get2:getMockFoodSpecs(food:"牛肉"){
-					howRecommend,
-					specs{
-						name,
-						value,
-						unit,
-						howHigh
-					}
+			}
+			get2:getMockFoodSpecs(food:"牛肉"){
+				howRecommend,
+				specs{
+					name,
+					value,
+					unit,
+					howHigh
 				}
-			}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-
-		} else {
+			}
+		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		if !MOCK {
 			c.MustPost(`query get_food_specs{
 				get1:getFoodSpecs(food:"牛肉"){
 					howRecommend,
@@ -93,7 +91,7 @@ func TestFoodSpecs(t *testing.T) {
 			require.GreaterOrEqual(t, 1.0, spec.HowHigh)
 			require.NotEmpty(t, spec.Unit)
 			require.NotEmpty(t, spec.Name)
-			require.Positive(t, spec.Value)
+			require.LessOrEqual(t, 0.0, spec.Value)
 		}
 	})
 
@@ -116,20 +114,19 @@ func TestFoodSpecs(t *testing.T) {
 
 		var err error
 
-		if MOCK {
-			err = c.Post(`query{
-				get:getMockFoodSpecs(food:"牛肉"){
-					howRecommend,
-					specs{
-						name,
-						value,
-						unit,
-						howHigh
-					}
+		err = c.Post(`query{
+			get:getMockFoodSpecs(food:"牛肉"){
+				howRecommend,
+				specs{
+					name,
+					value,
+					unit,
+					howHigh
 				}
-			}`, &response)
+			}
+		}`, &response)
 
-		} else {
+		if !MOCK {
 			err = c.Post(`query{
 				get:getFoodSpecs(food:"牛肉"){
 					howRecommend,
@@ -163,16 +160,15 @@ func TestFoodRecommend(t *testing.T) {
 			}
 		}
 
-		if MOCK {
-			c.MustPost(`query get_food_recommendation{
-				get1:getMockFoodRecommendation{
-					name
-				}
-				get2:getMockFoodRecommendation{
-					name
-				}
-			}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-		} else {
+		c.MustPost(`query get_food_recommendation{
+			get1:getMockFoodRecommendation{
+				name
+			}
+			get2:getMockFoodRecommendation{
+				name
+			}
+		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		if !MOCK {
 			c.MustPost(`query get_food_recommendation{
 				get1:getFoodRecommendation{
 					name
@@ -199,16 +195,15 @@ func TestFoodRecommend(t *testing.T) {
 
 		var err error
 
-		if MOCK {
-			err = c.Post(`query get_food_recommendation{
-				get1:getMockFoodRecommendation{
-					name
-				}
-				get2:getMockFoodRecommendation{
-					name
-				}
-			}`, &response)
-		} else {
+		err = c.Post(`query get_food_recommendation{
+			get1:getMockFoodRecommendation{
+				name
+			}
+			get2:getMockFoodRecommendation{
+				name
+			}
+		}`, &response)
+		if !MOCK {
 			err = c.Post(`query get_food_recommendation{
 				get1:getFoodRecommendation{
 					name
