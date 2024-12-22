@@ -16,18 +16,24 @@ import (
 type FoodSpec struct {
 	Name        string
 	ChineseName string
-	UpperRange  float64
+	Recommended float64
 }
 type SpecUnit string
 
 // var gpt4o_mini chatgpt.ChatGPTModel = "gpt-4o-mini-2024-07-18"
 
 var SpecLimits = []FoodSpec{
-	{Name: "animal protein", ChineseName: "动物蛋白", UpperRange: 10.0},
-	{Name: "plant protein", ChineseName: "植物蛋白", UpperRange: 12.3},
-	{Name: "sodium", ChineseName: "纳", UpperRange: 10.0},
-	{Name: "potassium", ChineseName: "钾", UpperRange: 12.3},
-	{Name: "phosphorus", ChineseName: "磷", UpperRange: 12.3},
+	// 慢性肾病患者一天蛋白摄入总量应<0.6g/kg(body weight)，其中以植物蛋白为主
+	// 此处按照人均体重60kg，食用2kg食物计算
+	{Name: "animal protein", ChineseName: "动物蛋白", Recommended: 1000.0},
+	{Name: "plant protein", ChineseName: "植物蛋白", Recommended: 1800.0},
+	// 按照每人每天总摄入000g食物计算
+	// 慢性肾病患者一天摄入量应<1500mg
+	{Name: "sodium", ChineseName: "纳", Recommended: 75.0},
+	// 慢性肾病患者一天摄入量应<2000mg
+	{Name: "potassium", ChineseName: "钾", Recommended: 100.0},
+	// 慢性肾病患者一天摄入量应<800mg
+	{Name: "phosphorus", ChineseName: "磷", Recommended: 80.0},
 }
 
 var conv_food_info = []chatgpt.ChatMessage{
