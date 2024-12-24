@@ -237,29 +237,32 @@ func TestUserFunctions(t *testing.T) {
 		require.Equal(t, "SMS sending failed: 只能向已回复授权信息的手机号发送", err_msg[0].Message)
 
 	})
-	// t.Run("Reset Password", func(t *testing.T) {
-	// 	var response struct {
-	// 		ResetPassword struct {
-	// 			Message string
-	// 		}
-	// 	}
+	t.Run("Reset Password", func(t *testing.T) {
+		var response struct {
+			ResetPassword struct {
+				Message string
+			}
+		}
 
-	// 	query := `
-	// 		mutation {
-	// 			ResetPassword(resetCode: "123456", newPassword:"new_password") {
-	// 				message
-	// 			}
-	// 		}
-	// 	`
-	// 	var err_msg []struct {
-	// 		Message string `json:"message"`
-	// 		Path    string `json:"path"`
-	// 	}
-	// 	err := c.Post(query, &response)
-	// 	json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
-	// 	require.Equal(t, "invalid or expired resetcode", err_msg[0].Message)
+		query := `
+			mutation {
+				resetPassword(resetCode: "123456", newPassword:"new_password") {
+					message
+				}
+			}
+		`
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(query, &response)
+		if err != nil {
+			fmt.Println("Error:", err.Error())
+		}
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "invalid or expired resetcode", err_msg[0].Message)
 
-	// })
+	})
 
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
