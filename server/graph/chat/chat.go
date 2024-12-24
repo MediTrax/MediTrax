@@ -5,12 +5,9 @@ package chat
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
-	chatgpt "github.com/ayush6624/go-chatgpt"
 	deepseek "github.com/cohesion-org/deepseek-go"
-	"github.com/surrealdb/surrealdb.go"
 )
 
 type FoodSpec struct {
@@ -22,143 +19,21 @@ type SpecUnit string
 
 // var gpt4o_mini chatgpt.ChatGPTModel = "gpt-4o-mini-2024-07-18"
 
+// necessary specs for a food and their recommended content
 var SpecLimits = []FoodSpec{
-	// 慢性肾病患者一天蛋白摄入总量应<0.6g/kg(body weight)，其中以植物蛋白为主
-	// 此处按照人均体重60kg，食用2kg食物计算
+	// assuming average weight of 60kg, with 2kg of food intake per day
+	// chronic kidney disease patients should intake <0.6g/kg(body weight) of protein a day (mainly plant protein)
 	{Name: "animal protein", ChineseName: "动物蛋白", Recommended: 1000.0},
 	{Name: "plant protein", ChineseName: "植物蛋白", Recommended: 1800.0},
-	// 按照每人每天总摄入000g食物计算
-	// 慢性肾病患者一天摄入量应<1500mg
+	// chronic kidney disease patients' daily intake of sodium should be <1500mg
 	{Name: "sodium", ChineseName: "纳", Recommended: 75.0},
-	// 慢性肾病患者一天摄入量应<2000mg
+	// chronic kidney disease patients' daily intake of pottasium should be <2000mg
 	{Name: "potassium", ChineseName: "钾", Recommended: 100.0},
-	// 慢性肾病患者一天摄入量应<800mg
+	// chronic kidney disease patients' daily intake of phosphorus should be <800mg
 	{Name: "phosphorus", ChineseName: "磷", Recommended: 80.0},
 }
 
-var conv_food_info = []chatgpt.ChatMessage{
-	{
-		Role: chatgpt.ChatGPTModelRoleUser,
-		Content: "chat, what are the mg/100g content of animal protein, plant protein, sodium, potassium, and phosphorous in beef?\n" +
-			"Please answer with only their content listed as below without any other greetings:\nanimal protein: [animal protein in mg/100g]\n" +
-			"plant protein: [plant protein in mg/100g]\n...",
-	},
-	{
-		Role: chatgpt.ChatGPTModelRoleAssistant,
-		Content: `animal protein: 25000 mg/100g
-		plant protein: 0 mg/100g
-		sodium: 55 mg/100g
-		potassium: 318 mg/100g
-		phosphorus: 190 mg/100g`,
-	},
-	{
-		Role:    chatgpt.ChatGPTModelRoleUser,
-		Content: "very good answer, now for the rest of the conversation, if I only input a single food item name, please respond in this format",
-	},
-	{
-		Role:    chatgpt.ChatGPTModelRoleAssistant,
-		Content: "Understood! I'll follow that format for the rest of our conversation. Feel free to provide the food item when you're ready.",
-	},
-	{
-		Role:    chatgpt.ChatGPTModelRoleUser,
-		Content: "fish",
-	},
-	{
-		Role: chatgpt.ChatGPTModelRoleAssistant,
-		Content: `animal protein: 25000 mg/100g  
-		plant protein: 0 mg/100g  
-		sodium: 55 mg/100g  
-		potassium: 318 mg/100g  
-		phosphorus: 190 mg/100g`,
-	},
-	{
-		Role:    chatgpt.ChatGPTModelRoleUser,
-		Content: "鸡肉",
-	},
-	{
-		Role: chatgpt.ChatGPTModelRoleAssistant,
-		Content: `animal protein: 31000 mg/100g  
-		plant protein: 0 mg/100g  
-		sodium: 60 mg/100g  
-		potassium: 256 mg/100g  
-		phosphorus: 230 mg/100g`,
-	},
-	{
-		Role:    chatgpt.ChatGPTModelRoleUser,
-		Content: "空心菜",
-	},
-	{
-		Role: chatgpt.ChatGPTModelRoleAssistant,
-		Content: `animal protein: 0 mg/100g  
-		plant protein: 2200 mg/100g  
-		sodium: 70 mg/100g  
-		potassium: 500 mg/100g  
-		phosphorus: 40 mg/100g`,
-	},
-}
-
-func GetClient() *chatgpt.Client {
-	key := os.Getenv("OPENAI_KEY")
-
-	client, err := chatgpt.NewClient(key)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return client
-}
-
-func GetFoodSpec(food string, c *chatgpt.Client) (*string, error) {
-	ctx := context.Background()
-
-	messages := append(conv_food_info, chatgpt.ChatMessage{
-		Role:    chatgpt.ChatGPTModelRoleUser,
-		Content: food,
-	})
-
-	result, err := c.Send(ctx, &chatgpt.ChatCompletionRequest{
-		Model:    chatgpt.GPT35Turbo,
-		Messages: messages,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := surrealdb.SmartUnmarshal[chatgpt.ChatResponse](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(response.Choices) == 0 {
-		return nil, fmt.Errorf("no response was returned by gpt")
-	}
-
-	choice := response.Choices[0]
-	return &choice.Message.Content, nil
-}
-
-func GetFoodRecommend(c *chatgpt.Client) (*string, error) {
-	ctx := context.Background()
-
-	result, err := c.SimpleSend(ctx, "chat,我是一名慢性肾病患者，你可以为我推荐一种适合食用的食物吗？请仅回答食物的名称，不要加任何的修饰词")
-
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := surrealdb.SmartUnmarshal[chatgpt.ChatResponse](result, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(response.Choices) == 0 {
-		return nil, fmt.Errorf("no response was returned by gpt")
-	}
-
-	choice := response.Choices[0]
-	return &choice.Message.Content, nil
-}
-
+// conversation for getting specifiications of a food
 var conv_food_info_deepseek = []deepseek.ChatCompletionMessage{
 	{
 		Role: deepseek.ChatMessageRoleUser,
@@ -232,34 +107,7 @@ var conv_food_info_deepseek = []deepseek.ChatCompletionMessage{
 	},
 }
 
-func GetClientDeepSeek() *deepseek.Client {
-	client := deepseek.NewClient(os.Getenv("DEEPSEEK_KEY"))
-	return client
-}
-
-func GetFoodSpecDeepSeek(food string, c *deepseek.Client) (*string, error) {
-	ctx := context.Background()
-
-	messages := append(conv_food_info_deepseek, deepseek.ChatCompletionMessage{
-		Role:    deepseek.ChatMessageRoleUser,
-		Content: food,
-	})
-
-	response, err := c.CreateChatCompletion(ctx, &deepseek.ChatCompletionRequest{
-		Model:    deepseek.DeepSeekChat,
-		Messages: messages,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(response.Choices) == 0 {
-		return nil, fmt.Errorf("no response was returned by deepseek")
-	}
-
-	return &response.Choices[0].Message.Content, nil
-}
-
+// conversation for getting a dish recommendation
 var conv_food_rec = []deepseek.ChatCompletionMessage{
 	{
 		Role:    deepseek.ChatMessageRoleUser,
@@ -307,26 +155,42 @@ var conv_food_rec = []deepseek.ChatCompletionMessage{
 	},
 }
 
+// idx of next dish to be replaces in conversation
 var idx = 1
 
-func GetFoodRecommendDeepSeek(c *deepseek.Client) (*string, error) {
+// getting a client from the DeepSeek API (using api key)
+func GetClientDeepSeek() *deepseek.Client {
+	client := deepseek.NewClient(os.Getenv("DEEPSEEK_KEY"))
+	return client
+}
+
+// gets specifications for the given food using the given DeepSeek client
+func GetFoodSpecDeepSeek(food string, c *deepseek.Client) (*string, error) {
 	ctx := context.Background()
 
-	// request := &deepseek.ChatCompletionRequest{
-	// 	Model: deepseek.DeepSeekChat,
-	// 	Messages: []deepseek.ChatCompletionMessage{
-	// 		{
-	// 			Role:    deepseek.ChatMessageRoleUser,
-	// 			Content: "deepseek,我是一名慢性肾病患者，你可以为我推荐一种吗？推荐的食物应该符合低盐，低钾，低磷，且不含大蛋白分子的要求。请仅回答食物的名称，不要加任何的修饰词",
-	// 		},
-	// 	},
-	// 	Temperature: 2,
-	// }
+	messages := append(conv_food_info_deepseek, deepseek.ChatCompletionMessage{
+		Role:    deepseek.ChatMessageRoleUser,
+		Content: food,
+	})
 
-	// response, err := c.CreateChatCompletion(ctx, request)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	response, err := c.CreateChatCompletion(ctx, &deepseek.ChatCompletionRequest{
+		Model:    deepseek.DeepSeekChat,
+		Messages: messages,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(response.Choices) == 0 {
+		return nil, fmt.Errorf("no response was returned by deepseek")
+	}
+
+	return &response.Choices[0].Message.Content, nil
+}
+
+// gets a food recommendation from the deepseek client, that is different from the five previous recommendations
+func GetFoodRecommendDeepSeek(c *deepseek.Client) (*string, error) {
+	ctx := context.Background()
 
 	request2 := &deepseek.ChatCompletionRequest{
 		Model:       deepseek.DeepSeekChat,

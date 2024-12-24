@@ -6,7 +6,6 @@ toolchain go1.23.4
 
 require (
 	github.com/99designs/gqlgen v0.17.55
-	github.com/ayush6624/go-chatgpt v0.3.0
 	github.com/cohesion-org/deepseek-go v0.0.0-20241216210207-8ae1bb3c99dc
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1

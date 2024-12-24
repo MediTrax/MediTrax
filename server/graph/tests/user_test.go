@@ -92,47 +92,6 @@ func TestToken(t *testing.T) {
 		require.Equal(t, "token not found", errMsg[0].Message)
 		// Ensure that no duplicate tokens exist by checking the database or ensuring old token is deleted.
 	})
-	// t.Run("Refresh Token Logic", func(t *testing.T) {
-	// 	var refreshResponse struct {
-	// 		RefreshToken struct {
-	// 			AccessToken  string
-	// 			RefreshToken string
-	// 			Device       string
-	// 		}
-	// 	}
-
-	// 	// 调用 refreshToken 测试逻辑
-	// 	err := c.Post(`mutation refresh_token($accessToken: String!, $refreshToken: String!, $device: String!){
-	//         refreshToken(
-	//             accessToken: $accessToken,
-	//             refreshToken: $refreshToken,
-	//             device: $device
-	//         ) {
-	//             accessToken
-	//             refreshToken
-	//             device
-	//         }
-	//     }`, &refreshResponse,
-	// 		client.Var("accessToken", accessToken),
-	// 		client.Var("refreshToken", refreshToken),
-	// 		client.Var("device", "PC"),
-	// 	)
-	// 	require.NoError(t, err)
-
-	// 	// 检查新生成的 Token
-	// 	require.NotEmpty(t, refreshResponse.RefreshToken.AccessToken)
-	// 	require.NotEmpty(t, refreshResponse.RefreshToken.RefreshToken)
-	// 	require.Equal(t, "PC", refreshResponse.RefreshToken.Device)
-
-	// 	// 验证旧 Token 已被删除
-	// 	oldToken, err := database.DB.Query(`
-	//         SELECT * FROM token WHERE accessToken = $accessToken;
-	//     `, map[string]interface{}{
-	// 		"accessToken": accessToken,
-	// 	})
-	// 	require.NoError(t, err)
-	// 	require.Empty(t, oldToken)
-	// })
 }
 
 func TestUserFunctions(t *testing.T) {
@@ -278,29 +237,32 @@ func TestUserFunctions(t *testing.T) {
 		require.Equal(t, "SMS sending failed: 只能向已回复授权信息的手机号发送", err_msg[0].Message)
 
 	})
-	// t.Run("Reset Password", func(t *testing.T) {
-	// 	var response struct {
-	// 		ResetPassword struct {
-	// 			Message string
-	// 		}
-	// 	}
+	t.Run("Reset Password", func(t *testing.T) {
+		var response struct {
+			ResetPassword struct {
+				Message string
+			}
+		}
 
-	// 	query := `
-	// 		mutation {
-	// 			ResetPassword(resetCode: "123456", newPassword:"new_password") {
-	// 				message
-	// 			}
-	// 		}
-	// 	`
-	// 	var err_msg []struct {
-	// 		Message string `json:"message"`
-	// 		Path    string `json:"path"`
-	// 	}
-	// 	err := c.Post(query, &response)
-	// 	json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
-	// 	require.Equal(t, "invalid or expired resetcode", err_msg[0].Message)
+		query := `
+			mutation {
+				resetPassword(resetCode: "123456", newPassword:"new_password") {
+					message
+				}
+			}
+		`
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(query, &response)
+		if err != nil {
+			fmt.Println("Error:", err.Error())
+		}
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "invalid or expired resetcode", err_msg[0].Message)
 
-	// })
+	})
 
 	t.Run("Delete User", func(t *testing.T) {
 		var response struct {
@@ -324,8 +286,10 @@ func TestSharedProfiles(t *testing.T) {
 	c := client.New(NewServer())
 	user1 := CreateUserAndLogin(t, c)
 	user2 := CreateUserAndLogin(t, c)
+	user3 := CreateUserAndLogin(t, c)
 
 	t.Run("Share Profile", func(t *testing.T) {
+		// share user1's profile with user2
 		var response struct {
 			ShareProfile struct {
 				Message string
@@ -340,6 +304,41 @@ func TestSharedProfiles(t *testing.T) {
 			client.Var("phoneNumber", user2.PhoneNumber),
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
 		require.Equal(t, fmt.Sprintf("Profile shared successfully with %s", user2.Username), response.ShareProfile.Message)
+
+		// testing sharing with phonenumber that is not related to any user
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`mutation ($phoneNumber: String!){
+			shareProfile(phoneNumber:$phoneNumber, accessLevel:"1", remarks:"no remarks"){
+				message
+			}
+		}`, &response,
+			client.Var("phoneNumber", "00000000000000000"),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "no user found with the provided phone number", err_msg[0].Message)
+		// test sharing with yourself
+		err = c.Post(`mutation ($phoneNumber: String!){
+			shareProfile(phoneNumber:$phoneNumber, accessLevel:"1", remarks:"no remarks"){
+				message
+			}
+		}`, &response,
+			client.Var("phoneNumber", user1.PhoneNumber),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "cannot share profile with yourself", err_msg[0].Message)
+		// testing sharing with no access token
+		err = c.Post(`mutation ($phoneNumber: String!){
+			shareProfile(phoneNumber:$phoneNumber, accessLevel:"1", remarks:"no remarks"){
+				message
+			}
+		}`, &response,
+			client.Var("phoneNumber", user1.PhoneNumber))
+		println(response.ShareProfile.Message)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Get Profiles", func(t *testing.T) {
@@ -386,6 +385,209 @@ func TestSharedProfiles(t *testing.T) {
 		require.Equal(t, user2.PhoneNumber, response.Get[1].PhoneNumber)
 		_, err = custom.UnmarshalDateTime(response.Get[1].CreatedAt)
 		require.Nil(t, err)
+	})
+
+	t.Run("Get shared details", func(t *testing.T) {
+		// add one of medication, medical records, treatment schedule, and health metric for user1
+		var response_create struct {
+			AddMedication struct {
+				MedicationID string
+				Message      string
+			}
+			AddMedicalRecord struct {
+				RecordID string
+				Message  string
+			}
+			CreateTreatmentSchedule struct {
+				ScheduleID string
+				Message    string
+			}
+			AddHealthMetric struct {
+				MetricID string
+				Message  string
+			}
+		}
+		c.MustPost(`mutation{
+			addMedication(
+				name: "test_medication1"
+				unit: "tablets"
+				dosage: 1
+				frequency: "1/2"
+				inventory: 24
+		  	) {
+				medicationId
+				message
+		  	}
+			addMedicalRecord(recordType: "type1", content: "treatment successful"){
+				recordId,
+				message
+			}
+			createTreatmentSchedule(
+				treatmentType: "test_type",
+				scheduledTime: "2025-01-01T10:00:00.000",
+				location: "hospital",
+				notes: "bring past records"
+			){
+				scheduleId
+				message
+			}
+			addHealthMetric(
+				metricType:"type1", 
+				unit:"mg/l", 
+				value:11.3, 
+				recordedAt:"2024-07-01T10:00:00.000"
+			){
+				metricId
+				message
+			}
+		}`, &response_create,
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
+
+		// get user1's shared information using user2's access token
+		var response_get struct {
+			GetSharedTreatmentSchedule []struct {
+				ScheduleID    string
+				TreatmentType string
+				ScheduledTime string
+				Location      string
+				Notes         string
+			}
+			GetSharedMedications []struct {
+				MedicationID string
+				Name         string
+				Dosage       float64
+				Frequency    string
+				Inventory    float64
+			}
+			GetSharedMedicalRecords []struct {
+				RecordID   string
+				RecordType string
+				Content    string
+				CreatedAt  string
+			}
+			GetSharedHealthMetrics []struct {
+				MetricID   string
+				MetricType string
+				Value      float64
+				RecordedAt string
+				Unit       string
+			}
+		}
+
+		c.MustPost(`query ($sharedId:String!){
+			getSharedTreatmentSchedule(patientId:$sharedId){
+				scheduleId,
+				treatmentType,
+				scheduledTime,
+				location,
+				notes
+			}
+			getSharedMedications(patientId:$sharedId) {
+				medicationId
+				name
+				dosage
+				frequency
+				inventory
+			}
+			getSharedMedicalRecords(patientId:$sharedId) {
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+			getSharedHealthMetrics(patientId:$sharedId){
+				metricId
+				metricType
+				value
+				recordedAt
+				unit
+			}
+
+		}`, &response_get, client.Var("sharedId", user1.ID),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user2.AccessToken)))
+		require.Equal(t, response_create.AddHealthMetric.MetricID, response_get.GetSharedHealthMetrics[0].MetricID)
+		require.Equal(t, response_create.AddMedication.MedicationID, response_get.GetSharedMedications[0].MedicationID)
+		require.Equal(t, response_create.AddMedicalRecord.RecordID, response_get.GetSharedMedicalRecords[0].RecordID)
+		require.Equal(t, response_create.CreateTreatmentSchedule.ScheduleID, response_get.GetSharedTreatmentSchedule[0].ScheduleID)
+
+		// test accessing user1's information using user3 (which user1 is not shared with)
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`query ($sharedId:String!){
+			getSharedTreatmentSchedule(patientId:$sharedId){
+				scheduleId,
+				treatmentType,
+				scheduledTime,
+				location,
+				notes
+			}
+			getSharedMedications(patientId:$sharedId) {
+				medicationId
+				name
+				dosage
+				frequency
+				inventory
+			}
+			getSharedMedicalRecords(patientId:$sharedId) {
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+			getSharedHealthMetrics(patientId:$sharedId){
+				metricId
+				metricType
+				value
+				recordedAt
+				unit
+			}
+
+		}`, &response_get, client.Var("sharedId", user1.ID),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user3.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, 4, len(err_msg))
+		for _, err := range err_msg {
+			require.Equal(t, "access denied, user is not a family member of patient", err.Message)
+		}
+
+		// using no access token, get shared api should return the same "access denied" as any other endpoints
+		err = c.Post(`query ($sharedId:String!){
+			getSharedTreatmentSchedule(patientId:$sharedId){
+				scheduleId,
+				treatmentType,
+				scheduledTime,
+				location,
+				notes
+			}
+			getSharedMedications(patientId:$sharedId) {
+				medicationId
+				name
+				dosage
+				frequency
+				inventory
+			}
+			getSharedMedicalRecords(patientId:$sharedId) {
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+			getSharedHealthMetrics(patientId:$sharedId){
+				metricId
+				metricType
+				value
+				recordedAt
+				unit
+			}
+
+		}`, &response_get, client.Var("sharedId", user1.ID))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, 4, len(err_msg))
+		for _, err := range err_msg {
+			require.Equal(t, "access denied", err.Message)
+		}
 	})
 
 	t.Run("Unshare profile", func(t *testing.T) {
@@ -440,4 +642,5 @@ func TestSharedProfiles(t *testing.T) {
 
 	DeleteUser(t, c, user1)
 	DeleteUser(t, c, user2)
+	DeleteUser(t, c, user3)
 }

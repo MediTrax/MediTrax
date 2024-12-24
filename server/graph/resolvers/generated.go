@@ -295,7 +295,7 @@ type ComplexityRoot struct {
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
 		ResetPassword                func(childComplexity int, resetCode string, newPassword string) int
 		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
-		TakeMedication               func(childComplexity int, reminderID *string) int
+		TakeMedication               func(childComplexity int, reminderID string) int
 		UnshareProfile               func(childComplexity int, targetUserID string) int
 		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string, recordedAt *time.Time) int
 		UpdateMedicalRecord          func(childComplexity int, recordID string, recordType *string, content *string) int
@@ -508,7 +508,7 @@ type MutationResolver interface {
 	DeleteMedication(ctx context.Context, medicationID string) (*model.DeleteMedicationResponse, error)
 	CreateMedicationReminder(ctx context.Context, medicationID string, reminderTime time.Time) (*model.CreateMedicationReminderResponse, error)
 	UpdateMedicationReminder(ctx context.Context, reminderID string, reminderTime *time.Time, isTaken *bool) (*model.UpdateMedicationReminderResponse, error)
-	TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error)
+	TakeMedication(ctx context.Context, reminderID string) (*model.TakeMedicationResponse, error)
 	DeleteMedicationReminder(ctx context.Context, reminderID string) (*model.DeleteMedicationReminderResponse, error)
 	CreateTreatmentSchedule(ctx context.Context, treatmentType string, scheduledTime time.Time, location string, notes *string) (*model.CreateTreatmentScheduleResponse, error)
 	UpdateTreatmentSchedule(ctx context.Context, scheduleID string, treatmentType *string, scheduledTime *time.Time, location *string, notes *string) (*model.UpdateTreatmentScheduleResponse, error)
@@ -1691,7 +1691,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.TakeMedication(childComplexity, args["reminderId"].(*string)), true
+		return e.complexity.Mutation.TakeMedication(childComplexity, args["reminderId"].(string)), true
 
 	case "Mutation.unshareProfile":
 		if e.complexity.Mutation.UnshareProfile == nil {
@@ -3829,7 +3829,7 @@ extend type Mutation {
     """
     The ID of the medication reminder.
     """
-    reminderId: String
+    reminderId: String!
   ): TakeMedicationResponse!
 
   """
@@ -5547,13 +5547,13 @@ func (ec *executionContext) field_Mutation_takeMedication_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_takeMedication_argsReminderID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*string, error) {
+) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reminderId"))
 	if tmp, ok := rawArgs["reminderId"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
-	var zeroVal *string
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -12361,7 +12361,7 @@ func (ec *executionContext) _Mutation_takeMedication(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().TakeMedication(rctx, fc.Args["reminderId"].(*string))
+		return ec.resolvers.Mutation().TakeMedication(rctx, fc.Args["reminderId"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
