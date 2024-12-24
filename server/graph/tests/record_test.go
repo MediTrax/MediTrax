@@ -43,6 +43,20 @@ func TestMedicalRecord(t *testing.T) {
 		require.Equal(t, "Medical record added successfully", response.Create2.Message)
 		recordId1 = response.Create1.RecordID
 		recordId2 = response.Create2.RecordID
+
+		// illegal creations
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`mutation{
+			addMedicalRecord(recordType: "type2", content: "treatment unsuccessful"){
+				recordId,
+				message
+			}
+		}`, &response)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Update and query", func(t *testing.T) {
@@ -98,6 +112,22 @@ func TestMedicalRecord(t *testing.T) {
 				require.Empty(t, record.RecordID)
 			}
 		}
+
+		// illegal queries for record
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`query get_records{
+			getMedicalRecords{
+				recordId,
+				recordType,
+				content,
+				createdAt
+			}
+		}`, &response_query)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Delete record", func(t *testing.T) {
@@ -132,12 +162,20 @@ func TestMedicalRecord(t *testing.T) {
 		}`, &response_query, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, 1, len(response_query.GetMedicalRecords))
 		require.Equal(t, recordId2, response_query.GetMedicalRecords[0].RecordID)
+
+		// illegal deletes
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`mutation ($recordId:String!){
+			deleteMedicalRecord(recordId:$recordId){
+				message
+			}
+		}`, &response, client.Var("recordId", recordId1))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
-
-	// TODO: add tests for error responses
-	// t.Run("Error responses", func(t *testing.T){
-
-	// })
 
 	DeleteUser(t, c, user)
 }
@@ -194,7 +232,7 @@ func TestHealthMetric(t *testing.T) {
 			Message string `json:"message"`
 			Path    string `json:"path"`
 		}
-
+		// same type and recordAt
 		var response_ struct {
 			AddHealthMetric struct {
 				MetricID string
@@ -215,8 +253,7 @@ func TestHealthMetric(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "health metric with the same type and same recordAt time already exists", err_msg[0].Message)
-
-		// newTime, _ := time.Parse("2006-01-02T15:04:05.000", "2024-01-03T18:04:06.000")
+		// no access token
 		err = c.Post(`mutation create_metric($recordedAt:DateTime!){
 			addHealthMetric(metricType:"type1", unit:"mg/l", value:11.3, recordedAt:$recordedAt){
 				metricId
@@ -264,11 +301,11 @@ func TestHealthMetric(t *testing.T) {
 				Unit       string
 			}
 		}
-
+		// testing querying with start date, end date, and metric type separately set
 		firstDate, _ := time.Parse("2006-01-02T15:04:05.000", "2024-01-01T18:04:05.000")
 		secondDate, _ := time.Parse("2006-01-02T15:04:05.000", "2024-02-01T18:04:05.000")
 		c.MustPost(`query get_metrics($firstDate:DateTime!, $secondDate:DateTime!){
-			type1:getHealthMetrics(metricType: "type1", ){
+			type1:getHealthMetrics(metricType: "type1"){
 				metricId
 				metricType
 				value
@@ -309,7 +346,6 @@ func TestHealthMetric(t *testing.T) {
 			}
 		}`, &response, client.Var("firstDate", firstDate), client.Var("secondDate", secondDate),
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
-
 		require.Equal(t, 1, len(response.Type1))
 		require.Equal(t, metricId1, response.Type1[0].MetricID)
 
@@ -324,6 +360,32 @@ func TestHealthMetric(t *testing.T) {
 
 		require.Equal(t, 1, len(response.DateAndType))
 		require.Equal(t, metricId1, response.DateAndType[0].MetricID)
+
+		// illegal querying
+		var query_response struct {
+			GetHealthMetrics []struct {
+				MetricID   string
+				MetricType string
+				Value      float64
+				RecordedAt string
+				Unit       string
+			}
+		}
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`query{
+			getHealthMetrics{
+				metricId
+				metricType
+				value
+				recordedAt
+				unit
+			}
+		}`, &query_response)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Update metrics", func(t *testing.T) {
@@ -349,6 +411,7 @@ func TestHealthMetric(t *testing.T) {
 			Message string `json:"message"`
 			Path    string `json:"path"`
 		}
+		// illegally formated metric id
 		err := c.Post(`mutation update_metric($metricId:String!){
 			updateHealthMetric(metricId:$metricId, value: 11.0, unit: "g/l"){
 				metricId
@@ -358,7 +421,7 @@ func TestHealthMetric(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "illegal health metric id", err_msg[0].Message)
-
+		// using metric id that is not associated with the user
 		err = c.Post(`mutation update_metric($metricId:String!){
 			updateHealthMetric(metricId:$metricId, value: 10.0, unit: "g/l"){
 				metricId
@@ -368,6 +431,15 @@ func TestHealthMetric(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "invalid id, no user associated heath metric object found", err_msg[0].Message)
+		// no access token
+		err = c.Post(`mutation update_metric($metricId:String!){
+			updateHealthMetric(metricId:$metricId, value: 10.0, unit: "g/l"){
+				metricId
+				message
+			}
+		}`, &response, client.Var("metricId", metricId1))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 
 		// query to check that the previous update has been realized
 		var response_query struct {

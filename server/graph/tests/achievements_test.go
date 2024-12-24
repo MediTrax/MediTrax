@@ -210,6 +210,31 @@ func TestPoints(t *testing.T) {
 		println(points1)
 		println(points2)
 		require.Equal(t, points1+points2, response.EarnPoints.UpdatedPoints)
+
+		// test error responses to illegal mutations
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// negative points
+		err := c.Post(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"another reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", -5.0),
+			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "earned points must be positive number", err_msg[0].Message)
+		// without access token
+		err = c.Post(`mutation add_points($pointsEarned: Float!){
+			earnPoints(pointsEarned:$pointsEarned, reason:"another reason"){
+				updatedPoints,
+				message
+			}
+		}`, &response, client.Var("pointsEarned", 1))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Query points history", func(t *testing.T) {
