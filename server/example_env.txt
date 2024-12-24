@@ -11,3 +11,9 @@
 # MINIO_ACCESS_KEY_ID=<your-minio-access-key-id>
 # MINIO_ACCESS_KEY_SECRET=<your-minio-access-key-secret>
 # MINIO_BUCKET_NAME=<your-minio-bucket-name>
+# ALIYUN_SMS_REGION=<your-aliyun-sms-region-id>
+# ALIYUN_SMS_SIGN_NAME=<your-aliyun-sms-sign-name>
+# ALIYUN_SMS_TEMPLATE_CODE=<your-aliyun-sms-template-code>
+# ALIYUN_SMS_ACCESS_KEY_ID=<your-aliyun-sms-access-key-id>
+# ALIYUN_SMS_ACCESS_KEY_SECRET=<your-aliyun-sms-access-key-secret>
+# DEEPSEEK_KEY=<your-deepseek-key>

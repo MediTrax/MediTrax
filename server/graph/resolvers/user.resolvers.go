@@ -18,7 +18,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 	surrealdb "github.com/surrealdb/surrealdb.go"
 )
 
@@ -161,6 +160,153 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 	return response, nil
 }
 
+// LoginUserWithOtp is the resolver for the loginUserWithOTP field.
+func (r *mutationResolver) LoginUserWithOtp(ctx context.Context, phoneNumber string, otpCode string) (*model.LoginUserResponse, error) {
+	// First get the user
+	result, err := database.DB.Query(`
+	SELECT * FROM user WHERE phoneNumber = $phoneNumber;`,
+		map[string]interface{}{
+			"phoneNumber": phoneNumber,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) <= 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	user := users[0]
+
+	// Verify OTP
+	result, err = database.DB.Query(`
+	SELECT * FROM otp 
+	WHERE userId = $userId 
+	AND code = $otpCode 
+	AND expiresAt > <datetime>$now 
+	ORDER BY createdAt DESC 
+	LIMIT 1;`,
+		map[string]interface{}{
+			"userId":  user.ID,
+			"otpCode": otpCode,
+			"now":     time.Now().UTC(),
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the result similar to password reset
+	rawResults, ok := result.([]interface{})
+	if !ok || len(rawResults) == 0 {
+		return nil, fmt.Errorf("invalid or expired OTP")
+	}
+
+	rawRecord, ok := rawResults[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid or expired OTP")
+	}
+
+	rawData, ok := rawRecord["result"].([]interface{})
+	if !ok || len(rawData) == 0 {
+		return nil, fmt.Errorf("invalid or expired OTP")
+	}
+
+	recordData, ok := rawData[0].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid or expired OTP")
+	}
+
+	// Delete used OTP
+	otpID, ok := recordData["id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid OTP format")
+	}
+
+	_, err = database.DB.Delete(otpID)
+	if err != nil {
+		log.Printf("Failed to delete used OTP: %v", err)
+	}
+
+	// Generate token and handle login
+	token, err := utils.HandleLogin(&user, ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update last login
+	_, err = database.DB.Query(
+		`UPDATE $userId SET lastLogin=<datetime>$now;`,
+		map[string]interface{}{
+			"userId": user.ID,
+			"now":    time.Now().UTC(),
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.LoginUserResponse{
+		UserID:  user.ID,
+		Token:   token,
+		Message: "Login successful",
+	}, nil
+}
+
+// RequestOtp is the resolver for the requestOTP field.
+func (r *mutationResolver) RequestOtp(ctx context.Context, phoneNumber string) (*model.RequestOTPResponse, error) {
+	// Check if user exists
+	result, err := database.DB.Query(`
+	SELECT * FROM user WHERE phoneNumber = $phoneNumber;`,
+		map[string]interface{}{
+			"phoneNumber": phoneNumber,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	users, err := surrealdb.SmartUnmarshal[[]model.User](result, nil)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) <= 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	// Generate a random 6-digit OTP
+	rand.Seed(time.Now().UnixNano())
+	otpCode := fmt.Sprintf("%06d", rand.Intn(1000000))
+
+	// Store OTP in database with expiration
+	result, err = database.DB.Query(
+		`CREATE ONLY otp:ulid() 
+		 SET userId = $userId,
+		 code = $otpCode,
+		 createdAt = <datetime>$now,
+		 expiresAt = <datetime>$expiry;`,
+		map[string]interface{}{
+			"userId":  users[0].ID,
+			"otpCode": otpCode,
+			"now":     time.Now().UTC(),
+			"expiry":  time.Now().UTC().Add(15 * time.Minute), // OTP expires in 15 minutes
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	// Send OTP via SMS
+	err = utils.SendOTP(phoneNumber, otpCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.RequestOTPResponse{
+		Message: fmt.Sprintf("OTP sent to %s", phoneNumber),
+	}, nil
+}
+
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error) {
 	// check if the user is registed
@@ -301,9 +447,10 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 
 	// 创建密码重置请求
 	result2, err := database.DB.Query(
-		`CREATE ONLY passwordChange:ulid() SET userId=$userId;`,
+		`CREATE ONLY passwordChange:ulid() SET user=$userId, createdAt=<datetime>$now;`,
 		map[string]interface{}{
 			"userId": users[0].ID,
+			"now":    time.Now().UTC(),
 		})
 	if err != nil {
 		return nil, err
@@ -335,40 +482,9 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, phoneNumber
 	}
 	resetCode = numericResetCode
 
-	// 阿里云短信服务的凭证
-	accessKeyId := "LTAI5tLD94gG1JJBs3GRGw5Q"           // 替换为你从阿里云获取的 AccessKeyId
-	accessKeySecret := "8AdXowtI5gzvY7WHKxb5ebbw0FaWiZ" // 替换为你从阿里云获取的 AccessKeySecret
-
-	// 创建阿里云短信客户端
-	client, err := dysmsapi.NewClientWithAccessKey("cn-hangzhou", accessKeyId, accessKeySecret)
-	if err != nil {
-		log.Printf("Failed to create client: %v", err)
-		return nil, err
+	if err := utils.SendOTP(phoneNumber, resetCode); err != nil {
+		return nil, fmt.Errorf("failed to send OTP: %v", err)
 	}
-
-	// 创建短信请求参数
-	request := dysmsapi.CreateSendSmsRequest()
-	request.Scheme = "https"
-	request.PhoneNumbers = phoneNumber                              // 接收短信的手机号码
-	request.SignName = "Meditrax验证码"                                // 替换短信签名
-	request.TemplateCode = "SMS_476405140"                          // 替换短信模板ID
-	request.TemplateParam = fmt.Sprintf(`{"code":"%s"}`, resetCode) // 填入模板参数，代码作为示例
-
-	// 发送短信
-	response, err := client.SendSms(request)
-	if err != nil {
-		log.Printf("Failed to send SMS: %v", err)
-	} else {
-		log.Printf("SMS API Response: %+v", response)
-	}
-
-	// 打印返回结果（可以根据需要进行日志记录）
-	if response.Code != "OK" {
-		log.Printf("Failed to send SMS: %s", response.Message)
-		return nil, fmt.Errorf("SMS sending failed: %s", response.Message)
-	}
-
-	log.Printf("SMS sent successfully, requestId: %s", response.RequestId)
 
 	// 创建响应
 	responseMsg := &model.RequestPasswordResetResponse{
@@ -443,7 +559,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, resetCode string, 
 }
 
 // ShareProfile is the resolver for the shareProfile field.
-func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error) {
+func (r *mutationResolver) ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks *string) (*model.ShareProfileResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")

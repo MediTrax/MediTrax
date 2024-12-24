@@ -1,110 +1,540 @@
+"""
+Represents a token for user authentication.
+"""
 type Token {
+  """
+  The unique identifier of the token.
+  """
   id: String!
+
+  """
+  The ID of the user associated with the token.
+  """
   user: String!
+
+  """
+  The access token for authentication.
+  """
   accessToken: String!
+
+  """
+  The refresh token for renewing the access token.
+  """
   refreshToken: String!
+
+  """
+  The expiry date and time of the access token.
+  """
   accessTokenExpiry: DateTime!
+
+  """
+  The expiry date and time of the refresh token.
+  """
   refreshTokenExpiry: DateTime!
+
+  """
+  The device associated with the token.
+  """
   device: String!
+
+  """
+  The date and time when the token was created.
+  """
   createdAt: DateTime!
+
+  """
+  The date and time when the token was last updated.
+  """
   updatedAt: DateTime!
 }
 
-type User{
+"""
+Represents a user in the system.
+"""
+type User {
+  """
+  The unique identifier of the user.
+  """
   id: String!
+
+  """
+  The phone number of the user.
+  """
   phoneNumber: String!
+
+  """
+  The password of the user.
+  """
   password: String!
+
+  """
+  The name of the user.
+  """
   name: String!
+
+  """
+  The total points earned by the user.
+  """
   points: Float!
+
+  """
+  The date and time when the user was created.
+  """
   createdAt: DateTime!
+
+  """
+  The date and time when the user was last updated.
+  """
   updatedAt: DateTime!
+
+  """
+  The date and time when the user last logged in.
+  """
   lastLogin: DateTime!
+
+  """
+  The status of the user account.
+  """
   status: Int!
+
+  """
+  The role of the user in the system.
+  """
   role: String!
 }
 
+"""
+Represents a password change request.
+"""
 type PasswordChange {
+  """
+  The unique identifier of the password change request.
+  """
   id: String!
+
+  """
+  The ID of the user requesting the password change.
+  """
   user: String!
-  token: String!
+  resetCode: String!
   createdAt: DateTime!
 }
 
+"""
+Response type for creating a user.
+"""
 type CreateUserResponse {
+  """
+  The ID of the newly created user.
+  """
   userId: String!
+
+  """
+  A message indicating the result of the creation operation.
+  """
   message: String!
 }
 
+"""
+Response type for logging in a user.
+"""
 type LoginUserResponse {
+  """
+  The ID of the logged-in user.
+  """
   userId: String!
+
+  """
+  The token associated with the logged-in user.
+  """
   token: Token!
+
+  """
+  A message indicating the result of the login operation.
+  """
   message: String!
 }
 
+"""
+Detailed information about a user.
+"""
 type UserDetailResponse {
+  """
+  The ID of the user.
+  """
   userId: String!
+
+  """
+  The phone number of the user.
+  """
   phoneNumber: String!
+
+  """
+  The name of the user.
+  """
   name: String!
+
+  """
+  The total points earned by the user.
+  """
   points: Float!
+
+  """
+  The role of the user in the system.
+  """
   role: String!
+
+  """
+  The date and time when the user was created.
+  """
   createdAt: DateTime!
+
+  """
+  The date and time when the user last logged in.
+  """
   lastLogin: DateTime
 }
 
+"""
+Response type for updating a user.
+"""
 type UpdateUserResponse {
+  """
+  The ID of the updated user.
+  """
   userId: String!
+
+  """
+  A message indicating the result of the update operation.
+  """
   message: String!
 }
 
+"""
+Response type for deleting a user.
+"""
 type DeleteUserResponse {
+  """
+  A message indicating the result of the deletion operation.
+  """
   message: String!
 }
 
+"""
+Response type for requesting an OTP.
+"""
+type RequestOTPResponse {
+  """
+  A message indicating the result of the OTP request.
+  """
+  message: String!
+}
+
+"""
+Response type for requesting a password reset.
+"""
 type RequestPasswordResetResponse {
+  """
+  A message indicating the result of the password reset request.
+  """
   message: String!
 }
 
+"""
+Response type for resetting a password.
+"""
 type ResetPasswordResponse {
+  """
+  A message indicating the result of the password reset operation.
+  """
   message: String!
 }
 
+"""
+Detailed information about a user profile.
+"""
 type ProfileDetail {
+  """
+  The unique identifier of the profile.
+  """
   id: String!
+
+  """
+  The name of the profile.
+  """
   name: String!
+
+  """
+  The phone number associated with the profile.
+  """
   phoneNumber: String!
+
+  """
+  The role of the profile in the system.
+  """
   role: String!
+
+  """
+  The date and time when the profile was created.
+  """
   createdAt: DateTime!
 }
 
+"""
+Response type for sharing a profile.
+"""
 type ShareProfileResponse {
-    message: String!
+  """
+  A message indicating the result of the profile sharing operation.
+  """
+  message: String!
 }
 
+"""
+Response type for unsharing a profile.
+"""
 type UnshareProfileResponse {
-    message: String!
+  """
+  A message indicating the result of the profile unsharing operation.
+  """
+  message: String!
 }
 
-extend type Query{
+extend type Query {
+  """
+  Retrieves the details of the current user.
+  """
   getUser: UserDetailResponse
+
+  """
+  Retrieves a list of profiles for the user.
+  """
   getProfiles: [ProfileDetail]
+
+  """
+  Retrieves a list of shared profiles for the user.
+  """
   getSharedProfiles: [ProfileDetail]
 
-  getSharedMedicalRecords(patientId: String!): [MedicalRecordDetail]
-  getSharedTreatmentSchedule(patientId: String!): [TreatmentScheduleDetail]
-  getSharedMedications(patientId: String!): [MedicationDetail]
-  getSharedHealthMetrics(patientId: String!, startDate: DateTime, endDate: DateTime, metricType: String): [HealthMetricDetail]
+  """
+  Retrieves shared medical records for a specific patient.
+  """
+  getSharedMedicalRecords(
+    """
+    The ID of the patient.
+    """
+    patientId: String!
+  ): [MedicalRecordDetail]
+
+  """
+  Retrieves shared treatment schedules for a specific patient.
+  """
+  getSharedTreatmentSchedule(
+    """
+    The ID of the patient.
+    """
+    patientId: String!
+  ): [TreatmentScheduleDetail]
+
+  """
+  Retrieves shared medications for a specific patient.
+  """
+  getSharedMedications(
+    """
+    The ID of the patient.
+    """
+    patientId: String!
+  ): [MedicationDetail]
+
+  """
+  Retrieves shared health metrics for a specific patient.
+  """
+  getSharedHealthMetrics(
+    """
+    The ID of the patient.
+    """
+    patientId: String!
+
+    """
+    The start date for filtering health metrics.
+    """
+    startDate: DateTime
+
+    """
+    The end date for filtering health metrics.
+    """
+    endDate: DateTime
+
+    """
+    The type of health metric to filter by.
+    """
+    metricType: String
+  ): [HealthMetricDetail]
 }
 
-extend type Mutation{
-  refreshToken(accessToken: String!, refreshToken: String!, device:String!): Token
+extend type Mutation {
+  """
+  Refreshes the authentication token.
+  """
+  refreshToken(
+    """
+    The current access token.
+    """
+    accessToken: String!
 
-  createUser(phoneNumber: String!, password: String!, username: String!, role: String!): CreateUserResponse
-  loginUser(phoneNumber: String!, password: String!): LoginUserResponse
-  updateUser(name: String, phoneNumber: String, password: String): UpdateUserResponse
+    """
+    The current refresh token.
+    """
+    refreshToken: String!
+
+    """
+    The device associated with the token.
+    """
+    device: String!
+  ): Token
+
+  """
+  Creates a new user.
+  """
+  createUser(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+
+    """
+    The password of the user.
+    """
+    password: String!
+
+    """
+    The username of the user.
+    """
+    username: String!
+
+    """
+    The role of the user in the system.
+    """
+    role: String!
+  ): CreateUserResponse
+
+  """
+  Logs in a user.
+  """
+  loginUser(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+
+    """
+    The password of the user.
+    """
+    password: String!
+  ): LoginUserResponse
+
+  """
+  Logs in a user with OTP.
+  """
+  loginUserWithOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+
+    """
+    The OTP code of the user.
+    """
+    otpCode: String!
+  ): LoginUserResponse
+
+  """
+  Requests an OTP for a user.
+  """
+  requestOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestOTPResponse
+
+  """
+  Updates the details of the current user.
+  """
+  updateUser(
+    """
+    The new name of the user.
+    """
+    name: String
+
+    """
+    The new phone number of the user.
+    """
+    phoneNumber: String
+
+    """
+    The new password of the user.
+    """
+    password: String
+  ): UpdateUserResponse
+
+  """
+  Deletes the current user.
+  """
   deleteUser: DeleteUserResponse
-  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
-  resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
-  
-  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
-  unshareProfile(targetUserId: String!): UnshareProfileResponse!
+
+  """
+  Requests a password reset for a user.
+  """
+  requestPasswordReset(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestPasswordResetResponse
+
+  """
+  Resets a user's password.
+  """
+  resetPassword(
+    """
+    The reset code for the password reset.
+    """
+    resetCode: String!
+
+    """
+    The new password for the user.
+    """
+    newPassword: String!
+  ): ResetPasswordResponse
+
+  """
+  Shares a profile with another user.
+  """
+  shareProfile(
+    """
+    The phone number of the user to share the profile with.
+    """
+    phoneNumber: String!
+
+    """
+    The access level of the profile.
+    """
+    accessLevel: String!
+
+    """
+    The remarks of the profile.
+    """
+    remarks: String
+  ): ShareProfileResponse!
+
+  """
+  Unshares a profile with another user.
+  """
+  unshareProfile(
+    """
+    The ID of the user to unshare the profile with.
+    """
+    targetUserId: String!
+  ): UnshareProfileResponse!
 }

@@ -3020,11 +3020,11 @@ class _CopyWithStubImpl$Mutation$RequestPasswordReset$requestPasswordReset<TRes>
 
 class Variables$Mutation$ResetPassword {
   factory Variables$Mutation$ResetPassword({
-    required String token,
+    required String resetCode,
     required String newPassword,
   }) =>
       Variables$Mutation$ResetPassword._({
-        r'token': token,
+        r'resetCode': resetCode,
         r'newPassword': newPassword,
       });
 
@@ -3032,8 +3032,8 @@ class Variables$Mutation$ResetPassword {
 
   factory Variables$Mutation$ResetPassword.fromJson(Map<String, dynamic> data) {
     final result$data = <String, dynamic>{};
-    final l$token = data['token'];
-    result$data['token'] = (l$token as String);
+    final l$resetCode = data['resetCode'];
+    result$data['resetCode'] = (l$resetCode as String);
     final l$newPassword = data['newPassword'];
     result$data['newPassword'] = (l$newPassword as String);
     return Variables$Mutation$ResetPassword._(result$data);
@@ -3041,14 +3041,14 @@ class Variables$Mutation$ResetPassword {
 
   Map<String, dynamic> _$data;
 
-  String get token => (_$data['token'] as String);
+  String get resetCode => (_$data['resetCode'] as String);
 
   String get newPassword => (_$data['newPassword'] as String);
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
-    final l$token = token;
-    result$data['token'] = l$token;
+    final l$resetCode = resetCode;
+    result$data['resetCode'] = l$resetCode;
     final l$newPassword = newPassword;
     result$data['newPassword'] = l$newPassword;
     return result$data;
@@ -3069,9 +3069,9 @@ class Variables$Mutation$ResetPassword {
         runtimeType != other.runtimeType) {
       return false;
     }
-    final l$token = token;
-    final lOther$token = other.token;
-    if (l$token != lOther$token) {
+    final l$resetCode = resetCode;
+    final lOther$resetCode = other.resetCode;
+    if (l$resetCode != lOther$resetCode) {
       return false;
     }
     final l$newPassword = newPassword;
@@ -3084,10 +3084,10 @@ class Variables$Mutation$ResetPassword {
 
   @override
   int get hashCode {
-    final l$token = token;
+    final l$resetCode = resetCode;
     final l$newPassword = newPassword;
     return Object.hashAll([
-      l$token,
+      l$resetCode,
       l$newPassword,
     ]);
   }
@@ -3103,7 +3103,7 @@ abstract class CopyWith$Variables$Mutation$ResetPassword<TRes> {
       _CopyWithStubImpl$Variables$Mutation$ResetPassword;
 
   TRes call({
-    String? token,
+    String? resetCode,
     String? newPassword,
   });
 }
@@ -3122,12 +3122,13 @@ class _CopyWithImpl$Variables$Mutation$ResetPassword<TRes>
   static const _undefined = <dynamic, dynamic>{};
 
   TRes call({
-    Object? token = _undefined,
+    Object? resetCode = _undefined,
     Object? newPassword = _undefined,
   }) =>
       _then(Variables$Mutation$ResetPassword._({
         ..._instance._$data,
-        if (token != _undefined && token != null) 'token': (token as String),
+        if (resetCode != _undefined && resetCode != null)
+          'resetCode': (resetCode as String),
         if (newPassword != _undefined && newPassword != null)
           'newPassword': (newPassword as String),
       }));
@@ -3140,7 +3141,7 @@ class _CopyWithStubImpl$Variables$Mutation$ResetPassword<TRes>
   TRes _res;
 
   call({
-    String? token,
+    String? resetCode,
     String? newPassword,
   }) =>
       _res;
@@ -3290,7 +3291,7 @@ const documentNodeMutationResetPassword = DocumentNode(definitions: [
     name: NameNode(value: 'ResetPassword'),
     variableDefinitions: [
       VariableDefinitionNode(
-        variable: VariableNode(name: NameNode(value: 'token')),
+        variable: VariableNode(name: NameNode(value: 'resetCode')),
         type: NamedTypeNode(
           name: NameNode(value: 'String'),
           isNonNull: true,
@@ -3315,8 +3316,8 @@ const documentNodeMutationResetPassword = DocumentNode(definitions: [
         alias: null,
         arguments: [
           ArgumentNode(
-            name: NameNode(value: 'token'),
-            value: VariableNode(name: NameNode(value: 'token')),
+            name: NameNode(value: 'resetCode'),
+            value: VariableNode(name: NameNode(value: 'resetCode')),
           ),
           ArgumentNode(
             name: NameNode(value: 'newPassword'),

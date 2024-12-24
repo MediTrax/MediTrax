@@ -7,7 +7,8 @@ class AiHelperScreen extends StatefulWidget {
   State<AiHelperScreen> createState() => _AiHelperScreenState();
 }
 
-class _AiHelperScreenState extends State<AiHelperScreen> with SingleTickerProviderStateMixin {
+class _AiHelperScreenState extends State<AiHelperScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _messageController = TextEditingController();
 
@@ -72,7 +73,8 @@ class AiAssistantTab extends StatelessWidget {
                   children: [
                     const Text(
                       '智能健康助手',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const Text(
                       '与AI助手对话，获取健康建议',
@@ -80,7 +82,7 @@ class AiAssistantTab extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _buildAiMessage(
-                      '您好！我是您的智能健康助手。我可以回答您的健康问题，提供用药建议，或者帮助您理解医疗报告。请问有什么我可以帮助您的吗？',
+                      '您好！我是您的智能健康助手。我可以回答您的健康问题，提供用药建议，或者帮助您理解医疗报告。请问有��么我可以帮助您的吗？',
                     ),
                     _buildUserMessage(
                       '我最近感觉有点头晕，这可能是什么原因造成的？',
@@ -124,7 +126,19 @@ class AiAssistantTab extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () {
-                    // TODO: Implement send message
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('功能开发中'),
+                        content: const Text('该功能正在开发中，敬请期待！'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.send),
                   style: IconButton.styleFrom(

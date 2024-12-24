@@ -1852,6 +1852,1736 @@ class _CopyWithStubImpl$Mutation$LoginUser$loginUser$token<TRes>
       _res;
 }
 
+class Variables$Mutation$RequestOTP {
+  factory Variables$Mutation$RequestOTP({required String phoneNumber}) =>
+      Variables$Mutation$RequestOTP._({
+        r'phoneNumber': phoneNumber,
+      });
+
+  Variables$Mutation$RequestOTP._(this._$data);
+
+  factory Variables$Mutation$RequestOTP.fromJson(Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = data['phoneNumber'];
+    result$data['phoneNumber'] = (l$phoneNumber as String);
+    return Variables$Mutation$RequestOTP._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get phoneNumber => (_$data['phoneNumber'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = phoneNumber;
+    result$data['phoneNumber'] = l$phoneNumber;
+    return result$data;
+  }
+
+  CopyWith$Variables$Mutation$RequestOTP<Variables$Mutation$RequestOTP>
+      get copyWith => CopyWith$Variables$Mutation$RequestOTP(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Variables$Mutation$RequestOTP ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$phoneNumber = phoneNumber;
+    final lOther$phoneNumber = other.phoneNumber;
+    if (l$phoneNumber != lOther$phoneNumber) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$phoneNumber = phoneNumber;
+    return Object.hashAll([l$phoneNumber]);
+  }
+}
+
+abstract class CopyWith$Variables$Mutation$RequestOTP<TRes> {
+  factory CopyWith$Variables$Mutation$RequestOTP(
+    Variables$Mutation$RequestOTP instance,
+    TRes Function(Variables$Mutation$RequestOTP) then,
+  ) = _CopyWithImpl$Variables$Mutation$RequestOTP;
+
+  factory CopyWith$Variables$Mutation$RequestOTP.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$RequestOTP;
+
+  TRes call({String? phoneNumber});
+}
+
+class _CopyWithImpl$Variables$Mutation$RequestOTP<TRes>
+    implements CopyWith$Variables$Mutation$RequestOTP<TRes> {
+  _CopyWithImpl$Variables$Mutation$RequestOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Mutation$RequestOTP _instance;
+
+  final TRes Function(Variables$Mutation$RequestOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({Object? phoneNumber = _undefined}) =>
+      _then(Variables$Mutation$RequestOTP._({
+        ..._instance._$data,
+        if (phoneNumber != _undefined && phoneNumber != null)
+          'phoneNumber': (phoneNumber as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Mutation$RequestOTP<TRes>
+    implements CopyWith$Variables$Mutation$RequestOTP<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$RequestOTP(this._res);
+
+  TRes _res;
+
+  call({String? phoneNumber}) => _res;
+}
+
+class Mutation$RequestOTP {
+  Mutation$RequestOTP({
+    this.requestOTP,
+    this.$__typename = 'Mutation',
+  });
+
+  factory Mutation$RequestOTP.fromJson(Map<String, dynamic> json) {
+    final l$requestOTP = json['requestOTP'];
+    final l$$__typename = json['__typename'];
+    return Mutation$RequestOTP(
+      requestOTP: l$requestOTP == null
+          ? null
+          : Mutation$RequestOTP$requestOTP.fromJson(
+              (l$requestOTP as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Mutation$RequestOTP$requestOTP? requestOTP;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$requestOTP = requestOTP;
+    _resultData['requestOTP'] = l$requestOTP?.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$requestOTP = requestOTP;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$requestOTP,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$RequestOTP || runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$requestOTP = requestOTP;
+    final lOther$requestOTP = other.requestOTP;
+    if (l$requestOTP != lOther$requestOTP) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$RequestOTP on Mutation$RequestOTP {
+  CopyWith$Mutation$RequestOTP<Mutation$RequestOTP> get copyWith =>
+      CopyWith$Mutation$RequestOTP(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Mutation$RequestOTP<TRes> {
+  factory CopyWith$Mutation$RequestOTP(
+    Mutation$RequestOTP instance,
+    TRes Function(Mutation$RequestOTP) then,
+  ) = _CopyWithImpl$Mutation$RequestOTP;
+
+  factory CopyWith$Mutation$RequestOTP.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$RequestOTP;
+
+  TRes call({
+    Mutation$RequestOTP$requestOTP? requestOTP,
+    String? $__typename,
+  });
+  CopyWith$Mutation$RequestOTP$requestOTP<TRes> get requestOTP;
+}
+
+class _CopyWithImpl$Mutation$RequestOTP<TRes>
+    implements CopyWith$Mutation$RequestOTP<TRes> {
+  _CopyWithImpl$Mutation$RequestOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$RequestOTP _instance;
+
+  final TRes Function(Mutation$RequestOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? requestOTP = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$RequestOTP(
+        requestOTP: requestOTP == _undefined
+            ? _instance.requestOTP
+            : (requestOTP as Mutation$RequestOTP$requestOTP?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$RequestOTP$requestOTP<TRes> get requestOTP {
+    final local$requestOTP = _instance.requestOTP;
+    return local$requestOTP == null
+        ? CopyWith$Mutation$RequestOTP$requestOTP.stub(_then(_instance))
+        : CopyWith$Mutation$RequestOTP$requestOTP(
+            local$requestOTP, (e) => call(requestOTP: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$RequestOTP<TRes>
+    implements CopyWith$Mutation$RequestOTP<TRes> {
+  _CopyWithStubImpl$Mutation$RequestOTP(this._res);
+
+  TRes _res;
+
+  call({
+    Mutation$RequestOTP$requestOTP? requestOTP,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$RequestOTP$requestOTP<TRes> get requestOTP =>
+      CopyWith$Mutation$RequestOTP$requestOTP.stub(_res);
+}
+
+const documentNodeMutationRequestOTP = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.mutation,
+    name: NameNode(value: 'RequestOTP'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'phoneNumber')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      )
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'requestOTP'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'phoneNumber'),
+            value: VariableNode(name: NameNode(value: 'phoneNumber')),
+          )
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'message'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Mutation$RequestOTP _parserFn$Mutation$RequestOTP(Map<String, dynamic> data) =>
+    Mutation$RequestOTP.fromJson(data);
+typedef OnMutationCompleted$Mutation$RequestOTP = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Mutation$RequestOTP?,
+);
+
+class Options$Mutation$RequestOTP
+    extends graphql.MutationOptions<Mutation$RequestOTP> {
+  Options$Mutation$RequestOTP({
+    String? operationName,
+    required Variables$Mutation$RequestOTP variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$RequestOTP? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$RequestOTP? onCompleted,
+    graphql.OnMutationUpdate<Mutation$RequestOTP>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null ? null : _parserFn$Mutation$RequestOTP(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationRequestOTP,
+          parserFn: _parserFn$Mutation$RequestOTP,
+        );
+
+  final OnMutationCompleted$Mutation$RequestOTP? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+class WatchOptions$Mutation$RequestOTP
+    extends graphql.WatchQueryOptions<Mutation$RequestOTP> {
+  WatchOptions$Mutation$RequestOTP({
+    String? operationName,
+    required Variables$Mutation$RequestOTP variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$RequestOTP? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeMutationRequestOTP,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Mutation$RequestOTP,
+        );
+}
+
+extension ClientExtension$Mutation$RequestOTP on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$RequestOTP>> mutate$RequestOTP(
+          Options$Mutation$RequestOTP options) async =>
+      await this.mutate(options);
+  graphql.ObservableQuery<Mutation$RequestOTP> watchMutation$RequestOTP(
+          WatchOptions$Mutation$RequestOTP options) =>
+      this.watchMutation(options);
+}
+
+class Mutation$RequestOTP$HookResult {
+  Mutation$RequestOTP$HookResult(
+    this.runMutation,
+    this.result,
+  );
+
+  final RunMutation$Mutation$RequestOTP runMutation;
+
+  final graphql.QueryResult<Mutation$RequestOTP> result;
+}
+
+Mutation$RequestOTP$HookResult useMutation$RequestOTP(
+    [WidgetOptions$Mutation$RequestOTP? options]) {
+  final result = graphql_flutter
+      .useMutation(options ?? WidgetOptions$Mutation$RequestOTP());
+  return Mutation$RequestOTP$HookResult(
+    (variables, {optimisticResult, typedOptimisticResult}) =>
+        result.runMutation(
+      variables.toJson(),
+      optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+    ),
+    result.result,
+  );
+}
+
+graphql.ObservableQuery<Mutation$RequestOTP> useWatchMutation$RequestOTP(
+        WatchOptions$Mutation$RequestOTP options) =>
+    graphql_flutter.useWatchMutation(options);
+
+class WidgetOptions$Mutation$RequestOTP
+    extends graphql.MutationOptions<Mutation$RequestOTP> {
+  WidgetOptions$Mutation$RequestOTP({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$RequestOTP? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$RequestOTP? onCompleted,
+    graphql.OnMutationUpdate<Mutation$RequestOTP>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null ? null : _parserFn$Mutation$RequestOTP(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationRequestOTP,
+          parserFn: _parserFn$Mutation$RequestOTP,
+        );
+
+  final OnMutationCompleted$Mutation$RequestOTP? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+typedef RunMutation$Mutation$RequestOTP
+    = graphql.MultiSourceResult<Mutation$RequestOTP> Function(
+  Variables$Mutation$RequestOTP, {
+  Object? optimisticResult,
+  Mutation$RequestOTP? typedOptimisticResult,
+});
+typedef Builder$Mutation$RequestOTP = widgets.Widget Function(
+  RunMutation$Mutation$RequestOTP,
+  graphql.QueryResult<Mutation$RequestOTP>?,
+);
+
+class Mutation$RequestOTP$Widget
+    extends graphql_flutter.Mutation<Mutation$RequestOTP> {
+  Mutation$RequestOTP$Widget({
+    widgets.Key? key,
+    WidgetOptions$Mutation$RequestOTP? options,
+    required Builder$Mutation$RequestOTP builder,
+  }) : super(
+          key: key,
+          options: options ?? WidgetOptions$Mutation$RequestOTP(),
+          builder: (
+            run,
+            result,
+          ) =>
+              builder(
+            (
+              variables, {
+              optimisticResult,
+              typedOptimisticResult,
+            }) =>
+                run(
+              variables.toJson(),
+              optimisticResult:
+                  optimisticResult ?? typedOptimisticResult?.toJson(),
+            ),
+            result,
+          ),
+        );
+}
+
+class Mutation$RequestOTP$requestOTP {
+  Mutation$RequestOTP$requestOTP({
+    required this.message,
+    this.$__typename = 'RequestOTPResponse',
+  });
+
+  factory Mutation$RequestOTP$requestOTP.fromJson(Map<String, dynamic> json) {
+    final l$message = json['message'];
+    final l$$__typename = json['__typename'];
+    return Mutation$RequestOTP$requestOTP(
+      message: (l$message as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String message;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$message = message;
+    _resultData['message'] = l$message;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$message = message;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$message,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$RequestOTP$requestOTP ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$message = message;
+    final lOther$message = other.message;
+    if (l$message != lOther$message) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$RequestOTP$requestOTP
+    on Mutation$RequestOTP$requestOTP {
+  CopyWith$Mutation$RequestOTP$requestOTP<Mutation$RequestOTP$requestOTP>
+      get copyWith => CopyWith$Mutation$RequestOTP$requestOTP(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$RequestOTP$requestOTP<TRes> {
+  factory CopyWith$Mutation$RequestOTP$requestOTP(
+    Mutation$RequestOTP$requestOTP instance,
+    TRes Function(Mutation$RequestOTP$requestOTP) then,
+  ) = _CopyWithImpl$Mutation$RequestOTP$requestOTP;
+
+  factory CopyWith$Mutation$RequestOTP$requestOTP.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$RequestOTP$requestOTP;
+
+  TRes call({
+    String? message,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Mutation$RequestOTP$requestOTP<TRes>
+    implements CopyWith$Mutation$RequestOTP$requestOTP<TRes> {
+  _CopyWithImpl$Mutation$RequestOTP$requestOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$RequestOTP$requestOTP _instance;
+
+  final TRes Function(Mutation$RequestOTP$requestOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? message = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$RequestOTP$requestOTP(
+        message: message == _undefined || message == null
+            ? _instance.message
+            : (message as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Mutation$RequestOTP$requestOTP<TRes>
+    implements CopyWith$Mutation$RequestOTP$requestOTP<TRes> {
+  _CopyWithStubImpl$Mutation$RequestOTP$requestOTP(this._res);
+
+  TRes _res;
+
+  call({
+    String? message,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
+class Variables$Mutation$LoginUserWithOTP {
+  factory Variables$Mutation$LoginUserWithOTP({
+    required String phoneNumber,
+    required String otpCode,
+  }) =>
+      Variables$Mutation$LoginUserWithOTP._({
+        r'phoneNumber': phoneNumber,
+        r'otpCode': otpCode,
+      });
+
+  Variables$Mutation$LoginUserWithOTP._(this._$data);
+
+  factory Variables$Mutation$LoginUserWithOTP.fromJson(
+      Map<String, dynamic> data) {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = data['phoneNumber'];
+    result$data['phoneNumber'] = (l$phoneNumber as String);
+    final l$otpCode = data['otpCode'];
+    result$data['otpCode'] = (l$otpCode as String);
+    return Variables$Mutation$LoginUserWithOTP._(result$data);
+  }
+
+  Map<String, dynamic> _$data;
+
+  String get phoneNumber => (_$data['phoneNumber'] as String);
+
+  String get otpCode => (_$data['otpCode'] as String);
+
+  Map<String, dynamic> toJson() {
+    final result$data = <String, dynamic>{};
+    final l$phoneNumber = phoneNumber;
+    result$data['phoneNumber'] = l$phoneNumber;
+    final l$otpCode = otpCode;
+    result$data['otpCode'] = l$otpCode;
+    return result$data;
+  }
+
+  CopyWith$Variables$Mutation$LoginUserWithOTP<
+          Variables$Mutation$LoginUserWithOTP>
+      get copyWith => CopyWith$Variables$Mutation$LoginUserWithOTP(
+            this,
+            (i) => i,
+          );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Variables$Mutation$LoginUserWithOTP ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$phoneNumber = phoneNumber;
+    final lOther$phoneNumber = other.phoneNumber;
+    if (l$phoneNumber != lOther$phoneNumber) {
+      return false;
+    }
+    final l$otpCode = otpCode;
+    final lOther$otpCode = other.otpCode;
+    if (l$otpCode != lOther$otpCode) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    final l$phoneNumber = phoneNumber;
+    final l$otpCode = otpCode;
+    return Object.hashAll([
+      l$phoneNumber,
+      l$otpCode,
+    ]);
+  }
+}
+
+abstract class CopyWith$Variables$Mutation$LoginUserWithOTP<TRes> {
+  factory CopyWith$Variables$Mutation$LoginUserWithOTP(
+    Variables$Mutation$LoginUserWithOTP instance,
+    TRes Function(Variables$Mutation$LoginUserWithOTP) then,
+  ) = _CopyWithImpl$Variables$Mutation$LoginUserWithOTP;
+
+  factory CopyWith$Variables$Mutation$LoginUserWithOTP.stub(TRes res) =
+      _CopyWithStubImpl$Variables$Mutation$LoginUserWithOTP;
+
+  TRes call({
+    String? phoneNumber,
+    String? otpCode,
+  });
+}
+
+class _CopyWithImpl$Variables$Mutation$LoginUserWithOTP<TRes>
+    implements CopyWith$Variables$Mutation$LoginUserWithOTP<TRes> {
+  _CopyWithImpl$Variables$Mutation$LoginUserWithOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Variables$Mutation$LoginUserWithOTP _instance;
+
+  final TRes Function(Variables$Mutation$LoginUserWithOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? phoneNumber = _undefined,
+    Object? otpCode = _undefined,
+  }) =>
+      _then(Variables$Mutation$LoginUserWithOTP._({
+        ..._instance._$data,
+        if (phoneNumber != _undefined && phoneNumber != null)
+          'phoneNumber': (phoneNumber as String),
+        if (otpCode != _undefined && otpCode != null)
+          'otpCode': (otpCode as String),
+      }));
+}
+
+class _CopyWithStubImpl$Variables$Mutation$LoginUserWithOTP<TRes>
+    implements CopyWith$Variables$Mutation$LoginUserWithOTP<TRes> {
+  _CopyWithStubImpl$Variables$Mutation$LoginUserWithOTP(this._res);
+
+  TRes _res;
+
+  call({
+    String? phoneNumber,
+    String? otpCode,
+  }) =>
+      _res;
+}
+
+class Mutation$LoginUserWithOTP {
+  Mutation$LoginUserWithOTP({
+    this.loginUserWithOTP,
+    this.$__typename = 'Mutation',
+  });
+
+  factory Mutation$LoginUserWithOTP.fromJson(Map<String, dynamic> json) {
+    final l$loginUserWithOTP = json['loginUserWithOTP'];
+    final l$$__typename = json['__typename'];
+    return Mutation$LoginUserWithOTP(
+      loginUserWithOTP: l$loginUserWithOTP == null
+          ? null
+          : Mutation$LoginUserWithOTP$loginUserWithOTP.fromJson(
+              (l$loginUserWithOTP as Map<String, dynamic>)),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final Mutation$LoginUserWithOTP$loginUserWithOTP? loginUserWithOTP;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$loginUserWithOTP = loginUserWithOTP;
+    _resultData['loginUserWithOTP'] = l$loginUserWithOTP?.toJson();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$loginUserWithOTP = loginUserWithOTP;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$loginUserWithOTP,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$LoginUserWithOTP ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$loginUserWithOTP = loginUserWithOTP;
+    final lOther$loginUserWithOTP = other.loginUserWithOTP;
+    if (l$loginUserWithOTP != lOther$loginUserWithOTP) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$LoginUserWithOTP
+    on Mutation$LoginUserWithOTP {
+  CopyWith$Mutation$LoginUserWithOTP<Mutation$LoginUserWithOTP> get copyWith =>
+      CopyWith$Mutation$LoginUserWithOTP(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Mutation$LoginUserWithOTP<TRes> {
+  factory CopyWith$Mutation$LoginUserWithOTP(
+    Mutation$LoginUserWithOTP instance,
+    TRes Function(Mutation$LoginUserWithOTP) then,
+  ) = _CopyWithImpl$Mutation$LoginUserWithOTP;
+
+  factory CopyWith$Mutation$LoginUserWithOTP.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUserWithOTP;
+
+  TRes call({
+    Mutation$LoginUserWithOTP$loginUserWithOTP? loginUserWithOTP,
+    String? $__typename,
+  });
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes>
+      get loginUserWithOTP;
+}
+
+class _CopyWithImpl$Mutation$LoginUserWithOTP<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP<TRes> {
+  _CopyWithImpl$Mutation$LoginUserWithOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$LoginUserWithOTP _instance;
+
+  final TRes Function(Mutation$LoginUserWithOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? loginUserWithOTP = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$LoginUserWithOTP(
+        loginUserWithOTP: loginUserWithOTP == _undefined
+            ? _instance.loginUserWithOTP
+            : (loginUserWithOTP as Mutation$LoginUserWithOTP$loginUserWithOTP?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes>
+      get loginUserWithOTP {
+    final local$loginUserWithOTP = _instance.loginUserWithOTP;
+    return local$loginUserWithOTP == null
+        ? CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP.stub(
+            _then(_instance))
+        : CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP(
+            local$loginUserWithOTP, (e) => call(loginUserWithOTP: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$LoginUserWithOTP<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUserWithOTP(this._res);
+
+  TRes _res;
+
+  call({
+    Mutation$LoginUserWithOTP$loginUserWithOTP? loginUserWithOTP,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes>
+      get loginUserWithOTP =>
+          CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP.stub(_res);
+}
+
+const documentNodeMutationLoginUserWithOTP = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.mutation,
+    name: NameNode(value: 'LoginUserWithOTP'),
+    variableDefinitions: [
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'phoneNumber')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'otpCode')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'String'),
+          isNonNull: true,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
+    ],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'loginUserWithOTP'),
+        alias: null,
+        arguments: [
+          ArgumentNode(
+            name: NameNode(value: 'phoneNumber'),
+            value: VariableNode(name: NameNode(value: 'phoneNumber')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'otpCode'),
+            value: VariableNode(name: NameNode(value: 'otpCode')),
+          ),
+        ],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'userId'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'token'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: SelectionSetNode(selections: [
+              FieldNode(
+                name: NameNode(value: 'id'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'user'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'accessToken'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'refreshToken'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'accessTokenExpiry'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'refreshTokenExpiry'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'device'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'createdAt'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: 'updatedAt'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+              FieldNode(
+                name: NameNode(value: '__typename'),
+                alias: null,
+                arguments: [],
+                directives: [],
+                selectionSet: null,
+              ),
+            ]),
+          ),
+          FieldNode(
+            name: NameNode(value: 'message'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Mutation$LoginUserWithOTP _parserFn$Mutation$LoginUserWithOTP(
+        Map<String, dynamic> data) =>
+    Mutation$LoginUserWithOTP.fromJson(data);
+typedef OnMutationCompleted$Mutation$LoginUserWithOTP = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Mutation$LoginUserWithOTP?,
+);
+
+class Options$Mutation$LoginUserWithOTP
+    extends graphql.MutationOptions<Mutation$LoginUserWithOTP> {
+  Options$Mutation$LoginUserWithOTP({
+    String? operationName,
+    required Variables$Mutation$LoginUserWithOTP variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$LoginUserWithOTP? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$LoginUserWithOTP? onCompleted,
+    graphql.OnMutationUpdate<Mutation$LoginUserWithOTP>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$LoginUserWithOTP(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationLoginUserWithOTP,
+          parserFn: _parserFn$Mutation$LoginUserWithOTP,
+        );
+
+  final OnMutationCompleted$Mutation$LoginUserWithOTP? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+class WatchOptions$Mutation$LoginUserWithOTP
+    extends graphql.WatchQueryOptions<Mutation$LoginUserWithOTP> {
+  WatchOptions$Mutation$LoginUserWithOTP({
+    String? operationName,
+    required Variables$Mutation$LoginUserWithOTP variables,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$LoginUserWithOTP? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          variables: variables.toJson(),
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeMutationLoginUserWithOTP,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Mutation$LoginUserWithOTP,
+        );
+}
+
+extension ClientExtension$Mutation$LoginUserWithOTP on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Mutation$LoginUserWithOTP>>
+      mutate$LoginUserWithOTP(
+              Options$Mutation$LoginUserWithOTP options) async =>
+          await this.mutate(options);
+  graphql.ObservableQuery<Mutation$LoginUserWithOTP>
+      watchMutation$LoginUserWithOTP(
+              WatchOptions$Mutation$LoginUserWithOTP options) =>
+          this.watchMutation(options);
+}
+
+class Mutation$LoginUserWithOTP$HookResult {
+  Mutation$LoginUserWithOTP$HookResult(
+    this.runMutation,
+    this.result,
+  );
+
+  final RunMutation$Mutation$LoginUserWithOTP runMutation;
+
+  final graphql.QueryResult<Mutation$LoginUserWithOTP> result;
+}
+
+Mutation$LoginUserWithOTP$HookResult useMutation$LoginUserWithOTP(
+    [WidgetOptions$Mutation$LoginUserWithOTP? options]) {
+  final result = graphql_flutter
+      .useMutation(options ?? WidgetOptions$Mutation$LoginUserWithOTP());
+  return Mutation$LoginUserWithOTP$HookResult(
+    (variables, {optimisticResult, typedOptimisticResult}) =>
+        result.runMutation(
+      variables.toJson(),
+      optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+    ),
+    result.result,
+  );
+}
+
+graphql.ObservableQuery<Mutation$LoginUserWithOTP>
+    useWatchMutation$LoginUserWithOTP(
+            WatchOptions$Mutation$LoginUserWithOTP options) =>
+        graphql_flutter.useWatchMutation(options);
+
+class WidgetOptions$Mutation$LoginUserWithOTP
+    extends graphql.MutationOptions<Mutation$LoginUserWithOTP> {
+  WidgetOptions$Mutation$LoginUserWithOTP({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Mutation$LoginUserWithOTP? typedOptimisticResult,
+    graphql.Context? context,
+    OnMutationCompleted$Mutation$LoginUserWithOTP? onCompleted,
+    graphql.OnMutationUpdate<Mutation$LoginUserWithOTP>? update,
+    graphql.OnError? onError,
+  })  : onCompletedWithParsed = onCompleted,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          onCompleted: onCompleted == null
+              ? null
+              : (data) => onCompleted(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Mutation$LoginUserWithOTP(data),
+                  ),
+          update: update,
+          onError: onError,
+          document: documentNodeMutationLoginUserWithOTP,
+          parserFn: _parserFn$Mutation$LoginUserWithOTP,
+        );
+
+  final OnMutationCompleted$Mutation$LoginUserWithOTP? onCompletedWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onCompleted == null
+            ? super.properties
+            : super.properties.where((property) => property != onCompleted),
+        onCompletedWithParsed,
+      ];
+}
+
+typedef RunMutation$Mutation$LoginUserWithOTP
+    = graphql.MultiSourceResult<Mutation$LoginUserWithOTP> Function(
+  Variables$Mutation$LoginUserWithOTP, {
+  Object? optimisticResult,
+  Mutation$LoginUserWithOTP? typedOptimisticResult,
+});
+typedef Builder$Mutation$LoginUserWithOTP = widgets.Widget Function(
+  RunMutation$Mutation$LoginUserWithOTP,
+  graphql.QueryResult<Mutation$LoginUserWithOTP>?,
+);
+
+class Mutation$LoginUserWithOTP$Widget
+    extends graphql_flutter.Mutation<Mutation$LoginUserWithOTP> {
+  Mutation$LoginUserWithOTP$Widget({
+    widgets.Key? key,
+    WidgetOptions$Mutation$LoginUserWithOTP? options,
+    required Builder$Mutation$LoginUserWithOTP builder,
+  }) : super(
+          key: key,
+          options: options ?? WidgetOptions$Mutation$LoginUserWithOTP(),
+          builder: (
+            run,
+            result,
+          ) =>
+              builder(
+            (
+              variables, {
+              optimisticResult,
+              typedOptimisticResult,
+            }) =>
+                run(
+              variables.toJson(),
+              optimisticResult:
+                  optimisticResult ?? typedOptimisticResult?.toJson(),
+            ),
+            result,
+          ),
+        );
+}
+
+class Mutation$LoginUserWithOTP$loginUserWithOTP {
+  Mutation$LoginUserWithOTP$loginUserWithOTP({
+    required this.userId,
+    required this.token,
+    required this.message,
+    this.$__typename = 'LoginUserResponse',
+  });
+
+  factory Mutation$LoginUserWithOTP$loginUserWithOTP.fromJson(
+      Map<String, dynamic> json) {
+    final l$userId = json['userId'];
+    final l$token = json['token'];
+    final l$message = json['message'];
+    final l$$__typename = json['__typename'];
+    return Mutation$LoginUserWithOTP$loginUserWithOTP(
+      userId: (l$userId as String),
+      token: Mutation$LoginUserWithOTP$loginUserWithOTP$token.fromJson(
+          (l$token as Map<String, dynamic>)),
+      message: (l$message as String),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String userId;
+
+  final Mutation$LoginUserWithOTP$loginUserWithOTP$token token;
+
+  final String message;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$userId = userId;
+    _resultData['userId'] = l$userId;
+    final l$token = token;
+    _resultData['token'] = l$token.toJson();
+    final l$message = message;
+    _resultData['message'] = l$message;
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$userId = userId;
+    final l$token = token;
+    final l$message = message;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$userId,
+      l$token,
+      l$message,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$LoginUserWithOTP$loginUserWithOTP ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$userId = userId;
+    final lOther$userId = other.userId;
+    if (l$userId != lOther$userId) {
+      return false;
+    }
+    final l$token = token;
+    final lOther$token = other.token;
+    if (l$token != lOther$token) {
+      return false;
+    }
+    final l$message = message;
+    final lOther$message = other.message;
+    if (l$message != lOther$message) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$LoginUserWithOTP$loginUserWithOTP
+    on Mutation$LoginUserWithOTP$loginUserWithOTP {
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<
+          Mutation$LoginUserWithOTP$loginUserWithOTP>
+      get copyWith => CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes> {
+  factory CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP(
+    Mutation$LoginUserWithOTP$loginUserWithOTP instance,
+    TRes Function(Mutation$LoginUserWithOTP$loginUserWithOTP) then,
+  ) = _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP;
+
+  factory CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP.stub(TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP;
+
+  TRes call({
+    String? userId,
+    Mutation$LoginUserWithOTP$loginUserWithOTP$token? token,
+    String? message,
+    String? $__typename,
+  });
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> get token;
+}
+
+class _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes> {
+  _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$LoginUserWithOTP$loginUserWithOTP _instance;
+
+  final TRes Function(Mutation$LoginUserWithOTP$loginUserWithOTP) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? userId = _undefined,
+    Object? token = _undefined,
+    Object? message = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$LoginUserWithOTP$loginUserWithOTP(
+        userId: userId == _undefined || userId == null
+            ? _instance.userId
+            : (userId as String),
+        token: token == _undefined || token == null
+            ? _instance.token
+            : (token as Mutation$LoginUserWithOTP$loginUserWithOTP$token),
+        message: message == _undefined || message == null
+            ? _instance.message
+            : (message as String),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> get token {
+    final local$token = _instance.token;
+    return CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+        local$token, (e) => call(token: e));
+  }
+}
+
+class _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP(this._res);
+
+  TRes _res;
+
+  call({
+    String? userId,
+    Mutation$LoginUserWithOTP$loginUserWithOTP$token? token,
+    String? message,
+    String? $__typename,
+  }) =>
+      _res;
+
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> get token =>
+      CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token.stub(_res);
+}
+
+class Mutation$LoginUserWithOTP$loginUserWithOTP$token {
+  Mutation$LoginUserWithOTP$loginUserWithOTP$token({
+    required this.id,
+    required this.user,
+    required this.accessToken,
+    required this.refreshToken,
+    required this.accessTokenExpiry,
+    required this.refreshTokenExpiry,
+    required this.device,
+    required this.createdAt,
+    required this.updatedAt,
+    this.$__typename = 'Token',
+  });
+
+  factory Mutation$LoginUserWithOTP$loginUserWithOTP$token.fromJson(
+      Map<String, dynamic> json) {
+    final l$id = json['id'];
+    final l$user = json['user'];
+    final l$accessToken = json['accessToken'];
+    final l$refreshToken = json['refreshToken'];
+    final l$accessTokenExpiry = json['accessTokenExpiry'];
+    final l$refreshTokenExpiry = json['refreshTokenExpiry'];
+    final l$device = json['device'];
+    final l$createdAt = json['createdAt'];
+    final l$updatedAt = json['updatedAt'];
+    final l$$__typename = json['__typename'];
+    return Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+      id: (l$id as String),
+      user: (l$user as String),
+      accessToken: (l$accessToken as String),
+      refreshToken: (l$refreshToken as String),
+      accessTokenExpiry: dateTimeFromJson(l$accessTokenExpiry),
+      refreshTokenExpiry: dateTimeFromJson(l$refreshTokenExpiry),
+      device: (l$device as String),
+      createdAt: dateTimeFromJson(l$createdAt),
+      updatedAt: dateTimeFromJson(l$updatedAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String id;
+
+  final String user;
+
+  final String accessToken;
+
+  final String refreshToken;
+
+  final DateTime accessTokenExpiry;
+
+  final DateTime refreshTokenExpiry;
+
+  final String device;
+
+  final DateTime createdAt;
+
+  final DateTime updatedAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$id = id;
+    _resultData['id'] = l$id;
+    final l$user = user;
+    _resultData['user'] = l$user;
+    final l$accessToken = accessToken;
+    _resultData['accessToken'] = l$accessToken;
+    final l$refreshToken = refreshToken;
+    _resultData['refreshToken'] = l$refreshToken;
+    final l$accessTokenExpiry = accessTokenExpiry;
+    _resultData['accessTokenExpiry'] = dateTimeToJson(l$accessTokenExpiry);
+    final l$refreshTokenExpiry = refreshTokenExpiry;
+    _resultData['refreshTokenExpiry'] = dateTimeToJson(l$refreshTokenExpiry);
+    final l$device = device;
+    _resultData['device'] = l$device;
+    final l$createdAt = createdAt;
+    _resultData['createdAt'] = dateTimeToJson(l$createdAt);
+    final l$updatedAt = updatedAt;
+    _resultData['updatedAt'] = dateTimeToJson(l$updatedAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$id = id;
+    final l$user = user;
+    final l$accessToken = accessToken;
+    final l$refreshToken = refreshToken;
+    final l$accessTokenExpiry = accessTokenExpiry;
+    final l$refreshTokenExpiry = refreshTokenExpiry;
+    final l$device = device;
+    final l$createdAt = createdAt;
+    final l$updatedAt = updatedAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$id,
+      l$user,
+      l$accessToken,
+      l$refreshToken,
+      l$accessTokenExpiry,
+      l$refreshTokenExpiry,
+      l$device,
+      l$createdAt,
+      l$updatedAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Mutation$LoginUserWithOTP$loginUserWithOTP$token ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$id = id;
+    final lOther$id = other.id;
+    if (l$id != lOther$id) {
+      return false;
+    }
+    final l$user = user;
+    final lOther$user = other.user;
+    if (l$user != lOther$user) {
+      return false;
+    }
+    final l$accessToken = accessToken;
+    final lOther$accessToken = other.accessToken;
+    if (l$accessToken != lOther$accessToken) {
+      return false;
+    }
+    final l$refreshToken = refreshToken;
+    final lOther$refreshToken = other.refreshToken;
+    if (l$refreshToken != lOther$refreshToken) {
+      return false;
+    }
+    final l$accessTokenExpiry = accessTokenExpiry;
+    final lOther$accessTokenExpiry = other.accessTokenExpiry;
+    if (l$accessTokenExpiry != lOther$accessTokenExpiry) {
+      return false;
+    }
+    final l$refreshTokenExpiry = refreshTokenExpiry;
+    final lOther$refreshTokenExpiry = other.refreshTokenExpiry;
+    if (l$refreshTokenExpiry != lOther$refreshTokenExpiry) {
+      return false;
+    }
+    final l$device = device;
+    final lOther$device = other.device;
+    if (l$device != lOther$device) {
+      return false;
+    }
+    final l$createdAt = createdAt;
+    final lOther$createdAt = other.createdAt;
+    if (l$createdAt != lOther$createdAt) {
+      return false;
+    }
+    final l$updatedAt = updatedAt;
+    final lOther$updatedAt = other.updatedAt;
+    if (l$updatedAt != lOther$updatedAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Mutation$LoginUserWithOTP$loginUserWithOTP$token
+    on Mutation$LoginUserWithOTP$loginUserWithOTP$token {
+  CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<
+          Mutation$LoginUserWithOTP$loginUserWithOTP$token>
+      get copyWith => CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> {
+  factory CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+    Mutation$LoginUserWithOTP$loginUserWithOTP$token instance,
+    TRes Function(Mutation$LoginUserWithOTP$loginUserWithOTP$token) then,
+  ) = _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token;
+
+  factory CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token.stub(
+          TRes res) =
+      _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token;
+
+  TRes call({
+    String? id,
+    String? user,
+    String? accessToken,
+    String? refreshToken,
+    DateTime? accessTokenExpiry,
+    DateTime? refreshTokenExpiry,
+    String? device,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> {
+  _CopyWithImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+    this._instance,
+    this._then,
+  );
+
+  final Mutation$LoginUserWithOTP$loginUserWithOTP$token _instance;
+
+  final TRes Function(Mutation$LoginUserWithOTP$loginUserWithOTP$token) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? id = _undefined,
+    Object? user = _undefined,
+    Object? accessToken = _undefined,
+    Object? refreshToken = _undefined,
+    Object? accessTokenExpiry = _undefined,
+    Object? refreshTokenExpiry = _undefined,
+    Object? device = _undefined,
+    Object? createdAt = _undefined,
+    Object? updatedAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Mutation$LoginUserWithOTP$loginUserWithOTP$token(
+        id: id == _undefined || id == null ? _instance.id : (id as String),
+        user: user == _undefined || user == null
+            ? _instance.user
+            : (user as String),
+        accessToken: accessToken == _undefined || accessToken == null
+            ? _instance.accessToken
+            : (accessToken as String),
+        refreshToken: refreshToken == _undefined || refreshToken == null
+            ? _instance.refreshToken
+            : (refreshToken as String),
+        accessTokenExpiry:
+            accessTokenExpiry == _undefined || accessTokenExpiry == null
+                ? _instance.accessTokenExpiry
+                : (accessTokenExpiry as DateTime),
+        refreshTokenExpiry:
+            refreshTokenExpiry == _undefined || refreshTokenExpiry == null
+                ? _instance.refreshTokenExpiry
+                : (refreshTokenExpiry as DateTime),
+        device: device == _undefined || device == null
+            ? _instance.device
+            : (device as String),
+        createdAt: createdAt == _undefined || createdAt == null
+            ? _instance.createdAt
+            : (createdAt as DateTime),
+        updatedAt: updatedAt == _undefined || updatedAt == null
+            ? _instance.updatedAt
+            : (updatedAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes>
+    implements CopyWith$Mutation$LoginUserWithOTP$loginUserWithOTP$token<TRes> {
+  _CopyWithStubImpl$Mutation$LoginUserWithOTP$loginUserWithOTP$token(this._res);
+
+  TRes _res;
+
+  call({
+    String? id,
+    String? user,
+    String? accessToken,
+    String? refreshToken,
+    DateTime? accessTokenExpiry,
+    DateTime? refreshTokenExpiry,
+    String? device,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? $__typename,
+  }) =>
+      _res;
+}
+
 class Variables$Mutation$RefreshToken {
   factory Variables$Mutation$RefreshToken({
     required String accessToken,

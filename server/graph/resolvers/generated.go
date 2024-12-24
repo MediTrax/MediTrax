@@ -291,10 +291,12 @@ type ComplexityRoot struct {
 		EarnPoints                   func(childComplexity int, pointsEarned float64, reason string) int
 		EvaluateHealthRiskAssessment func(childComplexity int, filledQuestionnaire model.FilledQuestionnaire) int
 		LoginUser                    func(childComplexity int, phoneNumber string, password string) int
+		LoginUserWithOtp             func(childComplexity int, phoneNumber string, otpCode string) int
 		RefreshToken                 func(childComplexity int, accessToken string, refreshToken string, device string) int
+		RequestOtp                   func(childComplexity int, phoneNumber string) int
 		RequestPasswordReset         func(childComplexity int, phoneNumber string) int
 		ResetPassword                func(childComplexity int, resetCode string, newPassword string) int
-		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks string) int
+		ShareProfile                 func(childComplexity int, phoneNumber string, accessLevel string, remarks *string) int
 		TakeMedication               func(childComplexity int, reminderID string) int
 		UnshareProfile               func(childComplexity int, targetUserID string) int
 		UpdateHealthMetric           func(childComplexity int, metricID string, value *float64, unit *string, recordedAt *time.Time) int
@@ -359,6 +361,10 @@ type ComplexityRoot struct {
 
 	RecordObject struct {
 		Data func(childComplexity int) int
+	}
+
+	RequestOTPResponse struct {
+		Message func(childComplexity int) int
 	}
 
 	RequestPasswordResetResponse struct {
@@ -522,11 +528,13 @@ type MutationResolver interface {
 	RefreshToken(ctx context.Context, accessToken string, refreshToken string, device string) (*model.Token, error)
 	CreateUser(ctx context.Context, phoneNumber string, password string, username string, role string) (*model.CreateUserResponse, error)
 	LoginUser(ctx context.Context, phoneNumber string, password string) (*model.LoginUserResponse, error)
+	LoginUserWithOtp(ctx context.Context, phoneNumber string, otpCode string) (*model.LoginUserResponse, error)
+	RequestOtp(ctx context.Context, phoneNumber string) (*model.RequestOTPResponse, error)
 	UpdateUser(ctx context.Context, name *string, phoneNumber *string, password *string) (*model.UpdateUserResponse, error)
 	DeleteUser(ctx context.Context) (*model.DeleteUserResponse, error)
 	RequestPasswordReset(ctx context.Context, phoneNumber string) (*model.RequestPasswordResetResponse, error)
 	ResetPassword(ctx context.Context, resetCode string, newPassword string) (*model.ResetPasswordResponse, error)
-	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks string) (*model.ShareProfileResponse, error)
+	ShareProfile(ctx context.Context, phoneNumber string, accessLevel string, remarks *string) (*model.ShareProfileResponse, error)
 	UnshareProfile(ctx context.Context, targetUserID string) (*model.UnshareProfileResponse, error)
 }
 type QueryResolver interface {
@@ -1633,6 +1641,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.LoginUser(childComplexity, args["phoneNumber"].(string), args["password"].(string)), true
 
+	case "Mutation.loginUserWithOTP":
+		if e.complexity.Mutation.LoginUserWithOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_loginUserWithOTP_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.LoginUserWithOtp(childComplexity, args["phoneNumber"].(string), args["otpCode"].(string)), true
+
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
 			break
@@ -1644,6 +1664,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["accessToken"].(string), args["refreshToken"].(string), args["device"].(string)), true
+
+	case "Mutation.requestOTP":
+		if e.complexity.Mutation.RequestOtp == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestOTP_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestOtp(childComplexity, args["phoneNumber"].(string)), true
 
 	case "Mutation.requestPasswordReset":
 		if e.complexity.Mutation.RequestPasswordReset == nil {
@@ -1679,7 +1711,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ShareProfile(childComplexity, args["phoneNumber"].(string), args["accessLevel"].(string), args["remarks"].(string)), true
+		return e.complexity.Mutation.ShareProfile(childComplexity, args["phoneNumber"].(string), args["accessLevel"].(string), args["remarks"].(*string)), true
 
 	case "Mutation.takeMedication":
 		if e.complexity.Mutation.TakeMedication == nil {
@@ -2077,6 +2109,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RecordObject.Data(childComplexity), true
+
+	case "RequestOTPResponse.message":
+		if e.complexity.RequestOTPResponse.Message == nil {
+			break
+		}
+
+		return e.complexity.RequestOTPResponse.Message(childComplexity), true
 
 	case "RequestPasswordResetResponse.message":
 		if e.complexity.RequestPasswordResetResponse.Message == nil {
@@ -4403,6 +4442,16 @@ type DeleteUserResponse {
 }
 
 """
+Response type for requesting an OTP.
+"""
+type RequestOTPResponse {
+  """
+  A message indicating the result of the OTP request.
+  """
+  message: String!
+}
+
+"""
 Response type for requesting a password reset.
 """
 type RequestPasswordResetResponse {
@@ -4606,6 +4655,31 @@ extend type Mutation {
   ): LoginUserResponse
 
   """
+  Logs in a user with OTP.
+  """
+  loginUserWithOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+
+    """
+    The OTP code of the user.
+    """
+    otpCode: String!
+  ): LoginUserResponse
+
+  """
+  Requests an OTP for a user.
+  """
+  requestOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestOTPResponse
+
+  """
   Updates the details of the current user.
   """
   updateUser(
@@ -4629,12 +4703,63 @@ extend type Mutation {
   Deletes the current user.
   """
   deleteUser: DeleteUserResponse
-  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
-  resetPassword(resetCode: String!, newPassword: String!): ResetPasswordResponse
-  
-  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
-  unshareProfile(targetUserId: String!): UnshareProfileResponse!
-}`, BuiltIn: false},
+
+  """
+  Requests a password reset for a user.
+  """
+  requestPasswordReset(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestPasswordResetResponse
+
+  """
+  Resets a user's password.
+  """
+  resetPassword(
+    """
+    The reset code for the password reset.
+    """
+    resetCode: String!
+
+    """
+    The new password for the user.
+    """
+    newPassword: String!
+  ): ResetPasswordResponse
+
+  """
+  Shares a profile with another user.
+  """
+  shareProfile(
+    """
+    The phone number of the user to share the profile with.
+    """
+    phoneNumber: String!
+
+    """
+    The access level of the profile.
+    """
+    accessLevel: String!
+
+    """
+    The remarks of the profile.
+    """
+    remarks: String
+  ): ShareProfileResponse!
+
+  """
+  Unshares a profile with another user.
+  """
+  unshareProfile(
+    """
+    The ID of the user to unshare the profile with.
+    """
+    targetUserId: String!
+  ): UnshareProfileResponse!
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -5311,6 +5436,47 @@ func (ec *executionContext) field_Mutation_evaluateHealthRiskAssessment_argsFill
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_loginUserWithOTP_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_loginUserWithOTP_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phoneNumber"] = arg0
+	arg1, err := ec.field_Mutation_loginUserWithOTP_argsOtpCode(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["otpCode"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_loginUserWithOTP_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_loginUserWithOTP_argsOtpCode(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otpCode"))
+	if tmp, ok := rawArgs["otpCode"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_loginUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5404,6 +5570,29 @@ func (ec *executionContext) field_Mutation_refreshToken_argsDevice(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("device"))
 	if tmp, ok := rawArgs["device"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestOTP_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_requestOTP_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phoneNumber"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_requestOTP_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phoneNumber"))
+	if tmp, ok := rawArgs["phoneNumber"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -5524,13 +5713,13 @@ func (ec *executionContext) field_Mutation_shareProfile_argsAccessLevel(
 func (ec *executionContext) field_Mutation_shareProfile_argsRemarks(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (*string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("remarks"))
 	if tmp, ok := rawArgs["remarks"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -13168,6 +13357,122 @@ func (ec *executionContext) fieldContext_Mutation_loginUser(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_loginUserWithOTP(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_loginUserWithOTP(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().LoginUserWithOtp(rctx, fc.Args["phoneNumber"].(string), fc.Args["otpCode"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.LoginUserResponse)
+	fc.Result = res
+	return ec.marshalOLoginUserResponse2ᚖmeditraxᚋgraphᚋmodelᚐLoginUserResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_loginUserWithOTP(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_LoginUserResponse_userId(ctx, field)
+			case "token":
+				return ec.fieldContext_LoginUserResponse_token(ctx, field)
+			case "message":
+				return ec.fieldContext_LoginUserResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LoginUserResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_loginUserWithOTP_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_requestOTP(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_requestOTP(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RequestOtp(rctx, fc.Args["phoneNumber"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.RequestOTPResponse)
+	fc.Result = res
+	return ec.marshalORequestOTPResponse2ᚖmeditraxᚋgraphᚋmodelᚐRequestOTPResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_requestOTP(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_RequestOTPResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RequestOTPResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestOTP_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_updateUser(ctx, field)
 	if err != nil {
@@ -13397,7 +13702,7 @@ func (ec *executionContext) _Mutation_shareProfile(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ShareProfile(rctx, fc.Args["phoneNumber"].(string), fc.Args["accessLevel"].(string), fc.Args["remarks"].(string))
+		return ec.resolvers.Mutation().ShareProfile(rctx, fc.Args["phoneNumber"].(string), fc.Args["accessLevel"].(string), fc.Args["remarks"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15542,6 +15847,50 @@ func (ec *executionContext) _RecordObject_data(ctx context.Context, field graphq
 func (ec *executionContext) fieldContext_RecordObject_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecordObject",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RequestOTPResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.RequestOTPResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RequestOTPResponse_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RequestOTPResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RequestOTPResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -22493,6 +22842,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_loginUser(ctx, field)
 			})
+		case "loginUserWithOTP":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_loginUserWithOTP(ctx, field)
+			})
+		case "requestOTP":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_requestOTP(ctx, field)
+			})
 		case "updateUser":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateUser(ctx, field)
@@ -23235,6 +23592,45 @@ func (ec *executionContext) _RecordObject(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("RecordObject")
 		case "data":
 			out.Values[i] = ec._RecordObject_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var requestOTPResponseImplementors = []string{"RequestOTPResponse"}
+
+func (ec *executionContext) _RequestOTPResponse(ctx context.Context, sel ast.SelectionSet, obj *model.RequestOTPResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, requestOTPResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RequestOTPResponse")
+		case "message":
+			out.Values[i] = ec._RequestOTPResponse_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -25799,6 +26195,13 @@ func (ec *executionContext) marshalOQuestionnaireObject2ᚖmeditraxᚋgraphᚋmo
 		return graphql.Null
 	}
 	return ec._QuestionnaireObject(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORequestOTPResponse2ᚖmeditraxᚋgraphᚋmodelᚐRequestOTPResponse(ctx context.Context, sel ast.SelectionSet, v *model.RequestOTPResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RequestOTPResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalORequestPasswordResetResponse2ᚖmeditraxᚋgraphᚋmodelᚐRequestPasswordResetResponse(ctx context.Context, sel ast.SelectionSet, v *model.RequestPasswordResetResponse) graphql.Marshaler {
