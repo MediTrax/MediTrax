@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:math' as math;
 import 'dart:convert';
 import 'package:meditrax/providers/health_risk_provider.dart';
 import 'package:meditrax/models/health_risk_assessment.dart';
@@ -33,7 +34,7 @@ class _HealthRiskAssessmentScreenState extends ConsumerState<HealthRiskAssessmen
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
         data: (questionnaire) => questionnaire == null
-            ? const Center(child: Text('No questions available'))
+            ? const Center(child: CircularProgressIndicator())
             : QuestionnaireWidget(questionnaire: questionnaire),
       ),
     );
@@ -52,10 +53,46 @@ class QuestionnaireWidget extends ConsumerStatefulWidget {
   ConsumerState<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
 }
 
-class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
+class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with SingleTickerProviderStateMixin {
   int _currentQuestionIndex = 0;
   String? _selectedAnswer;
   final Map<int, String> _answers = {};
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _progressAnimation = Tween<double>(
+      begin: 0,
+      end: 1 / widget.questionnaire.data.length,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+    ));
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   List<HealthResponse> _getResponses() {
     return _answers.entries.map((entry) => HealthResponse(
@@ -143,20 +180,39 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
     // Handle numeric input (type 3)
     if (questionType == 3) {
       return [
-        TextField(
-          decoration: const InputDecoration(
-            hintText: '请输入数字',
-            border: OutlineInputBorder(),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade200,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-          ],
-          onChanged: (value) {
-            if (value.isEmpty || double.tryParse(value) != null) {
-              _handleAnswerSelection(value);
-            }
-          },
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: '请输入数字',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+            ],
+            onChanged: (value) {
+              if (value.isEmpty || double.tryParse(value) != null) {
+                _handleAnswerSelection(value);
+              }
+            },
+          ),
         ),
       ];
     }
@@ -164,12 +220,32 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
     // Handle text input (type 2)
     if (questionType == 2) {
       return [
-        TextField(
-          decoration: const InputDecoration(
-            hintText: '请输入您的答案',
-            border: OutlineInputBorder(),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade200,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          onChanged: _handleAnswerSelection,
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: '请输入您的答案',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+            onChanged: _handleAnswerSelection,
+            maxLines: 3,
+          ),
         ),
       ];
     }
@@ -178,22 +254,49 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
     if (questionType == 1) {
       return choices?.map((choice) => Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
-        child: CheckboxListTile(
-          title: Text(choice),
-          value: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false,
-          onChanged: (checked) {
-            if (checked == true) {
-              var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
-              currentAnswers.add(choice);
-              _handleAnswerSelection(currentAnswers.join(','));
-            } else {
-              var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
-              currentAnswers.remove(choice);
-              _handleAnswerSelection(currentAnswers.join(','));
-            }
-          },
-          activeColor: Colors.black,
-          contentPadding: EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
+                ? Colors.blue.shade50
+                : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
+                  ? Colors.blue.shade400
+                  : Colors.grey.shade300,
+            ),
+          ),
+          child: CheckboxListTile(
+            title: Text(
+              choice,
+              style: TextStyle(
+                color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
+                    ? Colors.blue.shade700
+                    : Colors.black87,
+                fontWeight: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+              ),
+            ),
+            value: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false,
+            onChanged: (checked) {
+              if (checked == true) {
+                var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
+                currentAnswers.add(choice);
+                _handleAnswerSelection(currentAnswers.join(','));
+              } else {
+                var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
+                currentAnswers.remove(choice);
+                _handleAnswerSelection(currentAnswers.join(','));
+              }
+            },
+            activeColor: Colors.blue.shade400,
+            checkColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
       )).toList() ?? [];
     }
@@ -201,13 +304,31 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
     // Handle single choice (type 0)
     return choices?.map((choice) => Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
-      child: RadioListTile<String>(
-        title: Text(choice),
-        value: choice,
-        groupValue: _selectedAnswer,
-        onChanged: _handleAnswerSelection,
-        activeColor: Colors.black,
-        contentPadding: EdgeInsets.zero,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _selectedAnswer == choice ? Colors.blue.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _selectedAnswer == choice ? Colors.blue.shade400 : Colors.grey.shade300,
+          ),
+        ),
+        child: RadioListTile<String>(
+          title: Text(
+            choice,
+            style: TextStyle(
+              color: _selectedAnswer == choice ? Colors.blue.shade700 : Colors.black87,
+              fontWeight: _selectedAnswer == choice ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          value: choice,
+          groupValue: _selectedAnswer,
+          onChanged: _handleAnswerSelection,
+          activeColor: Colors.blue.shade400,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     )).toList() ?? [];
   }
@@ -216,71 +337,164 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
   Widget build(BuildContext context) {
     final questions = widget.questionnaire.data;
     final currentQuestion = questions[_currentQuestionIndex];
+    final progress = (_currentQuestionIndex + 1) / questions.length;
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Progress Indicator
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '问题 ${_currentQuestionIndex + 1} / ${questions.length}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    currentQuestion.question,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ..._buildOptions(currentQuestion.choices, currentQuestion.questionType),
-                  const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (_currentQuestionIndex > 0)
-                        OutlinedButton(
-                          onPressed: _handlePrevious,
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(120, 48),
-                          ),
-                          child: const Text('上一题'),
-                        )
-                      else
-                        const SizedBox(width: 120),
-                      ElevatedButton(
-                        onPressed: _selectedAnswer != null ? _handleNext : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(120, 48),
-                          disabledBackgroundColor: Colors.grey[300],
+                      Text(
+                        '问题 ${_currentQuestionIndex + 1} / ${questions.length}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
                         ),
-                        child: Text(
-                          _currentQuestionIndex == questions.length - 1
-                              ? '完成'
-                              : '下一题',
+                      ),
+                      Text(
+                        '${(progress * 100).toInt()}%',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.blue.shade400,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 32),
+
+              // Question Card
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.1, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Card(
+                    key: ValueKey<int>(_currentQuestionIndex),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Question Text
+                          Text(
+                            currentQuestion.question,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Options
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: _buildOptions(
+                                  currentQuestion.choices,
+                                  currentQuestion.questionType,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Navigation Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (_currentQuestionIndex > 0)
+                    OutlinedButton.icon(
+                      onPressed: _handlePrevious,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('上一题'),
+                    )
+                  else
+                    const SizedBox(width: 120),
+                  FilledButton.icon(
+                    onPressed: _selectedAnswer != null ? _handleNext : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.blue.shade600,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: Icon(
+                      _currentQuestionIndex == questions.length - 1
+                          ? Icons.check_circle
+                          : Icons.arrow_forward,
+                    ),
+                    label: Text(
+                      _currentQuestionIndex == questions.length - 1
+                          ? '完成'
+                          : '下一题',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

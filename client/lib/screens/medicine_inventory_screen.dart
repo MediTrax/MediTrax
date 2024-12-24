@@ -2264,10 +2264,43 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     }
   }
 
-  Future<void> _handleReminderToggle(
-      MedicationReminder reminder, bool value) async {
+  Future<void> _handleReminderToggle(MedicationReminder reminder, bool value) async {
     // Only show confirmation dialog when marking as taken
     if (value) {
+      // Check if the reminder is for today or past
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final reminderDate = DateTime(
+        reminder.reminderTime.year,
+        reminder.reminderTime.month,
+        reminder.reminderTime.day,
+      );
+
+      // If the reminder is for a future date, show warning and return
+      if (reminderDate.isAfter(today)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('不能提前服用未来的药物'),
+                ],
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.fixed,
+            ),
+          );
+        }
+        return;
+      }
+
       final reminderDetails = await ref
           .read(medicationReminderProvider.notifier)
           .getReminderDetails(reminder.id);
