@@ -91,7 +91,15 @@ class HealthRisk extends _$HealthRisk {
           );
 
       if (result.hasException) {
-        throw result.exception!;
+        final errorMessage = result.exception?.graphqlErrors.map((error) {
+          print('GraphQL Error: ${error.message}');
+          print('Error Location: ${error.locations}');
+          print('Error Path: ${error.path}');
+          print('Error Extensions: ${error.extensions}');
+          return error.message;
+        }).join('\n');
+        
+        throw Exception(errorMessage ?? 'Unknown GraphQL Error');
       }
 
       final evaluationData = result.data?['evaluateHealthRiskAssessment'];
@@ -108,7 +116,8 @@ class HealthRisk extends _$HealthRisk {
         return true;
       }
       return false;
-    } catch (e, stackTrace) {
+    } catch (e) {
+      print('Error in evaluateHealthRiskAssessment: $e');
       return false;
     }
   }

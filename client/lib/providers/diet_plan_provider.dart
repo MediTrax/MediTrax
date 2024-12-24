@@ -103,6 +103,10 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
       state = AsyncValue.error(error, stackTrace);
     }
   }
+
+  void clearFoodSpecs() {
+    state = const AsyncValue.data(null);
+  }
 }
 
 class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommendation?>> {
@@ -166,5 +170,9 @@ class FoodRecommendationNotifier extends StateNotifier<AsyncValue<FoodRecommenda
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
+  }
+
+  void clearRecommendation() {
+    state = const AsyncValue.data(null);
   }
 }

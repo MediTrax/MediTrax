@@ -19,6 +19,22 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // 清空历史结果
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(foodSpecsProvider.notifier).clearFoodSpecs();
+      ref.read(foodRecommendationProvider.notifier).clearRecommendation();
+    });
+
+    // 监听 tab 切换
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        // 清空搜索框
+        _searchController.clear();
+        // 清空搜索结果
+        ref.read(foodSpecsProvider.notifier).clearFoodSpecs();
+        ref.read(foodRecommendationProvider.notifier).clearRecommendation();
+      }
+    });
   }
 
   @override
@@ -30,7 +46,26 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
 
   Future<void> _searchFood() async {
     final searchTerm = _searchController.text.trim();
-    if (searchTerm.isEmpty) return;
+    if (searchTerm.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('请输入食品名称'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+            action: SnackBarAction(
+              label: '知道了',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
+        );
+      }
+      return;
+    }
 
     setState(() {
       _isSearching = true;
@@ -88,29 +123,87 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '个性化膳食推荐',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Colors.transparent,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '根据您的健康状况定制的膳食计划',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.restaurant_menu,
+                    color: Theme.of(context).primaryColor,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '个性化膳食推荐',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '根据您的健康状况定制的膳食计划',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.smart_toy_outlined,
+                            size: 14,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '推荐由人工智能生成，可能出现错误，请使用安全查询确认后再食用',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 24),
+
           Center(
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () {
                   ref.read(foodRecommendationProvider.notifier)
-                      .getMockFoodRecommendation();
+                      .getFoodRecommendation();
                 },
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -119,15 +212,16 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                icon: const Icon(Icons.restaurant_menu),
+                icon: const Icon(Icons.thumb_up, color: Colors.white),
                 label: const Text(
                   '推荐膳食',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 24),
+
           recommendationState.when(
             loading: () => const Center(
               child: Column(
@@ -156,7 +250,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                   FilledButton.icon(
                     onPressed: () {
                       ref.read(foodRecommendationProvider.notifier)
-                          .getMockFoodRecommendation();
+                          .getFoodRecommendation();
                     },
                     icon: const Icon(Icons.refresh),
                     label: const Text('重试'),
@@ -208,7 +302,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.recommend,
+                              Icons.thumb_up,
                               color: Theme.of(context).primaryColor,
                               size: 24,
                             ),
@@ -260,7 +354,7 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
     );
   }
 
-Widget _buildFoodSafetyTab() {
+  Widget _buildFoodSafetyTab() {
     final foodSpecsState = ref.watch(foodSpecsProvider);
 
     return SingleChildScrollView(
@@ -268,147 +362,203 @@ Widget _buildFoodSafetyTab() {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '食品安全查询',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: const [
-              Icon(Icons.info_outline, size: 16, color: Colors.grey),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '查询食品的安全信息和营养替代品推荐',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: '输入食品名称',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                  onSubmitted: (_) => _searchFood(),
-                ),
-              ),
-              const SizedBox(width: 16),
-              FilledButton.icon(
-                onPressed: _isSearching ? null : _searchFood,
-                icon: _isSearching
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Icon(Icons.search),
-                label: const Text('查询'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          foodSpecsState.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    '加载失败: $error',
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: _searchFood,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('重试'),
-                  ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Colors.transparent,
                 ],
               ),
+              borderRadius: BorderRadius.circular(16),
             ),
-            data: (foodSpecs) {
-              if (foodSpecs == null) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search, size: 48, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('请输入食品名称进行查询'),
-                    ],
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              }
-              
-              return Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  child: Icon(
+                    Icons.security,
+                    color: Theme.of(context).primaryColor,
+                    size: 28,
+                  ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                const SizedBox(width: 16),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text(
+                        '食品安全查询',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
                       Row(
                         children: const [
-                          Icon(Icons.recommend, color: Colors.blue),
+                          Icon(Icons.info_outline, 
+                            size: 16, 
+                            color: Colors.grey
+                          ),
                           SizedBox(width: 8),
-                          Text(
-                            '食用建议',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Text(
+                              '查询食品的安全信息',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 32),
-                        child: Text(foodSpecs.howRecommend),
-                      ),
-                      const Divider(height: 32),
                       Row(
-                        children: const [
-                          Icon(Icons.restaurant_menu, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text(
-                            '营养成分',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                        children: [
+                          Icon(
+                            Icons.smart_toy_outlined,
+                            size: 14,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '菜品做法不同可能导致元素含量不同，请根据实际情况调整',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                                height: 1.2,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      ...foodSpecs.specs.map((spec) => _buildNutritionRow(spec)),
                     ],
                   ),
                 ),
-              );
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: '输入食品名称',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade400,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.restaurant,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    onSubmitted: (_) => _searchFood(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withBlue(255),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: FilledButton.icon(
+                    onPressed: _isSearching ? null : _searchFood,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                    icon: _isSearching
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.search),
+                    label: const Text(
+                      '查询',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          if (foodSpecsState.value == null)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 40),
+                  Text(
+                    '请输入食品名称进行查询',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          foodSpecsState.when(
+            loading: () => const Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('正在查询...'),
+                ],
+              ),
+            ),
+            error: (error, stack) => _buildErrorState(error),
+            data: (foodSpecs) {
+              if (foodSpecs == null) return const SizedBox.shrink();
+              return _buildResultCard(foodSpecs);
             },
           ),
         ],
@@ -416,14 +566,150 @@ Widget _buildFoodSafetyTab() {
     );
   }
 
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red.shade300,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '查询失败: $error',
+            style: TextStyle(
+              color: Colors.red.shade300,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _searchFood,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade100,
+              foregroundColor: Colors.red,
+            ),
+            icon: const Icon(Icons.refresh),
+            label: const Text('重试'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultCard(FoodSpecs foodSpecs) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: const [
+                Icon(Icons.recommend, color: Colors.blue),
+                SizedBox(width: 8),
+                Text(
+                  '食用建议',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 32),
+              child: _buildRecommendationStatus(foodSpecs.howRecommend),
+            ),
+            const Divider(height: 32),
+            Row(
+              children: const [
+                Icon(Icons.restaurant_menu, color: Colors.green),
+                SizedBox(width: 8),
+                Text(
+                  '营养成分',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...foodSpecs.specs.map((spec) => _buildNutritionRow(spec)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecommendationStatus(String howRecommend) {
+    final originalValue = double.tryParse(howRecommend) ?? 0.0;
+    final recommendValue = 1 - originalValue;
+    
+    Widget recommendationIcon;
+    String recommendationText;
+    Color recommendationColor;
+
+    if (recommendValue >= 0.7) {
+      recommendationIcon = const Icon(Icons.check_circle, color: Colors.green);
+      recommendationText = '推荐食用';
+      recommendationColor = Colors.green;
+    } else if (recommendValue >= 0.5) {
+      recommendationIcon = const Icon(Icons.warning_amber_rounded, color: Colors.orange);
+      recommendationText = '可以适量食用';
+      recommendationColor = Colors.orange;
+    } else {
+      recommendationIcon = const Icon(Icons.do_not_disturb, color: Colors.red);
+      recommendationText = '不推荐食用';
+      recommendationColor = Colors.red;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: recommendationColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          recommendationIcon,
+          const SizedBox(width: 8),
+          Text(
+            recommendationText,
+            style: TextStyle(
+              color: recommendationColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNutritionRow(FoodSpec spec) {
-    // Parse howHigh value (ensure it's between 0 and 1)
     final howHigh = double.tryParse(spec.howHigh) ?? 0;
     final normalizedHowHigh = howHigh.clamp(0.0, 1.0);
     
-    // Status indicators based on howHigh value
-    final isHigh = normalizedHowHigh > 0.7;
-    final isRecommended = normalizedHowHigh >= 0.3 && normalizedHowHigh <= 0.7;
+    final isDangerous = normalizedHowHigh >= 0.8;
+    final isWarning = normalizedHowHigh >= 0.3;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -432,187 +718,100 @@ Widget _buildFoodSafetyTab() {
         children: [
           Row(
             children: [
-              if (isHigh)
+              if (isDangerous)
+                const Icon(Icons.dangerous, color: Colors.red, size: 20)
+              else if (isWarning)
                 const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20)
-              else if (isRecommended)
-                const Icon(Icons.check_circle_outline, color: Colors.green, size: 20)
               else
-                const SizedBox(width: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      spec.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 120,
+                child: Text(
+                  spec.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: isDangerous 
+                        ? Colors.red
+                        : isWarning 
+                            ? Colors.orange 
+                            : Colors.green,
+                  ),
                 ),
               ),
-              // Display value and unit
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      spec.value,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (spec.unit.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Text(
-                        spec.unit,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 12,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ],
+              Expanded(
+                child: Text(
+                  '${spec.value} ${spec.unit}',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
-              // Display howHigh value
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isHigh 
-                      ? Colors.orange.withOpacity(0.1)
-                      : isRecommended
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '指数: ${spec.howHigh}',
-                      style: TextStyle(
-                        color: isHigh 
-                            ? Colors.orange
-                            : isRecommended
-                                ? Colors.green
-                                : Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Stack(
             children: [
-              // Background progress bar
               Container(
-                height: 8,
+                height: 24,
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              // Foreground progress bar with normalized howHigh value
               FractionallySizedBox(
                 widthFactor: normalizedHowHigh,
                 child: Container(
-                  height: 8,
+                  height: 24,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: isHigh
-                          ? [Colors.orange.shade300, Colors.orange]
-                          : isRecommended
-                              ? [Colors.green.shade300, Colors.green]
-                              : [Colors.grey.shade300, Colors.grey],
+                      colors: isDangerous
+                          ? [Colors.red.shade300, Colors.red]
+                          : isWarning
+                              ? [Colors.orange.shade300, Colors.orange]
+                              : [Colors.green.shade300, Colors.green],
                     ),
-                    borderRadius: BorderRadius.circular(4),
-                    boxShadow: [
-                      BoxShadow(
-                        color: (isHigh
-                            ? Colors.orange
-                            : isRecommended
-                                ? Colors.green
-                                : Colors.grey)
-                            .withOpacity(0.2),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              Container(
+                height: 24,
+                alignment: Alignment.center,
+                child: Text(
+                  '危险指数: ${double.parse(spec.howHigh).toStringAsFixed(3)}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    shadows: [
+                      Shadow(
+                        offset: const Offset(1, 1),
+                        blurRadius: 2,
+                        color: Colors.black.withOpacity(0.3),
                       ),
                     ],
                   ),
                 ),
               ),
-              // Current howHigh value indicator
-              Positioned(
-                left: MediaQuery.of(context).size.width * normalizedHowHigh - 48,
-                top: -15,
-                child: Text(
-                  spec.howHigh,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isHigh 
-                        ? Colors.orange
-                        : isRecommended
-                            ? Colors.green
-                            : Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              // Scale markers (0 to 1)
-              ...List.generate(
-                5,
-                (index) {
-                  final markerValue = (index * 0.25).toStringAsFixed(2);
-                  return Positioned(
-                    left: MediaQuery.of(context).size.width * (index / 4) - 48,
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 1,
-                          height: 8,
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        if (index % 2 == 0) // Show every other label
-                          Text(
-                            markerValue,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              // Recommended range indicators (0.3 - 0.7)
               Positioned(
                 left: MediaQuery.of(context).size.width * 0.3 - 48,
                 child: Container(
                   width: 2,
-                  height: 8,
-                  color: Colors.green.withOpacity(0.5),
+                  height: 24,
+                  color: Colors.orange.withOpacity(0.5),
                 ),
               ),
               Positioned(
-                left: MediaQuery.of(context).size.width * 0.7 - 48,
+                left: MediaQuery.of(context).size.width * 0.8 - 48,
                 child: Container(
                   width: 2,
-                  height: 8,
-                  color: Colors.orange.withOpacity(0.5),
+                  height: 24,
+                  color: Colors.red.withOpacity(0.5),
                 ),
               ),
             ],

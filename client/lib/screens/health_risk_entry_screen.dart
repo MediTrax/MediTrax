@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meditrax/screens/health_risk_assessment_screen.dart';
 import 'package:meditrax/screens/health_risk_report_screen.dart';
 import 'package:meditrax/providers/health_risk_provider.dart';
@@ -76,6 +77,10 @@ class HealthRiskEntryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => context.go('/'),
+        ),
         title: const Text('健康风险评估'),
       ),
       body: SingleChildScrollView(
