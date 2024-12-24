@@ -83,8 +83,13 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> {
           );
 
       if (success && mounted) {
-        final assessmentData = ref.read(healthRiskProvider).value;
-        if (assessmentData != null) {
+        await ref.refresh(healthRiskProvider.future);
+
+        final assessments = await ref.read(healthRiskProvider.future);
+        if (assessments.isNotEmpty && mounted) {
+          ref.read(healthRiskProvider.notifier)
+              .setSelectedAssessment(assessments.first);
+            
           if (context.mounted) {
             Navigator.push(
               context,

@@ -335,6 +335,25 @@ class HomeScreen extends ConsumerWidget {
     required MaterialColor color,
     required VoidCallback onTap,
   }) {
+    // For health risk level card
+    if (title == '健康风险') {
+      Color cardColor;
+      switch (content) {
+        case '低风险':
+          cardColor = Colors.teal;
+          break;
+        case '中风险':
+          cardColor = Colors.orange;
+          break;
+        case '高风险':
+          cardColor = Colors.red;
+          break;
+        default:
+          cardColor = Colors.grey;
+      }
+      color = cardColor as MaterialColor;
+    }
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
