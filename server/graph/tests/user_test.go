@@ -129,6 +129,25 @@ func TestUserFunctions(t *testing.T) {
 			println("End of errors")
 		}
 		require.Equal(t, fmt.Sprintf("User %s created successfully", username), resp.CreateUser.Message)
+
+		// test illegal create users
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err = c.Post(`mutation($phoneNumber: String!, $password: String!, $username: String!) {
+			createUser(
+				phoneNumber: $phoneNumber,
+				password: $password,
+				username: $username,
+				role: "patient"
+			){
+				userId,
+				message
+			}
+		}`, &resp, client.Var("phoneNumber", phoneNumber), client.Var("password", password), client.Var("username", username))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "phoneNumber and username should be unique", err_msg[0].Message)
 	})
 
 	t.Run("Login", func(t *testing.T) {
@@ -150,6 +169,22 @@ func TestUserFunctions(t *testing.T) {
 
 		user.AccessToken = resp.LoginUser.Token.AccessToken
 		user.ID = resp.LoginUser.UserID
+
+		// test errors
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(fmt.Sprintf(`mutation login {
+			loginUser(phoneNumber: "%s", password:"%s "){
+				userId
+			  	token{
+					accessToken
+			  	}
+			}
+		  }`, phoneNumber, password), &resp, client.Var("phoneNumber", phoneNumber), client.Var("password", password))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "user not found", err_msg[0].Message)
 	})
 	user.Password = password
 	user.PhoneNumber = phoneNumber
@@ -256,9 +291,6 @@ func TestUserFunctions(t *testing.T) {
 			Path    string `json:"path"`
 		}
 		err := c.Post(query, &response)
-		if err != nil {
-			fmt.Println("Error:", err.Error())
-		}
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "invalid or expired resetcode", err_msg[0].Message)
 
@@ -278,6 +310,28 @@ func TestUserFunctions(t *testing.T) {
 		  }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 
 		require.Equal(t, fmt.Sprintf("User %s with name %s deleted successfully", user.ID, user.Username), response.DeleteUser.Message)
+
+		// test illegal deletions
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// no access token
+		err := c.Post(`mutation delete_user{
+			deleteUser{
+				message
+		  	}
+		  }`, &response)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+		// user not found (already deleted)
+		err = c.Post(`mutation delete_user{
+			deleteUser{
+				message
+		  	}
+		  }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 }
@@ -336,7 +390,6 @@ func TestSharedProfiles(t *testing.T) {
 			}
 		}`, &response,
 			client.Var("phoneNumber", user1.PhoneNumber))
-		println(response.ShareProfile.Message)
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "access denied", err_msg[0].Message)
 	})
@@ -385,6 +438,34 @@ func TestSharedProfiles(t *testing.T) {
 		require.Equal(t, user2.PhoneNumber, response.Get[1].PhoneNumber)
 		_, err = custom.UnmarshalDateTime(response.Get[1].CreatedAt)
 		require.Nil(t, err)
+
+		// illegal queries without access token
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err_ := c.Post(`query {
+			get:getProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response)
+		json.Unmarshal(json.RawMessage(err_.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+		err_ = c.Post(`query {
+			get:getSharedProfiles{
+				id,
+				name,
+				phoneNumber,
+				role,
+				createdAt
+			}
+		}`, &response)
+		json.Unmarshal(json.RawMessage(err_.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Get shared details", func(t *testing.T) {
@@ -638,6 +719,19 @@ func TestSharedProfiles(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user1.AccessToken)))
 		require.Equal(t, 1, len(getResponse.Get))
 		require.Equal(t, user1.ID, getResponse.Get[0].ID)
+
+		// error response (no access token)
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err_ := c.Post(`mutation($targetUserId:String!){
+			unshareProfile(targetUserId:$targetUserId){
+				message
+			}
+		}`, &response, client.Var("targetUserId", user2.ID))
+		json.Unmarshal(json.RawMessage(err_.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	DeleteUser(t, c, user1)

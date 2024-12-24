@@ -137,9 +137,6 @@ func (r *mutationResolver) LoginUser(ctx context.Context, phoneNumber string, pa
 	}
 
 	user := users[0]
-	if user.Password == "" {
-		return nil, fmt.Errorf("user not available for password sign in, use other sign in methods instead")
-	}
 
 	token, err := utils.HandleLogin(&user, ctx)
 	if err != nil {

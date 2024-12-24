@@ -535,6 +535,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID string
 	}
 
 	reminder := reminders[0]
+	// deprecated reminder.IsTaken will be removed in the next version
 	if reminder.IsTaken {
 		return nil, fmt.Errorf("reminder already taken, cannot take again")
 	}

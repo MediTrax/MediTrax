@@ -86,7 +86,21 @@ func TestMedication(t *testing.T) {
 		  }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "identical medication name already exists for the user, please use update medication instead", err_msg[0].Message)
-
+		// creating medication with wrong frequency format
+		err = c.Post(`mutation add_med{
+			addMedication(
+				name: "test_medication3"
+				unit: "pills"
+				dosage: 20
+				frequency: "11.3"
+				inventory: 42
+		  	) {
+				medicationId
+				message
+		  	}
+		  }`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "invalid frequency format 11.3 for medication test_medication3", err_msg[0].Message)
 		// creating medication without login in (no access token)
 		err = c.Post(`mutation add_med{
 			addMedication(
@@ -125,6 +139,23 @@ func TestMedication(t *testing.T) {
 		}`, &response, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, medId1, response.GetMedications[0].MedicationID)
 		require.Equal(t, medId2, response.GetMedications[1].MedicationID)
+
+		// illegal get (no access token)
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		err := c.Post(`query get_meds{
+			getMedications {
+				medicationId
+				name
+				dosage
+				frequency
+				inventory
+			}
+		}`, &response)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Update Medication", func(t *testing.T) {
@@ -385,6 +416,7 @@ func TestMedicationReminder(t *testing.T) {
 			Message string `json:"message"`
 			Path    string `json:"path"`
 		}
+		// illegally formatted medication reminder
 		err := c.Post(`mutation create_rem($medicationId:String!, $reminderTime:DateTime!) {
 			createMedicationReminder(
 				medicationId: $medicationId, 
@@ -397,7 +429,7 @@ func TestMedicationReminder(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "illegal medication id", err_msg[0].Message)
-
+		// link to non-existent medication object
 		err = c.Post(`mutation create_rem($medicationId:String!, $reminderTime:DateTime!) {
 			createMedicationReminder(
 				medicationId: $medicationId, 
@@ -410,7 +442,7 @@ func TestMedicationReminder(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "invalid medication id or medication id not associated with user", err_msg[0].Message)
-
+		// create an identical reminder for the same user and the same medication
 		err = c.Post(`mutation add_reminder($medicationId: String!, $reminderTime:DateTime!){
 			createMedicationReminder(
 				medicationId: $medicationId, 
@@ -423,6 +455,18 @@ func TestMedicationReminder(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
 		require.Equal(t, "identical medication reminder for the user already exists", err_msg[0].Message)
+		// without access token
+		err = c.Post(`mutation add_reminder($medicationId: String!, $reminderTime:DateTime!){
+			createMedicationReminder(
+				medicationId: $medicationId, 
+				reminderTime:$reminderTime
+			){
+				reminderId
+				message
+			}
+		}`, &response, client.Var("medicationId", medId), client.Var("reminderTime", rem_time))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("update and query reminder", func(t *testing.T) {
@@ -501,6 +545,25 @@ func TestMedicationReminder(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, rem_time, new_rem_time)
 		require.Equal(t, true, response3.GetMedicationReminders[0].IsTaken)
+
+		// illegal queries
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+
+		//
+		err_ := c.Post(`query get_rems{
+			getMedicationReminders {
+				reminderId
+				medicationId
+				reminderTime
+				isTaken
+			}
+		}`, &response3)
+		json.Unmarshal(json.RawMessage(err_.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
+
 	})
 
 	t.Run("Take Medication", func(t *testing.T) {
@@ -532,7 +595,7 @@ func TestMedicationReminder(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, "Medication test_medication_take added successfully", addMedResponse.AddMedication.Message)
 		medId := addMedResponse.AddMedication.MedicationID
-		
+
 		// add a reminder for the created medication
 		var addReminderResponse struct {
 			CreateMedicationReminder struct {
@@ -556,7 +619,7 @@ func TestMedicationReminder(t *testing.T) {
 		  }`, &addReminderResponse, client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)),
 			client.Var("medicationId", medId), client.Var("reminderTime", rem_time.UTC()))
 		reminderId := addReminderResponse.CreateMedicationReminder.ReminderID
-		
+
 		// take the medication via the created reminder
 		var takeResponse struct {
 			TakeMedication struct {
@@ -646,9 +709,8 @@ func TestMedicationReminder(t *testing.T) {
 		  }`, &takeResponse, client.Var("reminderId", reminderId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		json.Unmarshal(json.RawMessage(err.Error()), &errMsg)
 		require.Equal(t, "negative inventory", errMsg[0].Message)
-		
+
 	})
-		
 
 	t.Run("illegal updates", func(t *testing.T) {
 		var response struct {
@@ -787,6 +849,26 @@ func TestTreatmentSchedule(t *testing.T) {
 			client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, "Treatment schedule created successfully", response.CreateTreatmentSchedule.Message)
 		scheduleId = response.CreateTreatmentSchedule.ScheduleID
+
+		// illegal creations of treatment schedule
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// no access token
+		err := c.Post(`mutation create_schedule($scheduledTime:DateTime!){
+			createTreatmentSchedule(
+				treatmentType: "test_type",
+				scheduledTime: $scheduledTime,
+				location: "hospital",
+				notes: "bring past records"
+			){
+				scheduleId
+				message
+			}
+		}`, &response, client.Var("scheduledTime", scheduledTime))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Update and query treatment schedule", func(t *testing.T) {
@@ -840,6 +922,24 @@ func TestTreatmentSchedule(t *testing.T) {
 		require.Equal(t, "don't bring anything", response_query.GetTreatmentSchedules[0].Notes)
 		queried_time, _ := custom.UnmarshalDateTime(response_query.GetTreatmentSchedules[0].ScheduledTime)
 		require.Equal(t, newTime, queried_time)
+
+		// illegal queries of treatment schedule
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// no access token
+		err := c.Post(`query get_schedules{
+			getTreatmentSchedules{
+				scheduleId,
+				treatmentType,
+				scheduledTime,
+				location,
+				notes
+			}
+		}`, &response_query)
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	t.Run("Delete Treatment Schedule", func(t *testing.T) {
@@ -856,6 +956,36 @@ func TestTreatmentSchedule(t *testing.T) {
 		}`, &response, client.Var("scheduleId", scheduleId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
 		require.Equal(t, fmt.Sprintf("Treatment schedule %s deleted successfully", scheduleId),
 			response.DeleteTreatmentSchedule.Message)
+
+		// testing illegal deletions
+		var err_msg []struct {
+			Message string `json:"message"`
+			Path    string `json:"path"`
+		}
+		// illegally formatted schedule id
+		err := c.Post(`mutation delete_schedule($scheduleId:String!){
+			deleteTreatmentSchedule(scheduleId: $scheduleId){
+				message
+			}
+		}`, &response, client.Var("scheduleId", "49328ufkhewekw"), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "illegal schedule id", err_msg[0].Message)
+		// try to delete again
+		err = c.Post(`mutation delete_schedule($scheduleId:String!){
+			deleteTreatmentSchedule(scheduleId: $scheduleId){
+				message
+			}
+		}`, &response, client.Var("scheduleId", scheduleId), client.AddHeader("Authorization", fmt.Sprintf("Bearer %s", user.AccessToken)))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "schedule not found", err_msg[0].Message)
+		// deletion without giving access token
+		err = c.Post(`mutation delete_schedule($scheduleId:String!){
+			deleteTreatmentSchedule(scheduleId: $scheduleId){
+				message
+			}
+		}`, &response, client.Var("scheduleId", scheduleId))
+		json.Unmarshal(json.RawMessage(err.Error()), &err_msg)
+		require.Equal(t, "access denied", err_msg[0].Message)
 	})
 
 	DeleteUser(t, c, user)
