@@ -78,8 +78,6 @@ class _InventoryTab extends ConsumerStatefulWidget {
 }
 
 class _InventoryTabState extends ConsumerState<_InventoryTab> {
-  final List<String> _unitOptions = ['片', '毫升'];
-
   @override
   void initState() {
     super.initState();
@@ -100,9 +98,17 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       if (userData != null) {
         await ref.read(medicationProviderProvider.notifier).fetchMedications();
         setState(() {}); // Notify the framework to rebuild the UI
-      } 
+      }
     } catch (e) {
-      print("Error fetching medications: $e");
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('加载失败'),
+            content: Text('加载失败: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -157,7 +163,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
               child: medicationsState.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) {
-                  print("Error in medications state: $error");
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -241,7 +246,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                 SnackBar(
                                   content: Row(
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.delete_outline_rounded,
                                         color: Colors.white,
                                         size: 20,
@@ -264,7 +269,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                               await _fetchMedications();
                             }
                           } catch (e) {
-                            if (mounted) {
+                            if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('错误: $e'),
@@ -364,8 +369,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     ),
                     decoration: BoxDecoration(
                       color: isLowStock
-                          ? Colors.orange.withOpacity(0.1)
-                          : Colors.green.withOpacity(0.1),
+                          ? Colors.orange.withAlpha(25)
+                          : Colors.green.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isLowStock
@@ -411,7 +416,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -440,7 +445,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
+                      color: Colors.purple.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -524,12 +529,15 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     );
   }
 
-  void _showEditDialog(BuildContext context, WidgetRef ref, Medication medication) {
+  void _showEditDialog(
+      BuildContext context, WidgetRef ref, Medication medication) {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: medication.name);
-    final dosageController = TextEditingController(text: medication.dosage.toString());
+    final dosageController =
+        TextEditingController(text: medication.dosage.toString());
     final unitController = TextEditingController(text: medication.unit);
-    final inventoryController = TextEditingController(text: medication.inventory.toString());
+    final inventoryController =
+        TextEditingController(text: medication.inventory.toString());
 
     // Split frequency into times and days
     final frequencyParts = medication.frequency.split('/');
@@ -620,9 +628,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         ),
                         suffixText: unitController.text, // 使用当前选择的单位
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
+                        FilteringTextInputFormatter.allow(RegExp(
+                            r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -639,7 +649,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
                     // Unit Dropdown
                     DropdownButtonFormField<String>(
-                      value: unitController.text.isEmpty ? null : unitController.text,
+                      value: unitController.text.isEmpty
+                          ? null
+                          : unitController.text,
                       decoration: InputDecoration(
                         labelText: '单位',
                         border: OutlineInputBorder(
@@ -695,7 +707,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                             ),
                             keyboardType: TextInputType.number,
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                              FilteringTextInputFormatter
+                                  .digitsOnly, // Only allow digits
                             ],
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -726,7 +739,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                             ),
                             keyboardType: TextInputType.number,
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                              FilteringTextInputFormatter
+                                  .digitsOnly, // Only allow digits
                             ],
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -761,9 +775,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         ),
                         suffixText: unitController.text, // 使用当前选择的单位
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
+                        FilteringTextInputFormatter.allow(RegExp(
+                            r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -796,11 +812,13 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                     .updateMedication(
                                       medicationId: medication.id,
                                       name: nameController.text,
-                                      dosage: double.parse(dosageController.text),
+                                      dosage:
+                                          double.parse(dosageController.text),
                                       unit: unitController.text,
-                                      inventory:
-                                          double.parse(inventoryController.text),
-                                      frequency: '${timesController.text}/${daysController.text}',
+                                      inventory: double.parse(
+                                          inventoryController.text),
+                                      frequency:
+                                          '${timesController.text}/${daysController.text}',
                                     );
 
                                 if (success && context.mounted) {
@@ -810,12 +828,14 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                   );
                                 }
                               } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('更新失败: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('更新失败: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
                               }
                             }
                           },
@@ -860,7 +880,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       context: context,
       builder: (dialogContext) => PopScope(
         canPop: !isClosing,
-        onPopInvoked: (didPop) {},
+        onPopInvokedWithResult: (didPop, _) {},
         child: AlertDialog(
           title: Row(
             children: [
@@ -917,7 +937,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                 valueListenable: errorState,
                 builder: (context, error, _) => TextField(
                   controller: controller,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                   ],
@@ -986,15 +1007,15 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     closeDialog(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Row(
+                        content: const Row(
                           children: [
                             Icon(
                               Icons.check_circle_outline,
                               color: Colors.white,
                               size: 20,
                             ),
-                            const SizedBox(width: 8),
-                            const Text('库存更新成功'),
+                            SizedBox(width: 8),
+                            Text('库存更新成功'),
                           ],
                         ),
                         backgroundColor: Colors.green.shade600,
@@ -1002,7 +1023,9 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                     );
                     // 刷新数据
                     ref.invalidate(medicationProviderProvider);
-                    await ref.read(medicationProviderProvider.notifier).fetchMedications();
+                    await ref
+                        .read(medicationProviderProvider.notifier)
+                        .fetchMedications();
                   }
                 } catch (e) {
                   if (dialogContext.mounted && !isClosing) {
@@ -1022,28 +1045,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     ).whenComplete(() {
       disposeController();
     });
-  }
-
-  void _showUndoSnackBar(BuildContext context, Medication deletedMedication) {
-    if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              Icons.delete_outline_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text('${deletedMedication.name} 已删除'),
-          ],
-        ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.fixed,
-      ),
-    );
   }
 }
 
@@ -1069,192 +1070,24 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
   // Add a state variable to track selected unit
   String? _selectedUnit;
 
-  Widget _buildFrequencySelector() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_month_rounded,
-                color: Colors.purple.shade400,
-                size: 28,
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                '服用频率',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.repeat_rounded,
-                          color: Colors.blue.shade400,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('每隔几天'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<int>(
-                      value: _periodInDays,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        prefixIcon: Icon(
-                          Icons.calendar_today_rounded,
-                          color: Colors.blue.shade300,
-                        ),
-                      ),
-                      items: List.generate(7, (index) => index + 1)
-                          .map((days) => DropdownMenuItem(
-                                value: days,
-                                child: Text('$days天'),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _periodInDays = value;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.alarm_rounded,
-                          color: Colors.orange.shade400,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('服用次数'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      initialValue: _timesPerPeriod.toString(),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        prefixIcon: Icon(
-                          Icons.medication_rounded,
-                          color: Colors.orange.shade300,
-                        ),
-                        suffixText: '次',
-                        hintText: '输入次数',
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '请输入次数';
-                        }
-                        final times = int.tryParse(value);
-                        if (times == null) {
-                          return '请输入有效数字';
-                        }
-                        if (times <= 0) {
-                          return '次数必须大于0';
-                        }
-                        if (times > 24) {
-                          return '次数不能超过24';
-                        }
-                        return null;
-                      },
-                      onChanged: (value) {
-                        final times = int.tryParse(value);
-                        if (times != null && times > 0 && times <= 24) {
-                          setState(() {
-                            _timesPerPeriod = times;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.purple.shade100),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.info_outline_rounded,
-                  size: 20,
-                  color: Colors.purple.shade700,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '每$_periodInDays天服用$_timesPerPeriod次',
-                  style: TextStyle(
-                    color: Colors.purple.shade700,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _addMedication() async {
-    final currentUser = ref.read(userDataProvider).value;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
       try {
-        // Watch the medication provider to get the current state
-        final medicationsState = ref.watch(medicationProviderProvider);
+        // Explicitly dismiss keyboard before navigation
+        FocusScope.of(context).unfocus();
 
-        final success = await ref.read(medicationProviderProvider.notifier)
-            .addMedication(
-              name: nameController.text,
-              dosage: double.parse(dosageController.text),
-              unit: unitController.text,
-              frequency: formattedFrequency,
-              inventory: double.parse(inventoryController.text),
-            );
+        final success =
+            await ref.read(medicationProviderProvider.notifier).addMedication(
+                  name: nameController.text,
+                  dosage: double.parse(dosageController.text),
+                  unit: unitController.text,
+                  frequency: formattedFrequency,
+                  inventory: double.parse(inventoryController.text),
+                );
 
         if (!mounted) return;
 
@@ -1274,9 +1107,12 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
             _periodInDays = 1;
           });
 
+          // Add a small delay before navigation to ensure keyboard is dismissed
+          await Future.delayed(const Duration(milliseconds: 100));
+
           // Switch to inventory tab
           if (mounted) {
-            DefaultTabController.of(context)?.animateTo(0);
+            DefaultTabController.of(context).animateTo(0);
           }
         } else {
           // Show error dialog for medication already exists
@@ -1338,7 +1174,6 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = ref.read(userDataProvider).value;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Form(
@@ -1397,9 +1232,11 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                         hintText: '输入剂量值',
                         suffixText: _selectedUnit,
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*$')),
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -1425,7 +1262,8 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                           color: Colors.blue.shade300,
                         ),
                         border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                       ),
                       hint: const Text('单位'),
                       items: _unitOptions.map((String unit) {
@@ -1621,9 +1459,11 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
                     Icons.inventory_rounded,
                     color: Colors.orange.shade300,
                   ),
-                  hintText: '输入库存数量${_selectedUnit != null ? '(单位：$_selectedUnit)' : ''}',
+                  hintText:
+                      '输入库存数量${_selectedUnit != null ? '(单位：$_selectedUnit)' : ''}',
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                 ],
@@ -1710,30 +1550,13 @@ class _AddMedicineTabState extends ConsumerState<_AddMedicineTab> {
       ),
     );
   }
-
-  Widget _buildFieldLabel({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: color,
-          size: 20,
-        ),
-        const SizedBox(width: 8),
-        Text(label),
-      ],
-    );
-  }
 }
 
 class _ReminderTab extends ConsumerStatefulWidget {
   @override
   ConsumerState<_ReminderTab> createState() => _ReminderTabState();
 }
+
 class _ReminderTabState extends ConsumerState<_ReminderTab> {
   final NotificationService _notificationService = NotificationService();
 
@@ -1802,7 +1625,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     .read(medicationReminderProvider.notifier)
                     .toggleReminderStatus(reminderId, true);
 
-                if (mounted) {
+                if (context.mounted) {
                   Navigator.of(context).pop();
 
                   if (success) {
@@ -1837,12 +1660,6 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     if (!reminder.isTaken) {
       _notificationService.scheduleReminder(reminder, medication.name);
     }
-
-    final reminderTime = reminder.reminderTime.toLocal();
-    final now = DateTime.now();
-    final isToday = reminderTime.year == now.year &&
-        reminderTime.month == now.month &&
-        reminderTime.day == now.day;
 
     return Dismissible(
       key: Key(reminder.id),
@@ -1927,13 +1744,13 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
               .read(medicationReminderProvider.notifier)
               .deleteReminder(reminder.id);
 
-          if (success && mounted) {
+          if (success && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('提醒已删除'),
               ),
             );
-          } else if (mounted) {
+          } else if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('删除失败'),
@@ -1943,7 +1760,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
             await _fetchReminders();
           }
         } catch (e) {
-          if (mounted) {
+          if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('错误: $e'),
@@ -2000,15 +1817,13 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withAlpha(50),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           _formatReminderDate(reminder.reminderTime),
                           style: const TextStyle(
-                            color: Colors.white, 
-                            fontSize: 12
-                          ),
+                              color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ],
@@ -2094,7 +1909,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     final parts = frequency.split('/');
     final times = parts[0];
     final days = parts.length > 1 ? parts[1] : '1';
-    return '每${days}天${times}次';
+    return '每$days天$times次';
   }
 
   void _showEditReminderDialog(
@@ -2236,7 +2051,15 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
         await ref.read(medicationReminderProvider.notifier).fetchReminders();
       }
     } catch (e) {
-      print("Error fetching reminders: $e");
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('加载失败'),
+            content: Text('加载失败: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -2249,11 +2072,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
-    final reminderDate = DateTime(
-      reminderTime.year, 
-      reminderTime.month, 
-      reminderTime.day
-    );
+    final reminderDate =
+        DateTime(reminderTime.year, reminderTime.month, reminderTime.day);
 
     if (reminderDate == today) {
       return '今天';
@@ -2264,7 +2084,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     }
   }
 
-  Future<void> _handleReminderToggle(MedicationReminder reminder, bool value) async {
+  Future<void> _handleReminderToggle(
+      MedicationReminder reminder, bool value) async {
     // Only show confirmation dialog when marking as taken
     if (value) {
       // Check if the reminder is for today or past
@@ -2280,7 +2101,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       if (reminderDate.isAfter(today)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Row(
                 children: [
                   Icon(
@@ -2288,12 +2109,12 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                     color: Colors.white,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
-                  const Text('不能提前服用未来的药物'),
+                  SizedBox(width: 8),
+                  Text('不能提前服用未来的药物'),
                 ],
               ),
               backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 2),
+              duration: Duration(seconds: 2),
               behavior: SnackBarBehavior.fixed,
             ),
           );
@@ -2339,7 +2160,7 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('您确定要服用以下药物吗？'),
+                const Text('您确定要服用以下药物吗？'),
                 const SizedBox(height: 16),
                 Container(
                   width: double.infinity,
@@ -2361,7 +2182,8 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
                       ),
                       const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade100,
                           borderRadius: BorderRadius.circular(6),
@@ -2422,8 +2244,10 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
         if (success) {
           // 使用 invalidate 来强制重新获取数据并触发 UI 更新
           ref.invalidate(medicationProviderProvider);
-          await ref.read(medicationProviderProvider.notifier).fetchMedications();
-          
+          await ref
+              .read(medicationProviderProvider.notifier)
+              .fetchMedications();
+
           // 如果需要确保提醒列表也更新
           ref.invalidate(medicationReminderProvider);
           await ref.read(medicationReminderProvider.notifier).fetchReminders();
@@ -2440,13 +2264,13 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
       }
     } else {
       // For marking as not taken, just update the reminder
-      final success = await ref.read(medicationReminderProvider.notifier)
-          .updateReminder(
-            reminderId: reminder.id,
-            reminderTime: reminder.reminderTime,
-            isTaken: false,
-          );
-       
+      final success =
+          await ref.read(medicationReminderProvider.notifier).updateReminder(
+                reminderId: reminder.id,
+                reminderTime: reminder.reminderTime,
+                isTaken: false,
+              );
+
       if (!success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
