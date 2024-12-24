@@ -473,7 +473,7 @@ extend type Mutation {
     """
     The ID of the medication reminder.
     """
-    reminderId: String
+    reminderId: String!
   ): TakeMedicationResponse!
 
   """

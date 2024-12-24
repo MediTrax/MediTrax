@@ -504,18 +504,14 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 }
 
 // TakeMedication is the resolver for the takeMedication field.
-func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *string) (*model.TakeMedicationResponse, error) {
+func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID string) (*model.TakeMedicationResponse, error) {
 	user := middlewares.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("access denied")
 	}
 
-	if reminderID == nil {
-		return nil, fmt.Errorf("no medication id given")
-	}
-
 	// check legality of the reminder id
-	if !utils.MatchID(*reminderID, "medication_reminder") {
+	if !utils.MatchID(reminderID, "medication_reminder") {
 		return nil, fmt.Errorf("illegal reminder id")
 	}
 
@@ -607,7 +603,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 	_, err = database.DB.Query(`
 		UPDATE $id SET reminderTime=<datetime>$reminderTime;`,
 		map[string]interface{}{
-			"id":           *reminderID,
+			"id":           reminderID,
 			"reminderTime": next_reminder_time,
 		})
 	if err != nil {
@@ -615,7 +611,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID *strin
 	}
 
 	// add to change log
-	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication, update reminder time", *reminderID,
+	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication, update reminder time", reminderID,
 		[]utils.ChangeLog{
 			{
 				Field: "reminderTime",
