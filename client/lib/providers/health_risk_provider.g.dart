@@ -6,7 +6,7 @@ part of 'health_risk_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$healthRiskHash() => r'2cb2b0247684d08b836cb8a629941f6bbaa604ca';
+String _$healthRiskHash() => r'69d072fd9c31817d09a3bddfe974d7ba400c1cd4';
 
 /// See also [HealthRisk].
 @ProviderFor(HealthRisk)

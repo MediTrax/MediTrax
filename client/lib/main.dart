@@ -155,7 +155,8 @@ class RouterNotifier extends ChangeNotifier {
     } else if (location.startsWith('/medical-records')) {
       return 3;
     } else if (location.startsWith('/profile') ||
-        location.startsWith('/profile-sharing')) {
+        location.startsWith('/profile-sharing') ||
+        location.startsWith('/rewards')) {
       return 4;
     }
     // Check if the route is a sub-route of any main routes
@@ -164,8 +165,7 @@ class RouterNotifier extends ChangeNotifier {
         location.startsWith('/family-collaboration') ||
         location.startsWith('/health-risk-assessment') ||
         location.startsWith('/health-risk-report') ||
-        location.startsWith('/prescription-management') ||
-        location.startsWith('/rewards')) {
+        location.startsWith('/prescription-management')) {
       return 2; // These are accessed from home, so keep home selected
     }
     return 2; // Default to home

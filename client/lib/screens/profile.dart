@@ -257,36 +257,72 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const Divider(height: 32),
 
             // Health Points Section
-            _buildProfileSection(
-              title: '健康积分',
-              subtitle: '1,250',
-              icon: Icons.favorite_rounded,
-              color: Colors.red,
-              onTap: () => context.push('/rewards'),
-              subtitleStyle: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Consumer(
+              builder: (context, ref, child) {
+                final pointsAsync = ref.watch(userPointsProvider);
+                return pointsAsync.when(
+                  loading: () => _buildProfileSection(
+                    title: '健康积分',
+                    subtitle: '加载中...',
+                    icon: Icons.favorite_rounded,
+                    color: Colors.red,
+                    onTap: () => context.push('/rewards'),
+                  ),
+                  error: (error, stack) => _buildProfileSection(
+                    title: '健康积分',
+                    subtitle: '加载失败',
+                    icon: Icons.favorite_rounded,
+                    color: Colors.red,
+                    onTap: () => context.push('/rewards'),
+                    error: true,
+                  ),
+                  data: (points) => _buildProfileSection(
+                    title: '健康积分',
+                    subtitle: '${points['currentPoints']}',
+                    icon: Icons.favorite_rounded,
+                    color: Colors.red,
+                    onTap: () => context.push('/rewards'),
+                    subtitleStyle: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
             ),
             const Divider(height: 32),
 
             // Quick Info Grid
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2.5,
-              children: [
-                _buildInfoCard('年龄', '35岁', Icons.cake_rounded, Colors.orange),
-                _buildInfoCard(
-                    '血型', 'A型', Icons.water_drop_rounded, Colors.red),
-                _buildInfoCard(
-                    '身高', '175cm', Icons.height_rounded, Colors.blue),
-                _buildInfoCard(
-                    '体重', '70kg', Icons.monitor_weight_rounded, Colors.green),
-              ],
+            Consumer(
+              builder: (context, ref, child) {
+                final userAsync = ref.watch(userDataProvider);
+                return userAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (error, stack) => const SizedBox.shrink(),
+                  data: (user) {
+                    if (user == null) return const SizedBox.shrink();
+
+                    // Here we can add additional user metadata fields when they're available
+                    // For now, we'll show a message that this info is not available
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '用户详细信息即将上线',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),

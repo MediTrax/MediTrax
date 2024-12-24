@@ -79,7 +79,8 @@ class HomeScreen extends ConsumerWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.blue.shade50,
-                                  border: Border.all(color: Colors.blue.shade100),
+                                  border:
+                                      Border.all(color: Colors.blue.shade100),
                                 ),
                                 child: CircleAvatar(
                                   radius: 24,
@@ -126,20 +127,27 @@ class HomeScreen extends ConsumerWidget {
                                   loading: () => _buildLoadingCard(),
                                   error: (err, stack) => GestureDetector(
                                     onTap: () {
-                                      ref.refresh(medicationReminderProvider.notifier).fetchReminders();
+                                      ref
+                                          .refresh(medicationReminderProvider
+                                              .notifier)
+                                          .fetchReminders();
                                     },
                                     child: _buildErrorCard(),
                                   ),
-                                  data: (reminders) {  
+                                  data: (reminders) {
                                     final now = DateTime.now();
-                                    final todayStart = DateTime(now.year, now.month, now.day);
-                                    final todayEnd = todayStart.add(const Duration(days: 1));
-                                    
-                                    final todayReminders = reminders.where((reminder) {
-                                      final reminderTime = reminder.reminderTime.toLocal();
-                                      return reminderTime.isAfter(todayStart) && 
-                                             reminderTime.isBefore(todayEnd) && 
-                                             !reminder.isTaken;
+                                    final todayStart =
+                                        DateTime(now.year, now.month, now.day);
+                                    final todayEnd =
+                                        todayStart.add(const Duration(days: 1));
+
+                                    final todayReminders =
+                                        reminders.where((reminder) {
+                                      final reminderTime =
+                                          reminder.reminderTime.toLocal();
+                                      return reminderTime.isAfter(todayStart) &&
+                                          reminderTime.isBefore(todayEnd) &&
+                                          !reminder.isTaken;
                                     }).length;
 
                                     return _buildInfoCard(
@@ -148,8 +156,9 @@ class HomeScreen extends ConsumerWidget {
                                       subtitle: '待服用次数',
                                       icon: Icons.medication_rounded,
                                       color: Colors.green,
-                                      onTap: () =>
-                                          ref.read(appStateProvider.notifier).changeNavigatorIndex(1),
+                                      onTap: () => ref
+                                          .read(appStateProvider.notifier)
+                                          .changeNavigatorIndex(1),
                                     );
                                   },
                                 ),
@@ -182,8 +191,9 @@ class HomeScreen extends ConsumerWidget {
                                           : '',
                                       icon: Icons.calendar_month_rounded,
                                       color: Colors.blue,
-                                      onTap: () => 
-                                      ref.read(appStateProvider.notifier).changeNavigatorIndex(0),
+                                      onTap: () => ref
+                                          .read(appStateProvider.notifier)
+                                          .changeNavigatorIndex(0),
                                     );
                                   },
                                 ),
@@ -206,7 +216,12 @@ class HomeScreen extends ConsumerWidget {
                                         '距下一等级${points['nextLevelPoints'] - points['currentPoints']}分',
                                     icon: Icons.stars_rounded,
                                     color: Colors.amber,
-                                    onTap: () => context.go('/rewards'),
+                                    onTap: () {
+                                      ref
+                                          .read(appStateProvider.notifier)
+                                          .changeNavigatorIndex(4);
+                                      context.push('/rewards');
+                                    },
                                   ),
                                 ),
                               ),
@@ -224,14 +239,16 @@ class HomeScreen extends ConsumerWidget {
 
                                         return _buildInfoCard(
                                           title: '健康风险',
-                                          content: latestAssessment?.riskLevel ??
-                                              '未评估',
+                                          content:
+                                              latestAssessment?.riskLevel ??
+                                                  '未评估',
                                           subtitle: latestAssessment != null
                                               ? '上次评估: ${latestAssessment.createdAt.month}-${latestAssessment.createdAt.day}'
                                               : '点击进行评估',
                                           icon: Icons.shield_rounded,
                                           color: Colors.purple,
-                                          onTap: () => context.go('/health-risk-assessment'),
+                                          onTap: () => context
+                                              .go('/health-risk-assessment'),
                                         );
                                       },
                                     ),

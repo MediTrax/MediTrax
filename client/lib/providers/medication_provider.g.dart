@@ -7,7 +7,7 @@ part of 'medication_provider.dart';
 // **************************************************************************
 
 String _$medicationProviderHash() =>
-    r'cf2b19af3e4cefac49a9c328527069f7d88e2af1';
+    r'5b711d012222410e1ee49b52a69865aff452f0dd';
 
 /// See also [MedicationProvider].
 @ProviderFor(MedicationProvider)
