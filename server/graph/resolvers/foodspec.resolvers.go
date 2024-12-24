@@ -69,9 +69,17 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 				valid_spec = true
 				spec.Name = spec_limit.ChineseName
 
-				spec.HowHigh = min(1, value/spec_limit.UpperRange)
+				// if actual value is below recommended value, then make HowHigh<0.3 (displays as recommended)
+				if value < spec_limit.Recommended {
+					spec.HowHigh = 0.3 * value / spec_limit.Recommended
+					s_total += spec.HowHigh
+				} else {
+					spec.HowHigh = 0.3 + 0.7*(value-spec_limit.Recommended)/spec_limit.Recommended
+					s_total += min(1.5, spec.HowHigh)
+					spec.HowHigh = min(1, spec.HowHigh)
+				}
+
 				n_spec = n_spec + 1
-				s_total = s_total + value/spec_limit.UpperRange
 			}
 		}
 
@@ -97,7 +105,7 @@ func (r *queryResolver) GetMockFoodSpecs(ctx context.Context, food string) (*mod
 
 	var specs []*model.FoodSpec
 	for _, spec_limit := range chat.SpecLimits {
-		specs = append(specs, &model.FoodSpec{Name: spec_limit.ChineseName, Value: spec_limit.UpperRange / 2, Unit: "mock unit", HowHigh: 0.5})
+		specs = append(specs, &model.FoodSpec{Name: spec_limit.ChineseName, Value: spec_limit.Recommended / 2, Unit: "mock unit", HowHigh: 0.5})
 	}
 
 	foodSpecs := &model.FoodSpecs{
