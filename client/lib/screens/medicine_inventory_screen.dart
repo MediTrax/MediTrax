@@ -87,11 +87,19 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     _fetchMedications();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fetch medications whenever dependencies change, such as when the tab is switched
+    _fetchMedications();
+  }
+
   Future<void> _fetchMedications() async {
     try {
       final userData = await ref.read(userDataProvider.future);
       if (userData != null) {
         await ref.read(medicationProviderProvider.notifier).fetchMedications();
+        setState(() {}); // Notify the framework to rebuild the UI
       } 
     } catch (e) {
       print("Error fetching medications: $e");
@@ -214,6 +222,8 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                         onDismissed: (_) async {
                           try {
                             final deletedMedication = medication;
+                            // 保存 ScaffoldMessenger 的引用
+                            final messenger = ScaffoldMessenger.of(context);
 
                             // Delete medication and its reminders
                             final success = await ref
@@ -226,9 +236,26 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                                 .fetchReminders();
 
                             if (success && mounted) {
-                              _showUndoSnackBar(context, deletedMedication);
+                              // 使用保存的 messenger 引用来显示 SnackBar
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete_outline_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text('${deletedMedication.name} 已删除'),
+                                    ],
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.fixed,
+                                ),
+                              );
                             } else if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 const SnackBar(
                                   content: Text('删除失败'),
                                   backgroundColor: Colors.red,
@@ -513,288 +540,292 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 500,
-            maxHeight: MediaQuery.of(context).size.height * 0.9,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.edit_calendar_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '编辑${medication.name}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 500,
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.edit_calendar_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '编辑${medication.name}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Medicine Name
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: '药品名称',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_liquid_rounded,
-                        color: Colors.purple.shade300,
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入药品名称';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Dosage
-                  TextFormField(
-                    controller: dosageController,
-                    decoration: InputDecoration(
-                      labelText: '剂量',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.scale_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                      suffixText: unitController.text,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入剂量';
-                      }
-                      final number = double.tryParse(value);
-                      if (number == null || number <= 0) {
-                        return '请输入有效的剂量';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Unit (changed to dropdown)
-                  DropdownButtonFormField<String>(
-                    value: unitController.text.isEmpty ? null : unitController.text,
-                    decoration: InputDecoration(
-                      labelText: '单位',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.straighten_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: '片',
-                        child: Text('片'),
-                      ),
-                      DropdownMenuItem(
-                        value: '毫升',
-                        child: Text('毫升'),
-                      ),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请选择单位';
-                      }
-                      return null;
-                    },
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        unitController.text = newValue;
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Frequency fields
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: daysController,
-                          decoration: InputDecoration(
-                            labelText: '每隔几天',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.calendar_today_rounded,
-                              color: Colors.purple.shade300,
-                            ),
-                            suffixText: '天',
-                          ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly, // Only allow digits
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return '请输入天数';
-                            }
-                            final days = int.tryParse(value);
-                            if (days == null || days <= 0) {
-                              return '请输入有效天数';
-                            }
-                            return null;
-                          },
+                    // Medicine Name
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: '药品名称',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medication_liquid_rounded,
+                          color: Colors.purple.shade300,
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: TextFormField(
-                          controller: timesController,
-                          decoration: InputDecoration(
-                            labelText: '服用次数',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            prefixIcon: Icon(
-                              Icons.access_time_rounded,
-                              color: Colors.blue.shade300,
-                            ),
-                            suffixText: '次',
-                          ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly, // Only allow digits
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return '请输入次数';
-                            }
-                            final times = int.tryParse(value);
-                            if (times == null || times <= 0) {
-                              return '请输入有效次数';
-                            }
-                            if (times > 24) {
-                              return '次数不能超过24';
-                            }
-                            return null;
-                          },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入药品名称';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Dosage Input with dynamic unit
+                    TextFormField(
+                      controller: dosageController,
+                      decoration: InputDecoration(
+                        labelText: '剂量',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.scale_rounded,
+                          color: Colors.green.shade300,
+                        ),
+                        suffixText: unitController.text, // 使用当前选择的单位
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入剂量';
+                        }
+                        final number = double.tryParse(value);
+                        if (number == null || number <= 0) {
+                          return '请输入有效的剂量';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Unit Dropdown
+                    DropdownButtonFormField<String>(
+                      value: unitController.text.isEmpty ? null : unitController.text,
+                      decoration: InputDecoration(
+                        labelText: '单位',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.straighten_rounded,
+                          color: Colors.orange.shade300,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Inventory (moved to end)
-                  TextFormField(
-                    controller: inventoryController,
-                    decoration: InputDecoration(
-                      labelText: '库存',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.inventory_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                      suffixText: unitController.text,
+                      items: const [
+                        DropdownMenuItem(
+                          value: '片',
+                          child: Text('片'),
+                        ),
+                        DropdownMenuItem(
+                          value: '毫升',
+                          child: Text('毫升'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请选择单位';
+                        }
+                        return null;
+                      },
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            unitController.text = newValue;
+                          });
+                        }
+                      },
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入库存数量';
-                      }
-                      final number = double.tryParse(value);
-                      if (number == null || number < 0) {
-                        return '请输入有效的库存数量';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                    // Frequency fields
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: daysController,
+                            decoration: InputDecoration(
+                              labelText: '每隔几天',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.calendar_today_rounded,
+                                color: Colors.purple.shade300,
+                              ),
+                              suffixText: '天',
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '请输入天数';
+                              }
+                              final days = int.tryParse(value);
+                              if (days == null || days <= 0) {
+                                return '请输入有效天数';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                            controller: timesController,
+                            decoration: InputDecoration(
+                              labelText: '服用次数',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.access_time_rounded,
+                                color: Colors.blue.shade300,
+                              ),
+                              suffixText: '次',
+                            ),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly, // Only allow digits
+                            ],
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '请输入次数';
+                              }
+                              final times = int.tryParse(value);
+                              if (times == null || times <= 0) {
+                                return '请输入有效次数';
+                              }
+                              if (times > 24) {
+                                return '次数不能超过24';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Inventory with dynamic unit
+                    TextFormField(
+                      controller: inventoryController,
+                      decoration: InputDecoration(
+                        labelText: '库存',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.inventory_rounded,
+                          color: Colors.orange.shade300,
+                        ),
+                        suffixText: unitController.text, // 使用当前选择的单位
                       ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              final success = await ref
-                                  .read(medicationProviderProvider.notifier)
-                                  .updateMedication(
-                                    medicationId: medication.id,
-                                    name: nameController.text,
-                                    dosage: double.parse(dosageController.text),
-                                    unit: unitController.text,
-                                    inventory:
-                                        double.parse(inventoryController.text),
-                                    frequency: '${timesController.text}/${daysController.text}',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Only allow numbers and one decimal point
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入库存数量';
+                        }
+                        final number = double.tryParse(value);
+                        if (number == null || number < 0) {
+                          return '请输入有效的库存数量';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                final success = await ref
+                                    .read(medicationProviderProvider.notifier)
+                                    .updateMedication(
+                                      medicationId: medication.id,
+                                      name: nameController.text,
+                                      dosage: double.parse(dosageController.text),
+                                      unit: unitController.text,
+                                      inventory:
+                                          double.parse(inventoryController.text),
+                                      frequency: '${timesController.text}/${daysController.text}',
+                                    );
+
+                                if (success && context.mounted) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('药品更新成功')),
                                   );
-
-                              if (success && context.mounted) {
-                                Navigator.pop(context);
+                                }
+                              } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('药品更新成功')),
+                                  SnackBar(
+                                    content: Text('更新失败: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
                                 );
                               }
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('更新失败: $e'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
-                      ),
-                    ],
-                  ),
-                ],
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -808,7 +839,6 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     final controller = TextEditingController();
     bool isDisposed = false;
     bool isClosing = false;
-    // Add state variable for error
     final errorState = ValueNotifier<String?>(null);
 
     void disposeController() {
@@ -830,40 +860,109 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
       context: context,
       builder: (dialogContext) => PopScope(
         canPop: !isClosing,
-        onPopInvoked: (didPop) {
-          // Do nothing here, let the then callback handle disposal
-        },
+        onPopInvoked: (didPop) {},
         child: AlertDialog(
-          title: Text('补充${medication.name}的库存'),
-          content: ValueListenableBuilder<String?>(
-            valueListenable: errorState,
-            builder: (context, error, _) => TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-              ],
-              decoration: InputDecoration(
-                labelText: '补充量',
-                border: const OutlineInputBorder(),
-                errorText: error,
-                errorStyle: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
-                ),
-                suffixText: medication.unit,
+          title: Row(
+            children: [
+              Icon(
+                Icons.add_circle_outline_rounded,
+                color: Colors.green.shade400,
+                size: 24,
               ),
-              onChanged: (_) {
-                errorState.value = null;
-              },
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '补充${medication.name}的库存',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 当前库存信息卡片
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade100),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.inventory_2_rounded,
+                      color: Colors.blue.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '当前库存: ${medication.inventory}${medication.unit}',
+                      style: TextStyle(
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 补充量输入框
+              ValueListenableBuilder<String?>(
+                valueListenable: errorState,
+                builder: (context, error, _) => TextField(
+                  controller: controller,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: '补充量',
+                    labelStyle: TextStyle(color: Colors.green.shade600),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.green.shade400),
+                    ),
+                    errorText: error,
+                    errorStyle: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.add_box_rounded,
+                      color: Colors.green.shade400,
+                    ),
+                    suffixText: medication.unit,
+                    suffixStyle: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  onChanged: (_) {
+                    errorState.value = null;
+                  },
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () => closeDialog(dialogContext),
-              child: const Text('取消'),
+              child: Text(
+                '取消',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
             ),
-            FilledButton(
+            FilledButton.icon(
               onPressed: () async {
                 if (controller.text.trim().isEmpty) {
                   errorState.value = '请输入补充剂量';
@@ -886,9 +985,24 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   if (success && dialogContext.mounted && !isClosing) {
                     closeDialog(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('库存更新')),
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text('库存更新成功'),
+                          ],
+                        ),
+                        backgroundColor: Colors.green.shade600,
+                      ),
                     );
-                    await _fetchMedications();
+                    // 刷新数据
+                    ref.invalidate(medicationProviderProvider);
+                    await ref.read(medicationProviderProvider.notifier).fetchMedications();
                   }
                 } catch (e) {
                   if (dialogContext.mounted && !isClosing) {
@@ -896,7 +1010,11 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   }
                 }
               },
-              child: const Text('保存'),
+              icon: const Icon(Icons.save_rounded),
+              label: const Text('保存'),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.green.shade600,
+              ),
             ),
           ],
         ),
@@ -909,78 +1027,23 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
   void _showUndoSnackBar(BuildContext context, Medication deletedMedication) {
     if (!context.mounted) return;
 
-    final messenger = ScaffoldMessenger.of(context);
-
-    Future.microtask(() async {
-      if (!context.mounted) return;
-
-      messenger.clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('${deletedMedication.name} 已删除'),
-          action: SnackBarAction(
-            label: '撤销',
-            onPressed: () async {
-              try {
-                // Restore the medication
-                final successRestore = await ref
-                    .read(medicationProviderProvider.notifier)
-                    .addMedication(
-                      name: deletedMedication.name,
-                      dosage: deletedMedication.dosage,
-                      unit: deletedMedication.unit,
-                      frequency: deletedMedication.frequency,
-                      inventory: deletedMedication.inventory,
-                    );
-
-                if (successRestore) {
-                  // Fetch medications after successful restore
-                  await _fetchMedications();
-                  // Also refresh reminders since they might have been restored
-                  await ref
-                      .read(medicationReminderProvider.notifier)
-                      .fetchReminders();
-
-                  if (context.mounted) {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('撤销成功'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                } else {
-                  if (context.mounted) {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('撤销失败，请重试'),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                  await _fetchMedications();
-                }
-              } catch (e) {
-                print('Error in undo operation: $e');
-                if (context.mounted) {
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: Text('撤销错误: $e'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-                await _fetchMedications();
-              }
-            },
-          ),
-          duration: const Duration(seconds: 5),
-          behavior: SnackBarBehavior.fixed,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text('${deletedMedication.name} 已删除'),
+          ],
         ),
-      );
-    });
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.fixed,
+      ),
+    );
   }
 }
 
@@ -1671,7 +1734,6 @@ class _ReminderTab extends ConsumerStatefulWidget {
   @override
   ConsumerState<_ReminderTab> createState() => _ReminderTabState();
 }
-
 class _ReminderTabState extends ConsumerState<_ReminderTab> {
   final NotificationService _notificationService = NotificationService();
 
@@ -2202,10 +2264,43 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     }
   }
 
-  Future<void> _handleReminderToggle(
-      MedicationReminder reminder, bool value) async {
+  Future<void> _handleReminderToggle(MedicationReminder reminder, bool value) async {
     // Only show confirmation dialog when marking as taken
     if (value) {
+      // Check if the reminder is for today or past
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final reminderDate = DateTime(
+        reminder.reminderTime.year,
+        reminder.reminderTime.month,
+        reminder.reminderTime.day,
+      );
+
+      // If the reminder is for a future date, show warning and return
+      if (reminderDate.isAfter(today)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('不能提前服用未来的药物'),
+                ],
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.fixed,
+            ),
+          );
+        }
+        return;
+      }
+
       final reminderDetails = await ref
           .read(medicationReminderProvider.notifier)
           .getReminderDetails(reminder.id);
@@ -2323,6 +2418,16 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
         final success = await ref
             .read(medicationReminderProvider.notifier)
             .confirmAndTakeMedication(reminder.id);
+
+        if (success) {
+          // 使用 invalidate 来强制重新获取数据并触发 UI 更新
+          ref.invalidate(medicationProviderProvider);
+          await ref.read(medicationProviderProvider.notifier).fetchMedications();
+          
+          // 如果需要确保提醒列表也更新
+          ref.invalidate(medicationReminderProvider);
+          await ref.read(medicationReminderProvider.notifier).fetchReminders();
+        }
 
         if (!success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

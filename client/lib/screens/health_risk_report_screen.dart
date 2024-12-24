@@ -62,21 +62,51 @@ class HealthRiskReportScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '建议',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline_rounded,
+                                color: Colors.amber.shade600,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                '建议',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            latestAssessment.recommendations,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              height: 1.5,
-                            ),
-                          ),
+                          const SizedBox(height: 16),
+                          ...latestAssessment.recommendations
+                              .split('。')
+                              .where((recommendation) => recommendation.isNotEmpty)
+                              .map((recommendation) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.check_circle_outline_rounded,
+                                          color: Colors.green.shade600,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            '$recommendation。',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              height: 1.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
                         ],
                       ),
                     ),

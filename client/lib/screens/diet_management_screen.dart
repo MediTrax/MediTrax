@@ -168,27 +168,6 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
                           fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.smart_toy_outlined,
-                            size: 14,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              '推荐由人工智能生成，可能出现错误，请使用安全查询确认后再食用',
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 12,
-                                height: 1.2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -274,74 +253,167 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
               return Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Theme.of(context).primaryColor.withOpacity(0.1),
-                        Theme.of(context).primaryColor.withOpacity(0.05),
+                        Colors.blue.shade50,
+                        Colors.purple.shade50,
                       ],
                     ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // 标题和图标
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(0.1),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: Icon(
-                              Icons.thumb_up,
+                              Icons.restaurant_menu,
                               color: Theme.of(context).primaryColor,
-                              size: 24,
+                              size: 28,
                             ),
                           ),
                           const SizedBox(width: 16),
                           const Text(
-                            '今日推荐',
+                            '今日推荐膳食',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        recommendation.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          height: 1.5,
+                      const SizedBox(height: 32),
+
+                      // 推荐的膳食名称
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              recommendation.name,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.green.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: Colors.green.shade700,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '推荐食用',
+                                        style: TextStyle(
+                                          color: Colors.green.shade700,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.timer_outlined,
+                                  size: 16,
+                                  color: Colors.grey.shade600,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '更新时间: ${DateTime.now().toString().substring(11, 16)}',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.timer_outlined,
-                            size: 16,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '更新时间: ${DateTime.now().toString().substring(0, 16)}',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                      const SizedBox(height: 20),
+
+                      // 营养提示
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.amber.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline,
+                              color: Colors.amber.shade700,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                '推荐由人工智能生成，可能出现错误，请使用安全查询确认后再食用',
+                                style: TextStyle(
+                                  color: Colors.amber.shade900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
