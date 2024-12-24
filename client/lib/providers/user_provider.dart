@@ -98,11 +98,11 @@ class UserData extends _$UserData {
     }
   }
 
-  Future<void> resetPassword(String token, String newPassword) async {
+  Future<void> resetPassword(String resetCode, String newPassword) async {
     final result = await ref.read(graphQLServiceProvider).mutate$ResetPassword(
           Options$Mutation$ResetPassword(
             variables: Variables$Mutation$ResetPassword(
-              token: token,
+              resetCode: resetCode,
               newPassword: newPassword,
             ),
           ),

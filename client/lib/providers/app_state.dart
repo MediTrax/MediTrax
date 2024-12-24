@@ -38,8 +38,67 @@ class AppState extends _$AppState {
     _hiveBox!.put("appState", state);
   }
 
+  Future<void> loginWithPhoneNumberOTP(
+      String phoneNumber, String otpCode) async {
+    final result =
+        await ref.read(graphQLServiceProvider).mutate$LoginUserWithOTP(
+              Options$Mutation$LoginUserWithOTP(
+                variables: Variables$Mutation$LoginUserWithOTP(
+                  phoneNumber: phoneNumber,
+                  otpCode: otpCode,
+                ),
+              ),
+            );
+
+    if (result.hasException) {
+      print("login problem");
+      throw result.exception!;
+    }
+    if (result.data == null) return;
+    final parsedData = result.parsedData!.loginUserWithOTP;
+
+    final token = Token(
+      id: parsedData!.token.refreshToken,
+      user: parsedData.userId,
+      accessToken: parsedData.token.accessToken,
+      accessTokenExpiry: parsedData.token.accessTokenExpiry,
+      refreshTokenExpiry: parsedData.token.refreshTokenExpiry,
+      device: parsedData.token.device,
+      createdAt: parsedData.token.createdAt,
+    );
+
+    _refreshTokenTimer = Timer(
+      token.accessTokenExpiry.difference(DateTime.now()),
+      () {
+        refreshToken();
+      },
+    );
+
+    state = state.copyWith(
+      token: token,
+      autoLoginResult: true,
+      selectedProfile: null,
+      navigatorIndex: 2,
+    );
+    ref.invalidate(graphQLServiceProvider);
+    await _hiveBox!.put("appState", state);
+  }
+
+  Future<void> requestOTP(String phoneNumber) async {
+    final result = await ref.read(graphQLServiceProvider).mutate$RequestOTP(
+          Options$Mutation$RequestOTP(
+            variables: Variables$Mutation$RequestOTP(
+              phoneNumber: phoneNumber,
+            ),
+          ),
+        );
+    if (result.hasException) {
+      throw result.exception!;
+    }
+  }
+
   Future<void> loginWithPhoneNumberPassword(
-      String phoneNumber, String password, String captcha) async {
+      String phoneNumber, String password, String otpCode) async {
     final result = await ref.read(graphQLServiceProvider).mutate$LoginUser(
           Options$Mutation$LoginUser(
             variables: Variables$Mutation$LoginUser(

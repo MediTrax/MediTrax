@@ -452,6 +452,12 @@ type RecordObject struct {
 	Data string `json:"data"`
 }
 
+// Response type for requesting an OTP.
+type RequestOTPResponse struct {
+	// A message indicating the result of the OTP request.
+	Message string `json:"message"`
+}
+
 // Response type for requesting a password reset.
 type RequestPasswordResetResponse struct {
 	// A message indicating the result of the password reset request.

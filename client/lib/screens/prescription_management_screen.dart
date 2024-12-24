@@ -122,7 +122,19 @@ class _UploadPrescriptionTab extends StatelessWidget {
               child: FilledButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: Implement prescription upload
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('功能开发中'),
+                        content: const Text('该功能正在开发中，敬请期待！'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                 },
                 style: FilledButton.styleFrom(

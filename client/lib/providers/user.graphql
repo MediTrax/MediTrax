@@ -37,8 +37,8 @@ mutation RequestPasswordReset($phoneNumber: String!) {
   }
 }
 
-mutation ResetPassword($token: String!, $newPassword: String!) {
-  resetPassword(token: $token, newPassword: $newPassword) {
+mutation ResetPassword($resetCode: String!, $newPassword: String!) {
+  resetPassword(resetCode: $resetCode, newPassword: $newPassword) {
     message
   }
 }

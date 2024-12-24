@@ -113,12 +113,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              user.name,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_rounded),
+                            onPressed: () =>
+                                _showEditNameDialog(context, ref, user.name),
+                            iconSize: 20,
+                            style: IconButton.styleFrom(
+                              padding: const EdgeInsets.all(4),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Container(
@@ -680,6 +695,74 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             }).toList(),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showEditNameDialog(
+      BuildContext context, WidgetRef ref, String currentName) {
+    final nameController = TextEditingController(text: currentName);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('修改姓名'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: '姓名',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请输入姓名';
+              }
+              if (value.length < 2) {
+                return '姓名至少需要2个字符';
+              }
+              if (value.length > 20) {
+                return '姓名不能超过20个字符';
+              }
+              return null;
+            },
+            autofocus: true,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                try {
+                  await ref.read(userDataProvider.notifier).updateUser(
+                        name: nameController.text.trim(),
+                      );
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('姓名修改成功'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ErrorHandler.showErrorSnackBar(context, e);
+                  }
+                }
+              }
+            },
+            child: const Text('保存'),
+          ),
+        ],
       ),
     );
   }

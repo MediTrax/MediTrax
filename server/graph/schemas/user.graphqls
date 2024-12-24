@@ -221,6 +221,16 @@ type DeleteUserResponse {
 }
 
 """
+Response type for requesting an OTP.
+"""
+type RequestOTPResponse {
+  """
+  A message indicating the result of the OTP request.
+  """
+  message: String!
+}
+
+"""
 Response type for requesting a password reset.
 """
 type RequestPasswordResetResponse {
@@ -424,6 +434,31 @@ extend type Mutation {
   ): LoginUserResponse
 
   """
+  Logs in a user with OTP.
+  """
+  loginUserWithOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+
+    """
+    The OTP code of the user.
+    """
+    otpCode: String!
+  ): LoginUserResponse
+
+  """
+  Requests an OTP for a user.
+  """
+  requestOTP(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestOTPResponse
+
+  """
   Updates the details of the current user.
   """
   updateUser(
@@ -447,9 +482,59 @@ extend type Mutation {
   Deletes the current user.
   """
   deleteUser: DeleteUserResponse
-  requestPasswordReset(phoneNumber: String!): RequestPasswordResetResponse
-  resetPassword(resetCode: String!, newPassword: String!): ResetPasswordResponse
-  
-  shareProfile(phoneNumber: String!, accessLevel: String!, remarks: String!): ShareProfileResponse!
-  unshareProfile(targetUserId: String!): UnshareProfileResponse!
+
+  """
+  Requests a password reset for a user.
+  """
+  requestPasswordReset(
+    """
+    The phone number of the user.
+    """
+    phoneNumber: String!
+  ): RequestPasswordResetResponse
+
+  """
+  Resets a user's password.
+  """
+  resetPassword(
+    """
+    The reset code for the password reset.
+    """
+    resetCode: String!
+
+    """
+    The new password for the user.
+    """
+    newPassword: String!
+  ): ResetPasswordResponse
+
+  """
+  Shares a profile with another user.
+  """
+  shareProfile(
+    """
+    The phone number of the user to share the profile with.
+    """
+    phoneNumber: String!
+
+    """
+    The access level of the profile.
+    """
+    accessLevel: String!
+
+    """
+    The remarks of the profile.
+    """
+    remarks: String
+  ): ShareProfileResponse!
+
+  """
+  Unshares a profile with another user.
+  """
+  unshareProfile(
+    """
+    The ID of the user to unshare the profile with.
+    """
+    targetUserId: String!
+  ): UnshareProfileResponse!
 }

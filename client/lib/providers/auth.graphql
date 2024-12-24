@@ -39,6 +39,40 @@ mutation LoginUser(
     }
 }
 
+mutation RequestOTP(
+    $phoneNumber: String!
+) {
+    requestOTP(
+        phoneNumber: $phoneNumber
+    ) {
+        message
+    }
+}
+
+mutation LoginUserWithOTP(
+    $phoneNumber: String!
+    $otpCode: String!
+) {
+    loginUserWithOTP(
+        phoneNumber: $phoneNumber
+        otpCode: $otpCode
+    ) {
+        userId
+        token {
+            id
+            user
+            accessToken
+            refreshToken
+            accessTokenExpiry
+            refreshTokenExpiry
+            device
+            createdAt
+            updatedAt
+        }
+        message
+    }
+}
+
 mutation RefreshToken(
     $accessToken: String!
     $refreshToken: String!

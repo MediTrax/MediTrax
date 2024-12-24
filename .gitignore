@@ -2,7 +2,7 @@
 *.env
 server/.env
 server/coverage.out
-
+server/tmp
 
 .private
 .public

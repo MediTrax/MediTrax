@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:meditrax/providers/app_state.dart';
+import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -19,7 +20,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   PhoneNumber _phoneNumber = PhoneNumber(isoCode: 'CN');
   bool _isLoading = false;
   bool _isSignup = false;
-  bool _useOTP = true;
+  bool _useOTP = false;
   String? _otpCode;
   bool _showPassword = false;
 
@@ -48,7 +49,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     try {
       if (_useOTP) {
-        throw UnimplementedError('OTP login not implemented yet');
+        await ref.read(appStateProvider.notifier).loginWithPhoneNumberOTP(
+              _phoneNumber.phoneNumber!,
+              _otpCode!,
+            );
       } else {
         await ref.read(appStateProvider.notifier).loginWithPhoneNumberPassword(
               _phoneNumber.phoneNumber!,
@@ -101,17 +105,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   Future<void> _requestOTP() async {
-    if (_phoneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入手机号码')),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
+    _formKey.currentState!.save();
 
     setState(() => _isLoading = true);
 
     try {
-      throw UnimplementedError('OTP functionality not implemented yet');
+      await ref.read(appStateProvider.notifier).requestOTP(
+            _phoneNumber.phoneNumber!,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('验证码已发送'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ErrorHandler.showErrorSnackBar(
@@ -128,21 +140,149 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 
   Future<void> _handleWeChatLogin() async {
-    setState(() => _isLoading = true);
+    _showComingSoonDialog('微信登录');
+  }
+
+  void _showComingSoonDialog(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.upcoming_rounded, color: Colors.blue.shade400),
+            const SizedBox(width: 8),
+            const Text('即将推出'),
+          ],
+        ),
+        content: Text('$feature功能正在开发中，敬请期待！'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('知道了'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResetPasswordDialog(String phoneNumber) {
+    final otpController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('重置密码'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: otpController,
+                decoration: const InputDecoration(
+                  labelText: '验证码',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入验证码';
+                  }
+                  if (value.length != 6) {
+                    return '验证码必须是6位数字';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: newPasswordController,
+                decoration: const InputDecoration(
+                  labelText: '新密码',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '请输入新密码';
+                  }
+                  if (value.length < 6) {
+                    return '密码至少需要6个字符';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                try {
+                  await ref.read(userDataProvider.notifier).resetPassword(
+                        otpController.text,
+                        newPasswordController.text,
+                      );
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('密码重置成功'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ErrorHandler.showErrorSnackBar(
+                      context,
+                      e,
+                      prefix: '重置密码失败: ',
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('确认'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleResetPasswordRequest() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
 
     try {
-      throw UnimplementedError('WeChat login not implemented yet');
+      await ref.read(userDataProvider.notifier).requestPasswordReset(
+            _phoneNumber.phoneNumber!,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('验证码已发送到您的手机'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        _showResetPasswordDialog(_phoneNumber.phoneNumber!);
+      }
     } catch (e) {
       if (mounted) {
         ErrorHandler.showErrorSnackBar(
           context,
           e,
-          prefix: '微信登录失败: ',
+          prefix: '发送验证码失败: ',
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -250,6 +390,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                 ),
                               ),
                             ),
+                            if (!_isSignup && !_useOTP) ...[
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: _handleResetPasswordRequest,
+                                  child: const Text('忘记密码？'),
+                                ),
+                              ),
+                            ],
                             if (_isSignup) const SizedBox(height: 16),
                             if (_isSignup)
                               TextFormField(
