@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO: write test for MedicalRecord
 func TestMedicalRecord(t *testing.T) {
 	c := client.New(NewServer())
 	user := CreateUserAndLogin(t, c)
