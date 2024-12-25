@@ -125,6 +125,11 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 			from=$from,
 			to=$to,
 			timestamp=<datetime>$timestamp;
+			CREATE ONLY point_record:ulid() 
+			SET userId=$userId,
+			pointsEarned=$pointsEarned,
+			reason=$reason,
+			earnedAt=<datetime>$now;
 			`,
 			map[string]interface{}{
 				"userId":        userId,
@@ -135,6 +140,9 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 				"from":          change.From,
 				"to":            change.To,
 				"timestamp":     timestamp,
+				"pointsEarned":  1,
+				"reason":        "user activity",
+				"now":           time.Now().UTC(),
 			},
 		)
 		if err != nil {
