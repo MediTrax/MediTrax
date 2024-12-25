@@ -330,184 +330,186 @@ class _VisitHistoryTab extends ConsumerWidget {
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.add_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '添加就诊记录',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '添加就诊记录',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Date Picker
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.event_rounded,
-                        color: Colors.blue.shade300,
-                      ),
-                      title: const Text('就诊日期'),
-                      subtitle: Text(
-                        selectedDate.toString().split(' ')[0],
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) {
-                          selectedDate = date;
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Visit Type
-                  DropdownButtonFormField<String>(
-                    value: visitType,
-                    decoration: InputDecoration(
-                      labelText: '就诊类型',
-                      border: OutlineInputBorder(
+                    // Date Picker
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      prefixIcon: Icon(
-                        Icons.medical_services_rounded,
-                        color: Colors.purple.shade300,
-                      ),
-                    ),
-                    items: ['门诊', '住院'].map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      visitType = value!;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Diagnosis
-                  TextFormField(
-                    controller: diagnosisController,
-                    decoration: InputDecoration(
-                      labelText: '诊断结果',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medical_information_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入诊断结果';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Prescription
-                  TextFormField(
-                    controller: prescriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: '处方',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入处方';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(medicalRecordsProvider.notifier)
-                                  .addRecord(
-                                recordType: 'visit',
-                                content: {
-                                  'type': visitType,
-                                  'diagnosis': diagnosisController.text,
-                                  'prescription': prescriptionController.text,
-                                  'date': selectedDate.toIso8601String(),
-                                },
-                              );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
-                            }
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.event_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        title: const Text('就诊日期'),
+                        subtitle: Text(
+                          selectedDate.toString().split(' ')[0],
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            selectedDate = date;
                           }
                         },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Visit Type
+                    DropdownButtonFormField<String>(
+                      value: visitType,
+                      decoration: InputDecoration(
+                        labelText: '就诊类型',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_services_rounded,
+                          color: Colors.purple.shade300,
+                        ),
+                      ),
+                      items: ['门诊', '住院'].map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        visitType = value!;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Diagnosis
+                    TextFormField(
+                      controller: diagnosisController,
+                      decoration: InputDecoration(
+                        labelText: '诊断结果',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_information_rounded,
+                          color: Colors.green.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入诊断结果';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Prescription
+                    TextFormField(
+                      controller: prescriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: '处方',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medication_rounded,
+                          color: Colors.orange.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入处方';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(medicalRecordsProvider.notifier)
+                                    .addRecord(
+                                  recordType: 'visit',
+                                  content: {
+                                    'type': visitType,
+                                    'diagnosis': diagnosisController.text,
+                                    'prescription': prescriptionController.text,
+                                    'date': selectedDate.toIso8601String(),
+                                  },
+                                );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -539,186 +541,188 @@ class _VisitHistoryTab extends ConsumerWidget {
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.edit_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '编辑就诊记录',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '编辑就诊记录',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Date Picker
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.event_rounded,
-                        color: Colors.blue.shade300,
-                      ),
-                      title: const Text('就诊日期'),
-                      subtitle: Text(
-                        selectedDate.toString().split(' ')[0],
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime.now(),
-                        );
-                        if (date != null) {
-                          selectedDate = date;
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Visit Type
-                  DropdownButtonFormField<String>(
-                    value: visitType,
-                    decoration: InputDecoration(
-                      labelText: '就诊类型',
-                      border: OutlineInputBorder(
+                    // Date Picker
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      prefixIcon: Icon(
-                        Icons.medical_services_rounded,
-                        color: Colors.purple.shade300,
-                      ),
-                    ),
-                    items: ['门诊', '住院'].map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      visitType = value!;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Diagnosis
-                  TextFormField(
-                    controller: diagnosisController,
-                    decoration: InputDecoration(
-                      labelText: '诊断结果',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medical_information_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入诊断结果';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Prescription
-                  TextFormField(
-                    controller: prescriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: '处方',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入处方';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(medicalRecordsProvider.notifier)
-                                  .updateRecord(
-                                    recordId: recordId,
-                                    recordType: 'visit',
-                                    content: jsonEncode({
-                                      'type': visitType,
-                                      'diagnosis': diagnosisController.text,
-                                      'prescription':
-                                          prescriptionController.text,
-                                      'date': selectedDate.toIso8601String(),
-                                    }),
-                                  );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
-                            }
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.event_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        title: const Text('就诊日期'),
+                        subtitle: Text(
+                          selectedDate.toString().split(' ')[0],
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            selectedDate = date;
                           }
                         },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Visit Type
+                    DropdownButtonFormField<String>(
+                      value: visitType,
+                      decoration: InputDecoration(
+                        labelText: '就诊类型',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_services_rounded,
+                          color: Colors.purple.shade300,
+                        ),
+                      ),
+                      items: ['门诊', '住院'].map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        visitType = value!;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Diagnosis
+                    TextFormField(
+                      controller: diagnosisController,
+                      decoration: InputDecoration(
+                        labelText: '诊断结果',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_information_rounded,
+                          color: Colors.green.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入诊断结果';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Prescription
+                    TextFormField(
+                      controller: prescriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: '处方',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medication_rounded,
+                          color: Colors.orange.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入处方';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(medicalRecordsProvider.notifier)
+                                    .updateRecord(
+                                      recordId: recordId,
+                                      recordType: 'visit',
+                                      content: jsonEncode({
+                                        'type': visitType,
+                                        'diagnosis': diagnosisController.text,
+                                        'prescription':
+                                            prescriptionController.text,
+                                        'date': selectedDate.toIso8601String(),
+                                      }),
+                                    );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1060,183 +1064,185 @@ class _MedicationHistoryTab extends ConsumerWidget {
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.add_rounded,
-                        color: Colors.orange.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '添加用药记录',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          color: Colors.orange.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '添加用药记录',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Medication Name
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: '药品名称',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_rounded,
-                        color: Colors.orange.shade300,
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入药品名称';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Dosage
-                  TextFormField(
-                    controller: dosageController,
-                    decoration: InputDecoration(
-                      labelText: '剂量',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    // Medication Name
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: '药品名称',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medication_rounded,
+                          color: Colors.orange.shade300,
+                        ),
                       ),
-                      prefixIcon: Icon(
-                        Icons.straighten_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入剂量';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Frequency
-                  TextFormField(
-                    controller: frequencyController,
-                    decoration: InputDecoration(
-                      labelText: '服用频率',
-                      hintText: '例如：每日一次',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.schedule_rounded,
-                        color: Colors.purple.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入服用频率';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Start Date
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.event_rounded,
-                        color: Colors.blue.shade300,
-                      ),
-                      title: const Text('开始日期'),
-                      subtitle: Text(
-                        selectedDate.toString().split(' ')[0],
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: DateTime(2000),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (date != null) {
-                          selectedDate = date;
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入药品名称';
                         }
+                        return null;
                       },
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                    // Dosage
+                    TextFormField(
+                      controller: dosageController,
+                      decoration: InputDecoration(
+                        labelText: '剂量',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.straighten_rounded,
+                          color: Colors.green.shade300,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(medicalRecordsProvider.notifier)
-                                  .addRecord(
-                                recordType: 'medication',
-                                content: {
-                                  'name': nameController.text,
-                                  'dosage': dosageController.text,
-                                  'frequency': frequencyController.text,
-                                  'startDate': selectedDate.toIso8601String(),
-                                },
-                              );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
-                            }
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入剂量';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Frequency
+                    TextFormField(
+                      controller: frequencyController,
+                      decoration: InputDecoration(
+                        labelText: '服用频率',
+                        hintText: '例如：每日一次',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.schedule_rounded,
+                          color: Colors.purple.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入服用频率';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Start Date
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.event_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        title: const Text('开始日期'),
+                        subtitle: Text(
+                          selectedDate.toString().split(' ')[0],
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (date != null) {
+                            selectedDate = date;
                           }
                         },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(medicalRecordsProvider.notifier)
+                                    .addRecord(
+                                  recordType: 'medication',
+                                  content: {
+                                    'name': nameController.text,
+                                    'dosage': dosageController.text,
+                                    'frequency': frequencyController.text,
+                                    'startDate': selectedDate.toIso8601String(),
+                                  },
+                                );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1268,149 +1274,151 @@ class _MedicationHistoryTab extends ConsumerWidget {
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.edit_rounded,
-                        color: Colors.orange.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '编辑用药记录',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.edit_rounded,
+                          color: Colors.orange.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '编辑用药记录',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Same form fields as add dialog
-                  TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: '药品名称',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medication_rounded,
-                        color: Colors.orange.shade300,
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入药品名称';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: dosageController,
-                    decoration: InputDecoration(
-                      labelText: '剂量',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    // Same form fields as add dialog
+                    TextFormField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: '药品名称',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medication_rounded,
+                          color: Colors.orange.shade300,
+                        ),
                       ),
-                      prefixIcon: Icon(
-                        Icons.straighten_rounded,
-                        color: Colors.green.shade300,
-                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入药品名称';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入剂量';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: frequencyController,
-                    decoration: InputDecoration(
-                      labelText: '服用频率',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    TextFormField(
+                      controller: dosageController,
+                      decoration: InputDecoration(
+                        labelText: '剂量',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.straighten_rounded,
+                          color: Colors.green.shade300,
+                        ),
                       ),
-                      prefixIcon: Icon(
-                        Icons.schedule_rounded,
-                        color: Colors.purple.shade300,
-                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入剂量';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入服用频率';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                    TextFormField(
+                      controller: frequencyController,
+                      decoration: InputDecoration(
+                        labelText: '服用频率',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.schedule_rounded,
+                          color: Colors.purple.shade300,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(medicalRecordsProvider.notifier)
-                                  .updateRecord(
-                                    recordId: recordId,
-                                    recordType: 'medication',
-                                    content: jsonEncode({
-                                      'name': nameController.text,
-                                      'dosage': dosageController.text,
-                                      'frequency': frequencyController.text,
-                                      'startDate':
-                                          selectedDate.toIso8601String(),
-                                    }),
-                                  );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入服用频率';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(medicalRecordsProvider.notifier)
+                                    .updateRecord(
+                                      recordId: recordId,
+                                      recordType: 'medication',
+                                      content: jsonEncode({
+                                        'name': nameController.text,
+                                        'dosage': dosageController.text,
+                                        'frequency': frequencyController.text,
+                                        'startDate':
+                                            selectedDate.toIso8601String(),
+                                      }),
+                                    );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
                               }
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
-                      ),
-                    ],
-                  ),
-                ],
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
