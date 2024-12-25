@@ -405,61 +405,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoCard(
-    String label,
-    String value,
-    IconData icon,
-    MaterialColor color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.shade100),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: color.shade400,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: color.shade700,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAccountSettings(BuildContext context, WidgetRef ref) {
     return Card(
       elevation: 0,
@@ -490,6 +435,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
             const SizedBox(height: 24),
+            OutlinedButton.icon(
+              onPressed: () => _showDeleteAccountDialog(context, ref),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: const BorderSide(color: Colors.red),
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              icon: const Icon(Icons.delete_forever_rounded),
+              label: const Text('删除账户'),
+            ),
+            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: () async {
                 try {
@@ -512,6 +468,41 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('删除账户'),
+        content: const Text('您确定要删除账户吗？此操作无法撤销，所有数据将被永久删除。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              try {
+                await ref.read(userDataProvider.notifier).deleteUser();
+                if (context.mounted) {
+                  context.go('/auth');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ErrorHandler.showErrorSnackBar(context, e);
+                }
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('确认删除'),
+          ),
+        ],
       ),
     );
   }

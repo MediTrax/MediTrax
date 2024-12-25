@@ -16,6 +16,37 @@ class _AiHelperScreenState extends State<AiHelperScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Show dialog after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.construction_rounded,
+                color: Colors.orange.shade400,
+              ),
+              const SizedBox(width: 8),
+              const Text('功能开发中'),
+            ],
+          ),
+          content: const Text('AI智能功能正在开发中，敬请期待！'),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.pop(
+                    context); // Pop twice to go back to previous screen
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+        barrierDismissible: false, // Prevent dismissing by tapping outside
+      );
+    });
   }
 
   @override
@@ -82,7 +113,7 @@ class AiAssistantTab extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _buildAiMessage(
-                      '您好！我是您的智能健康助手。我可以回答您的健康问题，提供用药建议，或者帮助您理解医疗报告。请问有��么我可以帮助您的吗？',
+                      '您好！我是您的智能健康助手。我可以回答您的健康问题，提供用药建议，或者帮助您理解医疗报告。请问有什么我可以帮助您的吗？',
                     ),
                     _buildUserMessage(
                       '我最近感觉有点头晕，这可能是什么原因造成的？',
@@ -114,7 +145,7 @@ class AiAssistantTab extends StatelessWidget {
                   child: TextField(
                     controller: messageController,
                     decoration: const InputDecoration(
-                      hintText: '输入您的问题...',
+                      hintText: '输入��的问题...',
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 16,
@@ -202,7 +233,7 @@ class HealthInsightsTab extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const Text(
-              '基于您的健康数据，提供个性化的健康建议',
+              '基于您��健康数据，提供个性化的健康建议',
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 24),

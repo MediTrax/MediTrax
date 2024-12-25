@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/providers/health_risk_provider.dart';
-import 'package:meditrax/providers/medication_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/providers/app_state.dart';
 import 'package:meditrax/providers/medication_reminder_provider.dart';
@@ -14,7 +13,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userDataProvider);
-    final medicationsAsync = ref.watch(medicationProviderProvider);
     final healthMetricsAsync = ref.watch(healthMetricsProvider);
     final userPointsAsync = ref.watch(userPointsProvider);
     final remindersAsync = ref.watch(medicationReminderProvider);
