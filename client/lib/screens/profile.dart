@@ -293,7 +293,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   data: (points) => _buildProfileSection(
                     title: '健康积分',
-                    subtitle: '${points['currentPoints']}',
+                    subtitle:
+                        '${points.fold(0.0, (a, b) => a + (b?.pointsEarned ?? 0))}',
                     icon: Icons.favorite_rounded,
                     color: Colors.red,
                     onTap: () => context.push('/rewards'),
