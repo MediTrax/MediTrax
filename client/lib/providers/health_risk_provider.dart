@@ -98,7 +98,7 @@ class HealthRisk extends _$HealthRisk {
           print('Error Extensions: ${error.extensions}');
           return error.message;
         }).join('\n');
-        
+
         throw Exception(errorMessage ?? 'Unknown GraphQL Error');
       }
 

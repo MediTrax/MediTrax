@@ -141,7 +141,7 @@ func AddActivityLogs(userId string, actType string, description string, objId st
 				"to":            change.To,
 				"timestamp":     timestamp,
 				"pointsEarned":  1,
-				"reason":        "user activity",
+				"reason":        actType,
 				"now":           time.Now().UTC(),
 			},
 		)

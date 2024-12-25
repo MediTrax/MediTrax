@@ -209,9 +209,10 @@ class HomeScreen extends ConsumerWidget {
                                   error: (err, stack) => _buildErrorCard(),
                                   data: (points) => _buildInfoCard(
                                     title: '健康积分',
-                                    content: '${points['currentPoints']}',
+                                    content:
+                                        '${points.fold(0.0, (a, b) => a + (b?.pointsEarned ?? 0))}',
                                     subtitle:
-                                        '距下一等级${points['nextLevelPoints'] - points['currentPoints']}分',
+                                        '距下一等级${((points.fold(0.0, (a, b) => a + (b?.pointsEarned ?? 0)) / 100).ceil() * 100 - points.fold(0.0, (a, b) => a + (b?.pointsEarned ?? 0))).toInt()}分',
                                     icon: Icons.stars_rounded,
                                     color: Colors.amber,
                                     onTap: () {

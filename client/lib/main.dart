@@ -231,7 +231,9 @@ class RouterNotifier extends ChangeNotifier {
             ),
             GoRoute(
               path: '/health-risk-report',
-              builder: (context, state) => const HealthRiskReportScreen(),
+              builder: (context, state) => HealthRiskReportScreen(
+                latestAssessment: state.extra as HealthRiskAssessment?,
+              ),
             ),
             GoRoute(
               path: '/prescription-management',

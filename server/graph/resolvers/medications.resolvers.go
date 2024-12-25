@@ -199,7 +199,7 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateMedication", "user updated specs of a medicaion", medicationID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "更新药品", "user updated specs of a medicaion", medicationID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -435,7 +435,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 				return nil, err
 			}
 
-			err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "decrease medication inventory after medicaion is taken",
+			err = utils.AddActivityLogs(user.ID, "更新服药提醒", "decrease medication inventory after medicaion is taken",
 				remBefore.MedicationID, []utils.ChangeLog{
 					{
 						Field: "inventory",
@@ -485,7 +485,7 @@ func (r *mutationResolver) UpdateMedicationReminder(ctx context.Context, reminde
 		return nil, err
 	}
 
-	err = utils.AddActivityLogs(user.ID, "updateMedicationReminder", "user updated specs of a medicaion reminder", reminderID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "更新服药提醒", "user updated specs of a medicaion reminder", reminderID, changeLog)
 	if err != nil {
 		return nil, err
 	}
@@ -580,7 +580,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID string
 		return nil, err
 	}
 
-	err = utils.AddActivityLogs(user.ID, "takeMedication", "decrease medication inventory after user takes medication",
+	err = utils.AddActivityLogs(user.ID, "按时服药", "decrease medication inventory after user takes medication",
 		reminder.MedicationID, []utils.ChangeLog{
 			{
 				Field: "inventory",
@@ -612,7 +612,7 @@ func (r *mutationResolver) TakeMedication(ctx context.Context, reminderID string
 	}
 
 	// add to change log
-	err = utils.AddActivityLogs(user.ID, "takeMedication", "user take medication, update reminder time", reminderID,
+	err = utils.AddActivityLogs(user.ID, "按时服药", "user take medication, update reminder time", reminderID,
 		[]utils.ChangeLog{
 			{
 				Field: "reminderTime",
@@ -817,7 +817,7 @@ func (r *mutationResolver) UpdateTreatmentSchedule(ctx context.Context, schedule
 	}
 
 	// add to activity log
-	err = utils.AddActivityLogs(user.ID, "updateTreatmentSchedule", "user updated specs of a treatment schedule", scheduleID, changeLog)
+	err = utils.AddActivityLogs(user.ID, "更新治疗日程", "user updated specs of a treatment schedule", scheduleID, changeLog)
 	if err != nil {
 		return nil, err
 	}

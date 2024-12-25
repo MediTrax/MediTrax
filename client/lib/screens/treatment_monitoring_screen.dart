@@ -255,6 +255,7 @@ class _HealthMetricsTab extends ConsumerWidget {
                                     ref,
                                     type,
                                     unit,
+                                    canEdit,
                                   ),
                                 ),
                               ),
@@ -326,182 +327,189 @@ class _HealthMetricsTab extends ConsumerWidget {
               maxWidth: 500,
               maxHeight: MediaQuery.of(context).size.height * 0.9,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Dialog title
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.add_rounded,
-                          color: Colors.blue.shade400,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            '添加健康指标',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Dialog title
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
+                            color: Colors.blue.shade400,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              '添加健康指标',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.pop(context),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 16),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 16),
 
-                    // Show type selection only if not adding to existing
-                    if (!isAddingToExisting)
-                      Autocomplete<String>(
-                        initialValue: TextEditingValue(text: initialType ?? ''),
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          if (textEditingValue.text.isEmpty) {
+                      // Show type selection only if not adding to existing
+                      if (!isAddingToExisting)
+                        Autocomplete<String>(
+                          initialValue:
+                              TextEditingValue(text: initialType ?? ''),
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            if (textEditingValue.text.isEmpty) {
+                              return [
+                                ...COMMON_HEALTH_METRICS.keys,
+                                ...existingMetrics.keys
+                              ];
+                            }
                             return [
                               ...COMMON_HEALTH_METRICS.keys,
                               ...existingMetrics.keys
-                            ];
-                          }
-                          return [
-                            ...COMMON_HEALTH_METRICS.keys,
-                            ...existingMetrics.keys
-                          ].where((type) => type
-                              .toLowerCase()
-                              .contains(textEditingValue.text.toLowerCase()));
-                        },
-                        onSelected: (String selection) {
-                          setState(() {
-                            selectedType = selection;
-                            // Set unit based on common metrics or existing metrics
-                            if (COMMON_HEALTH_METRICS.containsKey(selection)) {
-                              unitController.text =
-                                  COMMON_HEALTH_METRICS[selection]!;
-                            } else if (existingMetrics.containsKey(selection)) {
-                              unitController.text = existingMetrics[selection]!;
-                            }
-                          });
-                        },
-                        fieldViewBuilder: (context, textEditingController,
-                            focusNode, onFieldSubmitted) {
-                          return TextFormField(
-                            controller: textEditingController,
-                            focusNode: focusNode,
-                            decoration: InputDecoration(
-                              labelText: '指标类型',
-                              hintText: '选择或输入新的指标类型',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              prefixIcon: Icon(
-                                Icons.monitor_heart_rounded,
-                                color: Colors.purple.shade300,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return '请输入指标类型';
+                            ].where((type) => type
+                                .toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase()));
+                          },
+                          onSelected: (String selection) {
+                            setState(() {
+                              selectedType = selection;
+                              // Set unit based on common metrics or existing metrics
+                              if (COMMON_HEALTH_METRICS
+                                  .containsKey(selection)) {
+                                unitController.text =
+                                    COMMON_HEALTH_METRICS[selection]!;
+                              } else if (existingMetrics
+                                  .containsKey(selection)) {
+                                unitController.text =
+                                    existingMetrics[selection]!;
                               }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                selectedType = value;
-                                // Clear unit if type is not in common or existing metrics
-                                if (!COMMON_HEALTH_METRICS.containsKey(value) &&
-                                    !existingMetrics.containsKey(value)) {
-                                  unitController.text = '';
+                            });
+                          },
+                          fieldViewBuilder: (context, textEditingController,
+                              focusNode, onFieldSubmitted) {
+                            return TextFormField(
+                              controller: textEditingController,
+                              focusNode: focusNode,
+                              decoration: InputDecoration(
+                                labelText: '指标类型',
+                                hintText: '选择或输入新的指标类型',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.monitor_heart_rounded,
+                                  color: Colors.purple.shade300,
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return '请输入指标类型';
                                 }
-                              });
-                            },
-                          );
-                        },
-                      )
-                    else
-                      // Show read-only type field when adding to existing
+                                return null;
+                              },
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedType = value;
+                                  // Clear unit if type is not in common or existing metrics
+                                  if (!COMMON_HEALTH_METRICS
+                                          .containsKey(value) &&
+                                      !existingMetrics.containsKey(value)) {
+                                    unitController.text = '';
+                                  }
+                                });
+                              },
+                            );
+                          },
+                        )
+                      else
+                        // Show read-only type field when adding to existing
+                        TextFormField(
+                          initialValue: initialType,
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: '指标类型',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixIcon: Icon(
+                              Icons.monitor_heart_rounded,
+                              color: Colors.purple.shade300,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+
+                      // Unit field (always read-only when adding to existing)
                       TextFormField(
-                        initialValue: initialType,
-                        readOnly: true,
+                        controller: unitController,
                         decoration: InputDecoration(
-                          labelText: '指标类型',
+                          labelText: '单位',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                           prefixIcon: Icon(
-                            Icons.monitor_heart_rounded,
-                            color: Colors.purple.shade300,
+                            Icons.science_rounded,
+                            color: Colors.orange.shade300,
                           ),
                         ),
+                        readOnly: isAddingToExisting ||
+                            (selectedType != null &&
+                                (COMMON_HEALTH_METRICS
+                                        .containsKey(selectedType) ||
+                                    existingMetrics.containsKey(selectedType))),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '请输入单位';
+                          }
+                          return null;
+                        },
                       ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Unit field (always read-only when adding to existing)
-                    TextFormField(
-                      controller: unitController,
-                      decoration: InputDecoration(
-                        labelText: '单位',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        prefixIcon: Icon(
-                          Icons.science_rounded,
-                          color: Colors.orange.shade300,
-                        ),
-                      ),
-                      readOnly: isAddingToExisting ||
-                          (selectedType != null &&
-                              (COMMON_HEALTH_METRICS
-                                      .containsKey(selectedType) ||
-                                  existingMetrics.containsKey(selectedType))),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '请输入单位';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Value and date editor
-                    _MetricValueEditor(
-                      initialValue: null,
-                      unit: unitController.text,
-                      date: selectedDate,
-                      onSave: (newValue, newDate) async {
-                        if (formKey.currentState!.validate() &&
-                            selectedType != null) {
-                          try {
-                            await ref
-                                .read(healthMetricsProvider.notifier)
-                                .addMetric(
-                                  metricType: selectedType!,
-                                  value: newValue,
-                                  unit: unitController.text,
-                                  recordedAt: newDate,
-                                );
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ErrorHandler.showErrorSnackBar(context, e);
+                      // Value and date editor
+                      _MetricValueEditor(
+                        initialValue: null,
+                        unit: unitController.text,
+                        date: selectedDate,
+                        onSave: (newValue, newDate) async {
+                          if (formKey.currentState!.validate() &&
+                              selectedType != null) {
+                            try {
+                              await ref
+                                  .read(healthMetricsProvider.notifier)
+                                  .addMetric(
+                                    metricType: selectedType!,
+                                    value: newValue,
+                                    unit: unitController.text,
+                                    recordedAt: newDate,
+                                  );
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ErrorHandler.showErrorSnackBar(context, e);
+                              }
                             }
                           }
-                        }
-                      },
-                    ),
-                  ],
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -528,106 +536,108 @@ class _HealthMetricsTab extends ConsumerWidget {
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.edit_rounded,
-                      color: Colors.blue.shade400,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '编辑 $type 数据',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.edit_rounded,
+                        color: Colors.blue.shade400,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '编辑 $type 数据',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-                const Divider(),
-                const SizedBox(height: 16),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 16),
 
-                // Value editor without unit editing capability
-                _MetricValueEditor(
-                  initialValue: value,
-                  unit: unit,
-                  date: date,
-                  onSave: (newValue, newDate) async {
-                    try {
-                      await ref
-                          .read(healthMetricsProvider.notifier)
-                          .updateMetric(
-                            metricId: id,
-                            value: newValue,
-                            unit: unit, // Keep the existing unit
-                            recordedAt: newDate,
-                          );
-                      if (context.mounted) {
-                        Navigator.pop(context);
+                  // Value editor without unit editing capability
+                  _MetricValueEditor(
+                    initialValue: value,
+                    unit: unit,
+                    date: date,
+                    onSave: (newValue, newDate) async {
+                      try {
+                        await ref
+                            .read(healthMetricsProvider.notifier)
+                            .updateMetric(
+                              metricId: id,
+                              value: newValue,
+                              unit: unit, // Keep the existing unit
+                              recordedAt: newDate,
+                            );
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ErrorHandler.showErrorSnackBar(context, e);
+                        }
                       }
-                    } catch (e) {
+                    },
+                    onDelete: () async {
+                      // Show confirmation dialog
                       if (context.mounted) {
-                        ErrorHandler.showErrorSnackBar(context, e);
-                      }
-                    }
-                  },
-                  onDelete: () async {
-                    // Show confirmation dialog
-                    if (context.mounted) {
-                      final shouldDelete = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('确认删除'),
-                          content: Text('确定要删除这条 $type 的记录吗？此操作不可撤销。'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('取消'),
-                            ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Colors.red,
+                        final shouldDelete = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('确认删除'),
+                            content: Text('确定要删除这条 $type 的记录吗？此操作不可撤销。'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('取消'),
                               ),
-                              child: const Text('删除'),
-                            ),
-                          ],
-                        ),
-                      );
+                              FilledButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: const Text('删除'),
+                              ),
+                            ],
+                          ),
+                        );
 
-                      if (shouldDelete == true) {
-                        try {
-                          await ref
-                              .read(healthMetricsProvider.notifier)
-                              .deleteMetric(id);
-                          if (context.mounted) {
-                            Navigator.pop(context); // Close the edit dialog
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ErrorHandler.showErrorSnackBar(context, e);
+                        if (shouldDelete == true) {
+                          try {
+                            await ref
+                                .read(healthMetricsProvider.notifier)
+                                .deleteMetric(id);
+                            if (context.mounted) {
+                              Navigator.pop(context); // Close the edit dialog
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ErrorHandler.showErrorSnackBar(context, e);
+                            }
                           }
                         }
                       }
-                    }
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -676,6 +686,7 @@ class _HealthMetricsTab extends ConsumerWidget {
     WidgetRef ref,
     String type,
     String unit,
+    bool canEdit,
   ) {
     return LineTouchData(
       enabled: true,
@@ -702,15 +713,17 @@ class _HealthMetricsTab extends ConsumerWidget {
           final index = spot.x.toInt();
           if (index >= 0 && index < typeMetrics.length) {
             final metric = typeMetrics[index];
-            _handleDataPointClick(
-              context,
-              ref,
-              metric['id'],
-              type,
-              metric['value'],
-              unit,
-              metric['date'],
-            );
+            if (canEdit) {
+              _handleDataPointClick(
+                context,
+                ref,
+                metric['id'],
+                type,
+                metric['value'],
+                unit,
+                metric['date'],
+              );
+            }
           }
         }
       },
@@ -752,124 +765,139 @@ class _MetricValueEditorState extends State<_MetricValueEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextFormField(
-          controller: valueController,
-          decoration: InputDecoration(
-            labelText: '数值',
-            suffixText: widget.unit,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            prefixIcon: Icon(
-              Icons.straighten_rounded,
-              color: Colors.green.shade300,
-            ),
-          ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-          ],
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return '请输入数值';
-            }
-            final number = double.tryParse(value);
-            if (number == null || number <= 0) {
-              return '请输入有效的数值';
-            }
-            return null;
-          },
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 500,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
-        const SizedBox(height: 16),
-
-        // Date picker
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ListTile(
-            leading: Icon(
-              Icons.event_rounded,
-              color: Colors.blue.shade300,
-            ),
-            title: const Text('记录时间'),
-            subtitle: Text(
-              selectedDate.toString().split('.')[0],
-              style: TextStyle(color: Colors.blue.shade700),
-            ),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: selectedDate,
-                firstDate: DateTime(2000),
-                lastDate: DateTime.now(),
-              );
-              if (date != null && context.mounted) {
-                final time = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.fromDateTime(selectedDate),
-                  builder: (BuildContext context, Widget? child) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context)
-                          .copyWith(alwaysUse24HourFormat: false),
-                      child: child!,
-                    );
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: valueController,
+                  decoration: InputDecoration(
+                    labelText: '数值',
+                    suffixText: widget.unit,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.straighten_rounded,
+                      color: Colors.green.shade300,
+                    ),
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  ],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入数值';
+                    }
+                    final number = double.tryParse(value);
+                    if (number == null || number <= 0) {
+                      return '请输入有效的数值';
+                    }
+                    return null;
                   },
-                );
-                if (time != null) {
-                  setState(() {
-                    selectedDate = DateTime(
-                      date.year,
-                      date.month,
-                      date.day,
-                      time.hour,
-                      time.minute,
-                    );
-                  });
-                }
-              }
-            },
+                ),
+                const SizedBox(height: 16),
+
+                // Date picker
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.event_rounded,
+                      color: Colors.blue.shade300,
+                    ),
+                    title: const Text('记录时间'),
+                    subtitle: Text(
+                      selectedDate.toString().split('.')[0],
+                      style: TextStyle(color: Colors.blue.shade700),
+                    ),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null && context.mounted) {
+                        final time = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.fromDateTime(selectedDate),
+                          builder: (BuildContext context, Widget? child) {
+                            return MediaQuery(
+                              data: MediaQuery.of(context)
+                                  .copyWith(alwaysUse24HourFormat: false),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (time != null) {
+                          setState(() {
+                            selectedDate = DateTime(
+                              date.year,
+                              date.month,
+                              date.day,
+                              time.hour,
+                              time.minute,
+                            );
+                          });
+                        }
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Action buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (widget.onDelete != null) ...[
+                      TextButton.icon(
+                        onPressed: widget.onDelete,
+                        icon: Icon(Icons.delete_outline,
+                            color: Colors.red.shade400),
+                        label: Text(
+                          '删除',
+                          style: TextStyle(color: Colors.red.shade400),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('取消'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton.icon(
+                      onPressed: () {
+                        final value = double.tryParse(valueController.text);
+                        if (value != null) {
+                          widget.onSave(value, selectedDate);
+                        }
+                      },
+                      icon: const Icon(Icons.save_rounded),
+                      label: const Text('保存'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 24),
-
-        // Action buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (widget.onDelete != null) ...[
-              TextButton.icon(
-                onPressed: widget.onDelete,
-                icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-                label: Text(
-                  '删除',
-                  style: TextStyle(color: Colors.red.shade400),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
-            ),
-            const SizedBox(width: 8),
-            FilledButton.icon(
-              onPressed: () {
-                final value = double.tryParse(valueController.text);
-                if (value != null) {
-                  widget.onSave(value, selectedDate);
-                }
-              },
-              icon: const Icon(Icons.save_rounded),
-              label: const Text('保存'),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1269,197 +1297,199 @@ class _TreatmentSchedulesTabState
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month_rounded,
-                        color: Colors.purple.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '添加治疗日程',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month_rounded,
+                          color: Colors.purple.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '添加治疗日程',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Treatment Type
-                  TextFormField(
-                    controller: typeController,
-                    decoration: InputDecoration(
-                      labelText: '治疗类型',
-                      hintText: '例如：复诊、理疗等',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medical_services_rounded,
-                        color: Colors.purple.shade300,
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入治疗类型';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Date Time Picker
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.event_rounded,
-                        color: Colors.blue.shade300,
+                    // Treatment Type
+                    TextFormField(
+                      controller: typeController,
+                      decoration: InputDecoration(
+                        labelText: '治疗类型',
+                        hintText: '例如：复诊、理疗等',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_services_rounded,
+                          color: Colors.purple.shade300,
+                        ),
                       ),
-                      title: const Text('选择时间'),
-                      subtitle: Text(
-                        selectedTime.toString().split('.')[0],
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedTime,
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (date != null && context.mounted) {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(selectedTime),
-                            builder: (BuildContext context, Widget? child) {
-                              return MediaQuery(
-                                data: MediaQuery.of(context)
-                                    .copyWith(alwaysUse24HourFormat: false),
-                                child: child!,
-                              );
-                            },
-                          );
-                          if (time != null) {
-                            selectedTime = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            );
-                          }
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入治疗类型';
                         }
+                        return null;
                       },
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Location
-                  TextFormField(
-                    controller: locationController,
-                    decoration: InputDecoration(
-                      labelText: '地点',
-                      hintText: '例如：XX医院',
-                      border: OutlineInputBorder(
+                    // Date Time Picker
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      prefixIcon: Icon(
-                        Icons.location_on_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入地点';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Notes
-                  TextFormField(
-                    controller: notesController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: '备注',
-                      hintText: '可选',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.notes_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(treatmentSchedulesProvider.notifier)
-                                  .addSchedule(
-                                    treatmentType: typeController.text,
-                                    scheduledTime: selectedTime,
-                                    location: locationController.text,
-                                    notes: notesController.text.isEmpty
-                                        ? null
-                                        : notesController.text,
-                                  );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.event_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        title: const Text('选择时间'),
+                        subtitle: Text(
+                          selectedTime.toString().split('.')[0],
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedTime,
+                            firstDate: DateTime.now(),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (date != null && context.mounted) {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(selectedTime),
+                              builder: (BuildContext context, Widget? child) {
+                                return MediaQuery(
+                                  data: MediaQuery.of(context)
+                                      .copyWith(alwaysUse24HourFormat: false),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (time != null) {
+                              selectedTime = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
                             }
                           }
                         },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Location
+                    TextFormField(
+                      controller: locationController,
+                      decoration: InputDecoration(
+                        labelText: '地点',
+                        hintText: '例如：XX医院',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.location_on_rounded,
+                          color: Colors.green.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入地点';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Notes
+                    TextFormField(
+                      controller: notesController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: '备注',
+                        hintText: '可选',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.notes_rounded,
+                          color: Colors.orange.shade300,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(treatmentSchedulesProvider.notifier)
+                                    .addSchedule(
+                                      treatmentType: typeController.text,
+                                      scheduledTime: selectedTime,
+                                      location: locationController.text,
+                                      notes: notesController.text.isEmpty
+                                          ? null
+                                          : notesController.text,
+                                    );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1491,193 +1521,195 @@ class _TreatmentSchedulesTabState
             maxWidth: 500,
             maxHeight: MediaQuery.of(context).size.height * 0.9,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title Bar
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.edit_calendar_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '编辑治疗日程',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Title Bar
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.edit_calendar_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '编辑治疗日程',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
-
-                  // Form fields (same as add dialog)
-                  TextFormField(
-                    controller: typeController,
-                    decoration: InputDecoration(
-                      labelText: '治疗类型',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.medical_services_rounded,
-                        color: Colors.purple.shade300,
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入治疗类型';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.event_rounded,
-                        color: Colors.blue.shade300,
+                    // Form fields (same as add dialog)
+                    TextFormField(
+                      controller: typeController,
+                      decoration: InputDecoration(
+                        labelText: '治疗类型',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.medical_services_rounded,
+                          color: Colors.purple.shade300,
+                        ),
                       ),
-                      title: const Text('选择时间'),
-                      subtitle: Text(
-                        selectedTime.toString().split('.')[0],
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: selectedTime,
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (date != null && context.mounted) {
-                          final time = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(selectedTime),
-                            builder: (BuildContext context, Widget? child) {
-                              return MediaQuery(
-                                data: MediaQuery.of(context)
-                                    .copyWith(alwaysUse24HourFormat: false),
-                                child: child!,
-                              );
-                            },
-                          );
-                          if (time != null) {
-                            selectedTime = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            );
-                          }
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入治疗类型';
                         }
+                        return null;
                       },
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: locationController,
-                    decoration: InputDecoration(
-                      labelText: '地点',
-                      border: OutlineInputBorder(
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      prefixIcon: Icon(
-                        Icons.location_on_rounded,
-                        color: Colors.green.shade300,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入地点';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: notesController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: '备注',
-                      hintText: '可选',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.notes_rounded,
-                        color: Colors.orange.shade300,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            try {
-                              await ref
-                                  .read(treatmentSchedulesProvider.notifier)
-                                  .updateSchedule(
-                                    scheduleId: id,
-                                    treatmentType: typeController.text,
-                                    scheduledTime: selectedTime,
-                                    location: locationController.text,
-                                    notes: notesController.text.isEmpty
-                                        ? null
-                                        : notesController.text,
-                                  );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ErrorHandler.showErrorSnackBar(context, e);
-                              }
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.event_rounded,
+                          color: Colors.blue.shade300,
+                        ),
+                        title: const Text('选择时间'),
+                        subtitle: Text(
+                          selectedTime.toString().split('.')[0],
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            initialDate: selectedTime,
+                            firstDate: DateTime.now(),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 365)),
+                          );
+                          if (date != null && context.mounted) {
+                            final time = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(selectedTime),
+                              builder: (BuildContext context, Widget? child) {
+                                return MediaQuery(
+                                  data: MediaQuery.of(context)
+                                      .copyWith(alwaysUse24HourFormat: false),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (time != null) {
+                              selectedTime = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
                             }
                           }
                         },
-                        icon: const Icon(Icons.save_rounded),
-                        label: const Text('保存'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: locationController,
+                      decoration: InputDecoration(
+                        labelText: '地点',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.location_on_rounded,
+                          color: Colors.green.shade300,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入地点';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: notesController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: '备注',
+                        hintText: '可选',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.notes_rounded,
+                          color: Colors.orange.shade300,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('取消'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              try {
+                                await ref
+                                    .read(treatmentSchedulesProvider.notifier)
+                                    .updateSchedule(
+                                      scheduleId: id,
+                                      treatmentType: typeController.text,
+                                      scheduledTime: selectedTime,
+                                      location: locationController.text,
+                                      notes: notesController.text.isEmpty
+                                          ? null
+                                          : notesController.text,
+                                    );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ErrorHandler.showErrorSnackBar(context, e);
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded),
+                          label: const Text('保存'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

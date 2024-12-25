@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meditrax/models/achievement_badge.dart';
 import 'package:meditrax/models/user.dart';
+import 'package:meditrax/providers/user.graphql.dart';
 import 'package:meditrax/providers/user_provider.dart';
 
 class UserTest extends UserData {
@@ -77,13 +78,14 @@ class AchievementsTest extends Achievements {
 
 class UserPointsTest extends UserPoints {
   @override
-  Future<Map<String, dynamic>> build() async {
-    return {
-      'currentPoints': 100,
-      'nextLevelPoints': 200,
-      'currentLevel': 1,
-      'nextLevel': 2,
-      'achievements': [],
-    };
+  Future<List<Query$GetUserPointRecords$getUserPointRecords?>> build() async {
+    return [
+      Query$GetUserPointRecords$getUserPointRecords(
+        recordId: '1',
+        pointsEarned: 100,
+        reason: 'user activity',
+        earnedAt: DateTime.now(),
+      ),
+    ];
   }
 }

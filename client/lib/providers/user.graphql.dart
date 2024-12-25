@@ -6170,3 +6170,570 @@ class _CopyWithStubImpl$Mutation$UnshareProfile$unshareProfile<TRes>
   }) =>
       _res;
 }
+
+class Query$GetUserPointRecords {
+  Query$GetUserPointRecords({
+    this.getUserPointRecords,
+    this.$__typename = 'Query',
+  });
+
+  factory Query$GetUserPointRecords.fromJson(Map<String, dynamic> json) {
+    final l$getUserPointRecords = json['getUserPointRecords'];
+    final l$$__typename = json['__typename'];
+    return Query$GetUserPointRecords(
+      getUserPointRecords: (l$getUserPointRecords as List<dynamic>?)
+          ?.map((e) => e == null
+              ? null
+              : Query$GetUserPointRecords$getUserPointRecords.fromJson(
+                  (e as Map<String, dynamic>)))
+          .toList(),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final List<Query$GetUserPointRecords$getUserPointRecords?>?
+      getUserPointRecords;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$getUserPointRecords = getUserPointRecords;
+    _resultData['getUserPointRecords'] =
+        l$getUserPointRecords?.map((e) => e?.toJson()).toList();
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$getUserPointRecords = getUserPointRecords;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$getUserPointRecords == null
+          ? null
+          : Object.hashAll(l$getUserPointRecords.map((v) => v)),
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Query$GetUserPointRecords ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$getUserPointRecords = getUserPointRecords;
+    final lOther$getUserPointRecords = other.getUserPointRecords;
+    if (l$getUserPointRecords != null && lOther$getUserPointRecords != null) {
+      if (l$getUserPointRecords.length != lOther$getUserPointRecords.length) {
+        return false;
+      }
+      for (int i = 0; i < l$getUserPointRecords.length; i++) {
+        final l$getUserPointRecords$entry = l$getUserPointRecords[i];
+        final lOther$getUserPointRecords$entry = lOther$getUserPointRecords[i];
+        if (l$getUserPointRecords$entry != lOther$getUserPointRecords$entry) {
+          return false;
+        }
+      }
+    } else if (l$getUserPointRecords != lOther$getUserPointRecords) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetUserPointRecords
+    on Query$GetUserPointRecords {
+  CopyWith$Query$GetUserPointRecords<Query$GetUserPointRecords> get copyWith =>
+      CopyWith$Query$GetUserPointRecords(
+        this,
+        (i) => i,
+      );
+}
+
+abstract class CopyWith$Query$GetUserPointRecords<TRes> {
+  factory CopyWith$Query$GetUserPointRecords(
+    Query$GetUserPointRecords instance,
+    TRes Function(Query$GetUserPointRecords) then,
+  ) = _CopyWithImpl$Query$GetUserPointRecords;
+
+  factory CopyWith$Query$GetUserPointRecords.stub(TRes res) =
+      _CopyWithStubImpl$Query$GetUserPointRecords;
+
+  TRes call({
+    List<Query$GetUserPointRecords$getUserPointRecords?>? getUserPointRecords,
+    String? $__typename,
+  });
+  TRes getUserPointRecords(
+      Iterable<Query$GetUserPointRecords$getUserPointRecords?>? Function(
+              Iterable<
+                  CopyWith$Query$GetUserPointRecords$getUserPointRecords<
+                      Query$GetUserPointRecords$getUserPointRecords>?>?)
+          _fn);
+}
+
+class _CopyWithImpl$Query$GetUserPointRecords<TRes>
+    implements CopyWith$Query$GetUserPointRecords<TRes> {
+  _CopyWithImpl$Query$GetUserPointRecords(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetUserPointRecords _instance;
+
+  final TRes Function(Query$GetUserPointRecords) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? getUserPointRecords = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetUserPointRecords(
+        getUserPointRecords: getUserPointRecords == _undefined
+            ? _instance.getUserPointRecords
+            : (getUserPointRecords
+                as List<Query$GetUserPointRecords$getUserPointRecords?>?),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+
+  TRes getUserPointRecords(
+          Iterable<Query$GetUserPointRecords$getUserPointRecords?>? Function(
+                  Iterable<
+                      CopyWith$Query$GetUserPointRecords$getUserPointRecords<
+                          Query$GetUserPointRecords$getUserPointRecords>?>?)
+              _fn) =>
+      call(
+          getUserPointRecords:
+              _fn(_instance.getUserPointRecords?.map((e) => e == null
+                  ? null
+                  : CopyWith$Query$GetUserPointRecords$getUserPointRecords(
+                      e,
+                      (i) => i,
+                    )))?.toList());
+}
+
+class _CopyWithStubImpl$Query$GetUserPointRecords<TRes>
+    implements CopyWith$Query$GetUserPointRecords<TRes> {
+  _CopyWithStubImpl$Query$GetUserPointRecords(this._res);
+
+  TRes _res;
+
+  call({
+    List<Query$GetUserPointRecords$getUserPointRecords?>? getUserPointRecords,
+    String? $__typename,
+  }) =>
+      _res;
+
+  getUserPointRecords(_fn) => _res;
+}
+
+const documentNodeQueryGetUserPointRecords = DocumentNode(definitions: [
+  OperationDefinitionNode(
+    type: OperationType.query,
+    name: NameNode(value: 'GetUserPointRecords'),
+    variableDefinitions: [],
+    directives: [],
+    selectionSet: SelectionSetNode(selections: [
+      FieldNode(
+        name: NameNode(value: 'getUserPointRecords'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: SelectionSetNode(selections: [
+          FieldNode(
+            name: NameNode(value: 'recordId'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'pointsEarned'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'reason'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: 'earnedAt'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+          FieldNode(
+            name: NameNode(value: '__typename'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null,
+          ),
+        ]),
+      ),
+      FieldNode(
+        name: NameNode(value: '__typename'),
+        alias: null,
+        arguments: [],
+        directives: [],
+        selectionSet: null,
+      ),
+    ]),
+  ),
+]);
+Query$GetUserPointRecords _parserFn$Query$GetUserPointRecords(
+        Map<String, dynamic> data) =>
+    Query$GetUserPointRecords.fromJson(data);
+typedef OnQueryComplete$Query$GetUserPointRecords = FutureOr<void> Function(
+  Map<String, dynamic>?,
+  Query$GetUserPointRecords?,
+);
+
+class Options$Query$GetUserPointRecords
+    extends graphql.QueryOptions<Query$GetUserPointRecords> {
+  Options$Query$GetUserPointRecords({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetUserPointRecords? typedOptimisticResult,
+    Duration? pollInterval,
+    graphql.Context? context,
+    OnQueryComplete$Query$GetUserPointRecords? onComplete,
+    graphql.OnQueryError? onError,
+  })  : onCompleteWithParsed = onComplete,
+        super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          pollInterval: pollInterval,
+          context: context,
+          onComplete: onComplete == null
+              ? null
+              : (data) => onComplete(
+                    data,
+                    data == null
+                        ? null
+                        : _parserFn$Query$GetUserPointRecords(data),
+                  ),
+          onError: onError,
+          document: documentNodeQueryGetUserPointRecords,
+          parserFn: _parserFn$Query$GetUserPointRecords,
+        );
+
+  final OnQueryComplete$Query$GetUserPointRecords? onCompleteWithParsed;
+
+  @override
+  List<Object?> get properties => [
+        ...super.onComplete == null
+            ? super.properties
+            : super.properties.where((property) => property != onComplete),
+        onCompleteWithParsed,
+      ];
+}
+
+class WatchOptions$Query$GetUserPointRecords
+    extends graphql.WatchQueryOptions<Query$GetUserPointRecords> {
+  WatchOptions$Query$GetUserPointRecords({
+    String? operationName,
+    graphql.FetchPolicy? fetchPolicy,
+    graphql.ErrorPolicy? errorPolicy,
+    graphql.CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Query$GetUserPointRecords? typedOptimisticResult,
+    graphql.Context? context,
+    Duration? pollInterval,
+    bool? eagerlyFetchResults,
+    bool carryForwardDataOnException = true,
+    bool fetchResults = false,
+  }) : super(
+          operationName: operationName,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
+          optimisticResult: optimisticResult ?? typedOptimisticResult?.toJson(),
+          context: context,
+          document: documentNodeQueryGetUserPointRecords,
+          pollInterval: pollInterval,
+          eagerlyFetchResults: eagerlyFetchResults,
+          carryForwardDataOnException: carryForwardDataOnException,
+          fetchResults: fetchResults,
+          parserFn: _parserFn$Query$GetUserPointRecords,
+        );
+}
+
+class FetchMoreOptions$Query$GetUserPointRecords
+    extends graphql.FetchMoreOptions {
+  FetchMoreOptions$Query$GetUserPointRecords(
+      {required graphql.UpdateQuery updateQuery})
+      : super(
+          updateQuery: updateQuery,
+          document: documentNodeQueryGetUserPointRecords,
+        );
+}
+
+extension ClientExtension$Query$GetUserPointRecords on graphql.GraphQLClient {
+  Future<graphql.QueryResult<Query$GetUserPointRecords>>
+      query$GetUserPointRecords(
+              [Options$Query$GetUserPointRecords? options]) async =>
+          await this.query(options ?? Options$Query$GetUserPointRecords());
+  graphql.ObservableQuery<Query$GetUserPointRecords>
+      watchQuery$GetUserPointRecords(
+              [WatchOptions$Query$GetUserPointRecords? options]) =>
+          this.watchQuery(options ?? WatchOptions$Query$GetUserPointRecords());
+  void writeQuery$GetUserPointRecords({
+    required Query$GetUserPointRecords data,
+    bool broadcast = true,
+  }) =>
+      this.writeQuery(
+        graphql.Request(
+            operation: graphql.Operation(
+                document: documentNodeQueryGetUserPointRecords)),
+        data: data.toJson(),
+        broadcast: broadcast,
+      );
+  Query$GetUserPointRecords? readQuery$GetUserPointRecords(
+      {bool optimistic = true}) {
+    final result = this.readQuery(
+      graphql.Request(
+          operation: graphql.Operation(
+              document: documentNodeQueryGetUserPointRecords)),
+      optimistic: optimistic,
+    );
+    return result == null ? null : Query$GetUserPointRecords.fromJson(result);
+  }
+}
+
+graphql_flutter.QueryHookResult<Query$GetUserPointRecords>
+    useQuery$GetUserPointRecords(
+            [Options$Query$GetUserPointRecords? options]) =>
+        graphql_flutter
+            .useQuery(options ?? Options$Query$GetUserPointRecords());
+graphql.ObservableQuery<Query$GetUserPointRecords>
+    useWatchQuery$GetUserPointRecords(
+            [WatchOptions$Query$GetUserPointRecords? options]) =>
+        graphql_flutter
+            .useWatchQuery(options ?? WatchOptions$Query$GetUserPointRecords());
+
+class Query$GetUserPointRecords$Widget
+    extends graphql_flutter.Query<Query$GetUserPointRecords> {
+  Query$GetUserPointRecords$Widget({
+    widgets.Key? key,
+    Options$Query$GetUserPointRecords? options,
+    required graphql_flutter.QueryBuilder<Query$GetUserPointRecords> builder,
+  }) : super(
+          key: key,
+          options: options ?? Options$Query$GetUserPointRecords(),
+          builder: builder,
+        );
+}
+
+class Query$GetUserPointRecords$getUserPointRecords {
+  Query$GetUserPointRecords$getUserPointRecords({
+    required this.recordId,
+    required this.pointsEarned,
+    required this.reason,
+    required this.earnedAt,
+    this.$__typename = 'UserPointRecordDetail',
+  });
+
+  factory Query$GetUserPointRecords$getUserPointRecords.fromJson(
+      Map<String, dynamic> json) {
+    final l$recordId = json['recordId'];
+    final l$pointsEarned = json['pointsEarned'];
+    final l$reason = json['reason'];
+    final l$earnedAt = json['earnedAt'];
+    final l$$__typename = json['__typename'];
+    return Query$GetUserPointRecords$getUserPointRecords(
+      recordId: (l$recordId as String),
+      pointsEarned: (l$pointsEarned as num).toDouble(),
+      reason: (l$reason as String),
+      earnedAt: dateTimeFromJson(l$earnedAt),
+      $__typename: (l$$__typename as String),
+    );
+  }
+
+  final String recordId;
+
+  final double pointsEarned;
+
+  final String reason;
+
+  final DateTime earnedAt;
+
+  final String $__typename;
+
+  Map<String, dynamic> toJson() {
+    final _resultData = <String, dynamic>{};
+    final l$recordId = recordId;
+    _resultData['recordId'] = l$recordId;
+    final l$pointsEarned = pointsEarned;
+    _resultData['pointsEarned'] = l$pointsEarned;
+    final l$reason = reason;
+    _resultData['reason'] = l$reason;
+    final l$earnedAt = earnedAt;
+    _resultData['earnedAt'] = dateTimeToJson(l$earnedAt);
+    final l$$__typename = $__typename;
+    _resultData['__typename'] = l$$__typename;
+    return _resultData;
+  }
+
+  @override
+  int get hashCode {
+    final l$recordId = recordId;
+    final l$pointsEarned = pointsEarned;
+    final l$reason = reason;
+    final l$earnedAt = earnedAt;
+    final l$$__typename = $__typename;
+    return Object.hashAll([
+      l$recordId,
+      l$pointsEarned,
+      l$reason,
+      l$earnedAt,
+      l$$__typename,
+    ]);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Query$GetUserPointRecords$getUserPointRecords ||
+        runtimeType != other.runtimeType) {
+      return false;
+    }
+    final l$recordId = recordId;
+    final lOther$recordId = other.recordId;
+    if (l$recordId != lOther$recordId) {
+      return false;
+    }
+    final l$pointsEarned = pointsEarned;
+    final lOther$pointsEarned = other.pointsEarned;
+    if (l$pointsEarned != lOther$pointsEarned) {
+      return false;
+    }
+    final l$reason = reason;
+    final lOther$reason = other.reason;
+    if (l$reason != lOther$reason) {
+      return false;
+    }
+    final l$earnedAt = earnedAt;
+    final lOther$earnedAt = other.earnedAt;
+    if (l$earnedAt != lOther$earnedAt) {
+      return false;
+    }
+    final l$$__typename = $__typename;
+    final lOther$$__typename = other.$__typename;
+    if (l$$__typename != lOther$$__typename) {
+      return false;
+    }
+    return true;
+  }
+}
+
+extension UtilityExtension$Query$GetUserPointRecords$getUserPointRecords
+    on Query$GetUserPointRecords$getUserPointRecords {
+  CopyWith$Query$GetUserPointRecords$getUserPointRecords<
+          Query$GetUserPointRecords$getUserPointRecords>
+      get copyWith => CopyWith$Query$GetUserPointRecords$getUserPointRecords(
+            this,
+            (i) => i,
+          );
+}
+
+abstract class CopyWith$Query$GetUserPointRecords$getUserPointRecords<TRes> {
+  factory CopyWith$Query$GetUserPointRecords$getUserPointRecords(
+    Query$GetUserPointRecords$getUserPointRecords instance,
+    TRes Function(Query$GetUserPointRecords$getUserPointRecords) then,
+  ) = _CopyWithImpl$Query$GetUserPointRecords$getUserPointRecords;
+
+  factory CopyWith$Query$GetUserPointRecords$getUserPointRecords.stub(
+          TRes res) =
+      _CopyWithStubImpl$Query$GetUserPointRecords$getUserPointRecords;
+
+  TRes call({
+    String? recordId,
+    double? pointsEarned,
+    String? reason,
+    DateTime? earnedAt,
+    String? $__typename,
+  });
+}
+
+class _CopyWithImpl$Query$GetUserPointRecords$getUserPointRecords<TRes>
+    implements CopyWith$Query$GetUserPointRecords$getUserPointRecords<TRes> {
+  _CopyWithImpl$Query$GetUserPointRecords$getUserPointRecords(
+    this._instance,
+    this._then,
+  );
+
+  final Query$GetUserPointRecords$getUserPointRecords _instance;
+
+  final TRes Function(Query$GetUserPointRecords$getUserPointRecords) _then;
+
+  static const _undefined = <dynamic, dynamic>{};
+
+  TRes call({
+    Object? recordId = _undefined,
+    Object? pointsEarned = _undefined,
+    Object? reason = _undefined,
+    Object? earnedAt = _undefined,
+    Object? $__typename = _undefined,
+  }) =>
+      _then(Query$GetUserPointRecords$getUserPointRecords(
+        recordId: recordId == _undefined || recordId == null
+            ? _instance.recordId
+            : (recordId as String),
+        pointsEarned: pointsEarned == _undefined || pointsEarned == null
+            ? _instance.pointsEarned
+            : (pointsEarned as double),
+        reason: reason == _undefined || reason == null
+            ? _instance.reason
+            : (reason as String),
+        earnedAt: earnedAt == _undefined || earnedAt == null
+            ? _instance.earnedAt
+            : (earnedAt as DateTime),
+        $__typename: $__typename == _undefined || $__typename == null
+            ? _instance.$__typename
+            : ($__typename as String),
+      ));
+}
+
+class _CopyWithStubImpl$Query$GetUserPointRecords$getUserPointRecords<TRes>
+    implements CopyWith$Query$GetUserPointRecords$getUserPointRecords<TRes> {
+  _CopyWithStubImpl$Query$GetUserPointRecords$getUserPointRecords(this._res);
+
+  TRes _res;
+
+  call({
+    String? recordId,
+    double? pointsEarned,
+    String? reason,
+    DateTime? earnedAt,
+    String? $__typename,
+  }) =>
+      _res;
+}

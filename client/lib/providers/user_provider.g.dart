@@ -36,12 +36,12 @@ final achievementsProvider = AutoDisposeAsyncNotifierProvider<Achievements,
 );
 
 typedef _$Achievements = AutoDisposeAsyncNotifier<List<AchievementBadge>>;
-String _$userPointsHash() => r'8e318e03cf541fd8aa5bef661cb5fc899f2c5d6e';
+String _$userPointsHash() => r'b020ec0d85f6549b2e2e4c2ee699afdde3e28809';
 
 /// See also [UserPoints].
 @ProviderFor(UserPoints)
-final userPointsProvider =
-    AutoDisposeAsyncNotifierProvider<UserPoints, Map<String, dynamic>>.internal(
+final userPointsProvider = AutoDisposeAsyncNotifierProvider<UserPoints,
+    List<Query$GetUserPointRecords$getUserPointRecords?>>.internal(
   UserPoints.new,
   name: r'userPointsProvider',
   debugGetCreateSourceHash:
@@ -50,6 +50,7 @@ final userPointsProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$UserPoints = AutoDisposeAsyncNotifier<Map<String, dynamic>>;
+typedef _$UserPoints = AutoDisposeAsyncNotifier<
+    List<Query$GetUserPointRecords$getUserPointRecords?>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

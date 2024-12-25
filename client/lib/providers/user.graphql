@@ -74,3 +74,12 @@ mutation UnshareProfile($targetUserId: String!) {
     message
   }
 }
+
+query GetUserPointRecords {
+  getUserPointRecords {
+    recordId
+    pointsEarned
+    reason
+    earnedAt
+  }
+}

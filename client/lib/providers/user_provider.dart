@@ -214,20 +214,16 @@ class Achievements extends _$Achievements {
 @riverpod
 class UserPoints extends _$UserPoints {
   @override
-  Future<Map<String, dynamic>> build() async {
-    final achievementsResult = await ref.watch(achievementsProvider.future);
+  Future<List<Query$GetUserPointRecords$getUserPointRecords?>> build() async {
+    final result =
+        await ref.read(graphQLServiceProvider).query$GetUserPointRecords(
+              Options$Query$GetUserPointRecords(),
+            );
 
-    // Calculate points based on achievements
-    int totalPoints = achievementsResult.length * 100; // Example calculation
-    int nextLevelPoints = ((totalPoints / 100 + 1) * 100).round();
-    int currentLevel = totalPoints ~/ 100;
+    if (result.hasException) {
+      throw result.exception!;
+    }
 
-    return {
-      'currentPoints': totalPoints,
-      'nextLevelPoints': nextLevelPoints,
-      'currentLevel': currentLevel,
-      'nextLevel': currentLevel + 1,
-      'achievements': achievementsResult,
-    };
+    return result.parsedData!.getUserPointRecords ?? [];
   }
 }
