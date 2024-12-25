@@ -6,6 +6,7 @@ import 'package:meditrax/providers/health_metrics_provider.dart';
 import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:meditrax/services/notification_service.dart';
 
 const Map<String, String> COMMON_HEALTH_METRICS = {
   '血压': 'mmHg',
@@ -873,11 +874,103 @@ class _MetricValueEditorState extends State<_MetricValueEditor> {
   }
 }
 
-class _TreatmentSchedulesTab extends ConsumerWidget {
+class _TreatmentSchedulesTab extends ConsumerStatefulWidget {
   const _TreatmentSchedulesTab();
+  @override
+  ConsumerState<_TreatmentSchedulesTab> createState() =>
+      _TreatmentSchedulesTabState();
+}
+
+class _TreatmentSchedulesTabState
+    extends ConsumerState<_TreatmentSchedulesTab> {
+  final NotificationService _notificationService = NotificationService();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  Future<void> _initializeNotifications() async {
+    await _notificationService.initialize();
+    await _notificationService.setOnNotificationResponse((String? payload) {
+      if (payload != null) {
+        _handleNotificationResponse(payload);
+      }
+    });
+  }
+
+  void _handleNotificationResponse(String scheduleId) {
+    if (!mounted) return;
+
+    // Show confirmation dialog when notification is tapped
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                color: Colors.purple.shade400,
+              ),
+              const SizedBox(width: 8),
+              const Text('治疗提醒'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('您有一个治疗日程即将开始'),
+              const SizedBox(height: 8),
+              Text(
+                '请确保按时前往治疗地点',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('知道了'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Add this method to schedule notifications for treatment schedules
+  void _scheduleNotification(
+      String id, String type, String location, DateTime scheduledTime) {
+    if (!_notificationService.isSupported) return;
+
+    try {
+      final now = DateTime.now();
+      // Schedule notification 1 hour before the treatment
+      final notificationTime = scheduledTime.subtract(const Duration(hours: 1));
+
+      if (notificationTime.isAfter(now)) {
+        _notificationService.zonedSchedule(
+          id.hashCode, // Use hash code of ID as notification ID
+          '治疗提醒',
+          '您有一个$type将在1小时后在$location开始',
+          notificationTime,
+          id, // Pass schedule ID as payload
+        );
+      }
+    } catch (e) {
+      debugPrint('Error scheduling treatment notification: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final schedulesAsync = ref.watch(treatmentSchedulesProvider);
     final selectedProfile = ref.watch(appStateProvider).selectedProfile;
     final currentUser = ref.watch(userDataProvider).value;
@@ -990,6 +1083,9 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
     String? notes,
     bool canEdit,
   ) {
+    // Schedule notification when building the card
+    _scheduleNotification(id, type, location, scheduledTime);
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
