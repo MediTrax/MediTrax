@@ -318,8 +318,48 @@ class _SharedProfilesTabState extends ConsumerState<SharedProfilesTab> {
   }
 }
 
-class PermissionsTab extends StatelessWidget {
+class PermissionsTab extends StatefulWidget {
   const PermissionsTab({super.key});
+
+  @override
+  State<PermissionsTab> createState() => _PermissionsTabState();
+}
+
+class _PermissionsTabState extends State<PermissionsTab> {
+  @override
+  void initState() {
+    super.initState();
+    // Show dialog after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.construction_rounded,
+                color: Colors.orange.shade400,
+              ),
+              const SizedBox(width: 8),
+              const Text('功能开发中'),
+            ],
+          ),
+          content: const Text('权限管理功能正在开发中，敬请期待！'),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.pop(
+                    context); // Pop twice to go back to previous screen
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+        barrierDismissible: false, // Prevent dismissing by tapping outside
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
