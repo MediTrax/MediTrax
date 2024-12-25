@@ -54,11 +54,11 @@ class PointsSystemTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final achievementsAsync = ref.watch(achievementsProvider);
+    final pointsAsync = ref.watch(userPointsProvider);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: achievementsAsync.when(
+      child: pointsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
@@ -72,10 +72,11 @@ class PointsSystemTab extends ConsumerWidget {
             ],
           ),
         ),
-        data: (achievements) {
-          final currentPoints = achievements.length * 100;
-          final nextLevelPoints = ((currentPoints ~/ 1000) + 1) * 1000;
-          final currentLevel = currentPoints ~/ 1000;
+        data: (points) {
+          final currentPoints = points.fold(
+              0.0, (sum, point) => sum + (point?.pointsEarned ?? 0));
+          final nextLevelPoints = ((currentPoints ~/ 100) + 1) * 100;
+          final currentLevel = currentPoints ~/ 100;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,19 +120,19 @@ class PointsSystemTab extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
               const Text(
-                '已获得成就',
+                '已获得积分',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.builder(
-                  itemCount: achievements.length,
+                  itemCount: points.length,
                   itemBuilder: (context, index) {
-                    final achievement = achievements[index];
+                    final point = points[index];
                     return _buildAchievementItem(
-                      achievement.name,
-                      '+100分',
-                      earnedAt: achievement.createdAt,
+                      point?.reason ?? '',
+                      '+${point?.pointsEarned ?? 0}分',
+                      earnedAt: point?.earnedAt ?? DateTime.now(),
                     );
                   },
                 ),
