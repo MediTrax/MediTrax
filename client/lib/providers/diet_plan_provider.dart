@@ -75,12 +75,20 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
         ),
       );
 
-      if (result.hasException) {
-        throw result.exception!;
+      if (result.hasException) {     
+        state = AsyncValue.data(FoodSpecs(
+          specs: [],
+          howRecommend: '0',
+        ));
+        return;
       }
 
       if (result.data?['getFoodSpecs'] == null) {
-        state = const AsyncValue.data(null);
+        print('No food specs data returned for: $food');
+        state = AsyncValue.data(FoodSpecs(
+          specs: [],
+          howRecommend: '0',
+        ));
         return;
       }
 
@@ -100,7 +108,11 @@ class FoodSpecsNotifier extends StateNotifier<AsyncValue<FoodSpecs?>> {
 
       state = AsyncValue.data(foodSpecs);
     } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
+      print('Error in getFoodSpecs: $error');
+      state = AsyncValue.data(FoodSpecs(
+        specs: [],
+        howRecommend: '0',
+      ));
     }
   }
 
