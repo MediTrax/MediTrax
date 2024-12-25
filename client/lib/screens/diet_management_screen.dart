@@ -680,6 +680,43 @@ class _DietManagementScreenState extends ConsumerState<DietManagementScreen> wit
   }
 
   Widget _buildResultCard(FoodSpecs foodSpecs) {
+    // Check if all nutrition values are zero
+    bool allValuesZero = foodSpecs.specs.every((spec) {
+      final value = double.tryParse(spec.value) ?? 0;
+      return value == 0;
+    });
+    
+    if (allValuesZero) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: 48,
+                color: Colors.orange.shade300,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到相关食物信息，请尝试其他食物',
+              style: TextStyle(
+                color: Colors.orange.shade700,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(

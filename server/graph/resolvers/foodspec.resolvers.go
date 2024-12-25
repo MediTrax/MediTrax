@@ -21,14 +21,6 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 		return nil, fmt.Errorf("access denied")
 	}
 
-	// client := chat.GetClient()
-
-	// result, err := chat.GetFoodSpec(food, client)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// println(*result)
 	client := chat.GetClientDeepSeek()
 
 	result, err := chat.GetFoodSpecDeepSeek(food, client)
@@ -39,6 +31,7 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 	println(*result)
 
 	lines := strings.Split(*result, "\n")
+	println(lines)
 
 	var specs []*model.FoodSpec
 	var n_spec = 0.0
@@ -48,6 +41,7 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 		line = strings.TrimSpace(line)
 
 		parameters := strings.Split(line, ": ")
+		print(parameters)
 		if len(parameters) < 2 {
 			continue
 		}
@@ -92,6 +86,10 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 		}
 	}
 
+	if n_spec == 0.0 {
+		n_spec = 1.0
+		s_total = 1.0
+	}
 	foodSpecs := &model.FoodSpecs{
 		Specs:        specs,
 		HowRecommend: min(1, s_total/n_spec),
