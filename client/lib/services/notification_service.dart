@@ -6,14 +6,14 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import '../models/medication_reminder.dart';
-import '../models/medication.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._();
   factory NotificationService() => _instance;
   NotificationService._();
 
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
 
   // Add new field for callback
   Function(String?)? _onNotificationResponse;
@@ -42,13 +42,14 @@ class NotificationService {
 
   Future<void> initialize() async {
     if (!isSupported) {
-      debugPrint('Skipping notification initialization on unsupported platform');
+      debugPrint(
+          'Skipping notification initialization on unsupported platform');
       return;
     }
 
     try {
       debugPrint('Initializing notifications...');
-      
+
       // Initialize timezone
       tz.initializeTimeZones();
       final String timeZoneName = await FlutterTimezone.getLocalTimezone();
@@ -56,7 +57,8 @@ class NotificationService {
       tz.setLocalLocation(tz.getLocation(timeZoneName));
 
       // Initialize notification settings
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -106,7 +108,8 @@ class NotificationService {
     }
   }
 
-  Future<void> scheduleReminder(MedicationReminder reminder, String medicationName) async {
+  Future<void> scheduleReminder(
+      MedicationReminder reminder, String medicationName) async {
     if (!isSupported) {
       debugPrint('Skipping reminder scheduling on unsupported platform');
       return;
@@ -114,7 +117,7 @@ class NotificationService {
 
     try {
       debugPrint('Scheduling reminder for $medicationName...');
-      final androidDetails = AndroidNotificationDetails(
+      const androidDetails = AndroidNotificationDetails(
         'medication_reminders',
         '服药提醒',
         channelDescription: '用于发送服药提醒的通知',
@@ -123,60 +126,62 @@ class NotificationService {
         enableVibration: true,
         enableLights: true,
         playSound: true,
-        sound: const RawResourceAndroidNotificationSound('alarm'),
+        sound: RawResourceAndroidNotificationSound('alarm'),
         fullScreenIntent: true,
         category: AndroidNotificationCategory.alarm,
       );
 
-    final iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      sound: 'alarm.aiff',
-      interruptionLevel: InterruptionLevel.timeSensitive,
-    );
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'alarm.aiff',
+        interruptionLevel: InterruptionLevel.timeSensitive,
+      );
 
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
 
-    // Convert reminder time to local timezone
-    final DateTime reminderTime = reminder.reminderTime.toLocal();
-    
-    // Calculate next occurrence
-    final now = DateTime.now();
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      reminderTime.year,
-      reminderTime.month,
-      reminderTime.day,
-      reminderTime.hour,
-      reminderTime.minute,
-    );
+      // Convert reminder time to local timezone
+      final DateTime reminderTime = reminder.reminderTime.toLocal();
 
-    // If the time has passed, schedule for the next day
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
+      // Calculate next occurrence
+      final now = DateTime.now();
+      tz.TZDateTime scheduledDate = tz.TZDateTime(
+        tz.local,
+        reminderTime.year,
+        reminderTime.month,
+        reminderTime.day,
+        reminderTime.hour,
+        reminderTime.minute,
+      );
 
-    // Cancel any existing notification for this reminder
-    await cancelReminder(reminder.id);
+      // If the time has passed, schedule for the next day
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
 
-    // Schedule the new notification
-    await _notifications.zonedSchedule(
-      reminder.id.hashCode,
-      '服药提醒',
-      '该服用 $medicationName 了',
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: reminder.id,
-    );
+      // Cancel any existing notification for this reminder
+      await cancelReminder(reminder.id);
 
-      debugPrint('Successfully scheduled reminder for $medicationName at ${scheduledDate.toString()}');
+      // Schedule the new notification
+      await _notifications.zonedSchedule(
+        reminder.id.hashCode,
+        '服药提醒',
+        '该服用 $medicationName 了',
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: reminder.id,
+      );
+
+      debugPrint(
+          'Successfully scheduled reminder for $medicationName at ${scheduledDate.toString()}');
     } catch (e, stack) {
       debugPrint('Error scheduling reminder: $e');
       debugPrint('Stack trace: $stack');
@@ -190,4 +195,77 @@ class NotificationService {
   Future<void> cancelAllReminders() async {
     await _notifications.cancelAll();
   }
-} 
+
+  Future<void> zonedSchedule(
+    int id,
+    String title,
+    String body,
+    DateTime scheduledTime,
+    String payload,
+  ) async {
+    if (!isSupported) {
+      debugPrint('Skipping notification scheduling on unsupported platform');
+      return;
+    }
+
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'treatment_schedules',
+        '治疗日程提醒',
+        channelDescription: '用于发送治疗日程提醒的通知',
+        importance: Importance.max,
+        priority: Priority.high,
+        enableVibration: true,
+        enableLights: true,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('alarm'),
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.reminder,
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'alarm.aiff',
+        interruptionLevel: InterruptionLevel.timeSensitive,
+      );
+
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final tz.TZDateTime scheduledDate = tz.TZDateTime(
+        tz.local,
+        scheduledTime.year,
+        scheduledTime.month,
+        scheduledTime.day,
+        scheduledTime.hour,
+        scheduledTime.minute,
+      );
+
+      // Cancel any existing notification with this ID
+      await _notifications.cancel(id);
+
+      // Schedule the new notification
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        payload: payload,
+      );
+
+      debugPrint(
+          'Successfully scheduled treatment notification for ${scheduledDate.toString()}');
+    } catch (e, stack) {
+      debugPrint('Error scheduling treatment notification: $e');
+      debugPrint('Stack trace: $stack');
+    }
+  }
+}
