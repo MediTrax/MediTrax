@@ -2461,11 +2461,13 @@ class Variables$Mutation$UpdateHealthMetric {
     required String metricId,
     double? value,
     String? unit,
+    DateTime? recordedAt,
   }) =>
       Variables$Mutation$UpdateHealthMetric._({
         r'metricId': metricId,
         if (value != null) r'value': value,
         if (unit != null) r'unit': unit,
+        if (recordedAt != null) r'recordedAt': recordedAt,
       });
 
   Variables$Mutation$UpdateHealthMetric._(this._$data);
@@ -2483,6 +2485,11 @@ class Variables$Mutation$UpdateHealthMetric {
       final l$unit = data['unit'];
       result$data['unit'] = (l$unit as String?);
     }
+    if (data.containsKey('recordedAt')) {
+      final l$recordedAt = data['recordedAt'];
+      result$data['recordedAt'] =
+          l$recordedAt == null ? null : dateTimeFromJson(l$recordedAt);
+    }
     return Variables$Mutation$UpdateHealthMetric._(result$data);
   }
 
@@ -2493,6 +2500,8 @@ class Variables$Mutation$UpdateHealthMetric {
   double? get value => (_$data['value'] as double?);
 
   String? get unit => (_$data['unit'] as String?);
+
+  DateTime? get recordedAt => (_$data['recordedAt'] as DateTime?);
 
   Map<String, dynamic> toJson() {
     final result$data = <String, dynamic>{};
@@ -2505,6 +2514,11 @@ class Variables$Mutation$UpdateHealthMetric {
     if (_$data.containsKey('unit')) {
       final l$unit = unit;
       result$data['unit'] = l$unit;
+    }
+    if (_$data.containsKey('recordedAt')) {
+      final l$recordedAt = recordedAt;
+      result$data['recordedAt'] =
+          l$recordedAt == null ? null : dateTimeToJson(l$recordedAt);
     }
     return result$data;
   }
@@ -2546,6 +2560,15 @@ class Variables$Mutation$UpdateHealthMetric {
     if (l$unit != lOther$unit) {
       return false;
     }
+    final l$recordedAt = recordedAt;
+    final lOther$recordedAt = other.recordedAt;
+    if (_$data.containsKey('recordedAt') !=
+        other._$data.containsKey('recordedAt')) {
+      return false;
+    }
+    if (l$recordedAt != lOther$recordedAt) {
+      return false;
+    }
     return true;
   }
 
@@ -2554,10 +2577,12 @@ class Variables$Mutation$UpdateHealthMetric {
     final l$metricId = metricId;
     final l$value = value;
     final l$unit = unit;
+    final l$recordedAt = recordedAt;
     return Object.hashAll([
       l$metricId,
       _$data.containsKey('value') ? l$value : const {},
       _$data.containsKey('unit') ? l$unit : const {},
+      _$data.containsKey('recordedAt') ? l$recordedAt : const {},
     ]);
   }
 }
@@ -2575,6 +2600,7 @@ abstract class CopyWith$Variables$Mutation$UpdateHealthMetric<TRes> {
     String? metricId,
     double? value,
     String? unit,
+    DateTime? recordedAt,
   });
 }
 
@@ -2595,6 +2621,7 @@ class _CopyWithImpl$Variables$Mutation$UpdateHealthMetric<TRes>
     Object? metricId = _undefined,
     Object? value = _undefined,
     Object? unit = _undefined,
+    Object? recordedAt = _undefined,
   }) =>
       _then(Variables$Mutation$UpdateHealthMetric._({
         ..._instance._$data,
@@ -2602,6 +2629,7 @@ class _CopyWithImpl$Variables$Mutation$UpdateHealthMetric<TRes>
           'metricId': (metricId as String),
         if (value != _undefined) 'value': (value as double?),
         if (unit != _undefined) 'unit': (unit as String?),
+        if (recordedAt != _undefined) 'recordedAt': (recordedAt as DateTime?),
       }));
 }
 
@@ -2615,6 +2643,7 @@ class _CopyWithStubImpl$Variables$Mutation$UpdateHealthMetric<TRes>
     String? metricId,
     double? value,
     String? unit,
+    DateTime? recordedAt,
   }) =>
       _res;
 }
@@ -2796,6 +2825,15 @@ const documentNodeMutationUpdateHealthMetric = DocumentNode(definitions: [
         defaultValue: DefaultValueNode(value: null),
         directives: [],
       ),
+      VariableDefinitionNode(
+        variable: VariableNode(name: NameNode(value: 'recordedAt')),
+        type: NamedTypeNode(
+          name: NameNode(value: 'DateTime'),
+          isNonNull: false,
+        ),
+        defaultValue: DefaultValueNode(value: null),
+        directives: [],
+      ),
     ],
     directives: [],
     selectionSet: SelectionSetNode(selections: [
@@ -2814,6 +2852,10 @@ const documentNodeMutationUpdateHealthMetric = DocumentNode(definitions: [
           ArgumentNode(
             name: NameNode(value: 'unit'),
             value: VariableNode(name: NameNode(value: 'unit')),
+          ),
+          ArgumentNode(
+            name: NameNode(value: 'recordedAt'),
+            value: VariableNode(name: NameNode(value: 'recordedAt')),
           ),
         ],
         directives: [],

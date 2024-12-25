@@ -25,8 +25,8 @@ mutation AddHealthMetric($metricType: String!, $value: Float!, $unit: String!, $
   }
 }
 
-mutation UpdateHealthMetric($metricId: String!, $value: Float, $unit: String) {
-  updateHealthMetric(metricId: $metricId, value: $value, unit: $unit) {
+mutation UpdateHealthMetric($metricId: String!, $value: Float, $unit: String, $recordedAt: DateTime) {
+  updateHealthMetric(metricId: $metricId, value: $value, unit: $unit, recordedAt: $recordedAt) {
     metricId
     message
   }

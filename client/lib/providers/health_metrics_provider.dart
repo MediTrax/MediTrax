@@ -107,6 +107,7 @@ class HealthMetrics extends _$HealthMetrics {
     required String metricId,
     double? value,
     String? unit,
+    DateTime? recordedAt,
   }) async {
     final result =
         await ref.read(graphQLServiceProvider).mutate$UpdateHealthMetric(
@@ -115,6 +116,7 @@ class HealthMetrics extends _$HealthMetrics {
                   metricId: metricId,
                   value: value,
                   unit: unit,
+                  recordedAt: recordedAt,
                 ),
               ),
             );

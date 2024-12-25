@@ -7,6 +7,22 @@ import 'package:meditrax/providers/user_provider.dart';
 import 'package:meditrax/utils/error_handler.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+const Map<String, String> COMMON_HEALTH_METRICS = {
+  '血压': 'mmHg',
+  '血糖': 'mmol/L',
+  '体重': 'kg',
+  '尿量': 'mL',
+  '肌酐': 'μmol/L',
+  '尿素氮': 'mmol/L',
+  '血钾': 'mmol/L',
+  '血钠': 'mmol/L',
+  '血磷': 'mmol/L',
+  '血钙': 'mmol/L',
+  '甲状旁腺激素': 'pg/mL',
+  '血红蛋白': 'g/L',
+  '白蛋白': 'g/L',
+};
+
 class TreatmentMonitoringScreen extends StatelessWidget {
   const TreatmentMonitoringScreen({super.key});
 
@@ -183,9 +199,9 @@ class _HealthMetricsTab extends ConsumerWidget {
                               height: 200,
                               child: LineChart(
                                 LineChartData(
-                                  gridData: FlGridData(show: true),
+                                  gridData: const FlGridData(show: true),
                                   titlesData: FlTitlesData(
-                                    leftTitles: AxisTitles(
+                                    leftTitles: const AxisTitles(
                                       sideTitles: SideTitles(
                                         showTitles: true,
                                         reservedSize: 40,
@@ -284,88 +300,140 @@ class _HealthMetricsTab extends ConsumerWidget {
     String? initialUnit,
   }) {
     final formKey = GlobalKey<FormState>();
-    final valueController = TextEditingController();
     final unitController = TextEditingController(text: initialUnit);
     String? selectedType = initialType;
     DateTime selectedDate = DateTime.now();
 
-    // Get existing metric types
+    // Get existing metric types and their units
     final metrics = ref.read(healthMetricsProvider).value ?? [];
-    final existingTypes = metrics.map((m) => m.metricType).toSet().toList();
+    final existingMetrics = <String, String>{};
+    for (var metric in metrics) {
+      if (!existingMetrics.containsKey(metric.metricType)) {
+        existingMetrics[metric.metricType] = metric.unit;
+      }
+    }
+
+    // If initialType is provided, this is adding a data point to existing metric
+    final bool isAddingToExisting = initialType != null;
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 500,
-            maxHeight: MediaQuery.of(context).size.height * 0.9,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Dialog title
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.add_rounded,
-                        color: Colors.blue.shade400,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          '添加健康指标',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 500,
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Dialog title
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.add_rounded,
+                          color: Colors.blue.shade400,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            '添加健康指标',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 16),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 16),
 
-                  // Autocomplete for metric type
-                  Autocomplete<String>(
-                    initialValue: TextEditingValue(text: initialType ?? ''),
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return existingTypes;
-                      }
-                      return existingTypes.where((type) => type
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase()));
-                    },
-                    onSelected: (String selection) {
-                      selectedType = selection;
-                      // Auto-fill unit if it exists
-                      final matchingMetrics =
-                          metrics.where((m) => m.metricType == selection);
-                      if (matchingMetrics.isNotEmpty) {
-                        unitController.text = matchingMetrics.first.unit;
-                      }
-                    },
-                    fieldViewBuilder: (context, textEditingController,
-                        focusNode, onFieldSubmitted) {
-                      return TextFormField(
-                        controller: textEditingController,
-                        focusNode: focusNode,
+                    // Show type selection only if not adding to existing
+                    if (!isAddingToExisting)
+                      Autocomplete<String>(
+                        initialValue: TextEditingValue(text: initialType ?? ''),
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text.isEmpty) {
+                            return [
+                              ...COMMON_HEALTH_METRICS.keys,
+                              ...existingMetrics.keys
+                            ];
+                          }
+                          return [
+                            ...COMMON_HEALTH_METRICS.keys,
+                            ...existingMetrics.keys
+                          ].where((type) => type
+                              .toLowerCase()
+                              .contains(textEditingValue.text.toLowerCase()));
+                        },
+                        onSelected: (String selection) {
+                          setState(() {
+                            selectedType = selection;
+                            // Set unit based on common metrics or existing metrics
+                            if (COMMON_HEALTH_METRICS.containsKey(selection)) {
+                              unitController.text =
+                                  COMMON_HEALTH_METRICS[selection]!;
+                            } else if (existingMetrics.containsKey(selection)) {
+                              unitController.text = existingMetrics[selection]!;
+                            }
+                          });
+                        },
+                        fieldViewBuilder: (context, textEditingController,
+                            focusNode, onFieldSubmitted) {
+                          return TextFormField(
+                            controller: textEditingController,
+                            focusNode: focusNode,
+                            decoration: InputDecoration(
+                              labelText: '指标类型',
+                              hintText: '选择或输入新的指标类型',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.monitor_heart_rounded,
+                                color: Colors.purple.shade300,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return '请输入指标类型';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                selectedType = value;
+                                // Clear unit if type is not in common or existing metrics
+                                if (!COMMON_HEALTH_METRICS.containsKey(value) &&
+                                    !existingMetrics.containsKey(value)) {
+                                  unitController.text = '';
+                                }
+                              });
+                            },
+                          );
+                        },
+                      )
+                    else
+                      // Show read-only type field when adding to existing
+                      TextFormField(
+                        initialValue: initialType,
+                        readOnly: true,
                         decoration: InputDecoration(
                           labelText: '指标类型',
-                          hintText: '选择或输入新的指标类型',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -374,169 +442,70 @@ class _HealthMetricsTab extends ConsumerWidget {
                             color: Colors.purple.shade300,
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '请输入指标类型';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) => selectedType = value,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                      ),
+                    const SizedBox(height: 16),
 
-                  // Unit field
-                  TextFormField(
-                    controller: unitController,
-                    decoration: InputDecoration(
-                      labelText: '单位',
-                      hintText: '例如：mmHg、mg/dL等',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    // Unit field (always read-only when adding to existing)
+                    TextFormField(
+                      controller: unitController,
+                      decoration: InputDecoration(
+                        labelText: '单位',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.science_rounded,
+                          color: Colors.orange.shade300,
+                        ),
                       ),
-                      prefixIcon: Icon(
-                        Icons.science_rounded,
-                        color: Colors.orange.shade300,
-                      ),
+                      readOnly: isAddingToExisting ||
+                          (selectedType != null &&
+                              (COMMON_HEALTH_METRICS
+                                      .containsKey(selectedType) ||
+                                  existingMetrics.containsKey(selectedType))),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入单位';
+                        }
+                        return null;
+                      },
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return '请输入单位';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Value and date editor
-                  _MetricValueEditor(
-                    initialValue: null,
-                    unit: unitController.text,
-                    date: selectedDate,
-                    onSave: (newValue, newDate) async {
-                      if (formKey.currentState!.validate() &&
-                          selectedType != null) {
-                        try {
-                          await ref
-                              .read(healthMetricsProvider.notifier)
-                              .addMetric(
-                                metricType: selectedType!,
-                                value: newValue,
-                                unit: unitController.text,
-                                recordedAt: newDate,
-                              );
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ErrorHandler.showErrorSnackBar(context, e);
+                    // Value and date editor
+                    _MetricValueEditor(
+                      initialValue: null,
+                      unit: unitController.text,
+                      date: selectedDate,
+                      onSave: (newValue, newDate) async {
+                        if (formKey.currentState!.validate() &&
+                            selectedType != null) {
+                          try {
+                            await ref
+                                .read(healthMetricsProvider.notifier)
+                                .addMetric(
+                                  metricType: selectedType!,
+                                  value: newValue,
+                                  unit: unitController.text,
+                                  recordedAt: newDate,
+                                );
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ErrorHandler.showErrorSnackBar(context, e);
+                            }
                           }
                         }
-                      }
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  void _showEditMetricDialog(
-    BuildContext context,
-    WidgetRef ref,
-    String id,
-    String type,
-    double value,
-    String unit,
-  ) {
-    final valueController = TextEditingController(text: value.toString());
-    final unitController = TextEditingController(text: unit);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑健康指标'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('指标类型: $type'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: valueController,
-              decoration: const InputDecoration(labelText: '数值'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: unitController,
-              decoration: const InputDecoration(labelText: '单位'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              try {
-                await ref.read(healthMetricsProvider.notifier).updateMetric(
-                      metricId: id,
-                      value: double.parse(valueController.text),
-                      unit: unitController.text,
-                    );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ErrorHandler.showErrorSnackBar(context, e);
-                }
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, String id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这条健康指标记录吗？此操作不��撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              try {
-                await ref.read(healthMetricsProvider.notifier).deleteMetric(id);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ErrorHandler.showErrorSnackBar(context, e);
-                }
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('删除'),
-          ),
-        ],
       ),
     );
   }
@@ -592,7 +561,7 @@ class _HealthMetricsTab extends ConsumerWidget {
                 const Divider(),
                 const SizedBox(height: 16),
 
-                // Value editor with delete functionality
+                // Value editor without unit editing capability
                 _MetricValueEditor(
                   initialValue: value,
                   unit: unit,
@@ -604,8 +573,8 @@ class _HealthMetricsTab extends ConsumerWidget {
                           .updateMetric(
                             metricId: id,
                             value: newValue,
-                            unit: unit,
-                            // recordedAt: newDate,
+                            unit: unit, // Keep the existing unit
+                            recordedAt: newDate,
                           );
                       if (context.mounted) {
                         Navigator.pop(context);
@@ -695,7 +664,7 @@ class _HealthMetricsTab extends ConsumerWidget {
       ),
       belowBarData: BarAreaData(
         show: true,
-        color: Colors.blue.withOpacity(0.1),
+        color: Colors.blue.withAlpha(25),
       ),
     );
   }
@@ -844,7 +813,8 @@ class _MetricValueEditorState extends State<_MetricValueEditor> {
                   initialTime: TimeOfDay.fromDateTime(selectedDate),
                   builder: (BuildContext context, Widget? child) {
                     return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                      data: MediaQuery.of(context)
+                          .copyWith(alwaysUse24HourFormat: false),
                       child: child!,
                     );
                   },
@@ -1065,7 +1035,7 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.1),
+                      color: Colors.purple.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.purple.shade300),
                     ),
@@ -1276,7 +1246,7 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                       ),
                       title: const Text('选择时间'),
                       subtitle: Text(
-                        '${selectedTime.toString().split('.')[0]}',
+                        selectedTime.toString().split('.')[0],
                         style: TextStyle(color: Colors.blue.shade700),
                       ),
                       onTap: () async {
@@ -1293,7 +1263,8 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                             initialTime: TimeOfDay.fromDateTime(selectedTime),
                             builder: (BuildContext context, Widget? child) {
                               return MediaQuery(
-                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                data: MediaQuery.of(context)
+                                    .copyWith(alwaysUse24HourFormat: false),
                                 child: child!,
                               );
                             },
@@ -1512,7 +1483,8 @@ class _TreatmentSchedulesTab extends ConsumerWidget {
                             initialTime: TimeOfDay.fromDateTime(selectedTime),
                             builder: (BuildContext context, Widget? child) {
                               return MediaQuery(
-                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+                                data: MediaQuery.of(context)
+                                    .copyWith(alwaysUse24HourFormat: false),
                                 child: child!,
                               );
                             },
