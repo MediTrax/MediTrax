@@ -1660,8 +1660,41 @@ class _ReminderTabState extends ConsumerState<_ReminderTab> {
     required Medication medication,
     required Function(bool) onToggle,
   }) {
+    // Modify the scheduling logic here
     if (!reminder.isTaken) {
-      _notificationService.scheduleReminder(reminder, medication.name);
+      final frequencyParts = medication.frequency.split('/');
+      final timesPerPeriod = int.tryParse(frequencyParts[0]) ?? 1;
+      final periodInDays =
+          int.tryParse(frequencyParts.length > 1 ? frequencyParts[1] : '1') ??
+              1;
+
+      // Calculate the interval between reminders
+      final intervalDays = (periodInDays / timesPerPeriod).ceil();
+
+      // Calculate the next reminder date based on the interval
+      final now = DateTime.now();
+      final reminderDate = reminder.reminderTime;
+      final daysDifference = reminderDate.difference(now).inDays;
+
+      if (daysDifference < 0) {
+        // If reminder is in the past, schedule next occurrence
+        final daysToAdd =
+            ((-daysDifference) / intervalDays).ceil() * intervalDays;
+        final nextReminderTime = DateTime(
+          reminderDate.year,
+          reminderDate.month,
+          reminderDate.day + daysToAdd,
+          reminderDate.hour,
+          reminderDate.minute,
+        );
+
+        _notificationService.scheduleReminder(
+          reminder.copyWith(reminderTime: nextReminderTime),
+          medication.name,
+        );
+      } else {
+        _notificationService.scheduleReminder(reminder, medication.name);
+      }
     }
 
     return Dismissible(

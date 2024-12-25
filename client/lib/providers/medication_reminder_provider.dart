@@ -7,10 +7,8 @@ import 'package:meditrax/providers/graphql.dart';
 import 'package:meditrax/providers/medication_reminder_provider.graphql.dart';
 import 'package:meditrax/providers/medication_provider.graphql.dart';
 
-
-
-
-final medicationReminderProvider = StateNotifierProvider<MedicationReminderNotifier, AsyncValue<List<MedicationReminder>>>((ref) {
+final medicationReminderProvider = StateNotifierProvider<
+    MedicationReminderNotifier, AsyncValue<List<MedicationReminder>>>((ref) {
   final client = ref.watch(graphQLServiceProvider);
   final notifier = MedicationReminderNotifier(client);
   // Ensure initial fetch
@@ -18,7 +16,8 @@ final medicationReminderProvider = StateNotifierProvider<MedicationReminderNotif
   return notifier;
 });
 
-class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<MedicationReminder>>> {
+class MedicationReminderNotifier
+    extends StateNotifier<AsyncValue<List<MedicationReminder>>> {
   final GraphQLClient _client;
 
   MedicationReminderNotifier(this._client) : super(const AsyncValue.loading());
@@ -26,24 +25,23 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
   Future<void> fetchReminders() async {
     state = const AsyncValue.loading();
     try {
-      final result = await _client.query$GetMedicationReminders(
-        Options$Query$GetMedicationReminders(
-          fetchPolicy: FetchPolicy.networkOnly, 
-        )
-      );
-      
+      final result = await _client
+          .query$GetMedicationReminders(Options$Query$GetMedicationReminders(
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+
       if (result.hasException) {
         throw result.exception!;
       }
 
       final remindersData = result.parsedData!.getMedicationReminders ?? [];
-      
+
       final reminders = remindersData.map((item) {
         return MedicationReminder(
           id: item!.reminderId,
           medicationId: item.medicationId,
           reminderTime: item.reminderTime,
-          isTaken: item.isTaken, 
+          isTaken: item.isTaken,
         );
       }).toList();
 
@@ -61,15 +59,12 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     String? dayOfWeek,
   }) async {
     try {
-      
       final result = await _client.mutate$CreateMedicationReminder(
-        Options$Mutation$CreateMedicationReminder(
-          variables: Variables$Mutation$CreateMedicationReminder(
-            medicationId: medicationId, 
-            reminderTime: reminderTime,
-          )
-        )
-      );
+          Options$Mutation$CreateMedicationReminder(
+              variables: Variables$Mutation$CreateMedicationReminder(
+        medicationId: medicationId,
+        reminderTime: reminderTime,
+      )));
 
       if (result.hasException) {
         throw result.exception!;
@@ -78,6 +73,8 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       await fetchReminders();
       return true;
     } catch (e, stackTrace) {
+      print(e);
+      print(stackTrace);
       return false;
     }
   }
@@ -88,7 +85,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
     required bool isTaken,
   }) async {
     try {
-
       final result = await _client.mutate$UpdateMedicationReminder(
         Options$Mutation$UpdateMedicationReminder(
           variables: Variables$Mutation$UpdateMedicationReminder(
@@ -122,7 +118,8 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
       if (!result.hasException) {
         state.whenData((reminders) {
-          final updatedReminders = reminders.where((r) => r.id != reminderId).toList();
+          final updatedReminders =
+              reminders.where((r) => r.id != reminderId).toList();
           state = AsyncValue.data(updatedReminders);
         });
         return true;
@@ -151,7 +148,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
       // Refresh reminders from server to get the next scheduled reminder
       await fetchReminders();
       return true;
-
     } catch (e) {
       return false;
     }
@@ -179,7 +175,7 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
       // Then get the medication info
       final medicationInfo = await getMedicationInfo(reminder.medicationId);
-      
+
       if (medicationInfo == null) {
         return null;
       }
@@ -199,14 +195,14 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
   Future<bool> confirmAndTakeMedication(String reminderId) async {
     try {
       final details = await getReminderDetails(reminderId);
-      
+
       if (details == null) {
         return false;
       }
 
       // Take the medication
       final success = await takeMedication(reminderId);
-      
+
       if (success) {
         // Refresh reminders to get the next scheduled reminder
         await fetchReminders();
@@ -220,7 +216,6 @@ class MedicationReminderNotifier extends StateNotifier<AsyncValue<List<Medicatio
 
   Future<bool> takeMedication(String reminderId) async {
     try {
-
       final result = await _client.mutate$TakeMedication(
         Options$Mutation$TakeMedication(
           variables: Variables$Mutation$TakeMedication(
