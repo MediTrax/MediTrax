@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:math' as math;
-import 'dart:convert';
 import 'package:meditrax/providers/health_risk_provider.dart';
 import 'package:meditrax/models/health_risk_assessment.dart';
 import 'package:meditrax/screens/health_risk_report_screen.dart';
@@ -11,10 +9,12 @@ class HealthRiskAssessmentScreen extends ConsumerStatefulWidget {
   const HealthRiskAssessmentScreen({super.key});
 
   @override
-  ConsumerState<HealthRiskAssessmentScreen> createState() => _HealthRiskAssessmentScreenState();
+  ConsumerState<HealthRiskAssessmentScreen> createState() =>
+      _HealthRiskAssessmentScreenState();
 }
 
-class _HealthRiskAssessmentScreenState extends ConsumerState<HealthRiskAssessmentScreen> {
+class _HealthRiskAssessmentScreenState
+    extends ConsumerState<HealthRiskAssessmentScreen> {
   @override
   void initState() {
     super.initState();
@@ -50,10 +50,12 @@ class QuestionnaireWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<QuestionnaireWidget> createState() => _QuestionnaireWidgetState();
+  ConsumerState<QuestionnaireWidget> createState() =>
+      _QuestionnaireWidgetState();
 }
 
-class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with SingleTickerProviderStateMixin {
+class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget>
+    with SingleTickerProviderStateMixin {
   int _currentQuestionIndex = 0;
   String? _selectedAnswer;
   final Map<int, String> _answers = {};
@@ -95,11 +97,13 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with 
   }
 
   List<HealthResponse> _getResponses() {
-    return _answers.entries.map((entry) => HealthResponse(
-      questionId: entry.key + 1,
-      choice: entry.value,
-      answer: null,
-    )).toList();
+    return _answers.entries
+        .map((entry) => HealthResponse(
+              questionId: entry.key + 1,
+              choice: entry.value,
+              answer: null,
+            ))
+        .toList();
   }
 
   Future<void> _handleAnswerSelection(String? value) async {
@@ -113,7 +117,8 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with 
   Future<void> _handleCompletion() async {
     try {
       final responses = _getResponses();
-      final success = await ref.read(healthRiskProvider.notifier)
+      final success = await ref
+          .read(healthRiskProvider.notifier)
           .evaluateHealthRiskAssessment(
             questionnaireId: 1,
             responses: responses,
@@ -124,14 +129,12 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with 
 
         final assessments = await ref.read(healthRiskProvider.future);
         if (assessments.isNotEmpty && mounted) {
-          ref.read(healthRiskProvider.notifier)
-              .setSelectedAssessment(assessments.first);
-            
           if (context.mounted) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const HealthRiskReportScreen(),
+                builder: (context) =>
+                    HealthRiskReportScreen(latestAssessment: assessments.first),
               ),
             );
           }
@@ -252,85 +255,122 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with 
 
     // Handle multiple choice (type 1)
     if (questionType == 1) {
-      return choices?.map((choice) => Padding(
-        padding: const EdgeInsets.only(bottom: 12.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
-                ? Colors.blue.shade50
-                : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
-                  ? Colors.blue.shade400
-                  : Colors.grey.shade300,
-            ),
-          ),
-          child: CheckboxListTile(
-            title: Text(
-              choice,
-              style: TextStyle(
-                color: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
-                    ? Colors.blue.shade700
-                    : Colors.black87,
-                fontWeight: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              ),
-            ),
-            value: _answers[_currentQuestionIndex]?.split(',').contains(choice) ?? false,
-            onChanged: (checked) {
-              if (checked == true) {
-                var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
-                currentAnswers.add(choice);
-                _handleAnswerSelection(currentAnswers.join(','));
-              } else {
-                var currentAnswers = _answers[_currentQuestionIndex]?.split(',').toList() ?? [];
-                currentAnswers.remove(choice);
-                _handleAnswerSelection(currentAnswers.join(','));
-              }
-            },
-            activeColor: Colors.blue.shade400,
-            checkColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-      )).toList() ?? [];
+      return choices
+              ?.map((choice) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _answers[_currentQuestionIndex]
+                                    ?.split(',')
+                                    .contains(choice) ??
+                                false
+                            ? Colors.blue.shade50
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _answers[_currentQuestionIndex]
+                                      ?.split(',')
+                                      .contains(choice) ??
+                                  false
+                              ? Colors.blue.shade400
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: CheckboxListTile(
+                        title: Text(
+                          choice,
+                          style: TextStyle(
+                            color: _answers[_currentQuestionIndex]
+                                        ?.split(',')
+                                        .contains(choice) ??
+                                    false
+                                ? Colors.blue.shade700
+                                : Colors.black87,
+                            fontWeight: _answers[_currentQuestionIndex]
+                                        ?.split(',')
+                                        .contains(choice) ??
+                                    false
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        value: _answers[_currentQuestionIndex]
+                                ?.split(',')
+                                .contains(choice) ??
+                            false,
+                        onChanged: (checked) {
+                          if (checked == true) {
+                            var currentAnswers = _answers[_currentQuestionIndex]
+                                    ?.split(',')
+                                    .toList() ??
+                                [];
+                            currentAnswers.add(choice);
+                            _handleAnswerSelection(currentAnswers.join(','));
+                          } else {
+                            var currentAnswers = _answers[_currentQuestionIndex]
+                                    ?.split(',')
+                                    .toList() ??
+                                [];
+                            currentAnswers.remove(choice);
+                            _handleAnswerSelection(currentAnswers.join(','));
+                          }
+                        },
+                        activeColor: Colors.blue.shade400,
+                        checkColor: Colors.white,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ))
+              .toList() ??
+          [];
     }
 
     // Handle single choice (type 0)
-    return choices?.map((choice) => Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _selectedAnswer == choice ? Colors.blue.shade50 : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: _selectedAnswer == choice ? Colors.blue.shade400 : Colors.grey.shade300,
-          ),
-        ),
-        child: RadioListTile<String>(
-          title: Text(
-            choice,
-            style: TextStyle(
-              color: _selectedAnswer == choice ? Colors.blue.shade700 : Colors.black87,
-              fontWeight: _selectedAnswer == choice ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          value: choice,
-          groupValue: _selectedAnswer,
-          onChanged: _handleAnswerSelection,
-          activeColor: Colors.blue.shade400,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    )).toList() ?? [];
+    return choices
+            ?.map((choice) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _selectedAnswer == choice
+                          ? Colors.blue.shade50
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _selectedAnswer == choice
+                            ? Colors.blue.shade400
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: RadioListTile<String>(
+                      title: Text(
+                        choice,
+                        style: TextStyle(
+                          color: _selectedAnswer == choice
+                              ? Colors.blue.shade700
+                              : Colors.black87,
+                          fontWeight: _selectedAnswer == choice
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      value: choice,
+                      groupValue: _selectedAnswer,
+                      onChanged: _handleAnswerSelection,
+                      activeColor: Colors.blue.shade400,
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ))
+            .toList() ??
+        [];
   }
 
   @override
@@ -391,7 +431,8 @@ class _QuestionnaireWidgetState extends ConsumerState<QuestionnaireWidget> with 
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return FadeTransition(
                       opacity: animation,
                       child: SlideTransition(

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meditrax/screens/health_risk_assessment_screen.dart';
-import 'package:meditrax/screens/health_risk_report_screen.dart';
-import 'package:meditrax/providers/health_risk_provider.dart';
 import 'package:meditrax/screens/health_risk_history_screen.dart';
 
 class HealthRiskEntryScreen extends ConsumerWidget {

@@ -284,6 +284,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                           context: context,
                           ref: ref,
                           medication: medication,
+                          canEdit: canEdit,
                         ),
                       );
                     },
@@ -301,6 +302,7 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
     required BuildContext context,
     required WidgetRef ref,
     required Medication medication,
+    required bool canEdit,
   }) {
     final frequencyParts = medication.frequency.split('/');
 
@@ -471,17 +473,18 @@ class _InventoryTabState extends ConsumerState<_InventoryTab> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () =>
-                            _showEditDialog(context, ref, medication),
-                        icon: Icon(
-                          Icons.edit_rounded,
-                          color: Colors.blue.shade400,
-                          size: 20,
+                      if (canEdit)
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () =>
+                              _showEditDialog(context, ref, medication),
+                          icon: Icon(
+                            Icons.edit_rounded,
+                            color: Colors.blue.shade400,
+                            size: 20,
+                          ),
+                          tooltip: '编辑',
                         ),
-                        tooltip: '编辑',
-                      ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
                         onPressed: () =>

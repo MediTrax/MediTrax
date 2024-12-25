@@ -6,12 +6,12 @@ part of 'health_risk_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$healthRiskHash() => r'3da13c7ddc5aaae50e6e4921aced7f5454a50a54';
+String _$healthRiskHash() => r'c58f5998b231ab8ecf504d4e88de07f30fd13ee8';
 
 /// See also [HealthRisk].
 @ProviderFor(HealthRisk)
-final healthRiskProvider =
-    AsyncNotifierProvider<HealthRisk, List<HealthRiskAssessment>>.internal(
+final healthRiskProvider = AutoDisposeAsyncNotifierProvider<HealthRisk,
+    List<HealthRiskAssessment>>.internal(
   HealthRisk.new,
   name: r'healthRiskProvider',
   debugGetCreateSourceHash:
@@ -20,7 +20,7 @@ final healthRiskProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$HealthRisk = AsyncNotifier<List<HealthRiskAssessment>>;
+typedef _$HealthRisk = AutoDisposeAsyncNotifier<List<HealthRiskAssessment>>;
 String _$questionnaireHash() => r'713e4791b6618b7bcf1ef0cdbf4bb97feddb12aa';
 
 /// See also [Questionnaire].

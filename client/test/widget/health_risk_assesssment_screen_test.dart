@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meditrax/models/health_risk_assessment.dart';
 import 'package:meditrax/screens/health_risk_entry_screen.dart';
 import 'package:meditrax/screens/health_risk_report_screen.dart';
 import 'package:meditrax/screens/health_risk_history_screen.dart';
@@ -65,7 +66,14 @@ void main() {
     testWidgets('should display loading state', (tester) async {
       await pumpTestWidget(
         tester,
-        child: const HealthRiskReportScreen(),
+        child: HealthRiskReportScreen(
+            latestAssessment: HealthRiskAssessment(
+          assessmentId: '1',
+          questionnaireData: [],
+          createdAt: DateTime.now(),
+          riskLevel: "low",
+          recommendations: "",
+        )),
         overrides: getMockProviders(),
       );
 
