@@ -6,7 +6,7 @@ import 'package:meditrax/models/health_risk_assessment.dart';
 
 part 'health_risk_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class HealthRisk extends _$HealthRisk {
   HealthRiskAssessment? _selectedAssessment;
   HealthRiskAssessment? get selectedAssessment => _selectedAssessment;
@@ -98,7 +98,7 @@ class HealthRisk extends _$HealthRisk {
           print('Error Extensions: ${error.extensions}');
           return error.message;
         }).join('\n');
-        
+
         throw Exception(errorMessage ?? 'Unknown GraphQL Error');
       }
 
