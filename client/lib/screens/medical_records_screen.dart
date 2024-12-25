@@ -135,6 +135,7 @@ class _VisitHistoryTab extends ConsumerWidget {
                       type: content['type'] as String,
                       diagnosis: content['diagnosis'] as String,
                       prescription: content['prescription'] as String,
+                      canEdit: canEdit,
                       onEdit: () => _showEditVisitDialog(
                         context,
                         ref,
@@ -165,6 +166,7 @@ class _VisitHistoryTab extends ConsumerWidget {
     required String recordId,
     required Function() onEdit,
     required Function() onDelete,
+    required bool canEdit,
   }) {
     return Card(
       elevation: 0,
@@ -204,41 +206,42 @@ class _VisitHistoryTab extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: Colors.grey.shade600,
+                  if (canEdit)
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Colors.grey.shade600,
+                      ),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          onEdit();
+                        } else if (value == 'delete') {
+                          onDelete();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit),
+                              SizedBox(width: 8),
+                              Text('编辑'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('删除', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        onEdit();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('编辑'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('删除', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -529,17 +532,17 @@ class _VisitHistoryTab extends ConsumerWidget {
     required String prescription,
     required DateTime date,
   }) {
+    // Move controllers outside of the builder
+    final diagnosisController = TextEditingController(text: diagnosis);
+    final prescriptionController = TextEditingController(text: prescription);
+    final formKey = GlobalKey<FormState>();
     DateTime selectedDate = date;
+    String visitType = type;
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
-          final diagnosisController = TextEditingController(text: diagnosis);
-          final prescriptionController =
-              TextEditingController(text: prescription);
-          String visitType = type;
-          final formKey = GlobalKey<FormState>();
-
           return Dialog(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -878,6 +881,7 @@ class _MedicationHistoryTab extends ConsumerWidget {
                       startDate: DateTime.parse(content['startDate'] as String)
                           .toString()
                           .split(' ')[0],
+                      canEdit: canEdit,
                       onEdit: () => _showEditMedicationDialog(
                         context,
                         ref,
@@ -909,6 +913,7 @@ class _MedicationHistoryTab extends ConsumerWidget {
     required String recordId,
     required Function() onEdit,
     required Function() onDelete,
+    required bool canEdit,
   }) {
     return Card(
       elevation: 0,
@@ -948,41 +953,42 @@ class _MedicationHistoryTab extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: Colors.grey.shade600,
+                  if (canEdit)
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Colors.grey.shade600,
+                      ),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          onEdit();
+                        } else if (value == 'delete') {
+                          onDelete();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit),
+                              SizedBox(width: 8),
+                              Text('编辑'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('删除', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        onEdit();
-                      } else if (value == 'delete') {
-                        onDelete();
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit),
-                            SizedBox(width: 8),
-                            Text('编辑'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('删除', style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -1272,16 +1278,17 @@ class _MedicationHistoryTab extends ConsumerWidget {
     required String frequency,
     required DateTime startDate,
   }) {
+    // Move controllers outside of the builder
+    final nameController = TextEditingController(text: name);
+    final dosageController = TextEditingController(text: dosage);
+    final frequencyController = TextEditingController(text: frequency);
+    final formKey = GlobalKey<FormState>();
     DateTime selectedDate = startDate;
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
-          final nameController = TextEditingController(text: name);
-          final dosageController = TextEditingController(text: dosage);
-          final frequencyController = TextEditingController(text: frequency);
-          final formKey = GlobalKey<FormState>();
-
           return Dialog(
             child: ConstrainedBox(
               constraints: BoxConstraints(
