@@ -43,10 +43,14 @@ func (r *queryResolver) GetFoodSpecs(ctx context.Context, food string) (*model.F
 	var specs []*model.FoodSpec
 	var n_spec = 0.0
 	var s_total = 0.0
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 
 		parameters := strings.Split(line, ": ")
+		if len(parameters) < 2 {
+			continue
+		}
 		info := strings.Split(strings.TrimSpace(parameters[1]), " ")
 
 		println(parameters[0] + parameters[1])
