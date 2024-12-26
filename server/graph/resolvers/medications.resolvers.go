@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"meditrax/graph/database"
 	middlewares "meditrax/graph/middleware"
@@ -246,6 +247,39 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 	}
 	if len(results) == 0 {
 		return nil, fmt.Errorf("invalid id, no associated medication object found")
+	}
+
+	// once medication is deleted, add it to medical records
+	// name, dosage, frequency, startDate, endDate
+	times, days, err := utils.FrequencyParser(results[0].Frequency)
+	if err != nil {
+		return nil, err
+	}
+	content, err := json.Marshal(map[string]interface{}{
+		"name":      results[0].Name,
+		"dosage":    results[0].Dosage,
+		"frequency": fmt.Sprintf("每%d天%d次", times, days),
+		"startDate": results[0].CreatedAt,
+		"endDate":   time.Now().UTC(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result, err = database.DB.Query(
+		`CREATE ONLY medical_record:ulid() 
+        SET userId=$userId,
+			recordType="medication",
+            content=$content,
+            createdAt=<datetime>$now,
+            updatedAt=<datetime>$now;`,
+		map[string]interface{}{
+			"userId":  user.ID,
+			"content": string(content),
+			"now":     time.Now().UTC(),
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	_, err = database.DB.Query(
