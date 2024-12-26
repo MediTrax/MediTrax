@@ -129,9 +129,10 @@ class _VisitHistoryTab extends ConsumerWidget {
                         as Map<String, dynamic>;
                     return _buildVisitCard(
                       recordId: record.id,
-                      date: DateTime.parse(content['date'] as String)
-                          .toString()
-                          .split(' ')[0],
+                      date: DateTime.tryParse(content['date'] as String)
+                              ?.toString()
+                              .split(' ')[0] ??
+                          "",
                       type: content['type'] as String,
                       diagnosis: content['diagnosis'] as String,
                       prescription: content['prescription'] as String,
@@ -143,7 +144,8 @@ class _VisitHistoryTab extends ConsumerWidget {
                         type: content['type'] as String,
                         diagnosis: content['diagnosis'] as String,
                         prescription: content['prescription'] as String,
-                        date: DateTime.parse(content['date'] as String),
+                        date: DateTime.tryParse(content['date'] as String) ??
+                            DateTime.now(),
                       ),
                       onDelete: () => _showDeleteConfirmationDialog(
                           context, ref, record.id),
@@ -878,14 +880,17 @@ class _MedicationHistoryTab extends ConsumerWidget {
                       name: content['name'] as String,
                       dosage: content['dosage'].toString(),
                       frequency: content['frequency'] as String,
-                      startDate: DateTime.parse(content['startDate'] as String)
-                          .toString()
-                          .split(' ')[0],
+                      startDate:
+                          DateTime.tryParse(content['startDate'] as String)
+                                  ?.toString()
+                                  .split(' ')[0] ??
+                              "",
                       endDate: content['endDate'] == null
                           ? ""
-                          : DateTime.parse(content['endDate'] as String)
-                              .toString()
-                              .split(' ')[0],
+                          : DateTime.tryParse(content['endDate'] as String)
+                                  ?.toString()
+                                  .split(' ')[0] ??
+                              "",
                       canEdit: canEdit,
                       onEdit: () => _showEditMedicationDialog(
                         context,
@@ -895,8 +900,11 @@ class _MedicationHistoryTab extends ConsumerWidget {
                         dosage: content['dosage'] as String,
                         frequency: content['frequency'] as String,
                         startDate:
-                            DateTime.parse(content['startDate'] as String),
-                        endDate: DateTime.parse(content['endDate'] as String),
+                            DateTime.tryParse(content['startDate'] as String) ??
+                                DateTime.now(),
+                        endDate:
+                            DateTime.tryParse(content['endDate'] as String) ??
+                                DateTime.now(),
                       ),
                       onDelete: () => _showDeleteConfirmationDialog(
                           context, ref, record.id),
