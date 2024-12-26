@@ -199,6 +199,38 @@ func (r *mutationResolver) UpdateMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("invalid id. no associated medication object found")
 	}
 
+	// add the medication before update to medical records as medication history
+	times, days, err := utils.FrequencyParser(original.Frequency)
+	if err != nil {
+		return nil, err
+	}
+	content, err := json.Marshal(map[string]interface{}{
+		"name":      original.Name,
+		"dosage":    original.Dosage,
+		"frequency": fmt.Sprintf("每%d天%d次", times, days),
+		"startDate": original.UpdatedAt,
+		"endDate":   time.Now().UTC(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result, err = database.DB.Query(
+		`CREATE ONLY medical_record:ulid() 
+			SET userId=$userId,
+				recordType="medication",
+				content=$content,
+				createdAt=<datetime>$now,
+				updatedAt=<datetime>$now;`,
+		map[string]interface{}{
+			"userId":  user.ID,
+			"content": string(content),
+			"now":     time.Now().UTC(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	// add to activity log
 	err = utils.AddActivityLogs(user.ID, "更新药品", "user updated specs of a medicaion", medicationID, changeLog)
 	if err != nil {
@@ -249,8 +281,7 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 		return nil, fmt.Errorf("invalid id, no associated medication object found")
 	}
 
-	// once medication is deleted, add it to medical records
-	// name, dosage, frequency, startDate, endDate
+	// once medication is deleted, add it to medical records as medication history
 	times, days, err := utils.FrequencyParser(results[0].Frequency)
 	if err != nil {
 		return nil, err
@@ -259,7 +290,7 @@ func (r *mutationResolver) DeleteMedication(ctx context.Context, medicationID st
 		"name":      results[0].Name,
 		"dosage":    results[0].Dosage,
 		"frequency": fmt.Sprintf("每%d天%d次", times, days),
-		"startDate": results[0].CreatedAt,
+		"startDate": results[0].UpdatedAt,
 		"endDate":   time.Now().UTC(),
 	})
 	if err != nil {
