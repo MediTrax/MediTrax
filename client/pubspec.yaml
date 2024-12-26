@@ -41,7 +41,7 @@ dependencies:
   json_annotation: ^4.9.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  intl: ^0.19.0
+  intl: ^0.20.1
   google_sign_in: ^6.2.1
   device_info_plus: ^11.1.0
   connectivity_plus: ^6.1.0
@@ -54,13 +54,14 @@ dependencies:
   go_router: ^14.3.0
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
-  flutter_timezone: ^1.0.8
+  flutter_timezone: ^4.0.0
   intl_phone_number_input:
     git:
       url: https://github.com/natintosh/intl_phone_number_input.git
       ref: master
-  fl_chart: ^0.69.2
+  fl_chart: ^0.70.0
   flutter_libphonenumber_ios: ^1.4.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -74,9 +75,9 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
   riverpod_generator: ^2.6.1
-  custom_lint: ^0.6.8
+  custom_lint: ^0.7.0
   freezed: ^2.5.7
   json_serializable: ^6.8.0
   hive_generator: ^2.0.1
