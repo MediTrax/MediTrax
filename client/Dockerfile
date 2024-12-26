@@ -30,7 +30,7 @@ ARG BUILD_NUM
 RUN sed -i "s/DEBUG/$BUILD_NUM/" ./lib/env.dart
 RUN sed -i "s/:\/\/localhost:8000/s:\/\/einvoice.jomfi.jomluz.com\/api/" ./lib/env.dart
 RUN flutter pub get
-RUN flutter build web --release --web-renderer html
+RUN flutter build web --release --no-web-resources-cdn
 
 # COPY ./ /modules/
 
