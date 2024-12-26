@@ -13,7 +13,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userDataProvider);
-    final healthMetricsAsync = ref.watch(healthMetricsProvider);
+    final treatmentSchedulesAsync = ref.watch(treatmentSchedulesProvider);
     final userPointsAsync = ref.watch(userPointsProvider);
     final remindersAsync = ref.watch(medicationReminderProvider);
 
@@ -163,20 +163,20 @@ class HomeScreen extends ConsumerWidget {
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: healthMetricsAsync.when(
+                                child: treatmentSchedulesAsync.when(
                                   loading: () => _buildLoadingCard(),
                                   error: (err, stack) => _buildErrorCard(),
-                                  data: (metrics) {
+                                  data: (schedules) {
                                     final now = DateTime.now();
-                                    final nextAppointment = metrics
-                                        .where((m) =>
-                                            m.metricType == 'appointment' &&
-                                            m.recordedAt.isAfter(now))
+                                    final nextAppointment = schedules
+                                        .where(
+                                            (m) => m.scheduledTime.isAfter(now))
                                         .fold<DateTime?>(
                                             null,
                                             (min, m) => min == null ||
-                                                    m.recordedAt.isBefore(min)
-                                                ? m.recordedAt
+                                                    m.scheduledTime
+                                                        .isBefore(min)
+                                                ? m.scheduledTime
                                                 : min);
 
                                     return _buildInfoCard(
