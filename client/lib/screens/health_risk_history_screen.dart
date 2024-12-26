@@ -54,13 +54,12 @@ class _HealthRiskHistoryScreenState
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: InkWell(
         onTap: () {
-          ref
-              .read(healthRiskProvider.notifier)
-              .setSelectedAssessment(assessment);
+          print(assessment.createdAt);
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const HealthRiskReportScreen(),
+              builder: (context) =>
+                  HealthRiskReportScreen(latestAssessment: assessment),
             ),
           );
         },

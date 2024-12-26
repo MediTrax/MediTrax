@@ -255,6 +255,7 @@ class _HealthMetricsTab extends ConsumerWidget {
                                     ref,
                                     type,
                                     unit,
+                                    canEdit,
                                   ),
                                 ),
                               ),
@@ -685,6 +686,7 @@ class _HealthMetricsTab extends ConsumerWidget {
     WidgetRef ref,
     String type,
     String unit,
+    bool canEdit,
   ) {
     return LineTouchData(
       enabled: true,
@@ -711,15 +713,17 @@ class _HealthMetricsTab extends ConsumerWidget {
           final index = spot.x.toInt();
           if (index >= 0 && index < typeMetrics.length) {
             final metric = typeMetrics[index];
-            _handleDataPointClick(
-              context,
-              ref,
-              metric['id'],
-              type,
-              metric['value'],
-              unit,
-              metric['date'],
-            );
+            if (canEdit) {
+              _handleDataPointClick(
+                context,
+                ref,
+                metric['id'],
+                type,
+                metric['value'],
+                unit,
+                metric['date'],
+              );
+            }
           }
         }
       },

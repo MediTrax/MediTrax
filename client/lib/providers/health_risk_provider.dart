@@ -6,7 +6,7 @@ import 'package:meditrax/models/health_risk_assessment.dart';
 
 part 'health_risk_provider.g.dart';
 
-@Riverpod(keepAlive: true)
+@riverpod
 class HealthRisk extends _$HealthRisk {
   HealthRiskAssessment? _selectedAssessment;
   HealthRiskAssessment? get selectedAssessment => _selectedAssessment;

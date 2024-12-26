@@ -6,7 +6,7 @@ env:
 
 on:
   push:
-    branches: [ master ] # Adjust branch name as needed
+    branches: [ deploy ] # Adjust branch name as needed
   workflow_dispatch: # Allows manual trigger
 
 jobs:
