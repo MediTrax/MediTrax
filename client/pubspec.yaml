@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+18
+version: 1.0.0+20
 
 environment:
   sdk: ^3.5.0-216.1.beta
@@ -55,7 +55,10 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
   flutter_timezone: ^1.0.8
-  intl_phone_number_input: ^0.7.4
+  intl_phone_number_input:
+    git:
+      url: https://github.com/natintosh/intl_phone_number_input.git
+      ref: master
   fl_chart: ^0.69.2
   flutter_libphonenumber_ios: ^1.4.0
 
